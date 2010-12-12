@@ -2,9 +2,9 @@
 #labels Phase-Design,Phase-Deploy
 
 = Introduction =
-
  * show traditional "Hello World" into selected cells.
-----
+
+== 概要 ==
  * 選択したセルに "Hello World" と書き込む。
 
 = Details =
@@ -18,7 +18,7 @@
  # add a vba module into your excel book.
  # paste the below Code on the module.
  # run the macro.
-----
+
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記のコードを貼り付ける。
  # 貼り付けたマクロを実行する。
