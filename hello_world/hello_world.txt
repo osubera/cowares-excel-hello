@@ -1,13 +1,13 @@
 'identity
 ' timestamp;2010/12/07 20:40 JST
-'       url;http://
+'       url;http://code.google.com/p/cowares-excel-hello/w/edit/hello_world
 
 'comment
 ' en;public text which implements a traditional "Hello World" on VBA
 ' ja;“`““I‚È Hello World ‚Å VBA ‚Ì—Œ^‚ğ—pˆÓ‚·‚é
 
 'tag
-' en;hello,vba,excel,M
+' en;hello,vba,excel
 
 'copyright
 '      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
