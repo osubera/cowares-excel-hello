@@ -1,6 +1,8 @@
 #summary hello world
 #labels Phase-Design,Phase-Deploy
 
+[cowares-excel-hello#Code]
+
 = Introduction =
 
  * show traditional "Hello World"s into selected cells.
