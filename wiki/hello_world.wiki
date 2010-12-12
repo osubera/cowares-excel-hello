@@ -3,7 +3,7 @@
 
 = Introduction =
 
- * show traditional "Hello World" into selected cells.
+ * show traditional "Hello World"s into selected cells.
 
 === 概要 ===
  * 選択したセルに "Hello World" と書き込む。
