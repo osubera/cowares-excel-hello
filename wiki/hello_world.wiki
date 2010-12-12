@@ -3,22 +3,73 @@
 
 = Introduction =
 
-This project goes under co-wares license.
-Fortitudinous, Free, Fair, http://cowares.nobody.jp
+ * show traditional "Hello World" into selected cells.
 
+ * 選択したセルに "Hello World" と書き込む。
 
 = Details =
 
-== co-wares license ==
+= How to use ==
 
- * Fortitudinous, Free, Fair
- * You just follow agreements of 3Fs above. And use it unlimitedly.
+ # add a vba module into your excel book.
+ # paste the below Code on the module.
+ # run the macro.
 
-== コ・ウェア・ライセンス ==
+ # エクセルブックにVBAのモジュールを挿入する。
+ # そのモジュールに、下記のコードを貼り付ける。
+ # 貼り付けたマクロを実行する。
 
- * 自律、自由、公正
- * ３つの約束を守るなら、どなたでも無料で使えます。個人利用から法人利用まで制限はありません。
+= Code ==
 
-== license url ==
+{{{
+'identity
 
- * http://cowares.nobody.jp/license/
+' timestamp;2010/12/07 20:40 JST
+
+'       url;http://code.google.com/p/cowares-excel-hello/w/edit/hello_world
+
+
+
+'comment
+
+' en;public text which implements a traditional "Hello World" on VBA
+
+' ja;伝統的な Hello World で VBA の雛型を用意する
+
+
+
+'tag
+
+' en;hello,vba,excel,M
+
+
+
+'copyright
+
+'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
+
+' contributors;Tomizono - kobobau.com
+
+'        since;2008
+
+
+
+'module
+
+'  name;HelloWorld
+
+'{{{
+
+
+
+Public Sub HelloWorld()
+
+    Selection.Value = "Hello World"
+
+End Sub
+
+
+
+'}}}
+
+}}}
