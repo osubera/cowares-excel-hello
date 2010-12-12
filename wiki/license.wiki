@@ -10,14 +10,14 @@ Fortitudinous, Free, Fair, http://cowares.nobody.jp
 
 == co-wares license ==
 
-* Fortitudinous, Free, Fair
-* You just follow agreements of 3Fs above. And use it unlimitedly.
+ * Fortitudinous, Free, Fair
+ * You just follow agreements of 3Fs above. And use it unlimitedly.
 
 == コ・ウェア・ライセンス ==
 
-* 自律、自由、公正
-* ３つの約束を守るなら、どなたでも無料で使えます。個人利用から法人利用まで制限はありません。
+ * 自律、自由、公正
+ * ３つの約束を守るなら、どなたでも無料で使えます。個人利用から法人利用まで制限はありません。
 
 == license url ==
 
-* http://cowares.nobody.jp/license/
+ * http://cowares.nobody.jp/license/
