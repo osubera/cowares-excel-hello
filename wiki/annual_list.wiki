@@ -1,0 +1,20 @@
+#summary generate sheets with annual list
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * generate sheets with annual list in an excel book
+
+=== 概要 ==
+ * エクセルで年間スケジュール表のシートを作る
+
+= Details =
+
+ * generate an annual schedule table for the next year, or the specified year.
+ * monthly sheet
+ * daily rows in every sheet
+
+=== 説明 ==
+ * 来年または、指定した年の年間スケジュール表を作る
+ * 月ごとにシートを用意する
+ * １日１行の縦リスト
