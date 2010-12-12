@@ -15,7 +15,7 @@
  * show how to put a value into excel cell from VBA
  * show how we manage codes here
 
-==== 説明 ====
+=== 説明 ===
  * hello world によるサンプル
  * VBA で関数を作る
  * VBA からエクセルのセルに値を書き込む
@@ -31,7 +31,7 @@
  # paste the below Code on the module.
  # run the macro.
 
-== 使い方 ==
+=== 使い方 ===
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記の Code を貼り付ける。
  # 貼り付けたマクロを実行する。
@@ -40,53 +40,28 @@
 
 {{{
 'identity
-
 ' timestamp;2010/12/07 20:40 JST
-
 '       url;http://code.google.com/p/cowares-excel-hello/w/edit/hello_world
 
-
-
 'comment
-
 ' en;public text which implements a traditional "Hello World" on VBA
-
 ' ja;伝統的な Hello World で VBA の雛型を用意する
 
-
-
 'tag
-
 ' en;hello,vba,excel,M
 
-
-
 'copyright
-
 '      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
-
 ' contributors;Tomizono - kobobau.com
-
 '        since;2008
 
-
-
 'module
-
 '  name;HelloWorld
-
 '{{{
 
-
-
 Public Sub HelloWorld()
-
     Selection.Value = "Hello World"
-
 End Sub
 
-
-
 '}}}
-
 }}}
