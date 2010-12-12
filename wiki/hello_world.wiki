@@ -5,7 +5,7 @@
 
  * show traditional "Hello World" into selected cells.
 
-== 概要 ==
+=== 概要 ===
  * 選択したセルに "Hello World" と書き込む。
 
 = Details =
@@ -15,7 +15,7 @@
  * show how to put a value into excel cell from VBA
  * show how we manage codes here
 
-== 説明 ==
+==== 説明 ====
  * hello world によるサンプル
  * VBA で関数を作る
  * VBA からエクセルのセルに値を書き込む
