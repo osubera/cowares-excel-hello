@@ -11,16 +11,17 @@
 
 = Downloads =
 
-* [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_world downloads]
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_world downloads]
 
-= How to use ==
+= How to use =
 
  # add a vba module into your excel book.
  # paste the below Code on the module.
  # run the macro.
 
+== 使い方 ==
  # エクセルブックにVBAのモジュールを挿入する。
- # そのモジュールに、下記のコードを貼り付ける。
+ # そのモジュールに、下記の Code を貼り付ける。
  # 貼り付けたマクロを実行する。
 
 = Code ==
