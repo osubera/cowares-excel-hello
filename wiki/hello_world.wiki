@@ -4,17 +4,21 @@
 = Introduction =
 
  * show traditional "Hello World" into selected cells.
-
+----
  * 選択したセルに "Hello World" と書き込む。
 
 = Details =
+
+= Downloads =
+
+* [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_world downloads]
 
 = How to use ==
 
  # add a vba module into your excel book.
  # paste the below Code on the module.
  # run the macro.
-
+----
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記のコードを貼り付ける。
  # 貼り付けたマクロを実行する。
@@ -73,7 +77,3 @@ End Sub
 '}}}
 
 }}}
-
-= Downloads =
-
-[http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_world downloads]
