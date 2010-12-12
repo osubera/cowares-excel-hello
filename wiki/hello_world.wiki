@@ -1,5 +1,5 @@
 #summary hello world
-#labels Featured
+#labels Phase-Design,Phase-Deploy
 
 = Introduction =
 
