@@ -1,7 +1,7 @@
 #summary hello world
 #labels Phase-Design,Phase-Deploy
 
-[cowares-excel-hello#Code]
+[#Code]
 
 = Introduction =
 
