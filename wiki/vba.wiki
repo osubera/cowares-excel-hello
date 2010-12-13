@@ -3,7 +3,7 @@
 
 = how to open the Visual Basic Editor window =
 
-=== Excel 2003 and earlier
+=== Excel 2003 and earlier ===
 
   * select followings at the menu bar
     # Tools
@@ -16,7 +16,7 @@
     # uncheck "Menus show recently used commands first"
     # click Close the Customize window
 
-=== Excel 2007 and later
+=== Excel 2007 and later ===
 
   * follow this at first, because the Visual Basic is hidden at default
     # click the Microsoft Office Button located at the top-left corner.
@@ -36,7 +36,7 @@
 
 == Visual Basic Editor ウィンドウの開き方 ==
 
-=== Excel 2003 以前
+=== Excel 2003 以前 ===
 
   * メニューバーで次の操作をする
     # ツール(T)
@@ -49,7 +49,7 @@
     # 「最近使用したコマンドを最初に表示する(N)」のチェックを消す
     # 「閉じる」をクリックして、ユーザー設定ウィンドウを閉じる
     
-=== Excel 2007 以降
+=== Excel 2007 以降 ===
 
   * インストール直後はVisual Basic を非表示にしているため、表示する設定が必要
     # 左上角の Officeボタンをクリック
@@ -60,3 +60,18 @@
   * リボンで次の操作をする
     # 開発　タブを選ぶ
     # Visual Basic ボタンを押す （コードグループ、左端）
+
+
+= how to insert a Visual Basic Module =
+
+  * at the Visual Basic window
+    * select followings at the menu bar
+      # Insert
+      # Module
+
+== 標準モジュールを作成するには ==
+
+  * Visual Basic ウィンドウで、次の操作をする
+    * メニューから
+      # 挿入(I)
+      # 標準モジュール(M)
