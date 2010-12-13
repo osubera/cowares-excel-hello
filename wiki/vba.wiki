@@ -1,6 +1,8 @@
 #summary notes on the visual basic (vba)
 #labels Featured
 
+<wiki:toc max_depth="2" />
+
 = how to open the Visual Basic Editor window =
 
 === Excel 2003 and earlier ===
