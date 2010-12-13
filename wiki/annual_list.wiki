@@ -28,11 +28,13 @@
  # add a vba module into your excel book.
  # paste the below Code on the module.
  # run the macro.
+ # will be the next year or the current cell year.
 
 === 使い方 ===
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記の Code を貼り付ける。
  # 貼り付けたマクロを実行する。
+ # 来年または、セル上の年を作成。
 
 = Code ==
 
