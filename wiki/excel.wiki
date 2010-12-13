@@ -1,0 +1,32 @@
+#summary notes on the excel
+#labels Featured
+
+= Excel Version =
+
+ * We target every version of excels in this project.
+ * Every local, US, Europe and Far East.
+ * Every version above the Excel 95, that begins to support VBA.
+
+Of course a single code may not run on all versions in all countries. 
+Our approach is to create a better simple code to run on almost of them. 
+People may want to change some code, because of differences of culture. 
+VBA grammers on the Excel 95 and 98 are far from the Excel 2000, 
+so they require another VBA code. 
+These are small things in comparison with the fact that our single code is alive more than a decade after 2000. 
+We can not do tests on every version, because it costs too much. 
+Actually I (the owner of this project) am still working with my old PC, 433MHz single processor which runs the Japanese Excel 2000 on the Windows 2000. 
+
+== エクセルのバージョン ==
+
+ * このプロジェクトは、エクセルの全バージョンが対象です。
+ * すべての国、米国版、欧州版、極東版。
+ * VBAがついたエクセル95以降のすべて。
+
+もちろん、単一コードですべての国のすべてのバージョンが動くとは限りません。
+なるべく多くの環境で動くように、より良く簡潔なコードを書く方針です。
+そもそも文化が違えば、コードそのものを変えたいと思う人もいるでしょう。
+VBAの文法だって、エクセル95と98では2000以降とかなり違いますから、
+普通は別のコードになります。
+私たちが書いた単一のコードが2000以降の10年以上動いている事実に比べれば、これらの差異はごく小さなものです。
+金がかかりすぎるためすべてのバージョンでのチェックはできません。
+実際の開発には、（プロジェクトのオーナーは）いまだに古い433MHzのCPUが１個だけ乗ったPCで、日本語版エクセル2000とウィンドウズ2000を使っています。
