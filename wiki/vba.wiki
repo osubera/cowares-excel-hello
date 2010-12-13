@@ -1,0 +1,62 @@
+#summary notes on the visual basic (vba)
+#labels Featured
+
+= how to open the Visual Basic Editor window =
+
+=== Excel 2003 and earlier
+
+  * select followings at the menu bar
+    # Tools
+    # Macro
+    # Visual Basic Editor
+  * you may want to disable "Menus show recently used commands first" settings.
+    # Tools
+    # Customize
+    # Options tab
+    # uncheck "Menus show recently used commands first"
+    # click Close the Customize window
+
+=== Excel 2007 and later
+
+  * follow this at first, because the Visual Basic is hidden at default
+    # click the Microsoft Office Button located at the top-left corner.
+    # Excel Options at the bottom
+    # Popular from the left menu
+    # check "Show Developer tab in the Ribbon"
+    # click OK button to close the Excel Options window
+  * do followings at the Ribbon
+    # Developer tab
+    # Visual Basic icon (at the left, in Code)
+
+=== Excel 2010 ===
+
+  * may change the Microsoft Office Button, but I'm not sure
+    * maybe, File, Options, Cusomize Ribbon, or something
+
+
+== Visual Basic Editor ウィンドウの開き方 ==
+
+=== Excel 2003 以前
+
+  * メニューバーで次の操作をする
+    # ツール(T)
+    # マクロ(M)
+    # Visual Basic Editor(V)
+  * 「最近使用したコマンドを最初に表示する(N)」機能が邪魔な場合
+    # ツール(T)
+    # ユーザー設定(C)
+    # オプション　タブ
+    # 「最近使用したコマンドを最初に表示する(N)」のチェックを消す
+    # 「閉じる」をクリックして、ユーザー設定ウィンドウを閉じる
+    
+=== Excel 2007 以降
+
+  * インストール直後はVisual Basic を非表示にしているため、表示する設定が必要
+    # 左上角の Officeボタンをクリック
+    # Excelのオプション(I) （最下行）
+    # 左側一覧の基本設定
+    # 「開発」タブをリボンに表示する(D) をチェック
+    # OK ボタンを押して、Excelのオプションウィンドウを閉じる
+  * リボンで次の操作をする
+    # 開発　タブを選ぶ
+    # Visual Basic ボタンを押す （コードグループ、左端）
