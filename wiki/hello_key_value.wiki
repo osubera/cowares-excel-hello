@@ -1,0 +1,30 @@
+#summary how to use key-value (hash) variables in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to use key-value (hash) variables in vba
+
+=== 概要 ==
+ * VBAで連想配列（ハッシュ変数）を使う
+
+= Details =
+
+ * refers the Microsoft Scripting Runtime to use the Scripting.Dictionary object.
+
+=== 説明 ==
+ * Microsoft Scripting Runtime の Scripting.Dictionary を使う
+
+= Code =
+
+{{{
+' add the Microsoft Scripting Runtime to the References.
+    Dim x As Scripting.Dictionary
+    Set x = New Scripting.Dictionary
+    
+    x("my key") = "my value"
+    MsgBox x("my key")
+    
+    x.RemoveAll
+    Set x = Nothing
+}}}
