@@ -35,25 +35,31 @@
 ' we can go without adding a refference for earyly binding.
     Dim a As Object
     Dim x As Variant
+    
     ' create a late binding object
     Set a = CreateObject("Scripting.Dictionary")
+    
     a("Mon") = 3
     ' the Add method can do something like above
     a.Add "Tue", 4
+    
     Debug.Print "see, we have 2 items. ", a.Count
     For Each x In a.Keys
         Debug.Print x, a(x)
     Next
+    
     Debug.Print "see, the Items methods return values only. ", a.Count
     For Each x In a.Items
         Debug.Print x
     Next
+    
     ' the Remove method deltes a key
     a.Remove ("Tue")
     Debug.Print "see, the Tue was deleted. ", a.Count
     For Each x In a.Keys
         Debug.Print x, a(x)
     Next
+    
     ' the "=" can overwrite an existing key, but the Add raises an error on an existing key
     a("Mon") = 5
     'a.Add "Mon", 5
@@ -61,12 +67,14 @@
     For Each x In a.Keys
         Debug.Print x, a(x)
     Next
+    
     ' any references generate keys
     Debug.Print a("Wed")
     Debug.Print "see, we have the Wed now. ", a.Count
     For Each x In a.Keys
         Debug.Print x, a(x)
     Next
+    
     ' remove all keys before terminate
     a.RemoveAll
     Debug.Print "see, we have no keys. ", a.Count
