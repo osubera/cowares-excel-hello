@@ -5,14 +5,14 @@
 
  * how to use key-value (hash) variables in vba
 
-=== 概要 ==
+== 概要 ==
  * VBAで連想配列（ハッシュ変数）を使う
 
 = Details =
 
  * refers the Microsoft Scripting Runtime to use the Scripting.Dictionary object.
 
-=== 説明 ==
+== 説明 ==
  * Microsoft Scripting Runtime の Scripting.Dictionary を使う
 
 = Code =
@@ -27,4 +27,71 @@
     
     x.RemoveAll
     Set x = Nothing
+}}}
+
+== more codes ==
+
+{{{
+' we can go without adding a refference for earyly binding.
+    Dim a As Object
+    Dim x As Variant
+    ' create a late binding object
+    Set a = CreateObject("Scripting.Dictionary")
+    a("Mon") = 3
+    ' the Add method can do something like above
+    a.Add "Tue", 4
+    Debug.Print "see, we have 2 items. ", a.Count
+    For Each x In a.Keys
+        Debug.Print x, a(x)
+    Next
+    Debug.Print "see, the Items methods return values only. ", a.Count
+    For Each x In a.Items
+        Debug.Print x
+    Next
+    ' the Remove method deltes a key
+    a.Remove ("Tue")
+    Debug.Print "see, the Tue was deleted. ", a.Count
+    For Each x In a.Keys
+        Debug.Print x, a(x)
+    Next
+    ' the "=" can overwrite an existing key, but the Add raises an error on an existing key
+    a("Mon") = 5
+    'a.Add "Mon", 5
+    Debug.Print "see, the Mon was changed. ", a.Count
+    For Each x In a.Keys
+        Debug.Print x, a(x)
+    Next
+    ' any references generate keys
+    Debug.Print a("Wed")
+    Debug.Print "see, we have the Wed now. ", a.Count
+    For Each x In a.Keys
+        Debug.Print x, a(x)
+    Next
+    ' remove all keys before terminate
+    a.RemoveAll
+    Debug.Print "see, we have no keys. ", a.Count
+    For Each x In a.Keys
+        Debug.Print x, a(x)
+    Next
+    Set a = Nothing
+}}}
+
+results
+
+{{{
+see, we have 2 items.        2 
+Mon            3 
+Tue            4 
+see, the Items methods return values only.               2 
+ 3 
+ 4 
+see, the Tue was deleted.    1 
+Mon            3 
+see, the Mon was changed.    1 
+Mon            5 
+
+see, we have the Wed now.    2 
+Mon            5 
+Wed           
+see, we have no keys.        0 
 }}}
