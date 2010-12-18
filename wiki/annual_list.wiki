@@ -5,7 +5,7 @@
 
  * generate sheets with annual list in an excel book
 
-=== 概要 ==
+== 概要 ==
  * エクセルで年間スケジュール表のシートを作る
 
 = Details =
@@ -14,7 +14,7 @@
  * monthly sheet
  * daily rows in every sheet
 
-=== 説明 ==
+== 説明 ==
  * 来年または、指定した年の年間スケジュール表を作る
  * 月ごとにシートを用意する
  * １日１行の縦リスト
@@ -30,13 +30,13 @@
  # run the macro.
  # will be the next year or the current cell year.
 
-=== 使い方 ===
+== 使い方 ==
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記の Code を貼り付ける。
  # 貼り付けたマクロを実行する。
  # 来年または、セル上の年を作成。
 
-= Code ==
+= Code =
 
 {{{
 'identity

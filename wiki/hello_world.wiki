@@ -1,11 +1,11 @@
 #summary hello world
-#labels Phase-Design,Phase-Deploy
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
 
 = Introduction =
 
  * show traditional "Hello World"s into selected cells.
 
-=== 概要 ===
+== 概要 ==
  * 選択したセルに "Hello World" と書き込む。
 
 = Details =
@@ -15,7 +15,7 @@
  * show how to put a value into excel cell from VBA
  * show how we manage codes here
 
-=== 説明 ===
+== 説明 ==
  * hello world によるサンプル
  * VBA で関数を作る
  * VBA からエクセルのセルに値を書き込む
@@ -31,12 +31,12 @@
  # paste the below Code on the module.
  # run the macro.
 
-=== 使い方 ===
+== 使い方 ==
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記の Code を貼り付ける。
  # 貼り付けたマクロを実行する。
 
-= Code ==
+= Code =
 
 {{{
 'identity
