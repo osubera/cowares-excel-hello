@@ -10,7 +10,7 @@
 
 = Details =
 
- * ReDim is a standard solution to handle this, but too much use of ReDim costs.
+ * !ReDim is a standard solution to handle this, but too much use of ReDim costs.
  * the Collection object can do this.
 
 == 説明 ==
