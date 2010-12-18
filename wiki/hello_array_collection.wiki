@@ -10,11 +10,11 @@
 
 = Details =
 
- * !ReDim is a standard solution to handle this, but too much use of ReDim costs.
+ * !ReDim is a standard solution to handle this, but too much use of !ReDim costs.
  * the Collection object can do this.
 
 == 説明 ==
- * 通常は ReDim で良いが、頻繁に変えるには ReDim は重い。
+ * 通常は !ReDim で良いが、頻繁に変えるには !ReDim は重い。
  * Collection object を使うとよい。
 
 = Code =
