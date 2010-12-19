@@ -1,0 +1,214 @@
+#summary how to override a user class in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to override a user class in vba
+
+== 概要 ==
+ * VBAでユーザークラスのオーバーライドを実現する
+
+= Details =
+
+ * VBA does not support subclassing nor overriding.
+ * however, we show a trick to try overriding a class method for an instance specified.
+{{{
+module: test
+  test1 is an executable, to see how it works.
+class: MyBase
+  a base class, that has 2 overridable methods.
+class: MyExt1
+  a subclass to override MyFuncGet() and MyFuncFunc(x,y)
+class: MyExt2
+  a subclass to override MyFuncGet()
+}}}
+
+== 説明 ==
+ * VBAは、クラスの継承もオーバーライドも記述できない。
+ * トリッキーだが、インスタンス（オブジェクト）ごとのメソッドをオーバーライドしてみた。
+{{{
+module: test
+  test1 が実行可能で、どんな動作をするか見れる
+class: MyBase
+  ２つのオーバーライド可能なメソッドを持つ、ベースクラス
+class: MyExt1
+  MyFuncGet() と MyFuncFunc(x,y) をオーバーライドするサブクラス
+class: MyExt2
+  MyFuncGet() をオーバーライドするサブクラス
+}}}
+
+= Code =
+
+{{{
+'class
+'    name;MyBase
+'{{{
+Option Explicit
+
+Private TheRolls As Collection
+Private TheResources As Scripting.Dictionary
+
+Private Function TryOverride(ByRef Result As Variant, ProcName As String, CallType As VbCallType _
+                            , Optional Args As Variant = 0) As Boolean
+    Dim i As Long
+    ' a later override has priority
+    For i = TheRolls.Count To 1 Step -1
+        If TheRolls(i).RespondTo(ProcName) Then
+            ' this very line calls the subclass method
+            Result = CallByName(TheRolls(i), ProcName, CallType, Array(TheResources, Args))
+            TryOverride = True
+            Exit Function
+        End If
+    Next
+    TryOverride = False
+End Function
+
+Public Property Get MyFuncGet() As String
+    ' overridable begin
+    Dim Result As Variant
+    If TryOverride(Result, "MyFuncGet", VbGet) Then
+        MyFuncGet = Result
+        Exit Property
+    End If
+    ' overridable end
+    MyFuncGet = "MyFuncGet: Original. "
+End Property
+
+Public Function MyFuncFunc(x As String, y As String) As String
+    ' overridable begin
+    Dim Result As Variant
+    If TryOverride(Result, "MyFuncFunc", VbMethod, Array(x, y)) Then
+        MyFuncFunc = Result
+        Exit Function
+    End If
+    ' overridable end
+    MyFuncFunc = "MyFuncFunc: Original. " & x & y
+End Function
+
+Public Sub AddRoll(Roll As Variant)
+    ' TheRolls keeps overriders for each instance
+    ' Roll is an instance of subclass
+    TheRolls.Add Roll
+End Sub
+
+Public Sub RemoveRoll(i As Long)
+    TheRolls.Remove i
+End Sub
+
+Private Sub ClearRolls()
+    On Error Resume Next
+    Do While TheRolls.Count > 0
+        TheRolls.Remove 1
+    Loop
+    Set TheRolls = Nothing
+End Sub
+
+Private Sub ClearResources()
+    On Error Resume Next
+    TheResources.RemoveAll
+    Set TheResources = Nothing
+End Sub
+
+Private Sub SetResources()
+    'TheResources contains portable private variables in the class
+    TheResources("Secret") = "jk"
+End Sub
+
+Private Sub Class_Initialize()
+    Set TheRolls = New Collection
+    Set TheResources = New Scripting.Dictionary
+    SetResources
+End Sub
+
+Private Sub Class_Terminate()
+    ClearRolls
+    ClearResources
+End Sub
+'}}}
+ 
+'class
+'    name;MyExt1
+'{{{
+Option Explicit
+
+Private TheResponses As Variant
+
+Public Function RespondTo(ProcName) As Boolean
+    Dim Name As Variant
+    For Each Name In TheResponses
+        If Name = ProcName Then
+            RespondTo = True
+            Exit Function
+        End If
+    Next
+    RespondTo = False
+End Function
+
+Public Property Get MyFuncGet(Args As Variant) As String
+    ' Args(0) is TheResources of the base class
+    MyFuncGet = "MyFuncGet: Ext1. " & Args(0)("Secret")
+End Property
+
+Public Function MyFuncFunc(Args As Variant) As String
+    ' Args(1) contains arguments as an array
+    MyFuncFunc = "MyFuncFunc: Ext1. " & Args(1)(0) & Args(1)(1)
+End Function
+
+Private Sub Class_Initialize()
+    ' keep names to override
+    TheResponses = Array("MyFuncGet", "MyFuncFunc")
+End Sub
+'}}}
+ 
+'class
+'    name;MyExt2
+'{{{
+Option Explicit
+
+Private TheResponses As Variant
+
+Public Function RespondTo(ProcName) As Boolean
+    Dim Name As Variant
+    For Each Name In TheResponses
+        If Name = ProcName Then
+            RespondTo = True
+            Exit Function
+        End If
+    Next
+    RespondTo = False
+End Function
+
+Public Property Get MyFuncGet(Args As Variant) As String
+    MyFuncGet = "MyFuncGet: Ext2. " & Args(0)("Secret")
+End Property
+
+Private Sub Class_Initialize()
+    TheResponses = Array("MyFuncGet")
+End Sub
+'}}}
+ 
+'module
+'    name;test
+'{{{
+Option Explicit
+
+Sub test1()
+    Dim x As MyBase
+    Set x = New MyBase
+    Debug.Print x.MyFuncGet, x.MyFuncFunc("no ", "extentions")
+    x.AddRoll New MyExt1
+    Debug.Print x.MyFuncGet, x.MyFuncFunc("added ", "ext1")
+    x.AddRoll New MyExt2
+    Debug.Print x.MyFuncGet, x.MyFuncFunc("added ", "ext1 and ext2")
+    Set x = Nothing
+End Sub
+'}}}
+}}}
+
+results
+
+{{{
+MyFuncGet: Original.        MyFuncFunc: Original. no extentions
+MyFuncGet: Ext1. jk         MyFuncFunc: Ext1. added ext1
+MyFuncGet: Ext2. jk         MyFuncFunc: Ext1. added ext1 and ext2
+}}}
