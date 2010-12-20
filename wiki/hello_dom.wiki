@@ -316,3 +316,357 @@ False         True
   </www>
 </o>
 }}}
+
+== Overridable ==
+
+ * add a flavor of the overriding written at HelloClassOverride page.
+ * you may want to make subclasses of the Node class.
+ 
+ {{{
+ 'module
+'    name;test
+'{{{
+Option Explicit
+
+Sub test1()
+    Dim x As Node
+    Set x = New Node
+    Debug.Print x.ToText
+    
+    x.Attributes("text") = "my text"
+    x.Attributes("color") = "my color"
+    Debug.Print x.HasChild, x.HasParent
+    Debug.Print x.ToText
+    
+    x.AddChild New Node
+    x.Child(1).Attributes("policy") = "Fortitudinous, Free, Fair"
+    Debug.Print x.HasChild, x.HasParent
+    Debug.Print x.Child(1).HasChild, x.Child(1).HasParent
+    Debug.Print x.ToText
+    
+    x.AddChild New Node
+    x.Child(2).Attributes("url") = "http://cowares.nobody.jp"
+    x.Child(2).Properties("tagname") = "www"
+    Debug.Print x.ToText
+End Sub
+'}}}
+ 
+'class
+'    name;Node
+'{{{
+Option Explicit
+
+Private TheResources As Scripting.Dictionary
+Private TheNode As Scripting.Dictionary
+Private TheChild As Nodes
+Private TheProperties As Scripting.Dictionary
+
+' make some methods overridable: begin
+
+Private TheRolls As Collection
+
+Private Function TryOverride(ByRef Result As Variant, ProcName As String, CallType As VbCallType _
+                            , Optional Args As Variant = 0) As Boolean
+    Dim i As Long
+    For i = TheRolls.Count To 1 Step -1
+        If TheRolls(i).RespondTo(ProcName) Then
+            Result = CallByName(TheRolls(i), ProcName, CallType, Array(TheResources, Args))
+            TryOverride = True
+            Exit Function
+        End If
+    Next
+    TryOverride = False
+End Function
+
+Public Sub AddRoll(Roll As Variant)
+    TheRolls.Add Roll
+End Sub
+
+Public Sub RemoveRoll(i As Long)
+    TheRolls.Remove i
+End Sub
+
+Private Sub InitializeRolls()
+    Set TheRolls = New Collection
+End Sub
+
+Private Sub ClearRolls()
+    On Error Resume Next
+    Do While TheRolls.Count > 0
+        TheRolls.Remove 1
+    Loop
+    Set TheRolls = Nothing
+End Sub
+
+' make some methods overridable: end
+
+Private Sub Class_Initialize()
+    Set TheNode = New Scripting.Dictionary
+    Set TheChild = New Nodes
+    Set TheProperties = New Scripting.Dictionary
+    Set TheResources = New Scripting.Dictionary
+    SetResources
+    InitializeRolls
+End Sub
+
+Private Sub Class_Terminate()
+    ClearRolls
+    ClearResources
+End Sub
+
+Private Sub SetResources()
+    Set TheResources("node") = TheNode
+    Set TheResources("children") = TheChild
+    Set TheResources("properties") = TheProperties
+    Set TheResources("parent") = Nothing
+    Set TheResources("this") = Me
+    SetProperties Array(Array("tagname", "o"), Array("tablength", 2))
+End Sub
+
+Private Sub ClearResources()
+    On Error Resume Next
+    TheResources.RemoveAll
+    Set TheResources = Nothing
+    TheProperties.RemoveAll
+    Set TheProperties = Nothing
+    Clear
+    Set TheNode = Nothing
+End Sub
+
+Private Sub Alert(Message As Variant)
+    Debug.Print Message
+End Sub
+
+Public Sub Clear()
+    TheChild.Clear
+    TheNode.RemoveAll
+End Sub
+
+Public Property Get HasParent() As Boolean
+    HasParent = IIf(Not TheResources("parent") Is Nothing, True, False)
+End Property
+
+Public Property Get Parent() As Node
+    Set Parent = TheResources("parent")
+End Property
+
+Public Property Set Parent(ParentNode As Node)
+    Set TheResources("parent") = ParentNode
+End Property
+
+Public Property Get Children() As Nodes
+    Set Children = TheChild
+End Property
+
+Public Property Get Child(i As Long) As Node
+    Set Child = TheChild.Item(i)
+End Property
+
+Public Property Get HasChild() As Boolean
+    HasChild = IIf(TheChild.Count > 0, True, False)
+End Property
+
+Public Sub AddChild(ChildNode As Node)
+    Set ChildNode.Parent = Me
+    TheChild.Add ChildNode
+End Sub
+
+Public Sub InsertChild(ChildNode As Node, Before As Long)
+    Set ChildNode.Parent = Me
+    TheChild.Insert ChildNode, Before
+End Sub
+
+Public Sub RemoveChild(i As Long)
+    TheChild.Remove (i)
+End Sub
+
+Public Property Get Attributes(Name As String) As String
+    If TheNode.Exists(Name) Then
+        Attributes = TheNode(Name)
+    Else
+        Alert "Warning: no attributes for the name. " & Name
+        Attributes = ""
+    End If
+End Property
+
+Public Property Let Attributes(Name As String, Text As String)
+    TheNode(Name) = Text
+End Property
+
+Public Sub SetAttributes(Settings As Variant)
+    Dim Pair As Variant
+    For Each Pair In Settings
+        TheNode(Pair(0)) = Pair(1)
+    Next
+End Sub
+
+Public Sub ClearAttributes()
+    TheNode.RemoveAll
+End Sub
+
+Public Property Get Properties(Name As String) As Variant
+    Properties = TheProperties(Name)
+End Property
+
+Public Property Let Properties(Name As String, Value As Variant)
+    TheProperties(Name) = Value
+End Property
+
+Public Sub SetProperties(Settings As Variant)
+    Dim Pair As Variant
+    For Each Pair In Settings
+        TheProperties(Pair(0)) = Pair(1)
+    Next
+End Sub
+
+Public Sub ClearProperties()
+    TheProperties.RemoveAll
+End Sub
+
+Public Sub ReInitialize()
+    ' make it overridable
+    Dim Result As Variant
+    If TryOverride(Result, "ReInitialize", VbMethod) Then Exit Sub
+    
+    ' base code begins here
+    ClearProperties
+    ClearAttributes
+    SetProperties Array(Array("tagname", "o"), Array("tablength", 2))
+End Sub
+
+Public Function ToText(Optional PaddingLeft As Long = 0) As String
+    ' overridable begin
+    Dim Result As Variant
+    If TryOverride(Result, "ToText", VbMethod, Array(PaddingLeft)) Then
+        ToText = Result
+        Exit Function
+    End If
+    
+    ' base code begins here
+    Dim Padding As String
+    Padding = Space(PaddingLeft)
+    ToText = Padding & "<" & TheProperties("tagname") & ToTextAttributes & ">" & vbCrLf _
+        & ToTextChildren(PaddingLeft + TheProperties("tablength")) _
+        & Padding & "</" & TheProperties("tagname") & ">" & vbCrLf
+End Function
+
+Public Function ToTextAttributes() As String
+    ' overridable begin
+    Dim Result As Variant
+    If TryOverride(Result, "ToTextAttributes", VbMethod) Then
+        ToTextAttributes = Result
+        Exit Function
+    End If
+    
+    ' base code begins here
+    Dim Text As String
+    Dim Key As Variant
+    Text = ""
+    For Each Key In TheNode.Keys
+        Text = Text & " " & CStr(Key) & "=""" & TheNode(Key) & """"
+    Next
+    ToTextAttributes = Text
+End Function
+
+Public Function ToTextChildren(PaddingLeft As Long) As String
+    ' overridable begin
+    Dim Result As Variant
+    If TryOverride(Result, "ToTextChildren", VbMethod, Array(PaddingLeft)) Then
+        ToTextChildren = Result
+        Exit Function
+    End If
+    
+    ' base code begins here
+    Dim Text As String
+    Dim i As Long
+    For i = 1 To TheChild.Count
+        Text = Text & TheChild.Item(i).ToText(PaddingLeft)
+    Next
+    ToTextChildren = Text
+End Function
+'}}}
+ 
+'class
+'    name;Nodes
+'{{{
+Option Explicit
+
+Private TheResources As Scripting.Dictionary
+Private TheNodes As Collection
+
+Private Sub Class_Initialize()
+    Set TheNodes = New Collection
+    Set TheResources = New Scripting.Dictionary
+    SetResources
+End Sub
+
+Private Sub Class_Terminate()
+    ClearResources
+End Sub
+
+Private Sub SetResources()
+    Set TheResources("nodes") = TheNodes
+End Sub
+
+Private Sub ClearResources()
+    On Error Resume Next
+    TheResources.RemoveAll
+    Set TheResources = Nothing
+    Clear
+    Set TheNodes = Nothing
+End Sub
+
+Private Sub Alert(Message As Variant)
+    Debug.Print Message
+End Sub
+
+Private Function IsValidItemNumber(i As Long) As Boolean
+    If (i < 1 Or i > TheNodes.Count) Then
+        Alert "Warning: not a valid item number. " & i
+        IsValidItemNumber = False
+        Exit Function
+    End If
+    IsValidItemNumber = True
+End Function
+
+Public Sub Clear()
+    Do While TheNodes.Count > 0
+        TheNodes(1).Clear
+        TheNodes.Remove 1
+    Loop
+End Sub
+
+Public Property Get Count() As Long
+    Count = TheNodes.Count
+End Property
+
+Public Property Get IsEmpty() As Boolean
+    IsEmpty = IIf(TheNodes.Count = 0, True, False)
+End Property
+
+Public Property Get Item(i As Long) As Node
+    If IsValidItemNumber(i) Then
+        Set Item = TheNodes(i)
+    Else
+        Set Item = Nothing
+    End If
+End Property
+
+Public Sub Add(TheNode As Node)
+    TheNodes.Add TheNode
+End Sub
+
+Public Sub Insert(TheNode As Node, i As Long)
+    If IsValidItemNumber(i) Then
+        TheNodes.Add TheNode, Before:=i
+    End If
+End Sub
+
+Public Sub Remove(i As Long)
+    If IsValidItemNumber(i) Then
+        TheNodes(i).Clear
+        TheNodes.Remove i
+    End If
+End Sub
+'}}}
+ }}}
