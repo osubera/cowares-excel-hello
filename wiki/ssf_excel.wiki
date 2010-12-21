@@ -113,12 +113,16 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 || orange ||  ||  || apple ||  ||  ||
 
+====== ====== ======
+
 {{{
 ' delimiter;,+
 '          ;orange,,,apple,,
 }}}
 
 || orange || apple ||
+
+====== ====== ======
 
 {{{
 ' delimiter; +
@@ -129,12 +133,16 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 || orange || apple ||
 || strawberry || lemon ||
 
+====== ====== ======
+
 {{{
 ' delimiter;★+
 '          ;蜜柑★林檎★苺★檸檬
 }}}
 
 || 蜜柑 || 林檎 || 苺 || 檸檬 ||
+
+====== ====== ======
 
  # the default is a line goes into a single cell
   省略時は、１行が１セルに対応
@@ -149,6 +157,8 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 ||  || *B* ||
 || *9* || apple or poison ||
 
+====== ====== ======
+
 {{{
 '    sparse;#+
 '          ;R9C2####apple or #poison#
@@ -156,6 +166,8 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 ||  || *B* ||
 || *9* || apple or #poison# ||
+
+====== ====== ======
 
 {{{
 '    sparse;#
@@ -166,8 +178,6 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 || *9* || ###apple or #poison# ||
 
 === cells-formula ===
-
-====== ====== ======
 
 {{{
 'cells-formula
@@ -216,6 +226,8 @@ http://cowares.nobody.jp
 ||  || *A* || *B* ||
 || *2* || license || Fortitudinous, Free, Fair<br>自律,自由,公正<br>http://cowares.nobody.jp ||
 || *3* || this project belongs to the public domain. ||  ||
+
+====== ====== ======
 
  # supports address, delimiter and sparse
   address, delimiter, sparse が有効
