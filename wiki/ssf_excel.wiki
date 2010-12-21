@@ -113,6 +113,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 || orange ||  ||  || apple ||  ||  ||
 
+ # specify a delimiter to separate each data
+  データを分割する区切り文字を指定する
+
 ====== ====== ======
 
 {{{
