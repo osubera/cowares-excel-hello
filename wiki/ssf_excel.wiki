@@ -160,6 +160,13 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '        ;=SUM(R[-2]C:R[-1]C)
 }}}
 
+ # above is a 3x2 table as this
+  こんな感じの3行2列の表になる
+||  || *A* || *B* ||
+|| *1* || Oranges || 1600 ||
+|| *2* || Apples || 1400 ||
+|| *3* || Total || 3000 ||
+
  # supports address, delimiter and sparse
   address, delimiter, sparse が有効
 
