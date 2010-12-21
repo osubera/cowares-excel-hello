@@ -167,6 +167,8 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 === cells-formula ===
 
+====== ====== ======
+
 {{{
 'cells-formula
 ' address;R1C1:R3C2
