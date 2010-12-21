@@ -178,6 +178,12 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '        ;=SUM(R[-2]C:R[-1]C)
 }}}
 
+ # specify formulas of cell by anonymous data
+  無名データでセル数式を書く
+ # a line goes into a single cell
+  １行が１セルに対応
+ # horizontal scan from left to right, then go to next line
+  行ごとに順に処理し、横方向に左から右へセルを進む
  # above is a 3x2 table as this
   こんな感じの3行2列の表になる
 ||  || *A* || *B* ||
