@@ -6,7 +6,8 @@
 
 = notices for Microsoft Excel =
 
- # we mostly target Microsoft Excel Books here, so we have some additional rules to work better with them.
+We mostly target Microsoft Excel Books here, so we have some additional rules to work better with them.
+
  # linefeed is `vbCrLf (x0d0a)` 
  # an ssf line begins with `' (x2c)` 
  # a void line contains only white spaces or blank
@@ -15,7 +16,8 @@
 
 == マイクロソフト エクセル に特化した事項 ==
 
- # ここではエクセル VBA の Visual Basic Editor ウィンドウに、 ssf を貼り付ける上で役に立つ表記上のルールをあげておく。
+ここではエクセル VBA の Visual Basic Editor ウィンドウに、 ssf を貼り付ける上で役に立つ表記上のルールをあげておく。
+
  # 改行記号は `vbCrLf (x0d0a)` 
  # ssf 有効行は、先頭が `' (x2c)` の行
  # 無効行は空行
