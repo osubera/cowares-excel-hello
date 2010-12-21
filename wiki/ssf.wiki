@@ -1,8 +1,6 @@
 #summary Spreadsheet Stream Format (SSF)
 #labels Featured,Phase-Design
 
-<wiki:toc max_depth="2" />
-
 = Spreadsheet Stream Format (SSF) =
 
 A text format describes any spreadsheets like the Microsoft Excel Book.
