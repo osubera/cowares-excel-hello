@@ -5,11 +5,13 @@
 
  * A text format describes any spreadsheets like the Microsoft Excel Book.
  * Easy exchanges of spreadsheet's data, avoiding to exchange binary files directly.
+ * Readable by both human and machine.
 
 == SSF書式 ==
 
  * エクセルブックのような表計算シートを、テキストで表現する。
  * バイナリファイルの直接交換をせずに情報のやりとりを容易に行う。
+ * 機械的に処理でき、人にとっても読みやすい。
 
 = Documents / 資料 =
 
