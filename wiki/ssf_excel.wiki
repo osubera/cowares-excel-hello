@@ -2,7 +2,7 @@
 #labels Phase-Design
 #sidebar ssf
 
-<wiki:toc max_depth="3" />
+<wiki:toc max_depth="4" />
 
 = notices for Microsoft Excel =
 
