@@ -19,76 +19,9 @@ Easy exchanges of spreadsheet's data, avoiding to exchange binary files directly
 
 バイナリファイルの直接交換をせずに情報のやりとりを容易に行う。
 
-= Definitions =
+= Documents / 資料 =
 
-we only define a framework here, because the ssf depends office applications and operating systems.
-
-=== ssf ===
-
- # a ssf is a group of ssf blocks.
- # a void block is found between any ssf blocks.
-
-=== line ===
-
- # a parser do a line at once.
- # escaped lines are handled as a single line on parsing.
- # escaped lines override every rule below.
-
-=== ssf block ===
-
- # a ssf line is defined explicitly and independently. maybe by the first character of a line.
- # a ssf block is a continuous ssf lines
- # a ssf block has a pair of a ssf key and a ssf value.
- # the first line of a ssf block contains a ssf key, the second line and later contain a ssf value.
- # a ssf key is for telling how to parse it, not for identifing unique block.
-
-=== void block ===
-
- # a void line is every line but ssf lines.
- # a void block is a continuous void lines.
-
-== 定義 ==
-
-ssf は、表計算アプリやOSに依存して変化してよいものなので、定義は枠組みの決定に限定する。
-
-=== ssf ===
-
- # ssf ブロックの集まりを ssf という。
- # ssf ブロックの間には、必ず無効ブロックが入る。
-
-=== 行 ===
-
- # 解釈は行単位で行う。
- # 複数行を解釈上の単一行とみなすための、行エスケープ機構を用意する。
- # 行エスケープはすべてのルールの中で最優先される。
-
-=== ssf ブロック ===
-
- # 行の先頭文字など、該当行だけで明確な定義により、 ssf 有効行を決める。
- # ssf 有効行の連続した固まりを ssf ブロックと呼ぶ。
- # ssf ブロックは ssf キーと ssf 値の一対のデータを表す。
- # ssf ブロック内の先頭行が ssf キーを持ち、２行目以降が ssf 値を持つ。
- # ssf キーは、解釈ルールを示すものであり、重複を妨げるキーではない。
-
-=== 無効ブロック ===
-
- # ssf 有効行でないものを無効行と呼ぶ。
- # １つ以上の連続する無効行の固まりを無効ブロックと呼ぶ。
-
-= notices for Microsoft Excel =
-
- # we mostly target Microsoft Excel Books here, so we have some additional rules to work better with them.
- # linefeed is `vbCrLf (x0d0a)` 
- # an ssf line begins with `' (x2c)` 
- # a void line contains only white spaces or blank
- # escaped lines begin with `'{{{` and end with `'}}}`
- # no localized characters in ssf keys, ascii 7bit alphabets and numbers only
-
-== マイクロソフト エクセル に特化した事項 ==
-
- # ここではエクセル VBA の Visual Basic Editor ウィンドウに、 ssf を貼り付ける上で役に立つ表記上のルールをあげておく。
- # 改行記号は vbCrLf (x0d0a) 
- # ssf 有効行は、先頭が ' (x2c) の行
- # 無効行は空行
- # 行エスケープは、 `'{{{` で開始、 `'}}}` で終了。
- # ssf キーは、欧米版を考慮して半角英数字だけにしておく。
+ # [ssf_definition Definitions of SSF / SSF の定義]
+ # [ssf_excel Working with Microsoft Excel / エクセルでの使用]
+ # [ssf_convert_from_excel Excel to SSF / エクセルからSSFへの変換]
+ # [ssf_convert_to_excel SSF to Excel / SSFからエクセルへの変換]

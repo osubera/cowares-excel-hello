@@ -1,0 +1,61 @@
+#summary Definitions of Spreadsheet Stream Format (SSF)
+#labels Featured,Phase-Design
+
+<wiki:toc max_depth="3" />
+
+= Definitions of SSF =
+
+we only define a framework here, because the ssf depends office applications and operating systems.
+
+=== ssf ===
+
+ # a ssf is a group of ssf blocks.
+ # a void block is found between any ssf blocks.
+
+=== line ===
+
+ # a parser do a line at once.
+ # escaped lines are handled as a single line on parsing.
+ # escaped lines override every rule below.
+
+=== ssf block ===
+
+ # a ssf line is defined explicitly and independently. maybe by the first character of a line.
+ # a ssf block is a continuous ssf lines
+ # a ssf block has a pair of a ssf key and a ssf value.
+ # the first line of a ssf block contains a ssf key, the second line and later contain a ssf value.
+ # a ssf key is for telling how to parse it, not for identifing unique block.
+
+=== void block ===
+
+ # a void line is every line but ssf lines.
+ # a void block is a continuous void lines.
+
+== SSF の定義 ==
+
+ssf は、表計算アプリやOSに依存して変化してよいものなので、定義は枠組みの決定に限定する。
+
+=== ssf ===
+
+ # ssf ブロックの集まりを ssf という。
+ # ssf ブロックの間には、必ず無効ブロックが入る。
+
+=== 行 ===
+
+ # 解釈は行単位で行う。
+ # 複数行を解釈上の単一行とみなすための、行エスケープ機構を用意する。
+ # 行エスケープはすべてのルールの中で最優先される。
+
+=== ssf ブロック ===
+
+ # 行の先頭文字など、該当行だけで明確な定義により、 ssf 有効行を決める。
+ # ssf 有効行の連続した固まりを ssf ブロックと呼ぶ。
+ # ssf ブロックは ssf キーと ssf 値の一対のデータを表す。
+ # ssf ブロック内の先頭行が ssf キーを持ち、２行目以降が ssf 値を持つ。
+ # ssf キーは、解釈ルールを示すものであり、重複を妨げるキーではない。
+
+=== 無効ブロック ===
+
+ # ssf 有効行でないものを無効行と呼ぶ。
+ # １つ以上の連続する無効行の固まりを無効ブロックと呼ぶ。
+
