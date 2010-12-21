@@ -186,7 +186,7 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
   行ごとに順に処理し、横方向に左から右へセルを進む
  # above is a 3x2 table as this
   こんな感じの3行2列の表になる
-||  || *A* || *B* ||
+  ||  || *A* || *B* ||
 || *1* || Oranges || 1600 ||
 || *2* || Apples || 1400 ||
 || *3* || Total || 3000 ||
