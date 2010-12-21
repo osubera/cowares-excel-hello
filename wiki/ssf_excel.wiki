@@ -105,17 +105,63 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
   省略時は全体
 
 ==== delimiter ====
+
+{{{
+' delimiter;,
+'          ;orange,,,apple,,
+}}}
+
+{{{
+' delimiter;,+
+'          ;orange,,,apple,,
+}}}
+
+{{{
+' delimiter; +
+'          ;orange       apple
+'          ;strawberry  lemon
+}}}
+
+{{{
+' delimiter;★+
+'          ;蜜柑★林檎★苺★檸檬
+}}}
+
+ # the default is a line goes into a single cell
+  省略時は、１行が１セルに対応
+
 ==== sparse ====
+
+{{{
+'    sparse; +
+'          ;R9C2     apple or poison
+}}}
+
+{{{
+'    sparse;#+
+'          ;R9C2####apple or poison
+}}}
+
+{{{
+'    sparse;#
+'          ;R9C2####apple or poison
+}}}
 
 === cells-formula ===
 
 {{{
+'cells-formula
+' address;RC1:R3C2
+'        ;Oranges
+'        ;1600
+'        ;Apples
+'        ;1400
+'        ;Total
+'        ;=SUM(R[-2]C:R[-1]C)
 }}}
 
  # supports address, delimiter and sparse
+  address, delimiter, sparse が有効
 
 
-{{{
-}}}
 
- # address, delimiter, sparse が有効
