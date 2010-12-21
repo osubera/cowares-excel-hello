@@ -100,9 +100,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 }}}
 
  # specify a range of cells
- 対象セルのアドレスを指定
+  対象セルのアドレスを指定
  # the default is entire cells
- 省略時は全体
+  省略時は全体
 
 ==== delimiter ====
 ==== sparse ====
