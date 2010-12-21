@@ -92,7 +92,18 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 = Cells / セル =
 
 === names / 名前 ===
+
 ==== address ====
+
+{{{
+' address;R5C1:R17C2
+}}}
+
+ # specify a range of cells
+ 対象セルのアドレスを指定
+ # the default is entire cells
+ 省略時は全体
+
 ==== delimiter ====
 ==== sparse ====
 
