@@ -23,3 +23,75 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
  # 無効行は空行
  # 行エスケープは、 `'{{{` で開始、 `'}}}` で終了。
  # ssf キーは、欧米版を考慮して半角英数字だけにしておく。
+
+= ssf block definitions for Excel =
+
+=== idenfity ssf lines ===
+
+ # a line begins with `' (x2c)` 
+ # remove the 1st character and continuous `spaces(x20)` and `tabs(x09)` from the 2nd
+ # remove the linefeed character at the line end
+ # escaped lines are not effected above all rules
+ # an escaped line block is regarded as a single line of anonymous data
+
+=== ssf key line ===
+
+ # an ssf key line is the 1st line of a ssf block
+ # remove continuous `spaces(x20)` and `tabs(x09)` at the line end
+ # the ssf key is all remained
+
+=== ssf value line ===
+
+ # ssf value lines are the 2nd line and followings of a ssf block
+ # an ssf value line is splited into 2 parts of name and data, by a delimiter
+ # the delimiter is `; (x3b)` , we take the earlier one only
+ # an anonymous data begins with the delimiter
+ # different format of data parts, for the different ssf key
+
+== エクセル向けの ssf ブロック定義 ==
+
+=== ssf 行の識別 ===
+
+ # 行の先頭文字が `' (x2c)` の行
+ # 先頭文字に続く連続した `空白(x20)` と `タブ(x09)` は先頭文字とともに除去
+ # 行末改行文字は除去
+ # 上記すべてに優先して、行エスケープ処理を行う
+ # 行エスケープは、処理上は１行の無名データとして扱う
+
+=== ssf キー行 ===
+
+ # ssf ブロックの先頭行が、 ssf キー行
+ # 末尾の連続した `空白(x20)` と `タブ(x09)` は除外
+ # 残った文字列全体が、このブロックのキーとなる
+
+=== ssf 値行 ===
+
+ # ssf ブロックの２行目以降が、 ssf 値行
+ # ssf 値行は、区切り記号によって、名前部分とデータ部分に分かれる
+ # 区切り記号は `; (x3b)` で、先頭に近い１つだけが有効
+ # 先頭が区切り記号のものを、無名データと呼ぶ
+ # データ部分もさらにキーごとに固有の書式を持つ
+
+= ssf block sequence and hidden globals =
+
+ # the sequence of ssf blocks is important on its meanings
+ # there're no parents or children relationships between ssf blocks. they're just serialized
+ # always exists a default target for implicit things
+ # consider there're global variables to keep defaults, maybe some block change its value, then the change impacts all blocks after that
+
+== ssf ブロックの順序と省略値の解釈 ==
+
+ # ssf ブロックは逐次処理で解釈する。
+ # 並び順は包含性ではなく、処理順を示している。
+ # 処理対象は、常にデフォルトの相手だ。
+ # デフォルトは、グローバルな環境変数などにあると考えてよく、先行する処理がそれを書き換えると、以降の処理にも影響するというルール。
+    Workbook を指定する処理があれば、それより後のブロックでの処理は、その Workbook に対して行う。
+    これは包含関係によるのではなく、そこでグローバルな環境の「対象とするWorkbook」が書き換えられたからと考える。
+    ssf は包含性を明確にする記述方法を持ってないので、グローバルな切り替えという発想で見ないと解釈にゆらぎが生じる。
+
+= Cells / セル =
+
+=== cells-formula ===
+
+{{{
+}}}
