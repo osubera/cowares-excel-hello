@@ -91,7 +91,20 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 = Cells / セル =
 
+=== names / 名前 ===
+==== address ====
+==== delimiter ====
+==== sparse ====
+
 === cells-formula ===
 
 {{{
 }}}
+
+ # supports address, delimiter and sparse
+
+
+{{{
+}}}
+
+ # address, delimiter, sparse が有効
