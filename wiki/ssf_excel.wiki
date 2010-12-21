@@ -151,19 +151,19 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 {{{
 '    sparse;#+
-'          ;R9C2####apple or poison
+'          ;R9C2####apple or #poison#
 }}}
 
 ||  || *B* ||
-|| *9* || apple or poison ||
+|| *9* || apple or #poison# ||
 
 {{{
 '    sparse;#
-'          ;R9C2####apple or poison
+'          ;R9C2####apple or #poison#
 }}}
 
 ||  || *B* ||
-|| *9* || ###apple or poison ||
+|| *9* || ###apple or #poison# ||
 
 === cells-formula ===
 
