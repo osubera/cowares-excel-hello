@@ -3,19 +3,13 @@
 
 = Spreadsheet Stream Format (SSF) =
 
-A text format describes any spreadsheets like the Microsoft Excel Book.
+ * A text format describes any spreadsheets like the Microsoft Excel Book.
+ * Easy exchanges of spreadsheet's data, avoiding to exchange binary files directly.
 
 == SSF書式 ==
 
-エクセルブックのような表計算シートを、テキストで表現する。
-
-= SSF is for ==
-
-Easy exchanges of spreadsheet's data, avoiding to exchange binary files directly.
-
-== SSF の目的 ==
-
-バイナリファイルの直接交換をせずに情報のやりとりを容易に行う。
+ * エクセルブックのような表計算シートを、テキストで表現する。
+ * バイナリファイルの直接交換をせずに情報のやりとりを容易に行う。
 
 = Documents / 資料 =
 
