@@ -125,6 +125,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 || orange || apple ||
 
+ # continuous delimiters are considered as one and the last delimiter is ignored when a `+(x2b)` exists at the 2nd character
+  `+(x2b)` が２文字目にあれば、連続した区切りは１つとし、末尾の区切りは無視する
+
 ====== ====== ======
 
 {{{
@@ -136,6 +139,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 || orange || apple ||
 || strawberry || lemon ||
 
+ # use this `space+(x202b)` to arrange vertically
+  `空白+(x202b)` で縦に揃える
+
 ====== ====== ======
 
 {{{
@@ -145,10 +151,8 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 || 蜜柑 || 林檎 || 苺 || 檸檬 ||
 
-====== ====== ======
-
- # the default is a line goes into a single cell
-  省略時は、１行が１セルに対応
+ # far east characters are also available as a delimiter
+  漢字なども区切り文字として使える
 
 ==== sparse ====
 
@@ -160,6 +164,11 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 ||  || *B* ||
 || *9* || apple or poison ||
 
+ # specify a single data with its address
+  単一のデータをアドレスとともに指定する
+ # this example shows continuous spaces are used as a delimiter
+  連続する空白を区切り文字として指定
+
 ====== ====== ======
 
 {{{
@@ -170,6 +179,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 ||  || *B* ||
 || *9* || apple or #poison# ||
 
+ # only the 1st one of delimiters effects, separates the former address and the latter data
+  最初の区切りだけが有効で、１つ目がアドレス、２つ目がデータ
+
 ====== ====== ======
 
 {{{
@@ -179,6 +191,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 ||  || *B* ||
 || *9* || ###apple or #poison# ||
+
+ # this example shows a single # is used as a delimiter
+  １つの # だけを区切りに指定した例
 
 === cells-formula ===
 
