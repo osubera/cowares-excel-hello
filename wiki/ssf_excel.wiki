@@ -191,7 +191,7 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 || *2* || Apples || 1400 ||
 || *3* || Total || 3000 ||
 
-----
+====== ====== ======
 
 {{{
 'cells-formula
