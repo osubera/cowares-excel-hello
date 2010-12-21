@@ -1,7 +1,8 @@
 #summary SSF, Working with Microsoft Excel 
-#labels Featured,Phase-Design
+#labels Phase-Design
+#sidebar ssf
 
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="3" />
 
 = notices for Microsoft Excel =
 
