@@ -111,10 +111,14 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '          ;orange,,,apple,,
 }}}
 
+|| orange ||  ||  || apple ||  ||  ||
+
 {{{
 ' delimiter;,+
 '          ;orange,,,apple,,
 }}}
+
+|| orange || apple ||
 
 {{{
 ' delimiter; +
@@ -122,10 +126,15 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '          ;strawberry  lemon
 }}}
 
+|| orange || apple ||
+|| strawberry || lemon ||
+
 {{{
 ' delimiter;★+
 '          ;蜜柑★林檎★苺★檸檬
 }}}
+
+|| 蜜柑 || 林檎 || 苺 || 檸檬 ||
 
  # the default is a line goes into a single cell
   省略時は、１行が１セルに対応
@@ -137,15 +146,24 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '          ;R9C2     apple or poison
 }}}
 
+||  || *B* ||
+|| *9* || apple or poison ||
+
 {{{
 '    sparse;#+
 '          ;R9C2####apple or poison
 }}}
 
+||  || *B* ||
+|| *9* || apple or poison ||
+
 {{{
 '    sparse;#
 '          ;R9C2####apple or poison
 }}}
+
+||  || *B* ||
+|| *9* || ###apple or poison ||
 
 === cells-formula ===
 
