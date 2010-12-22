@@ -99,6 +99,73 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
     これは包含関係によるのではなく、そこでグローバルな環境の「対象とするWorkbook」が書き換えられたからと考える。
     ssf は包含性を明確にする記述方法を持ってないので、グローバルな切り替えという発想で見ないと解釈にゆらぎが生じる。
 
+= Information / 情報 =
+
+=== names / 名前 ===
+
+==== en, ja, ,,, (languages / 言語) ====
+
+==== timestamp ====
+
+==== url ====
+
+==== license ====
+
+==== contributors ====
+
+==== since ====
+
+=== identity ===
+
+{{{
+'identity
+' timestamp;2010/12/07 20:40 JST
+'       url;http://code.google.com/p/cowares-excel-hello/wiki/hello_world
+}}}
+
+ # supports timestamp and url
+  timestamp, url が有効
+ # give an identification to thie release, with a unique name and version
+  一意な名称とバージョンの組み合わせで、このリリースを特定できるようにする
+ # the url is a good choice for a unique name, and the timestamp is good to describe version
+  名称として url 、バージョンとして日時を使うのがお奨め
+
+=== comment ===
+
+{{{
+'comment
+' en;public text which implements a traditional "Hello World" on VBA
+' ja;伝統的な Hello World で VBA の雛型を用意する
+}}}
+
+ # supports (languages)
+  (言語) が有効
+
+=== tag ===
+
+{{{
+'tag
+' en;hello,vba,excel
+}}}
+
+ # supports (languages)
+  (言語) が有効
+ # the delimiter is `,(x2c)` 
+  `,(x2c)` で区切る
+
+=== copyright ===
+
+{{{
+'copyright
+'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
+' contributors;Tomizono - kobobau.com
+'        since;2008
+}}}
+
+ # supports license, contributors and since
+  license, contributors, since が有効
+
+
 = Book, Sheet / ブック、シート =
 
 === names / 名前 ===
