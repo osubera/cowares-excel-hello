@@ -99,6 +99,38 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
     これは包含関係によるのではなく、そこでグローバルな環境の「対象とするWorkbook」が書き換えられたからと考える。
     ssf は包含性を明確にする記述方法を持ってないので、グローバルな切り替えという発想で見ないと解釈にゆらぎが生じる。
 
+= Book, Sheet / ブック、シート =
+
+=== names / 名前 ===
+
+==== name ====
+
+{{{
+' name:Sheet1
+}}}
+
+ # workbook name or sheet name on user side
+  ユーザーが認識している、ワークブック名とかシート名
+
+==== codename ====
+
+{{{
+' codename:Sheet1
+}}}
+
+ # object name on vba
+  vba 上で認識されるブックやシートの名称
+
+=== workbook ===
+
+ # supports name, codename
+  name, codename が有効
+
+=== worksheet ===
+
+ # supports name, codename
+  name, codename が有効
+
 = Cells / セル =
 
 === names / 名前 ===
@@ -327,8 +359,8 @@ http://cowares.nobody.jp
 
 === cells-name ===
 
- # supports address, delimiter and sparse
-  address, delimiter, sparse が有効
+ # supports sparse
+  sparse が有効
 
 ====== ====== ======
 
