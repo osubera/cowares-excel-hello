@@ -313,6 +313,42 @@ http://cowares.nobody.jp
   セルの名前を示す
 
 
+= VBA Code / VBA コード =
+
+=== names / 名前 ===
+
+==== name ====
+
+=== code ===
+
+ # supports name
+  name が有効
+ # belongs to one of Microsoft Excel Objects, such a worksheet or the ThisWorkbook
+  Microsoft Excel Objects 内にあるワークシートや ThisWorkbook に属する
+
+=== module ===
+
+ # supports name
+  name が有効
+ # one of modules
+  標準モジュール
+
+{{{
+'module
+'  name;HelloWorld
+'{{{
+Public Sub HelloWorld()
+    Selection.Value = "Hello World"
+End Sub
+'}}}
+}}}
+
+=== class ===
+
+ # supports name
+  name が有効
+ # one of classes
+  クラスモジュール
 
 
 
