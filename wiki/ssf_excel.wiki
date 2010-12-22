@@ -315,12 +315,14 @@ http://cowares.nobody.jp
 {{{
 'cells-name
 '    sparse; +
-'          ;R6C2   Author
-'          ;R3C2   Comment
+'          ;=Sheet1!R6C1:R6C2      Author
+'          ;=Sheet1!R3C2           Sheet1!Comment
 }}}
 
  # shows the name of cells
   セルの名前を示す
+ # mark the Names object belongs to a Excel Workbook object, not a Worksheet
+  エクセルではワークシートでなくブックが、名前オブジェクトを所有していることに注意
 
 
 = VBA Code / VBA コード =
