@@ -126,7 +126,7 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 {{{
 'workbook
 '      name:Book2
-'  codename:Book2
+'  codename:ThisWorkbook
 }}}
 
  # supports name, codename
