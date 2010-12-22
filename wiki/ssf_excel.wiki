@@ -123,10 +123,22 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 === workbook ===
 
+{{{
+'workbook
+'      name:Book2
+'  codename:Book2
+}}}
+
  # supports name, codename
   name, codename が有効
 
 === worksheet ===
+
+{{{
+'worksheet
+'      name:Sheet1
+'  codename:Sheet1
+}}}
 
  # supports name, codename
   name, codename が有効
