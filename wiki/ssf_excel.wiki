@@ -333,6 +333,19 @@ http://cowares.nobody.jp
  # belongs to one of Microsoft Excel Objects, such a worksheet or the !ThisWorkbook
   Microsoft Excel Objects 内にあるワークシートや !ThisWorkbook に属する
 
+{{{
+'code
+'    name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Cancel = IIf(MsgBox("Don't leave me!", vbExclamation Or vbYesNo, "ooooops!") = vbYes, True, False)
+End Sub
+
+'}}}
+}}}
+
 === module ===
 
  # supports name
@@ -356,6 +369,20 @@ End Sub
   name が有効
  # one of classes
   クラスモジュール
+
+{{{
+'class
+'    name;Class1
+'{{{
+Private Sub Class_Initialize()
+    Debug.Print "Class1 initialized"
+End Sub
+
+Private Sub Class_Terminate()
+    Debug.Print "Class1 terminated"
+End Sub
+'}}}
+}}}
 
 
 
