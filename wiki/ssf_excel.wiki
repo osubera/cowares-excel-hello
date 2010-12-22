@@ -300,10 +300,30 @@ http://cowares.nobody.jp
 'cells-numberformat
 '  sparse; +
 '        ;R9C2      m/d/yyyy h:mm
+'        ;R9C3      Generic
 }}}
 
  # shows the format strings of cells
   セルの書式設定を示す
+
+=== cells-numberformat-local ===
+
+ # supports address, delimiter and sparse
+  address, delimiter, sparse が有効
+ # shows different strings in localized versions
+  各国版では書式文字が違って見える場合もある
+
+====== ====== ======
+
+{{{
+'cells-numberformat-local
+'  sparse; +
+'        ;R9C2      yyyy/m/d h:mm
+'        ;R9C3      G/標準
+}}}
+
+ # shows the localized format strings of cells
+  セルの各国対応書式設定を示す
 
 === cells-name ===
 
