@@ -319,12 +319,19 @@ http://cowares.nobody.jp
 
 ==== name ====
 
+{{{
+'  name;HelloWorld
+}}}
+
+ # give the name of the code, which is displayed in a project pane on the Visual Basic Editor
+  Visual Basic ウィンドウのプロジェクトペインに表示されるコード名を示す
+
 === code ===
 
  # supports name
   name が有効
- # belongs to one of Microsoft Excel Objects, such a worksheet or the ThisWorkbook
-  Microsoft Excel Objects 内にあるワークシートや ThisWorkbook に属する
+ # belongs to one of Microsoft Excel Objects, such a worksheet or the !ThisWorkbook
+  Microsoft Excel Objects 内にあるワークシートや !ThisWorkbook に属する
 
 === module ===
 
