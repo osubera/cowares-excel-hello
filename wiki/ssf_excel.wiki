@@ -197,6 +197,11 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 === cells-formula ===
 
+ # supports address, delimiter and sparse
+  address, delimiter, sparse が有効
+
+====== ====== ======
+
 {{{
 'cells-formula
 ' address;R1C1:R3C2
@@ -209,9 +214,9 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 }}}
 
 ||  || *A* || *B* ||
-|| *1* || Oranges || 1600 ||
-|| *2* || Apples || 1400 ||
-|| *3* || Total || 3000 ||
+|| *1* || Oranges || 1,600 ||
+|| *2* || Apples || 1,400 ||
+|| *3* || Total || 3,000 ||
 
  # specify formulas of cell by anonymous data
   無名データでセル数式を書く
@@ -246,10 +251,64 @@ http://cowares.nobody.jp
 '        ;this project belongs to the public domain.
 }}}
 
-====== ====== ======
+=== cells-text ===
 
  # supports address, delimiter and sparse
   address, delimiter, sparse が有効
 
+====== ====== ======
 
+{{{
+'cells-text
+' address;R1C1:R3C2
+'        ;Oranges
+'        ;1,600
+'        ;Apples
+'        ;1,400
+'        ;Total
+'        ;3,000
+}}}
+
+||  || *A* || *B* ||
+|| *1* || Oranges || 1,600 ||
+|| *2* || Apples || 1,400 ||
+|| *3* || Total || 3,000 ||
+
+ # similar as the cell-formula except this shows appearances as a text
+  cell-formula とほぼ同じだが、こちらは外観をテキストで示す
+ # at the B3 cell, while we have a formula SUM, the shown is a calculated and formatted value
+  B3セルには SUM 数式があるが、計算結果を書式つきで出している
+
+=== cells-numberformat ===
+
+ # supports address, delimiter and sparse
+  address, delimiter, sparse が有効
+
+====== ====== ======
+
+{{{
+'cells-numberformat
+'  sparse; +
+'        ;R9C2      m/d/yyyy h:mm
+}}}
+
+ # shows the format strings of cells
+  セルの書式設定を示す
+
+=== cells-name ===
+
+ # supports address, delimiter and sparse
+  address, delimiter, sparse が有効
+
+====== ====== ======
+
+{{{
+'cells-name
+'    sparse; +
+'          ;R6C2   Author
+'          ;R3C2   Comment
+}}}
+
+ # shows the name of cells
+  セルの名前を示す
 
