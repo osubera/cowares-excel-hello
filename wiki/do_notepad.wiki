@@ -18,18 +18,18 @@
 == 説明 ==
  * メモ帳を新しく起動する
  * 起動したプロセスのウィンドウハンドルを保持する
- * Win32Api で起動したメモ帳を制御する
+ * !Win32Api で起動したメモ帳を制御する
  * VBA とメモ帳の間でテキストを交換する
 
 = How to use =
 
  # add 2 vba modules into your excel book.
- # paste the below Code on them, module DoNotepad and test.
+ # paste the below Code on them, module !DoNotepad and test.
  # see sample codes in the module test.
 
 == 使い方 ==
  # エクセルブックにVBAの標準モジュールを２つ挿入する。
- # そこに、下記の Code の DoNotepad と test をそれぞれ貼り付ける。
+ # そこに、下記の Code の !DoNotepad と test をそれぞれ貼り付ける。
  # 標準モジュール test のサンプルコードを確認する。
 
 = Code =
