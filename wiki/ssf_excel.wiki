@@ -340,7 +340,7 @@ http://cowares.nobody.jp
 Option Explicit
 
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
-    Cancel = IIf(MsgBox("Don't leave me!", vbExclamation Or vbYesNo, "ooooops!") = vbYes, True, False)
+    Cancel = IIf(MsgBox("Don't leave me!", vbExclamation Or vbYesNo, "ooooops!") = vbNo, True, False)
 End Sub
 
 '}}}
