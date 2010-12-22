@@ -300,7 +300,7 @@ http://cowares.nobody.jp
 'cells-numberformat
 '  sparse; +
 '        ;R9C2      m/d/yyyy h:mm
-'        ;R9C3      Generic
+'        ;R9C3      General
 }}}
 
  # shows the format strings of cells
