@@ -312,3 +312,11 @@ http://cowares.nobody.jp
  # shows the name of cells
   セルの名前を示す
 
+
+
+
+
+
+= candidates / 候補 =
+
+ * origin, offset
