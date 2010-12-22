@@ -460,7 +460,19 @@ End Sub
 '}}}
 }}}
 
+=== require ===
 
+{{{
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+}}}
+
+ # references required to add
+  追加すべき参照設定
+ # guid on the registry, major version, minor version and description
+  レジストリ上のguid, 主バージョン, 副バージョン, 説明文
+ # delimiters are 'space(x020)` 
+  '空白(x020)` で区切る
 
 
 = candidates / 候補 =
