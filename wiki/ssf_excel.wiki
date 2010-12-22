@@ -72,14 +72,24 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
  # 先頭が区切り記号のものを、無名データと呼ぶ
  # データ部分もさらにキーごとに固有の書式を持つ
 
-= ssf block sequence and hidden globals =
+= ssf block as an independent flow =
 
  # the sequence of ssf blocks is important on its meanings
  # there're no parents or children relationships between ssf blocks. they're just serialized
  # always exists a default target for implicit things
  # consider there're global variables to keep defaults, maybe some block change its value, then the change impacts all blocks after that
+    A ssf block never contains other ssf blocks, nor be included in another ssf block. 
+    This feature is very important to make things simple and clear. 
+    Though a Worksheet object contains Range objects in the Excel Spreadsheet object model, 
+    an ssf block of Cells is not included in an ssf block of Worksheet. 
+    Then what tells whose property those Cells are? 
+    Think ssf blocks are just flows. 
+    They are independent to each other, but depend an environment, such as global variables. 
+    There may be a global variable that has a "current worksheet name", 
+    an ssf block of Worksheet may change that value, 
+    and an ssf block of Cell may read that value to know a target sheet to act on. 
 
-== ssf ブロックの順序と省略値の解釈 ==
+== ssf ブロックは独立した流れ ==
 
  # ssf ブロックは逐次処理で解釈する。
  # 並び順は包含性ではなく、処理順を示している。
