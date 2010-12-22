@@ -133,7 +133,7 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 {{{
 ' delimiter; +
 '          ;orange       apple
-'          ;strawberry  lemon
+'          ;strawberry   lemon
 }}}
 
 || orange || apple ||
@@ -208,18 +208,17 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 '        ;=SUM(R[-2]C:R[-1]C)
 }}}
 
+||  || *A* || *B* ||
+|| *1* || Oranges || 1600 ||
+|| *2* || Apples || 1400 ||
+|| *3* || Total || 3000 ||
+
  # specify formulas of cell by anonymous data
   無名データでセル数式を書く
  # a line goes into a single cell
   １行が１セルに対応
  # horizontal scan from left to right, then go to next line
   行ごとに順に処理し、横方向に左から右へセルを進む
- # above is a 3x2 table as this
-  こんな感じの3行2列の表になる
-||  || *A* || *B* ||
-|| *1* || Oranges || 1600 ||
-|| *2* || Apples || 1400 ||
-|| *3* || Total || 3000 ||
 
 ====== ====== ======
 
@@ -235,15 +234,17 @@ http://cowares.nobody.jp
 '        ;this project belongs to the public domain.
 }}}
 
- # escaped lines are folded as below, before parsing
-  行エスケープは解釈の前に次のように折りたたまれる
-{{{
-';Foritudinous,F...(CrLf)...(CrLf)http...nobody.jp
-}}}
-
 ||  || *A* || *B* ||
 || *2* || license || Fortitudinous, Free, Fair<br>自律,自由,公正<br>http://cowares.nobody.jp ||
 || *3* || this project belongs to the public domain. ||  ||
+
+ # escaped lines are folded as below, before parsing
+  行エスケープは解釈の前に次のように折りたたまれる
+{{{
+'        ;license
+'        ;Foritudinous,F...(CrLf)...(CrLf)http...nobody.jp
+'        ;this project belongs to the public domain.
+}}}
 
 ====== ====== ======
 
