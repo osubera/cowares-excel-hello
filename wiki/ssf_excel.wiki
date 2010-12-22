@@ -305,13 +305,13 @@ http://cowares.nobody.jp
 
  # shows the format strings of cells
   セルの書式設定を示す
+ # shows different strings in localized versions
+  各国版では書式文字が違って見える場合もある
 
 === cells-numberformat-local ===
 
  # supports address, delimiter and sparse
   address, delimiter, sparse が有効
- # shows different strings in localized versions
-  各国版では書式文字が違って見える場合もある
 
 ====== ====== ======
 
