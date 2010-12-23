@@ -67,7 +67,7 @@
     * Microsoft Scripting Runtime
     * Microsoft Visual Basic for Applications Extensibility 5.3
  # change the filename at the topmost of the module code.
-    * GetFileName = "C:\tmp\ssf.txt"
+    * !GetFileName = "C:\tmp\ssf.txt"
     * the output file name is fixed above, never asked, so you may want to change that name as you wish.
  # open a target excel book and activate.
  # run the macro, "Writer" on the target book.
@@ -80,7 +80,7 @@
     * Microsoft Scripting Runtime
     * Microsoft Visual Basic for Applications Extensibility 5.3
  # モジュールコードの先頭近くにあるファイル名を変更する。
-    * GetFileName = "C:\tmp\ssf.txt"
+    * !GetFileName = "C:￥tmp￥ssf.txt"
     * 出力するファイルは上のものに固定されていて、実行中に変更できない。ここを使いやすいように変えておけばよい。
  # 変換対象のエクセルブックを開いて前面にしておく。
  # 貼り付けたマクロ "Writer" を実行する。
