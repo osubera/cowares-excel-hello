@@ -1,6 +1,6 @@
 #summary Definitions of Spreadsheet Stream Format (SSF)
 #labels Phase-Design
-#sidebar ssf
+#sidebar ssf_navigation
 
 <wiki:toc max_depth="3" />
 
