@@ -1,0 +1,229 @@
+'workbook
+'      name;ssf_writer_primitive.xls
+
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'  ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
+
+'worksheet
+'      name;Sheet1
+
+
+
+'module
+'  name;SsfWriterPrimitive
+'{{{
+Option Explicit
+
+Function GetFileName() As String
+    GetFileName = "C:\tmp\ssf.txt"
+End Function
+
+Sub Writer()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    
+    WriteTo Stream
+    
+    Stream.Close
+    Set Stream = Nothing
+    Set fs = Nothing
+End Sub
+
+Function WriteTo(Stream As Scripting.TextStream) As String
+    Stream.Write DumpWorkbook(ActiveWorkbook)
+End Function
+
+Function DumpWorkbook(Book As Workbook) As String
+    Dim Result As String
+    
+    Result = "'workbook" & vbCrLf
+    Result = Result & "'      name;" & Book.Name & vbCrLf
+    ' avoid to print the default codename
+    If "ThisWorkbook" <> Book.CodeName Then
+        Result = Result & "'  codename;" & Book.CodeName & vbCrLf
+    End If
+    Result = Result & vbCrLf
+    Result = Result & DumpProjectRequires(Book)
+    Result = Result & DumpCellsName(Book)
+    Result = Result & DumpWorksheets(Book)
+    Result = Result & DumpVbaCodes(Book)
+    
+    DumpWorkbook = Result
+End Function
+
+Function DumpWorksheets(Book As Workbook) As String
+    Dim Result As String
+    Dim Ws As Worksheet
+    
+    Result = ""
+    For Each Ws In Book.Worksheets
+        Result = Result & DumpWorksheet(Ws)
+    Next
+    
+    DumpWorksheets = Result
+End Function
+
+Function DumpWorksheet(Ws As Worksheet) As String
+    Dim Result As String
+    
+    Result = "'worksheet" & vbCrLf
+    Result = Result & "'      name;" & Ws.Name & vbCrLf
+    ' avoid to print the default codename
+    If Ws.Name <> Ws.CodeName Then
+        Result = Result & "'  codename;" & Ws.CodeName & vbCrLf
+    End If
+    Result = Result & vbCrLf
+    
+    ' go into cells when this sheet is not protected and has cell values
+    If Not Ws.ProtectContents Then
+        If (TypeName(Ws.UsedRange.Value) <> "Empty") Then
+            Result = Result & DumpCellsFormula(Ws.UsedRange) & DumpCellsNumberFormat(Ws.UsedRange)
+        End If
+    End If
+    
+    DumpWorksheet = Result
+End Function
+
+Function DumpCellsName(Book As Workbook) As String
+    Dim Result As String
+    Dim CellNames As Names
+    Dim CellName As Name
+    
+    DumpCellsName = ""
+    Set CellNames = Book.Names
+    If CellNames.Count = 0 Then Exit Function
+    
+    ' simple list, 2 lines for a single (address, name) pair
+    Result = "'cells-name" & vbCrLf
+    For Each CellName In CellNames
+        Result = Result & "'  ;" & CellName.RefersToR1C1 & vbCrLf
+        Result = Result & "'  ;" & CellName.Name & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsName = Result
+End Function
+
+Function DumpCellsFormula(Ra As Range) As String
+    Dim Result As String
+    Dim Ce As Range
+    
+    Result = "'cells-formula" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.FormulaR1C1 & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsFormula = Result
+End Function
+
+Function DumpCellsNumberFormat(Ra As Range) As String
+    ' this doesn't print any formats out of the UsedRange given
+    Dim Result As String
+    Dim Ce As Range
+    Dim AllFormats As Variant
+    
+    DumpCellsNumberFormat = ""
+    AllFormats = Ra.NumberFormat
+    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
+    If Not IsNull(AllFormats) Then
+        ' avoid this block when everything is "General"
+        If AllFormats = "General" Then Exit Function
+    End If
+    
+    Result = "'cells-numberformat" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.NumberFormat & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsNumberFormat = Result
+End Function
+
+Function DumpProjectRequires(Book As Workbook) As String
+    Dim Result As String
+    Dim Project As VBProject
+    Dim NumberOfReferences As Long
+    Dim i As Long
+    
+    Result = "'require" & vbCrLf
+    Set Project = Book.VBProject
+    NumberOfReferences = Project.References.Count
+    
+    For i = 1 To NumberOfReferences
+        ' avoid to print 4 standard references
+        ' VBA (builtin), Excel (builtin), stdole and Office
+        If Not Project.References(i).BuiltIn Then
+            If LCase(Project.References(i).Name) <> "stdole" _
+                    And LCase(Project.References(i).Name) <> "office" Then
+                ' machine needs Guid, Major and Minor.  human needs Description
+                Result = Result & "'  ;" & Project.References(i).GUID & " "
+                Result = Result & Project.References(i).Major & " "
+                Result = Result & Project.References(i).Minor & " "
+                Result = Result & Project.References(i).Description & vbCrLf
+            End If
+        End If
+    Next
+    
+    Result = Result & vbCrLf
+    
+    DumpProjectRequires = Result
+End Function
+
+Function DumpVbaCodes(Book As Workbook) As String
+    Dim Result As String
+    Dim Module As VBComponent
+    Dim ModuleType As String
+    Dim NumberOfLines As Long
+    Dim Source As String
+    
+    Result = ""
+    For Each Module In Book.VBProject.VBComponents
+        Select Case Module.Type
+        Case vbext_ct_StdModule
+            ModuleType = "module"   ' Module
+        Case vbext_ct_ClassModule
+            ModuleType = "class"    ' Class
+        Case vbext_ct_MSForm
+            ModuleType = "form"     ' not for Excel 2000
+        Case vbext_ct_ActiveXDesigner
+            ModuleType = "activex"
+        Case vbext_ct_Document
+            ModuleType = "code"     ' Excel Objects
+        Case Else
+            ModuleType = "unknown-type-" & Module.Type
+        End Select
+        NumberOfLines = Module.CodeModule.CountOfLines
+        If NumberOfLines > Module.CodeModule.CountOfDeclarationLines Then
+            ' avoid to print a blank code, that contains "Option Explicit" only
+            Result = Result & "'" & ModuleType & vbCrLf
+            Result = Result & "'  name;" & Module.Name & vbCrLf
+            Result = Result & "'{{{" & vbCrLf
+            
+            Source = Module.CodeModule.Lines(1, NumberOfLines)
+            ' need at least one linefeed on the end
+            If Right(Source, 2) <> vbCrLf Then
+                Source = Source & vbCrLf
+            End If
+            ' must disable escaping signs in the source itself
+            Source = Replace(Source, vbCrLf & "'{{{" & vbCrLf, vbCrLf & "'#{{{" & vbCrLf)
+            Source = Replace(Source, vbCrLf & "'}}}" & vbCrLf, vbCrLf & "'#}}}" & vbCrLf)
+            
+            Result = Result & Source
+            Result = Result & "'}}}" & vbCrLf
+        End If
+        Result = Result & vbCrLf
+    Next
+    
+    DumpVbaCodes = Result
+End Function
+ 
+'}}}
+
