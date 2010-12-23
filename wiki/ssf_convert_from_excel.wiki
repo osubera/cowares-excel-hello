@@ -1,0 +1,25 @@
+#summary convert Excel Book to SSF
+#labels Phase-Design
+#sidebar ssf_navigation
+
+<wiki:toc max_depth="2" />
+
+= ssf writer =
+
+intoroduce tools to convert an Excel book to an SSF text
+
+== SSF への保存 ==
+
+エクセルブックを SSF 形式のテキストに変換するツールを紹介する
+
+= ssf writer primitive =
+
+ * a simple tool, comes with only a single VBA standard module.
+ * minimized and essential functions, includes VBA macro, references, cell formulas, cell formats and cell names. put them into a text.
+ * [ssf_writer_primitive more>>]
+
+== SSF ライター 初号機 ==
+ * １つの VBA 標準モジュールだけで動作する単純なツール。
+ * VBA マクロ、参照設定、セル数式、セル書式、範囲名という、最低限必要なものをテキストに変換できる威力は大きい。
+ * [ssf_writer_primitive もっと詳しく>>]
+
