@@ -3,26 +3,26 @@
 
 = Introduction =
 
- * how to change the name "ThisWorkbook" in vba
+ * how to change the name "!ThisWorkbook" in vba
 
 == 概要 ==
- * VBAで "ThisWorkbook" という名前を変える
+ * VBAで "!ThisWorkbook" という名前を変える
 
 = Details =
 
- * small tips arround the ThisWorkbook.
+ * small tips arround the !ThisWorkbook.
  * anyway, Microsoft clearly says that changing the name is NOT recommended even by hands on VBIDE.
 
 == 説明 ==
- * ThisWorkbook 周辺のいろいろ
- * いずれにせよ、マイクロソフトはこれを ThisWorkbook 以外に変更するのはお奨めしないと明言している。たとえ開発ウィンドウで手で変更するとしてもだ。
+ * !ThisWorkbook 周辺のいろいろ
+ * いずれにせよ、マイクロソフトはこれを !ThisWorkbook 以外に変更するのはお奨めしないと明言している。たとえ開発ウィンドウで手で変更するとしてもだ。
 
 = Cases =
 
 === Case 1 ===
 
- * Change "ThisWorkbook" to "bok"
-    ThisWorkbook を bok に変える
+ * Change "!ThisWorkbook" to "bok"
+    !ThisWorkbook を bok に変える
 
 ==== NG ====
 
