@@ -45,7 +45,7 @@ ThisWorkbook
   control tool bar to appear or disappear on book events.
 }}}
  * define buttons
-  * SSF!_ButtonCaption is the beginning of the definition range.
+  * {{{SSF!_ButtonCaption}}} is the beginning of the definition range.
   * input button captions in the 1st column.
   * input description in the 2nd column.
   * use many rows continuously on your favor.
@@ -68,7 +68,7 @@ ThisWorkbook
   ブックの開閉にツールバーを連動させる
 }}}
  * ボタンの定義
-  * SSF!_ButtonCaption 範囲名が、定義セルの始まり。
+  * {{{SSF!_ButtonCaption}}} 範囲名が、定義セルの始まり。
   * １列目にボタンの表示文字を入れる。
   * ２列目に説明を入れる。
   * 好きなだけ続けて行を使う。
