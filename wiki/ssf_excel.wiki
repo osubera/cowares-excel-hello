@@ -174,41 +174,38 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
 {{{
 ' name:Sheet1
+' name:Sheet1/Sheet2
+' name:
 }}}
 
- # workbook name or sheet name on user side
-  ユーザーが認識している、ワークブック名とかシート名
-
-==== codename ====
-
-{{{
-' codename:Sheet1
-}}}
-
- # object name on vba
-  vba 上で認識されるブックやシートの名称
+ # switch a target object, book, sheet or module
+  ブック、シート、モジュールのような対象物を切り替える
+ # can specify the name of it
+  対象物の名前を指定できる
+ # when the target has 2 different names, use a `/(0x2f)` to separate them. the 2nd line of the example is showing a worksheet with its name is "Sheet1" and codename is "Sheet2"
+  対象物が２つの異なる名前を持つ時は、 `/(0x2f)` で区切る。２行目の例では、 "Sheet1" という name と "Sheet2" という codename を持つようなワークシートを示す。
+ # a new one is created if no names or not found,
+  名前が指定されないときや、指定した名前がないときは新規に作る
 
 === workbook ===
 
 {{{
 'workbook
 '      name:Book2
-'  codename:ThisWorkbook
 }}}
 
- # supports name, codename
-  name, codename が有効
+ # supports name
+  name が有効
 
 === worksheet ===
 
 {{{
 'worksheet
 '      name:Sheet1
-'  codename:Sheet1
 }}}
 
- # supports name, codename
-  name, codename が有効
+ # supports name
+  name が有効
 
 = Cells / セル =
 
