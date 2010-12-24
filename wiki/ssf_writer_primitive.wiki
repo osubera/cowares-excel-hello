@@ -46,14 +46,14 @@
  # uses the following ssf keys only.
     workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
  # uses the following names only.
-    name, codename, address
+    name, address
 
 == 制約 ==
  # このツールは SSF 書式の全機能が使えるわけではない。
  # 次の ssf キーしか使わない。
     workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
  # 次の名前しか使わない。
-    name, codename, address
+    name, address
 
 = Downloads =
 
@@ -90,15 +90,14 @@
 
 {{{
 'workbook
-'      name;ssf_writer_primitive.xls
+'  name;ssf_writer_primitive.xls
 
 'require
 '  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 '  ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
 
 'worksheet
-'      name;Sheet1
-
+'  name;Sheet1
 
 
 'module
@@ -131,15 +130,17 @@ Function DumpWorkbook(Book As Workbook) As String
     Dim Result As String
     
     Result = "'workbook" & vbCrLf
-    Result = Result & "'      name;" & Book.Name & vbCrLf
+    Result = Result & "'  name;" & Book.Name
     ' avoid to print the default codename
     If "ThisWorkbook" <> Book.CodeName Then
-        Result = Result & "'  codename;" & Book.CodeName & vbCrLf
+        Result = Result & "/" & Book.CodeName
     End If
-    Result = Result & vbCrLf
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of workbook block
     Result = Result & DumpProjectRequires(Book)
-    Result = Result & DumpCellsName(Book)
     Result = Result & DumpWorksheets(Book)
+    Result = Result & DumpCellsName(Book)
+    ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
     Result = Result & DumpVbaCodes(Book)
     
     DumpWorkbook = Result
@@ -161,12 +162,13 @@ Function DumpWorksheet(Ws As Worksheet) As String
     Dim Result As String
     
     Result = "'worksheet" & vbCrLf
-    Result = Result & "'      name;" & Ws.Name & vbCrLf
+    Result = Result & "'  name;" & Ws.Name
     ' avoid to print the default codename
     If Ws.Name <> Ws.CodeName Then
-        Result = Result & "'  codename;" & Ws.CodeName & vbCrLf
+        Result = Result & "/" & Ws.CodeName
     End If
-    Result = Result & vbCrLf
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of worksheet block
     
     ' go into cells when this sheet is not protected and has cell values
     If Not Ws.ProtectContents Then
@@ -244,10 +246,13 @@ Function DumpProjectRequires(Book As Workbook) As String
     Dim NumberOfReferences As Long
     Dim i As Long
     
-    Result = "'require" & vbCrLf
+    DumpProjectRequires = ""
     Set Project = Book.VBProject
     NumberOfReferences = Project.References.Count
+    If NumberOfReferences = 0 Then Exit Function
+    ' it doesn't work, because we have at least 4 references.
     
+    Result = "'require" & vbCrLf
     For i = 1 To NumberOfReferences
         ' avoid to print 4 standard references
         ' VBA (builtin), Excel (builtin), stdole and Office
@@ -271,51 +276,68 @@ End Function
 Function DumpVbaCodes(Book As Workbook) As String
     Dim Result As String
     Dim Module As VBComponent
+    Dim BookModule As VBComponent
+    
+    Result = ""
+    ' let ThisWorkbook go to the last
+    For Each Module In Book.VBProject.VBComponents
+        If Module.Name = "ThisWorkbook" Then
+            Set BookModule = Module
+        Else
+            Result = Result & DumpVbaCodeModule(Module.CodeModule)
+        End If
+    Next
+    If Not BookModule Is Nothing Then
+        Result = Result & DumpVbaCodeModule(BookModule.CodeModule)
+    End If
+    
+    DumpVbaCodes = Result
+End Function
+
+Function DumpVbaCodeModule(TheCode As CodeModule) As String
+    Dim Result As String
     Dim ModuleType As String
     Dim NumberOfLines As Long
     Dim Source As String
     
     Result = ""
-    For Each Module In Book.VBProject.VBComponents
-        Select Case Module.Type
-        Case vbext_ct_StdModule
-            ModuleType = "module"   ' Module
-        Case vbext_ct_ClassModule
-            ModuleType = "class"    ' Class
-        Case vbext_ct_MSForm
-            ModuleType = "form"     ' not for Excel 2000
-        Case vbext_ct_ActiveXDesigner
-            ModuleType = "activex"
-        Case vbext_ct_Document
-            ModuleType = "code"     ' Excel Objects
-        Case Else
-            ModuleType = "unknown-type-" & Module.Type
-        End Select
-        NumberOfLines = Module.CodeModule.CountOfLines
-        If NumberOfLines > Module.CodeModule.CountOfDeclarationLines Then
-            ' avoid to print a blank code, that contains "Option Explicit" only
-            Result = Result & "'" & ModuleType & vbCrLf
-            Result = Result & "'  name;" & Module.Name & vbCrLf
-            Result = Result & "'{{{" & vbCrLf
-            
-            Source = Module.CodeModule.Lines(1, NumberOfLines)
-            ' need at least one linefeed on the end
-            If Right(Source, 2) <> vbCrLf Then
-                Source = Source & vbCrLf
-            End If
-            ' must disable escaping signs in the source itself
-            Source = Replace(Source, vbCrLf & "'{{{" & vbCrLf, vbCrLf & "'#{{{" & vbCrLf)
-            Source = Replace(Source, vbCrLf & "'}}}" & vbCrLf, vbCrLf & "'#}}}" & vbCrLf)
-            
-            Result = Result & Source
-            Result = Result & "'}}}" & vbCrLf
+    Select Case TheCode.Parent.Type
+    Case vbext_ct_StdModule
+        ModuleType = "module"   ' Module
+    Case vbext_ct_ClassModule
+        ModuleType = "class"    ' Class
+    Case vbext_ct_MSForm
+        ModuleType = "form"     ' not for Excel 2000
+    Case vbext_ct_ActiveXDesigner
+        ModuleType = "activex"
+    Case vbext_ct_Document
+        ModuleType = "code"     ' Excel Objects
+    Case Else
+        ModuleType = "unknown-type-" & TheCode.Parent.Type
+    End Select
+    NumberOfLines = TheCode.CountOfLines
+    If NumberOfLines > TheCode.CountOfDeclarationLines Then
+        ' avoid to print a blank code, that contains "Option Explicit" only
+        Result = Result & "'" & ModuleType & vbCrLf
+        Result = Result & "'  name;" & TheCode.Parent.Name & vbCrLf
+        Result = Result & "'{{{" & vbCrLf
+        
+        Source = TheCode.Lines(1, NumberOfLines)
+        ' need at least one linefeed on the end
+        If Right(Source, 2) <> vbCrLf Then
+            Source = Source & vbCrLf
         End If
-        Result = Result & vbCrLf
-    Next
+        ' must disable escaping signs in the source itself
+        Source = Replace(Source, vbCrLf & "'{{{" & vbCrLf, vbCrLf & "'#{{{" & vbCrLf)
+        Source = Replace(Source, vbCrLf & "'}}}" & vbCrLf, vbCrLf & "'#}}}" & vbCrLf)
+        
+        Result = Result & Source
+        Result = Result & "'}}}" & vbCrLf
+    End If
+    Result = Result & vbCrLf
     
-    DumpVbaCodes = Result
+    DumpVbaCodeModule = Result
 End Function
- 
 '}}}
 
 }}}
