@@ -1,13 +1,12 @@
 'workbook
-'      name;ssf_reader_primitive.xls
+'  name;ssf_reader_primitive.xls
 
 'require
 '  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 '  ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
 
 'worksheet
-'      name;Sheet1
-
+'  name;Sheet1
 
 
 'module
@@ -160,8 +159,10 @@ Function InitializeEnv() As Object
     Set Env = New Scripting.Dictionary
     Set Env("workbook") = ActiveWorkbook
     Set Env("worksheet") = ActiveSheet
+    Set Env("module") = Nothing
     Env("chicken") = "NobodyCallsMeChicken_jk"  ' its an unexpected name
     Env("copyof") = "COPY_ooop_"
+    Env("copythisworkbook") = False             ' true is safer
     Set InitializeEnv = Env
 End Function
 
@@ -174,30 +175,161 @@ End Function
 Function DivideSsfLine(Line As Variant, ByRef TheName As String, ByRef TheValue As String) As String
     ' return results as TheName, TheValue and the function return value
     Dim x As Variant
-    x = Split(Line, ";", 2)
+    x = DivideLine(Line, ";", 2)
     TheName = x(0)
-    If UBound(x) = 1 Then
-        TheValue = x(1)
-    Else
-        TheValue = ""
-    End If
+    TheValue = x(1)
     DivideSsfLine = TheName
 End Function
 
-Function NameTheSheetChicken(Book As Workbook) As String
-    ' an initial book must have only one worksheet named by "chicken" env.
-    Dim Kept As Boolean
-    Kept = Application.DisplayAlerts
-    Application.DisplayAlerts = False
-    Do While Book.Sheets.Count > 1
-        Book.Sheets(1).Delete
-    Loop
-    Application.DisplayAlerts = Kept
+Function DivideName(Line As Variant, ByRef Name As String, ByRef CodeName As String) As String
+    Dim x As Variant
+    x = DivideLine(Line, "/", 2)
+    Name = x(0)
+    CodeName = IIf(x(1) = "", x(0), x(1))
+    ' we may have to set another rule on workbook
+    DivideName = CodeName
+End Function
+
+Function DivideLine(Line As Variant, Delimiter As String, Number As Long) As Variant
+    Dim x As Variant
+    Dim y() As Variant
+    Dim i As Long
     
-    Set Env("worksheet") = Book.Worksheets(1)
-    Env("worksheet").Name = Env("chicken")
-    Book.VBProject.VBComponents(Env("worksheet").CodeName).Name = Env("chicken")
-    NameTheSheetChicken = Env("chicken")
+    x = Split(Line, Delimiter, Number)
+    If UBound(x) = Number - 1 Then
+        DivideLine = x
+    Else
+        ReDim y(0 To Number - 1)
+        For i = 0 To UBound(x)
+            y(i) = x(i)
+        Next
+        DivideLine = y
+    End If
+End Function
+
+Function SwitchBook(Names As String) As Workbook
+    ' currently, we just open a new book
+    ' not name it, nor search an existing book
+    Dim Book As Workbook
+    Set Book = Application.Workbooks.Add
+    Set Env("workbook") = Book
+    Set SwitchBook = Book
+End Function
+
+Function SwitchWorksheet(Names As String) As Worksheet
+    ' 1. add a new sheet unless names are given
+    ' 2. search existing sheet for the given codename
+    ' 3. modify the name if the sheet found has another name
+    ' 4. add a new sheet if above 2 or 3 fail
+    
+    Dim Name As String
+    Dim CodeName As String
+    Dim Book As Workbook
+    Dim Ws As Worksheet
+    Dim Comp As VBComponent
+    Dim FrontName As String
+    
+    Set Book = Env("workbook")
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If DivideName(Names, Name, CodeName) = "" Then GoTo AddNew
+    
+    ' rule#2 search
+    Set Comp = Book.VBProject.VBComponents(CodeName)
+    FrontName = Comp.Properties("Name")
+    Set Ws = Book.Worksheets(FrontName)
+    
+    ' rule#3 rename
+    If Name <> FrontName Then Ws.Name = Name
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Ws = Nothing
+    Set Ws = Book.Worksheets.Add
+    If Ws.Name <> Name Then
+        Ws.Name = Name
+    End If
+    If Ws.CodeName <> CodeName Then
+        Book.VBProject.VBComponents(Ws.CodeName).Name = CodeName
+    End If
+    If Ws Is Nothing Then
+        Debug.Print CodeName & "*" & Name & "*" & Err.Number & Err.Description
+        Set SwitchWorksheet = Env("worksheet")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("worksheet") = Ws
+    Set SwitchWorksheet = Ws
+End Function
+
+Function SwitchModule(Name As String, ComponentType As vbext_ComponentType) As VBComponent
+    ' 1. add a new component unless names are given
+    ' 2. may copy ThisWorkbook by the condition of Env("copythisworkbook")
+    ' 3. search existing component for the given name
+    ' 4. add a new component if above 3 fails
+    ' 5. add only type of module
+    
+    Dim Project As VBProject
+    Dim Comp As VBComponent
+    Dim NewName As String
+    
+    NewName = ""
+    Set Project = Env("workbook").VBProject
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If Name = "" Then GoTo AddNew
+    
+    ' rule#5 add modules instead of documents
+    If ComponentType = vbext_ct_StdModule Or ComponentType = vbext_ct_ClassModule Then
+        NewName = Name
+    Else
+        NewName = Env("copyof") & Name
+    End If
+    
+    ' rule#2 ThisWorkbook
+    If Name = "ThisWorkbook" And Env("copythisworkbook") Then GoTo AddNew
+    
+    ' rule#3 search
+    Set Comp = Project.VBComponents(Name)
+    If Comp.Type <> ComponentType Then
+        NewName = ""
+        GoTo AddNew
+    End If
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Comp = Project.VBComponents.Add(vbext_ct_StdModule)
+    If NewName <> "" Then Comp.Name = NewName
+    If Comp Is Nothing Then
+        Debug.Print Name & "*" & Err.Number & Err.Description
+        Set SwitchModule = Env("module")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("module") = Comp
+    Set SwitchModule = Comp
 End Function
 
 Function ParseSsfWorkbook(Block As Collection) As String
@@ -207,28 +339,12 @@ Function ParseSsfWorkbook(Block As Collection) As String
     Dim TheValue As String
     
     Result = ""
-    
-    Set Env("workbook") = Application.Workbooks.Add
-    Result = Result & "new workbook" & vbCrLf
-    ' we have to work arround initial worksheets, because its name Sheet1 is too popular
-    ' and we cannot remove all of default sheets by Excel's design
-    Result = Result & "contains a default sheet " & NameTheSheetChicken(Env("workbook")) & vbCrLf
-    
-    On Error Resume Next
-    ' this section do nothing at this time
     For Each Line In Block
         Select Case DivideSsfLine(Line, TheName, TheValue)
         Case "name"
-            'Env("workbook").Name = TheValue
-            ' this won't work, because we have to save it as a file
-        Case "codename"
-            'Env("workbook").VBProject.VBComponents("ThisWorkbook").Name = TheValue
-            ' this is not working, it will destroy the book.
+            SwitchBook TheValue
+            Result = Result & "new workbook " & Env("workbook").Name & vbCrLf
         End Select
-        If Err.Number > 0 Then
-            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
-            Err.Clear
-        End If
     Next
     
     ParseSsfWorkbook = Result
@@ -241,21 +357,12 @@ Function ParseSsfWorksheet(Block As Collection) As String
     Dim TheValue As String
     
     Result = ""
-    Set Env("worksheet") = Env("workbook").Worksheets.Add
-    Result = Result & "new worksheet" & vbCrLf
-    On Error Resume Next
     For Each Line In Block
         Select Case DivideSsfLine(Line, TheName, TheValue)
         Case "name"
-            Env("worksheet").Name = TheValue
-            Env("worksheet").Parent.VBProject.VBComponents(Env("worksheet").CodeName).Name = TheValue
-        Case "codename"
-            Env("worksheet").Parent.VBProject.VBComponents(Env("worksheet").CodeName).Name = TheValue
+            SwitchWorksheet TheValue
+            Result = Result & "new worksheet " & Env("worksheet").Name & vbCrLf
         End Select
-        If Err.Number > 0 Then
-            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
-            Err.Clear
-        End If
     Next
     
     ParseSsfWorksheet = Result
@@ -266,35 +373,17 @@ Function ParseSsfModule(Block As Collection, Optional ComponentType As vbext_Com
     Dim Line As Variant
     Dim TheName As String
     Dim TheValue As String
-    Dim Project As VBProject
-    Dim Component As VBComponent
     Dim Source As String
     
     Result = ""
     Source = ""
-    Set Project = Env("workbook").VBProject
-    If ComponentType <> vbext_ct_Document Then
-        Set Component = Project.VBComponents.Add(ComponentType)
-        Result = Result & "new code-module" & vbCrLf
-    End If
     
     On Error Resume Next
     For Each Line In Block
         Select Case DivideSsfLine(Line, TheName, TheValue)
         Case "name"
-            If ComponentType = vbext_ct_Document Then
-                ' it's danger to modify the ThisWorkbook on the fly, we make a copy of some
-                If TheValue = "ThisWorkbook" Then
-                    Set Component = Project.VBComponents.Add(vbext_ct_StdModule)
-                    Component.Name = Env("copyof") & TheValue
-                    Result = Result & Component.Name & vbCrLf
-                Else
-                    Set Component = Project.VBComponents(TheValue)
-                End If
-                Result = Result & "document-code" & vbCrLf
-            Else
-                Component.Name = TheValue
-            End If
+            SwitchModule TheValue, ComponentType
+            Result = Result & "new module " & Env("module").Name & vbCrLf
         Case ""
             Source = Source & TheValue
         End Select
@@ -304,8 +393,8 @@ Function ParseSsfModule(Block As Collection, Optional ComponentType As vbext_Com
         End If
     Next
     
-    If Source <> "" Then
-        With Component.CodeModule
+    If Source <> "" And Not Env("module") Is Nothing Then
+        With Env("module").CodeModule
             .DeleteLines 1, .CountOfLines
             .InsertLines 1, Source
         End With
@@ -330,7 +419,7 @@ Function ParseSsfRequire(Block As Collection) As String
     For Each Line In Block
         Select Case DivideSsfLine(Line, TheName, TheValue)
         Case ""
-            GuidMajorMinorDescription = Split(TheValue, " ", 4)
+            GuidMajorMinorDescription = DivideLine(TheValue, " ", 4)
             Result = Result & GuidMajorMinorDescription(3) & vbCrLf
             Project.References.AddFromGuid GuidMajorMinorDescription(0), GuidMajorMinorDescription(1), GuidMajorMinorDescription(2)
         End Select
@@ -446,4 +535,5 @@ Function ParseSsfCellsNameV(Block As Collection) As String
     ParseSsfCellsNameV = Result
 End Function
 '}}}
+
 
