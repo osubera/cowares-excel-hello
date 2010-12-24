@@ -1,0 +1,235 @@
+'workbook
+'  name;tool_bar_buttons.xls
+
+'require
+
+'worksheet
+'  name;SSF
+
+'cells-formula
+'  address;A1:B17
+'         ;名称
+'         ;tool_bar_buttons
+'         ;コメント
+'         ;マクロ用の簡易ツールバーを生成する。(ボタンのみ)
+'         ;comment
+'         ;easy toolbar generator (buttons)
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;初版
+'         ;2002
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/tool_bar_buttons
+'         ;更新
+'         ;40536.7916666667
+'         ;keyword
+'         ;toolbar,vba,excel
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;
+'         ;
+'         ;機能１
+'         ;機能１の説明
+'         ;機能２
+'         ;機能２の説明
+'         ;=R1C2 & " について"
+'         ;このシートを表示する。
+
+'cells-numberformat
+'  address;A1:B17
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'cells-name
+'  ;=SSF!R15C1
+'  ;SSF!_ButtonCaption
+'  ;=SSF!R3C2
+'  ;SSF!_Comment
+'  ;=SSF!R6C2
+'  ;SSF!_Contributor
+'  ;=SSF!R4C2
+'  ;SSF!_Copyright
+'  ;=SSF!R5C2
+'  ;SSF!_License
+'  ;=SSF!R2C2
+'  ;SSF!_LocalComment
+'  ;=SSF!R1C2
+'  ;SSF!_PublicName
+'  ;=SSF!R7C2
+'  ;SSF!_Since
+'  ;=SSF!R10C2
+'  ;SSF!_Tag
+'  ;=SSF!R9C2
+'  ;SSF!_Timestamp
+'  ;=SSF!R8C2
+'  ;SSF!_Url
+
+'code
+'  name;SSF
+'{{{
+Option Explicit
+ 
+' シートの定義情報から、マクロ用の簡易ツールバーを生成する。
+ 
+Private oApplication As Application
+Private oThisWorkbook As Workbook
+ 
+Private ButtonCaption As Variant
+Private MyBar As Office.CommandBar
+ 
+Friend Property Let BarButtons(ButtonArray As Variant)
+    ButtonCaption = ButtonArray
+End Property
+ 
+Friend Property Get BarButtons() As Variant
+    BarButtons = ButtonCaption
+End Property
+ 
+' ツールバーから直接呼ばれるメイン関数。
+Friend Sub BarMain()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' ユーザー定義のメインプロシジャにボタンを引き渡す。
+    Main oAC
+    Set oAC = Nothing
+End Sub
+ 
+' ボタンだけの簡易ツールバーを生成する。
+' シートに定義されたボタン名称の数だけボタンを追加する。
+Friend Function BarInitialize() As CommandBar
+    Dim BAUDISTRIB As String
+    Dim ButtonA As CommandBarButton
+    Dim strBarName As String
+    Dim strButtonName As String
+    Dim i As Long, j As Long
+    Dim strC() As String
+    Dim Ra As Range
+    
+    On Error Resume Next
+    
+    Set oApplication = Application
+    Set oThisWorkbook = ThisWorkbook
+    ' 名前の衝突回避用に Url 情報を使う。
+    BAUDISTRIB = " - " & Me.Parent.Range("_Url").Value
+    BAUDISTRIB = " - " & Me.Range("_Url").Value
+    ' シート上のボタン定義
+    Set Ra = Me.Parent.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    Set Ra = Me.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    j = Ra.Cells.Count
+    ReDim strC(0 To j - 1)
+    For i = 0 To j - 1
+        strC(i) = Ra.Range("A1").Offset(i, 0).Text
+    Next
+    ButtonCaption = strC
+    Set Ra = Nothing
+    strBarName = oThisWorkbook.Name & BAUDISTRIB
+    Set MyBar = oApplication.CommandBars.Add(Name:=strBarName, Temporary:=True)
+    For i = LBound(ButtonCaption) To UBound(ButtonCaption)
+        strButtonName = CStr(ButtonCaption(i))
+        Set ButtonA = MyBar.Controls.Add(Type:=1, Temporary:=True)
+        With ButtonA
+            .Style = msoButtonCaption
+            .OnAction = Me.CodeName & ".BarMain"
+            .Caption = strButtonName
+            .Tag = strButtonName
+            .BeginGroup = True
+        End With
+        Set ButtonA = Nothing
+    Next
+    MyBar.Visible = True
+    MyBar.Position = msoBarTop
+    Set BarInitialize = MyBar
+End Function
+ 
+' ツールバーを除去する。
+Friend Sub BarTerminate()
+    On Error Resume Next
+    MyBar.Delete
+    Set oApplication = Nothing
+    Set oThisWorkbook = Nothing
+End Sub
+ 
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+ 
+' ツールバーから呼ばれるメインプロシジャ
+Public Sub Main(oAC As Object)
+    ' ボタンの表示名称で識別する
+    Select Case oAC.Tag
+    Case "機能１"
+        MsgBox oAC.Index
+    Case "機能２"
+        MsgBox oAC.Index
+    Case Else
+        About
+    End Select
+End Sub
+ 
+' 設定シートの表示をAbout Box の代わりにする
+Private Sub About()
+    SSF.Activate
+End Sub
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+' ツールバー初期化と終了
+ 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    SSF.BarTerminate
+End Sub
+ 
+Private Sub Workbook_Open()
+    SSF.BarInitialize
+    ThisWorkbook.Saved = True
+End Sub
+'}}}
+
