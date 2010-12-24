@@ -21,7 +21,7 @@
 
 === Case 1 ===
 
- * Change "!ThisWorkbook" to "bok"
+ * change "!ThisWorkbook" to "bok"
     !ThisWorkbook を bok に変える
 
 ==== NG ====
@@ -58,4 +58,22 @@ ThisWorkbook.VBProject.VBComponents("ThisWorkbook").Properties("_CodeName") = "b
     後者は推奨できない理由で定義されてるように思えて、試してみた。
  # at least, the "{{{_}}}!CodeName" changes both the project and properties pane.
     とりあえずこれなら、プロジェクトとプロパティの両方を変更してくれる。
+
+=== Case 2 ===
+
+ * modify VBA source codes in the !ThisWorkbook by VBA
+    !ThisWorkbook の VBA コードを、 VBA で書き換える
+ * sometime it success, many time it fail, I don't know why yet.
+    成功するときもあるが、失敗することが多い。理由は不明
+ * this causes a no return fall of Excel itself.
+    失敗するとエクセルごと落ちる
+ * it may be,,, i think,
+    # source code change of the !ThisWorkbook let Excel to recompile the project.
+    # after that, any changes of source raise an unrecoverable Excel error.
+    # thus changing the code at the last of the VBA task may bring a lucky result.
+ * たぶん、こういうことか、、、
+    # !ThisWorkbook のコードを書き換えると、エクセルが再コンパイルを開始する。
+    # この後に何か他のソースを変更すると、エクセルが回復不能なエラーを起こす。
+    # よって、こいつを書き換えるのを一連の作業の最後にすると、いい結果を生むのかも。
+
 
