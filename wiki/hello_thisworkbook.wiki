@@ -50,7 +50,7 @@ ThisWorkbook.VBProject.VBComponents("ThisWorkbook").Properties("_CodeName") = "b
 
 ==== why? ====
 
- # there're 2 properties for the !CodeName, "!CodeName" and "_!CodeName".
+ # there're 2 properties for the !CodeName, "!CodeName" and "__!CodeName".
     !CodeName 関連では "!CodeName" と "_!CodeName" と、２つのプロパティがある。
  # the former is safe, readonly.
     前者は読み出し専用で安全なもの。
