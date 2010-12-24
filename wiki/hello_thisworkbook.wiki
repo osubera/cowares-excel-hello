@@ -1,0 +1,61 @@
+#summary how to change the name "ThisWorkbook" in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to change the name "ThisWorkbook" in vba
+
+== 概要 ==
+ * VBAで "ThisWorkbook" という名前を変える
+
+= Details =
+
+ * small tips arround the ThisWorkbook.
+ * anyway, Microsoft clearly says that changing the name is NOT recommended even by hands on VBIDE.
+
+== 説明 ==
+ * ThisWorkbook 周辺のいろいろ
+ * いずれにせよ、マイクロソフトはこれを ThisWorkbook 以外に変更するのはお奨めしないと明言している。たとえ開発ウィンドウで手で変更するとしてもだ。
+
+= Cases =
+
+=== Case 1 ===
+
+ * Change "ThisWorkbook" to "bok"
+    ThisWorkbook を bok に変える
+
+==== NG ====
+
+{{{
+ThisWorkbook.VBProject.VBComponents("ThisWorkbook").Name = "bok"
+}}}
+
+ * above codes destroy the book.
+    上記の方法は、ブックを破壊する。
+ * after you save it, you can never open it.
+    保存したら最後、二度と開けない。
+ * the above changes only the project pane, no changes at the properties pane.
+    この方法はプロジェクトペインの表示だけ変更して、プロパティまでは変更していない。
+
+==== OK ====
+
+{{{
+ThisWorkbook.VBProject.VBComponents("ThisWorkbook").Properties("_CodeName") = "bok"
+}}}
+
+ * the above is working, and the book is not broken yet.
+    上記の方法は機能するし、今のところブックも壊れていない
+ * anyway i don't want to do it.
+    でも自分で使おうとは思わない。
+
+==== why? ====
+
+ # there're 2 properties for the CodeName, "CodeName" and "_CodeName".
+    CodeName 関連では "CodeName" と "_CodeName" と、２つのプロパティがある。
+ # the former is safe, readonly.
+    前者は読み出し専用で安全なもの。
+ # the latter seems to be defined to do something not recommended, so I did.
+    後者は推奨できない理由で定義されてるように思えて、試してみた。
+ # at least, the "_CodeName" changes both the project and properties pane.
+    とりあえずこれなら、プロジェクトとプロパティの両方を変更してくれる。
+
