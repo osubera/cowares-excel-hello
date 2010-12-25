@@ -33,9 +33,9 @@
 
 = Interface / 操作 =
 
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMs/s1600/shot0.png
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600/shot0.png
 
- # * copy ssf * copy activebook as ssf to clipboard
+ # * copy ssf * | copy activebook as ssf to clipboard
  # * paste ssf * paste to excel from clipboard ssf text
  # * to notepad * open a windows notepad contains an ssf converted from activebook
  # * from notepad * convert to excel from current notepad ssf text
@@ -51,7 +51,7 @@ http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMs/s1600/
 
 = Snapshots =
 
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMs/s1600/shot0.png
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600/shot0.png
 
 = Code =
 
