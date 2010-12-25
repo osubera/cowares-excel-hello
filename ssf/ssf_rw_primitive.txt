@@ -691,20 +691,22 @@ Function SwitchModule(Name As String, ComponentType As vbext_ComponentType) As V
     Dim Project As VBProject
     Dim Comp As VBComponent
     Dim NewName As String
+    Dim NewType As vbext_ComponentType
+    Dim StdOrClass As Boolean
     
-    NewName = ""
     Set Project = Env("workbook").VBProject
     On Error GoTo AddNew
+    
+    ' we only add classes and stdmodules
+    StdOrClass = (ComponentType = vbext_ct_StdModule Or ComponentType = vbext_ct_ClassModule)
+    NewType = IIf(StdOrClass, ComponentType, vbext_ct_StdModule)
+    NewName = ""
     
     ' rule#1 no names
     If Name = "" Then GoTo AddNew
     
     ' rule#5 add modules instead of documents
-    If ComponentType = vbext_ct_StdModule Or ComponentType = vbext_ct_ClassModule Then
-        NewName = Name
-    Else
-        NewName = Env("copyof") & Name
-    End If
+    NewName = IIf(StdOrClass, Name, Env("copyof") & Name)
     
     ' rule#2 ThisWorkbook
     If Name = "ThisWorkbook" And Env("copythisworkbook") Then GoTo AddNew
@@ -727,7 +729,7 @@ AddNew:
 AddNew2:
     On Error Resume Next
     
-    Set Comp = Project.VBComponents.Add(vbext_ct_StdModule)
+    Set Comp = Project.VBComponents.Add(NewType)
     If NewName <> "" Then Comp.Name = NewName
     If Comp Is Nothing Then
         Debug.Print Name & "*" & Err.Number & Err.Description
