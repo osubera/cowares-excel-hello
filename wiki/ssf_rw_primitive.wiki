@@ -33,7 +33,7 @@
 
 = Interface / 操作 =
 
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600/shot0.png
+http://4.bp.blogspot.com/_EUW0nrj9XlM/TRXbPYr-cfI/AAAAAAAAAAg/udfOZmYLlMI/s1600/shot1.png
 
  # * copy ssf * | copy activebook as ssf to clipboard
  # * paste ssf * | paste to excel from clipboard ssf text
@@ -51,7 +51,7 @@ http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600
 
 = Snapshots =
 
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600/shot0.png
+http://4.bp.blogspot.com/_EUW0nrj9XlM/TRXdqd49edI/AAAAAAAAAAk/xZ4vtHtysJw/s1600/shot1.png
 
 = Code =
 
