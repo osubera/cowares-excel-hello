@@ -36,18 +36,18 @@
 http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMss/s1600/shot0.png
 
  # * copy ssf * | copy activebook as ssf to clipboard
- # * paste ssf * paste to excel from clipboard ssf text
- # * to notepad * open a windows notepad contains an ssf converted from activebook
- # * from notepad * convert to excel from current notepad ssf text
- # * 0 * show the current notepad
- # * about ssf_rw_primitive * show an information
+ # * paste ssf * | paste to excel from clipboard ssf text
+ # * to notepad * | open a windows notepad contains an ssf converted from activebook
+ # * from notepad * | convert to excel from current notepad ssf text
+ # * 0 * | show the current notepad
+ # * about ssf_rw_primitive * | show an information
 
- # * コピーSSF * アクティブブックを変換し、クリップボードにSSFを書き出す。
- # * ペーストSSF * クリップボードのSSFを取り込み、エクセルブックにする。
- # * メモ帳へ * アクティブブックを変換し、メモ帳にSSFを書き出す。
- # * メモ帳から * メモ帳のSSFを取り込み、エクセルブックにする。
- # * 0 * 連携中のメモ帳を表示する。
- # * ssf_rw_primitive について * 情報シートを表示する。
+ # * コピーSSF * | アクティブブックを変換し、クリップボードにSSFを書き出す。
+ # * ペーストSSF * | クリップボードのSSFを取り込み、エクセルブックにする。
+ # * メモ帳へ * | アクティブブックを変換し、メモ帳にSSFを書き出す。
+ # * メモ帳から * | メモ帳のSSFを取り込み、エクセルブックにする。
+ # * 0 * | 連携中のメモ帳を表示する。
+ # * ssf_rw_primitive について * | 情報シートを表示する。
 
 = Snapshots =
 
