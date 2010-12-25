@@ -23,3 +23,14 @@ SSF 形式のテキストをエクセルブックに変換するツールを紹�
  * VBA マクロ、参照設定、セル数式、セル書式、範囲名という、最低限必要なものをテキストから変換できる威力は大きい。
  * [ssf_reader_primitive もっと詳しく>>]
 
+= ssf rw primitive =
+
+ * mixed [ssf_reader_primitive] and [ssf_writer_primitive] into a single book.
+ * has tool bar as a user interface.
+ * [ssf_rw_primitive more>>]
+
+== SSF読み書き 壱号機 ==
+ * [ssf_reader_primitive] と [ssf_writer_primitive] を１つのブックにまとめた。
+ * ツールバーで操作する。
+ * [ssf_rw_primitive もっと詳しく>>]
+

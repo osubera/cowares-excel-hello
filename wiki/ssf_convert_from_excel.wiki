@@ -23,3 +23,13 @@ intoroduce tools to convert an Excel book to an SSF text
  * VBA マクロ、参照設定、セル数式、セル書式、範囲名という、最低限必要なものをテキストに変換できる威力は大きい。
  * [ssf_writer_primitive もっと詳しく>>]
 
+= ssf rw primitive =
+
+ * mixed [ssf_reader_primitive] and [ssf_writer_primitive] into a single book.
+ * has tool bar as a user interface.
+ * [ssf_rw_primitive more>>]
+
+== SSF読み書き 壱号機 ==
+ * [ssf_reader_primitive] と [ssf_writer_primitive] を１つのブックにまとめた。
+ * ツールバーで操作する。
+ * [ssf_rw_primitive もっと詳しく>>]

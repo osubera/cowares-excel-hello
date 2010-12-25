@@ -1,0 +1,1513 @@
+#summary a primitive tool to convert between an SSF text and an Excel Book
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+#sidebar ssf_navigation
+
+= Introduction =
+
+ * a primitive tool to convert between an SSF text and an Excel Book
+
+== 概要 ==
+ * SSF テキストとエクセルブックの間を変換する、原始的なツール
+
+= Details =
+
+ * mixed [ssf_reader_primitive] and [ssf_writer_primitive] into a single book.
+ * has tool bar as a user interface.
+ * it has still same functions to read/write file directly without using new rich interfaces.
+
+== 説明 ==
+ * [ssf_reader_primitive] と [ssf_writer_primitive] を１つのブックにまとめた。
+ * ツールバーで操作する。
+ * 新しく使いやすい操作以外に、以前のとおりファイルに直接読み書きする機能も残している。
+
+= How to use =
+
+ # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
+ # save that book, and close.
+ # open the book, and see a toolbar appears.
+
+== 使い方 ==
+ # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+ # 保存して閉じる。
+ # そのブックを開き、ツールバーが現れるのを確認する。
+
+= Interface / 操作 =
+
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMs/s1600/shot0.png
+
+ # * copy ssf * copy activebook as ssf to clipboard
+ # * paste ssf * paste to excel from clipboard ssf text
+ # * to notepad * open a windows notepad contains an ssf converted from activebook
+ # * from notepad * convert to excel from current notepad ssf text
+ # * 0 * show the current notepad
+ # * about ssf_rw_primitive * show an information
+
+ # * コピーSSF * アクティブブックを変換し、クリップボードにSSFを書き出す。
+ # * ペーストSSF * クリップボードのSSFを取り込み、エクセルブックにする。
+ # * メモ帳へ * アクティブブックを変換し、メモ帳にSSFを書き出す。
+ # * メモ帳から * メモ帳のSSFを取り込み、エクセルブックにする。
+ # * 0 * 連携中のメモ帳を表示する。
+ # * ssf_rw_primitive について * 情報シートを表示する。
+
+= Snapshots =
+
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TRSHyQmLlGI/AAAAAAAAAAc/D7_Hs-tAoMs/s1600/shot0.png
+
+= Code =
+
+{{{
+'workbook
+'  name;ssf_rw_primitive.xls
+
+'require
+'  ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'  ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
+
+'worksheet
+'  name;SSF
+
+'cells-formula
+'  address;A1:B20
+'         ;名称
+'         ;ssf_rw_primitive
+'         ;コメント
+'         ;SSFの読み書きを行う (primitive)
+'         ;comment
+'         ;read /write SSF (primitive)
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;初版
+'         ;2010
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/ssf_rw_primitive
+'         ;更新
+'         ;40536.9243055556
+'         ;keyword
+'         ;ssf,vba,excel
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;
+'         ;
+'         ;コピーSSF
+'         ;クリップボードにSSFを書き出す。
+'         ;ペーストSSF
+'         ;クリップボードのSSFを取り込む。
+'         ;メモ帳へ
+'         ;メモ帳にSSFを書き出す。
+'         ;メモ帳から
+'         ;メモ帳のSSFを取り込む。
+'         ;0
+'         ;連携中のメモ帳。
+'         ;=R1C2 & " について"
+'         ;このシートを表示する。
+
+'cells-numberformat
+'  address;A1:B20
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'cells-name
+'  ;=SSF!R15C1
+'  ;SSF!_ButtonCaption
+'  ;=SSF!R3C2
+'  ;SSF!_Comment
+'  ;=SSF!R6C2
+'  ;SSF!_Contributor
+'  ;=SSF!R4C2
+'  ;SSF!_Copyright
+'  ;=SSF!R5C2
+'  ;SSF!_License
+'  ;=SSF!R2C2
+'  ;SSF!_LocalComment
+'  ;=SSF!R1C2
+'  ;SSF!_PublicName
+'  ;=SSF!R7C2
+'  ;SSF!_Since
+'  ;=SSF!R10C2
+'  ;SSF!_Tag
+'  ;=SSF!R9C2
+'  ;SSF!_Timestamp
+'  ;=SSF!R8C2
+'  ;SSF!_Url
+
+'module
+'  name;HelloClipboard
+'{{{
+Option Explicit
+
+' クリップボードからテキストを取得する。
+Public Function CopyFromClipboard() As String
+    Const CFText As Long = 1
+    Dim Text As String
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.GetFromClipboard
+    If Clip.GetFormat(CFText) Then
+        Text = Clip.GetText()
+    Else
+        Text = ""
+    End If
+    CopyFromClipboard = Text
+End Function
+ 
+' クリップボードにテキストを格納する。
+Public Sub CopyToClipboard(Text As String)
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Text
+    Clip.PutInClipboard
+End Sub
+'}}}
+
+'module
+'  name;SsfWriterPrimitive
+'{{{
+Option Explicit
+
+Function GetFileName() As String
+    GetFileName = "C:\tmp\ssf.txt"
+End Function
+
+Sub Writer()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    
+    WriteTo Stream
+    
+    Stream.Close
+    Set Stream = Nothing
+    Set fs = Nothing
+End Sub
+
+Sub WriterEx(Media As String, Args As Variant)
+    Dim Stream As StringStream
+    Set Stream = New StringStream
+    If Not CallByName(Stream, "Open" & Media & "Write", VbMethod, Args) Then
+        MsgBox "Failed to open " & Media & " for writing. ", vbExclamation, "SsfWriterPrimitive.WriterEx"
+    End If
+    
+    WriteTo Stream
+    
+    Stream.CloseText
+    Set Stream = Nothing
+End Sub
+
+Function WriteTo(Stream As Object) As String
+    Stream.WriteLine DumpWorkbook(ActiveWorkbook)
+End Function
+
+Function DumpWorkbook(Book As Workbook) As String
+    Dim Result As String
+    
+    Result = "'workbook" & vbCrLf
+    Result = Result & "'  name;" & Book.Name
+    ' avoid to print the default codename
+    If "ThisWorkbook" <> Book.CodeName Then
+        Result = Result & "/" & Book.CodeName
+    End If
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of workbook block
+    Result = Result & DumpProjectRequires(Book)
+    Result = Result & DumpWorksheets(Book)
+    Result = Result & DumpCellsName(Book)
+    ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
+    Result = Result & DumpVbaCodes(Book)
+    
+    DumpWorkbook = Result
+End Function
+
+Function DumpWorksheets(Book As Workbook) As String
+    Dim Result As String
+    Dim Ws As Worksheet
+    
+    Result = ""
+    For Each Ws In Book.Worksheets
+        Result = Result & DumpWorksheet(Ws)
+    Next
+    
+    DumpWorksheets = Result
+End Function
+
+Function DumpWorksheet(Ws As Worksheet) As String
+    Dim Result As String
+    
+    Result = "'worksheet" & vbCrLf
+    Result = Result & "'  name;" & Ws.Name
+    ' avoid to print the default codename
+    If Ws.Name <> Ws.CodeName Then
+        Result = Result & "/" & Ws.CodeName
+    End If
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of worksheet block
+    
+    ' go into cells when this sheet is not protected and has cell values
+    If Not Ws.ProtectContents Then
+        If (TypeName(Ws.UsedRange.Value) <> "Empty") Then
+            Result = Result & DumpCellsFormula(Ws.UsedRange) & DumpCellsNumberFormat(Ws.UsedRange)
+        End If
+    End If
+    
+    DumpWorksheet = Result
+End Function
+
+Function DumpCellsName(Book As Workbook) As String
+    Dim Result As String
+    Dim CellNames As Names
+    Dim CellName As Name
+    
+    DumpCellsName = ""
+    Set CellNames = Book.Names
+    If CellNames.Count = 0 Then Exit Function
+    
+    ' simple list, 2 lines for a single (address, name) pair
+    Result = "'cells-name" & vbCrLf
+    For Each CellName In CellNames
+        Result = Result & "'  ;" & CellName.RefersToR1C1 & vbCrLf
+        Result = Result & "'  ;" & CellName.Name & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsName = Result
+End Function
+
+Function DumpCellsFormula(Ra As Range) As String
+    Dim Result As String
+    Dim Ce As Range
+    
+    Result = "'cells-formula" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.FormulaR1C1 & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsFormula = Result
+End Function
+
+Function DumpCellsNumberFormat(Ra As Range) As String
+    ' this doesn't print any formats out of the UsedRange given
+    Dim Result As String
+    Dim Ce As Range
+    Dim AllFormats As Variant
+    
+    DumpCellsNumberFormat = ""
+    AllFormats = Ra.NumberFormat
+    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
+    If Not IsNull(AllFormats) Then
+        ' avoid this block when everything is "General"
+        If AllFormats = "General" Then Exit Function
+    End If
+    
+    Result = "'cells-numberformat" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.NumberFormat & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsNumberFormat = Result
+End Function
+
+Function DumpProjectRequires(Book As Workbook) As String
+    Dim Result As String
+    Dim Project As VBProject
+    Dim NumberOfReferences As Long
+    Dim i As Long
+    
+    DumpProjectRequires = ""
+    Set Project = Book.VBProject
+    NumberOfReferences = Project.References.Count
+    If NumberOfReferences = 0 Then Exit Function
+    ' it doesn't work, because we have at least 4 references.
+    
+    Result = "'require" & vbCrLf
+    For i = 1 To NumberOfReferences
+        ' avoid to print 4 standard references
+        ' VBA (builtin), Excel (builtin), stdole and Office
+        If Not Project.References(i).BuiltIn Then
+            If LCase(Project.References(i).Name) <> "stdole" _
+                    And LCase(Project.References(i).Name) <> "office" Then
+                ' machine needs Guid, Major and Minor.  human needs Description
+                Result = Result & "'  ;" & Project.References(i).GUID & " "
+                Result = Result & Project.References(i).Major & " "
+                Result = Result & Project.References(i).Minor & " "
+                Result = Result & Project.References(i).Description & vbCrLf
+            End If
+        End If
+    Next
+    
+    Result = Result & vbCrLf
+    
+    DumpProjectRequires = Result
+End Function
+
+Function DumpVbaCodes(Book As Workbook) As String
+    Dim Result As String
+    Dim Module As VBComponent
+    Dim BookModule As VBComponent
+    
+    Result = ""
+    ' let ThisWorkbook go to the last
+    For Each Module In Book.VBProject.VBComponents
+        If Module.Name = "ThisWorkbook" Then
+            Set BookModule = Module
+        Else
+            Result = Result & DumpVbaCodeModule(Module.CodeModule)
+        End If
+    Next
+    If Not BookModule Is Nothing Then
+        Result = Result & DumpVbaCodeModule(BookModule.CodeModule)
+    End If
+    
+    DumpVbaCodes = Result
+End Function
+
+Function DumpVbaCodeModule(TheCode As CodeModule) As String
+    Dim Result As String
+    Dim ModuleType As String
+    Dim NumberOfLines As Long
+    Dim Source As String
+    
+    Result = ""
+    Select Case TheCode.Parent.Type
+    Case vbext_ct_StdModule
+        ModuleType = "module"   ' Module
+    Case vbext_ct_ClassModule
+        ModuleType = "class"    ' Class
+    Case vbext_ct_MSForm
+        ModuleType = "form"     ' not for Excel 2000
+    Case vbext_ct_ActiveXDesigner
+        ModuleType = "activex"
+    Case vbext_ct_Document
+        ModuleType = "code"     ' Excel Objects
+    Case Else
+        ModuleType = "unknown-type-" & TheCode.Parent.Type
+    End Select
+    NumberOfLines = TheCode.CountOfLines
+    If NumberOfLines > TheCode.CountOfDeclarationLines Then
+        ' avoid to print a blank code, that contains "Option Explicit" only
+        Result = Result & "'" & ModuleType & vbCrLf
+        Result = Result & "'  name;" & TheCode.Parent.Name & vbCrLf
+        Result = Result & "'{{{" & vbCrLf
+        
+        Source = TheCode.Lines(1, NumberOfLines)
+        ' need at least one linefeed on the end
+        If Right(Source, 2) <> vbCrLf Then
+            Source = Source & vbCrLf
+        End If
+        ' must disable escaping signs in the source itself
+        Source = Replace(Source, vbCrLf & "'{{{" & vbCrLf, vbCrLf & "'#{{{" & vbCrLf)
+        Source = Replace(Source, vbCrLf & "'}}}" & vbCrLf, vbCrLf & "'#}}}" & vbCrLf)
+        
+        Result = Result & Source
+        Result = Result & "'}}}" & vbCrLf
+    End If
+    Result = Result & vbCrLf
+    
+    DumpVbaCodeModule = Result
+End Function
+
+'}}}
+
+'module
+'  name;SsfReaderPrimitive
+'{{{
+Option Explicit
+
+Dim Env As Scripting.Dictionary
+
+Function GetFileName() As String
+    GetFileName = "C:\tmp\ssf.txt"
+End Function
+
+Sub Reader()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    
+    InitializeEnv
+    ReadFrom Stream
+    TerminateEnv
+    
+    Stream.Close
+    Set Stream = Nothing
+    Set fs = Nothing
+End Sub
+
+Sub ReaderEx(Media As String, Args As Variant)
+    Dim Stream As StringStream
+    Set Stream = New StringStream
+    If Not CallByName(Stream, "Open" & Media & "Read", VbMethod, Args) Then
+        MsgBox "Failed to open " & Media & " for reading. ", vbExclamation, "SsfReaderPrimitive.ReaderEx"
+    End If
+    
+    InitializeEnv
+    ReadFrom Stream
+    TerminateEnv
+    
+    Stream.CloseText
+    Set Stream = Nothing
+End Sub
+
+Function ReadFrom(Stream As Object) As String
+    Dim Result As String
+    Dim Line As String
+    Dim FoldedLine As String
+    Dim Escaping As Boolean
+    Dim Block As Collection
+    
+    Result = ""
+    FoldedLine = ""
+    Escaping = False
+    Set Block = New Collection
+    
+    ' though i hate these big tripple loops, still working in this small task
+    Do Until Stream.AtEndOfStream
+        Do
+            If FoldedLine <> "" Then
+                Block.Add FoldedLine
+            End If
+            
+            Do
+                If Stream.AtEndOfStream Then
+                    Line = ""
+                    If Escaping Then
+                        Escaping = False
+                    End If
+                Else
+                    Line = Stream.ReadLine
+                End If
+                
+                If IsSsfEscapeBegin(Line) Then
+                    Escaping = True
+                    FoldedLine = ";"
+                ElseIf IsSsfEscapeEnd(Line) Then
+                    Escaping = False
+                Else
+                    If Escaping Then
+                        FoldedLine = FoldedLine & Line & vbCrLf
+                    ElseIf IsSsfLine(Line) Then
+                        FoldedLine = RemoveSsfSign(Line)
+                    Else
+                        FoldedLine = ""
+                    End If
+                End If
+            Loop While Escaping
+        Loop While IsSsfLine(Line)
+        
+        If Block.Count > 0 Then
+            Result = Result & ParseSsfBlock(Block)
+            Do While Block.Count > 0
+                Block.Remove 1
+            Loop
+        End If
+    Loop
+    
+    Debug.Print Result
+    Set Block = Nothing
+End Function
+
+Function IsSsfLine(Line As String) As Boolean
+    IsSsfLine = (Left(Line, 1) = "'")
+End Function
+
+Function IsSsfEscapeBegin(Line As String) As Boolean
+    IsSsfEscapeBegin = (Line = "'{{{")
+End Function
+
+Function IsSsfEscapeEnd(Line As String) As Boolean
+    IsSsfEscapeEnd = (Line = "'}}}")
+End Function
+
+Function RemoveSsfSign(Line As String) As String
+    Dim Result As String
+    Dim StartAt As Long
+    Dim EndAt As Long
+    
+    RemoveSsfSign = ""
+    If Left(Line, 1) <> "'" Then Exit Function
+    
+    StartAt = 2
+    EndAt = Len(Line)
+    Do
+        If StartAt > EndAt Then Exit Function
+        If Mid(Line, StartAt, 1) <> " " And Mid(Line, StartAt, 1) <> vbTab Then Exit Do
+        StartAt = StartAt + 1
+    Loop
+    
+    RemoveSsfSign = Right(Line, EndAt - StartAt + 1)
+End Function
+
+Function ParseSsfBlock(Block As Collection) As String
+    Dim Result As String
+    Dim SsfKey As String
+    
+    SsfKey = Block(1)
+    Block.Remove 1
+    ' these are keys supported
+    Select Case SsfKey
+    Case "cells-formula"
+        Result = ParseSsfCellsFormulaV(Block)
+    Case "cells-name"
+        Result = ParseSsfCellsNameV(Block)
+    Case "cells-numberformat"
+        Result = ParseSsfCellsNumberFormatV(Block)
+    Case "class"
+        Result = ParseSsfModule(Block, vbext_ct_ClassModule)
+    Case "code"
+        Result = ParseSsfModule(Block, vbext_ct_Document)
+    Case "module"
+        Result = ParseSsfModule(Block, vbext_ct_StdModule)
+    Case "require"
+        Result = ParseSsfRequire(Block)
+    Case "workbook"
+        Result = ParseSsfWorkbook(Block)
+    Case "worksheet"
+        Result = ParseSsfWorksheet(Block)
+    End Select
+    
+    ParseSsfBlock = Result
+End Function
+
+Function InitializeEnv() As Object
+    Set Env = New Scripting.Dictionary
+    Set Env("workbook") = ActiveWorkbook
+    Set Env("worksheet") = ActiveSheet
+    Set Env("module") = Nothing
+    Env("chicken") = "NobodyCallsMeChicken_jk"  ' its an unexpected name
+    Env("copyof") = "COPY_ooop_"
+    Env("copythisworkbook") = False             ' true is safer
+    Set InitializeEnv = Env
+End Function
+
+Function TerminateEnv() As Object
+    Env.RemoveAll
+    Set Env = Nothing
+    Set TerminateEnv = Nothing
+End Function
+
+Function DivideSsfLine(Line As Variant, ByRef TheName As String, ByRef TheValue As String) As String
+    ' return results as TheName, TheValue and the function return value
+    Dim x As Variant
+    x = DivideLine(Line, ";", 2)
+    TheName = x(0)
+    TheValue = x(1)
+    DivideSsfLine = TheName
+End Function
+
+Function DivideName(Line As Variant, ByRef Name As String, ByRef CodeName As String) As String
+    Dim x As Variant
+    x = DivideLine(Line, "/", 2)
+    Name = x(0)
+    CodeName = IIf(x(1) = "", x(0), x(1))
+    ' we may have to set another rule on workbook
+    DivideName = CodeName
+End Function
+
+Function DivideLine(Line As Variant, Delimiter As String, Number As Long) As Variant
+    Dim x As Variant
+    Dim y() As Variant
+    Dim i As Long
+    
+    x = Split(Line, Delimiter, Number)
+    If UBound(x) = Number - 1 Then
+        DivideLine = x
+    Else
+        ReDim y(0 To Number - 1)
+        For i = 0 To UBound(x)
+            y(i) = x(i)
+        Next
+        DivideLine = y
+    End If
+End Function
+
+Function SwitchBook(Names As String) As Workbook
+    ' currently, we just open a new book
+    ' not name it, nor search an existing book
+    Dim Book As Workbook
+    Set Book = Application.Workbooks.Add
+    Set Env("workbook") = Book
+    Set SwitchBook = Book
+End Function
+
+Function SwitchWorksheet(Names As String) As Worksheet
+    ' 1. add a new sheet unless names are given
+    ' 2. search existing sheet for the given codename
+    ' 3. modify the name if the sheet found has another name
+    ' 4. add a new sheet if above 2 or 3 fail
+    
+    Dim Name As String
+    Dim CodeName As String
+    Dim Book As Workbook
+    Dim Ws As Worksheet
+    Dim Comp As VBComponent
+    Dim FrontName As String
+    
+    Set Book = Env("workbook")
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If DivideName(Names, Name, CodeName) = "" Then GoTo AddNew
+    
+    ' rule#2 search
+    Set Comp = Book.VBProject.VBComponents(CodeName)
+    FrontName = Comp.Properties("Name")
+    Set Ws = Book.Worksheets(FrontName)
+    
+    ' rule#3 rename
+    If Name <> FrontName Then Ws.Name = Name
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Ws = Nothing
+    Set Ws = Book.Worksheets.Add
+    If Ws.Name <> Name Then
+        Ws.Name = Name
+    End If
+    If Ws.CodeName <> CodeName Then
+        Book.VBProject.VBComponents(Ws.CodeName).Name = CodeName
+    End If
+    If Ws Is Nothing Then
+        Debug.Print CodeName & "*" & Name & "*" & Err.Number & Err.Description
+        Set SwitchWorksheet = Env("worksheet")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("worksheet") = Ws
+    Set SwitchWorksheet = Ws
+End Function
+
+Function SwitchModule(Name As String, ComponentType As vbext_ComponentType) As VBComponent
+    ' 1. add a new component unless names are given
+    ' 2. may copy ThisWorkbook by the condition of Env("copythisworkbook")
+    ' 3. search existing component for the given name
+    ' 4. add a new component if above 3 fails
+    ' 5. add only type of module
+    
+    Dim Project As VBProject
+    Dim Comp As VBComponent
+    Dim NewName As String
+    Dim NewType As vbext_ComponentType
+    Dim StdOrClass As Boolean
+    
+    Set Project = Env("workbook").VBProject
+    On Error GoTo AddNew
+    
+    ' we only add classes and stdmodules
+    StdOrClass = (ComponentType = vbext_ct_StdModule Or ComponentType = vbext_ct_ClassModule)
+    NewType = IIf(StdOrClass, ComponentType, vbext_ct_StdModule)
+    NewName = ""
+    
+    ' rule#1 no names
+    If Name = "" Then GoTo AddNew
+    
+    ' rule#5 add modules instead of documents
+    NewName = IIf(StdOrClass, Name, Env("copyof") & Name)
+    
+    ' rule#2 ThisWorkbook
+    If Name = "ThisWorkbook" And Env("copythisworkbook") Then GoTo AddNew
+    
+    ' rule#3 search
+    Set Comp = Project.VBComponents(Name)
+    If Comp.Type <> ComponentType Then
+        NewName = ""
+        GoTo AddNew
+    End If
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Comp = Project.VBComponents.Add(NewType)
+    If NewName <> "" Then Comp.Name = NewName
+    If Comp Is Nothing Then
+        Debug.Print Name & "*" & Err.Number & Err.Description
+        Set SwitchModule = Env("module")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("module") = Comp
+    Set SwitchModule = Comp
+End Function
+
+Function ParseSsfWorkbook(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    
+    Result = ""
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchBook TheValue
+            Result = Result & "new workbook " & Env("workbook").Name & vbCrLf
+        End Select
+    Next
+    
+    ParseSsfWorkbook = Result
+End Function
+
+Function ParseSsfWorksheet(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    
+    Result = ""
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchWorksheet TheValue
+            Result = Result & "new worksheet " & Env("worksheet").Name & vbCrLf
+        End Select
+    Next
+    
+    ParseSsfWorksheet = Result
+End Function
+
+Function ParseSsfModule(Block As Collection, Optional ComponentType As vbext_ComponentType = vbext_ct_StdModule) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Source As String
+    
+    Result = ""
+    Source = ""
+    
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchModule TheValue, ComponentType
+            Result = Result & "new module " & Env("module").Name & vbCrLf
+        Case ""
+            Source = Source & TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    If Source <> "" And Not Env("module") Is Nothing Then
+        With Env("module").CodeModule
+            .DeleteLines 1, .CountOfLines
+            .InsertLines 1, Source
+        End With
+    End If
+    
+    ParseSsfModule = Result
+End Function
+
+Function ParseSsfRequire(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Project As VBProject
+    Dim GuidMajorMinorDescription As Variant
+    
+    Result = ""
+    Set Project = Env("workbook").VBProject
+    Result = Result & "require" & vbCrLf
+    
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case ""
+            GuidMajorMinorDescription = DivideLine(TheValue, " ", 4)
+            Result = Result & GuidMajorMinorDescription(3) & vbCrLf
+            Project.References.AddFromGuid GuidMajorMinorDescription(0), GuidMajorMinorDescription(1), GuidMajorMinorDescription(2)
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfRequire = Result
+End Function
+
+Function ParseSsfCellsFormulaV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set Ws = Env("worksheet")
+    Set Ra = Ws.Cells
+    Result = Result & "cells-formula on " & Ws.Name & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "address"
+            ' we only support an A1 style addresses here by Excel's design
+            ' maybe future, we can make a converter for R1C1
+            Set Ra = Ws.Range(TheValue)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).FormulaR1C1 = TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsFormulaV = Result
+End Function
+
+Function ParseSsfCellsNumberFormatV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set Ws = Env("worksheet")
+    Set Ra = Ws.Cells
+    Result = Result & "cells-numberformat on " & Ws.Name & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "address"
+            ' we only support an A1 style addresses here by Excel's design
+            ' maybe future, we can make a converter for R1C1
+            Set Ra = Ws.Range(TheValue)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).NumberFormat = TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsNumberFormatV = Result
+End Function
+
+Function ParseSsfCellsNameV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim ThePreviousValue As String
+    Dim CellsName As Names
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set CellsName = Env("workbook").Names
+    Result = Result & "cells-name" & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case ""
+            Counter = Counter + 1
+            If Counter Mod 2 = 1 Then
+                ThePreviousValue = TheValue
+            Else
+                CellsName.Add Name:=TheValue, RefersToR1C1:=ThePreviousValue
+            End If
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsNameV = Result
+End Function
+'}}}
+
+'module
+'  name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' hWndで指定したメモ帳の未保存フラグをクリアする。
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' hWndで指定したメモ帳を閉じる。
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' メモ帳を新しく起動し、hWndを返す。
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus) As Long
+    Dim hWnd As Long
+    Dim ProcID As Long, ThreadID As Long
+    Dim i As Long, j As Long, k As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    Dim TaskName As String
+    
+    On Error GoTo Err1
+    TitleText = "notepad - meets VBA - "
+    'TitleText = "無題 - ﾒﾓ帳"
+    ExePath = "notepad.exe"
+    TaskName = "Notepad"
+    i = Shell(ExePath, iWindowState)
+    If i = 0 Then GoTo Err1
+    hWnd = 0
+    Do
+        'hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        hWnd = FindWindowEx(0, hWnd, TaskName, vbNullString)
+        If hWnd = 0 Then GoTo Err1
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until i = ProcID
+    i = SetWindowText(hWnd, TitleText & ProcID)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' Z-order も変えるなら SetWindowPos
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "メモ帳の起動に失敗しました。", , "failed to start a notepad"
+    OpenNotepad = 0
+End Function
+ 
+' hWndで指定したメモ帳の内容を、指定した文字で置き換える。
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行つき。
+' push text into the notepad with a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行無し。
+' push text into the notepad without a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' 全部選択
+        SendMessage i, EM_SETSEL, -1, 0     ' 選択解除 (カーソルが選択領域の最後に移動)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' hWndで指定したメモ帳の内容を、文字として取得する。
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+' hWnd から ProcessID を取得する。
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcID As Long, ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    GetWindowProcessId = ProcID
+End Function
+
+' hWndで指定したメモ帳を、ユーザーに視覚で通知する。
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+'}}}
+
+'code
+'  name;SSF
+'{{{
+Option Explicit
+ 
+' シートの定義情報から、マクロ用の簡易ツールバーを生成する。
+ 
+Private oApplication As Application
+Private oThisWorkbook As Workbook
+ 
+Private ButtonCaption As Variant
+Private MyBar As Office.CommandBar
+ 
+Friend Property Let BarButtons(ButtonArray As Variant)
+    ButtonCaption = ButtonArray
+End Property
+ 
+Friend Property Get BarButtons() As Variant
+    BarButtons = ButtonCaption
+End Property
+ 
+' ツールバーから直接呼ばれるメイン関数。
+Friend Sub BarMain()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' ユーザー定義のメインプロシジャにボタンを引き渡す。
+    Main oAC
+    Set oAC = Nothing
+End Sub
+ 
+' ボタンだけの簡易ツールバーを生成する。
+' シートに定義されたボタン名称の数だけボタンを追加する。
+Friend Function BarInitialize() As CommandBar
+    Dim BAUDISTRIB As String
+    Dim ButtonA As CommandBarButton
+    Dim strBarName As String
+    Dim strButtonName As String
+    Dim strButtonDesc As String
+    Dim i As Long, j As Long
+    Dim strC() As Variant
+    Dim Ra As Range
+    
+    On Error Resume Next
+    
+    Set oApplication = Application
+    Set oThisWorkbook = ThisWorkbook
+    ' 名前の衝突回避用に Url 情報を使う。
+    BAUDISTRIB = " - " & Me.Parent.Range("_Url").Value
+    BAUDISTRIB = " - " & Me.Range("_Url").Value
+    ' シート上のボタン定義
+    Set Ra = Me.Parent.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    Set Ra = Me.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    j = Ra.Cells.Count
+    ReDim strC(0 To j - 1)
+    For i = 0 To j - 1
+        strC(i) = Array(Ra.Range("A1").Offset(i, 0).Text, Ra.Range("A1").Offset(i, 1).Text)
+    Next
+    ButtonCaption = strC
+    Set Ra = Nothing
+    strBarName = oThisWorkbook.Name & BAUDISTRIB
+    Set MyBar = oApplication.CommandBars.Add(Name:=strBarName, Temporary:=True)
+    For i = LBound(ButtonCaption) To UBound(ButtonCaption)
+        strButtonName = CStr(ButtonCaption(i)(0))
+        strButtonDesc = CStr(ButtonCaption(i)(1))
+        Set ButtonA = MyBar.Controls.Add(Type:=1, Temporary:=True)
+        With ButtonA
+            .Style = msoButtonCaption
+            .OnAction = Me.CodeName & ".BarMain"
+            .Caption = strButtonName
+            .Tag = strButtonName
+            .TooltipText = strButtonDesc
+            .BeginGroup = True
+        End With
+        Set ButtonA = Nothing
+    Next
+    MyBar.Visible = True
+    MyBar.Position = msoBarTop
+    Set BarInitialize = MyBar
+End Function
+ 
+' ツールバーを除去する。
+Friend Sub BarTerminate()
+    On Error Resume Next
+    MyBar.Delete
+    Set oApplication = Nothing
+    Set oThisWorkbook = Nothing
+End Sub
+ 
+'}}}
+
+'module
+'  name;SsfPrimitive
+'{{{
+Option Explicit
+ 
+' ツールバーから呼ばれるメインプロシジャ
+Public Sub Main(oAC As Object)
+    ' ボタンの順番で識別する
+    Select Case oAC.Index
+    Case 1  '"コピーSSF"
+        CopyAsSsf
+    Case 2  '"ペーストSSF"
+        PasteFromSsf
+    Case 3  '"メモ帳へ"
+        WriteSsfToNotepad oAC
+    Case 4  '"メモ帳から"
+        ReadSsfFromNotepad oAC
+    Case 5  '接続中のメモ帳のhWnd
+        ConnectNotepad oAC
+    Case Else
+        About
+    End Select
+End Sub
+ 
+' 設定シートの表示をAbout Box の代わりにする
+Private Sub About()
+    SSF.Activate
+End Sub
+
+' Menu Functions
+
+Private Function CopyAsSsf() As String
+    WriterEx "Clipboard", Array()
+End Function
+
+Private Function PasteFromSsf() As String
+    ReaderEx "Clipboard", Array()
+End Function
+
+Private Function WriteSsfToNotepad(oAC As Object) As String
+    WriterEx "Notepad", Array(oAC)
+End Function
+
+Private Function ReadSsfFromNotepad(oAC As Object) As String
+    ReaderEx "Notepad", Array(oAC)
+End Function
+
+Private Function ConnectNotepad(oAC As Object) As String
+    Dim hWnd As Long
+    hWnd = Val(oAC.Tag)
+    If Not ShowNotepad(hWnd) Then SetWndToButton oAC, 0
+End Function
+
+' helper functions
+
+Public Function GetWndFromButton(oAC As Variant) As Variant
+    ' accept every button, catch the 5th button, return (hWnd,ProcessID)
+    Dim hWnd As Long
+    Dim ConnectButton As Object          ' expect CommandBarButton or so
+    Set ConnectButton = oAC.Parent.Controls(5)          ' the 5th button
+    hWnd = CLng(ConnectButton.Tag)
+    GetWndFromButton = hWnd
+End Function
+
+Public Function SetWndToButton(oAC As Variant, hWnd As Long) As Object
+    ' accept every button, catch the 5th button, set hWnd and ProcessID, return the 5th
+    Dim ConnectButton As Object          ' expect CommandBarButton or so
+    Set ConnectButton = oAC.Parent.Controls(5)          ' the 5th button
+    With ConnectButton
+        .Caption = CStr(GetWindowProcessId(hWnd))       ' for human
+        .Tag = CStr(hWnd)                               ' for me
+    End With
+    Set SetWndToButton = ConnectButton
+End Function
+'}}}
+
+'class
+'  name;StringStream
+'{{{
+Option Explicit
+
+' wrap clipboard and notepad into a stream class, do like a Scripting.TextStream
+
+Private MyText As Collection
+Private MyLineFeed As String
+Private RememberFlush As String
+Private hNotepad As Long
+
+Private Sub Class_Initialize()
+    Set MyText = New Collection
+    MyLineFeed = vbCrLf
+    RememberFlush = ""
+    hNotepad = 0
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyText = Nothing
+End Sub
+
+Public Function OpenClipboardRead(Optional Args As Variant) As Boolean
+    ClearAll
+    RememberFlush = ""
+    Enqueue CopyFromClipboard
+    OpenClipboardRead = True
+End Function
+
+Public Function OpenClipboardWrite(Optional Args As Variant) As Boolean
+    ClearAll
+    RememberFlush = "ToClipboard"
+    OpenClipboardWrite = True
+End Function
+
+Public Function OpenNotepadRead(Args As Variant) As Boolean
+    ' Args(oAC)
+    ClearAll
+    RememberFlush = ""
+    hNotepad = GetWndFromButton(Args(0))
+    Enqueue ReadNotepad(hNotepad)
+    OpenNotepadRead = (hNotepad <> 0)
+End Function
+
+Public Function OpenNotepadWrite(Args As Variant) As Boolean
+    ' Args(oAC As CommandBarButton or so)
+    ClearAll
+    hNotepad = OpenNotepad
+    SetWndToButton Args(0), hNotepad
+    If hNotepad > 0 Then
+        RememberFlush = "ToNotepad"
+        OpenNotepadWrite = True
+    Else
+        OpenNotepadWrite = False
+    End If
+End Function
+
+Public Function OpenTextRead(Optional Text As Variant) As Boolean
+    If Not IsMissing(Text) Then Enqueue Text
+    RememberFlush = ""
+    OpenTextRead = True
+End Function
+
+Public Function OpenTextWrite(Optional Append As Boolean = False) As Boolean
+    If Not Append Then ClearAll
+    RememberFlush = ""
+    OpenTextWrite = True
+End Function
+
+Public Function OpenText() As Boolean
+    ClearAll
+    RememberFlush = ""
+    OpenText = True
+End Function
+
+Public Sub CloseText()
+    If RememberFlush <> "" Then
+        CallByName Me, RememberFlush, VbMethod
+    End If
+    ClearAll
+    RememberFlush = ""
+End Sub
+
+Public Property Get hWndNotepad() As Long
+    hWndNotepad = hNotepad
+End Property
+
+Public Property Let hWndNotepad(hWnd As Long)
+    hNotepad = hWnd
+End Property
+
+Public Property Get LineFeed() As String
+    LineFeed = MyLineFeed
+End Property
+
+Public Property Let LineFeed(Text As String)
+    MyLineFeed = Text
+End Property
+
+Public Property Get AtEndOfStream() As Boolean
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Function ReadLine() As String
+    ReadLine = Dequeue
+End Function
+
+Public Function ReadAll() As String
+    ReadAll = ToText
+    ClearAll
+End Function
+
+Public Sub WriteLine(ParamArray Text() As Variant)
+    Dim x As Variant
+    For Each x In Text
+        Enqueue x
+    Next
+End Sub
+
+Public Sub WriteTextArray(Texts As Variant)
+    EnqueueArray Texts
+End Sub
+
+Private Sub ClearAll()
+    Do While MyText.Count > 0
+        MyText.Remove 1
+    Loop
+End Sub
+
+Private Sub EnqueueArray(Texts As Variant)
+    Dim Text As Variant
+    For Each Text In Texts
+        Enqueue Text
+    Next
+End Sub
+
+Private Sub Enqueue(Text As Variant)
+    Dim Splitted As Variant
+    Dim x As Variant
+    Splitted = Split(Text, MyLineFeed)
+    For Each x In Splitted
+        MyText.Add CStr(x)
+    Next
+End Sub
+
+Private Function Dequeue() As String
+    Dequeue = MyText(1)
+    MyText.Remove 1
+End Function
+
+Private Function IsEmpty() As Boolean
+    IsEmpty = (MyText.Count = 0)
+End Function
+
+Private Function ToText() As String
+    Dim Result As String
+    Dim i As Long
+    For i = 1 To MyText.Count
+        Result = Result & MyText(i) & MyLineFeed
+    Next
+    ToText = Result
+End Function
+
+Public Sub ToClipboard()
+    CopyToClipboard ToText
+End Sub
+
+Public Sub ToNotepad()
+    WriteNotepad hNotepad, ToText
+End Sub
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+' ツールバー初期化と終了
+ 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    SSF.BarTerminate
+End Sub
+ 
+Private Sub Workbook_Open()
+    SSF.BarInitialize
+    ThisWorkbook.Saved = True
+End Sub
+'}}}
+
+}}}
+
