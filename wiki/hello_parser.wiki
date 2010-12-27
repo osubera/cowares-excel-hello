@@ -14,7 +14,7 @@
 
  * create a parser engine class, to make easy generating other classes for verious rules.
  * added !ReadLineParse method into the !StringStream class at [hello_stream].
- * {{{UtilText.DivideAtFirstMatch}}} is a string search function. it's simple and dull. we want ths separated, because some parsers may better use the regular expression instead of this one.
+ * !UtilText.!DivideAtFirstMatch is a string search function. it's simple and dull. we want ths separated, because some parsers may better use the regular expression instead of this one.
 {{{
 module: Module1
   executable tests, to see how it works.
@@ -38,7 +38,7 @@ class: HtmlParserT2
 == 説明 ==
  * パーサーエンジンを作って、ルールに応じたパーサークラスを作りやすくする
  * [hello_stream] で紹介した !StringStream クラスに !ReadLineParse メソッドを追加した
- * {{{UtilText.DivideAtFirstMatch}}} は文字列検索関数で、非常に単純な総当り検索をしている。パースの文法によっては、正規表現を使うなど別のものに差し替えやすいように切り離している。
+ * !UtilText.!DivideAtFirstMatch は文字列検索関数で、非常に単純な総当り検索をしている。パースの文法によっては、正規表現を使うなど別のものに差し替えやすいように切り離している。
 {{{
 module: Module1
   test を実行して動作確認をする
