@@ -664,11 +664,11 @@ End Function
 === Result ===
 
  * elements `<li>` with attributes disappeared by design
-    属性つきの "<li>" が消えたのは仕様による
- * the blank tag "<li/>" disappeared by design
-    空タグ "<li/>" が消えたのは仕様による
- * the irregal "<li>" directed to "<body>" disappeared, because the restriction of children is working
-    子要素を限定しているので、 "<body>" 直下の不正な "<li>" は消えた。
+    属性つきの `<li>` が消えたのは仕様による
+ * the blank tag `<li/>` disappeared by design
+    空タグ `<li/>` が消えたのは仕様による
+ * the irregal `<li>` directed to `<body>` disappeared, because the restriction of children is working
+    子要素を限定しているので、 `<body>` 直下の不正な `<li>` は消えた。
 
 {{{
 test1()
@@ -1058,8 +1058,8 @@ End Sub
 
  * can parse tags with attributes
     属性つきのタグが解釈できるようにした
- * can parse the blank tag, like "<li/>"
-    "<li/>" のような空タグを解釈できるようにした
+ * can parse the blank tag, like `<li/>`
+    `<li/>` のような空タグを解釈できるようにした
 
 {{{
 test3()
