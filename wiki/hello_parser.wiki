@@ -663,7 +663,7 @@ End Function
 
 === Result ===
 
- * elements "<li>" with attributes disappeared by design
+ * elements `<li>` with attributes disappeared by design
     属性つきの "<li>" が消えたのは仕様による
  * the blank tag "<li/>" disappeared by design
     空タグ "<li/>" が消えたのは仕様による
