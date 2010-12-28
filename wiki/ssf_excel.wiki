@@ -542,3 +542,4 @@ End Sub
 = candidates / 候補 =
 
  * origin, offset
+ * ssf-begin, ssf-end
