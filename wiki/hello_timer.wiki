@@ -36,6 +36,10 @@
  # Sheet2 をアクティブにして、しばらくして Sheet1 に戻り、作業の様子を見る
  # タスクは単純で、 C 列を下に記入していくだけのもの
 
+= Snapshots =
+
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TRljNQR9-nI/AAAAAAAAAAs/GbDnYc4-sBg/s1600/shot1.png
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TRljNq6om7I/AAAAAAAAAAw/QQNZ3vis9S4/s1600/shot2.png
 
 = Code =
 
