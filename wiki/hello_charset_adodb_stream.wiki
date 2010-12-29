@@ -1,0 +1,351 @@
+#summary how to read and write a text file encoded by verious character sets in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to read and write a text file encoded by verious character sets in vba
+ * especially, focused on Shift_JIS, euc-jp, iso-2022-jp in Japanese language
+
+== 概要 ==
+ * VBAでいろいろな文字コードセットのテキストファイルを読み書きする
+ * 特に日本語の、 Shift_JIS, euc-jp, iso-2022-jp 中心
+
+= Details =
+
+ * we use the ADODB.Steram object to convert
+ * also try to use a utf-8 file without BOM (Byte Order Mark), good manner in the world and bad manner in the Windows
+ * as a binary stream, it handles things as a byte number array.
+ * as a text stream, it always add a former 2 byte BOM (xFFxFE), if the file does not contain this 2 byte BOM.
+ * Windows text files follow simple rules below,
+    * the Unicode has a 2 byte BOM (xFFxFE) at the beginning.
+    * the UTF-8 has a 3 byte BOM (xEFxBBxBF) at the beginning.
+    * the ANSI has none of them.
+ * people speaking English may not understand, but Asian countries like Japan have verious historical rules in ANSI itself, or we have other rules unsupported in the Microsoft Windows, so this is important to convert them.
+
+== 説明 ==
+ * ADODB.Stream オブジェクトを変換に使う
+ * BOM 無しの utf-8 ファイルも試す。外界では普通だが Windows では非常識な
+ * バイナリストリームのとき、数字のバイト列でいろいろと扱える
+ * テキストストリームのとき、先頭に２バイトの BOM (xFFxFE) が無ければ、それを必ず追加する
+ * ウィンドウズのテキストファイルは次の簡単なルールに従っている
+    * ユニコード形式なら、先頭に２バイトの BOM (xFFxFE) がある
+    * UTF-8形式なら、先頭に３バイトの BOM (xEFxBBxBF) がある
+    * ANSI形式なら、いずれも無い
+ * 英語圏の人はわかりづらいかもしれないが、日本のようなアジアの国ではここで ANSI と言っている中に、さらに複数の歴史的ルールがあったり、マイクロソフトウィンドウズに無いルールがあったりする。なので、その変換が重要。
+
+= How to use =
+
+ # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
+ # 3 examples show how them work.
+ # may change constants near the top, as you favor
+
+== 使い方 ==
+ # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+ # ３つのテストコードを動かせば様子がわかる
+ # 先頭近くの定数を好きなように変えてみよう
+
+= Code =
+
+{{{
+'workbook
+'  name;hello_charset_adodb_stream.xls
+
+'require
+'  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+
+'worksheet
+'  name;Sheet1
+
+
+'module
+'  name;HelloCharsetAdodbStream
+'{{{
+Option Explicit
+
+Const HelloText = "お帰りなさいませ"
+
+Function Charsets() As Variant
+    Charsets = Array("unicode", "utf-8", "shift_jis", "euc-jp", "iso-2022-jp")
+End Function
+
+Function GenerateFileName(Enc As Variant) As String
+    GenerateFileName = "C:\tmp\" & LCase(CStr(Enc)) & ".txt"
+End Function
+
+' execute a test to save files encoded by specified character set,
+' and see the result by direct binary dump
+Sub SaveFiles()
+    Dim Enc As Variant
+    Dim FileName As String
+    
+    For Each Enc In Charsets
+        FileName = GenerateFileName(Enc)
+        SaveFileEncoded FileName, HelloText, Enc
+        Debug.Print "charset: " & Enc
+        Debug.Print DumpFileBinary(FileName)
+    Next
+End Sub
+
+' execute a test to read files encoded by specified character set,
+' and see the result by stream binary dump, finaly by result texts.
+Sub ReadFiles()
+    Dim Enc As Variant
+    Dim FileName As String
+    
+    For Each Enc In Charsets
+        FileName = GenerateFileName(Enc)
+        SaveFileEncoded FileName, HelloText, Enc
+        Debug.Print "charset: " & Enc
+        Debug.Print DumpStreamBinary(FileName)
+        Debug.Print DumpFileText(FileName, Enc)
+    Next
+End Sub
+
+' execute a test to save a file encoded by utf-8 without BOM.
+Sub SaveFileAsUTF8withoutBOM()
+    Const Enc = "utf8-nobom"
+    Dim FileName As String
+    
+    FileName = GenerateFileName(Enc)
+    SaveFileNoBom FileName, HelloText
+    Debug.Print "charset: " & Enc
+    Debug.Print DumpFileBinary(FileName)
+End Sub
+
+' watch binaries in a file directly
+Function DumpFileBinary(FileName As String) As String
+    Dim out As String
+    Dim bss() As Byte
+    Dim bs As Variant
+    
+    Open FileName For Binary Access Read As #1
+    ReDim bss(0 To LOF(1) - 1)
+    Get #1, , bss
+    Close #1
+    
+    out = ""
+    For Each bs In bss
+        out = out & Hex(bs) & " "
+    Next
+    DumpFileBinary = out
+End Function
+
+' watch binaries in a file using the ADODB.Stream
+Function DumpStreamBinary(FileName As String) As String
+    Dim Stream As ADODB.Stream
+    Dim out As String
+    Dim bs As Variant
+
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.LoadFromFile FileName
+    Stream.Type = adTypeBinary
+    out = ""
+    Do Until Stream.EOS
+        bs = Stream.Read(1)
+        out = out & Hex(bs(0)) & " "
+    Loop
+    Stream.Close
+    Set Stream = Nothing
+    
+    DumpStreamBinary = out
+End Function
+
+' read text from a file encoded by a specified character set, using the ADODB.Stream
+' means convert encoded text file into a vba unicode string
+Function DumpFileText(FileName As String, ByVal Enc As String) As String
+    Dim Stream As ADODB.Stream
+    Dim out As String
+    Dim bs As Variant
+
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.LoadFromFile FileName
+    Stream.Type = adTypeText
+    Stream.Charset = Enc
+    
+    SkipBom Stream
+    
+    out = Stream.ReadText
+    Stream.Close
+    Set Stream = Nothing
+    
+    DumpFileText = out
+End Function
+
+' save a text into a file with specified character set, using the ADODB.Stream
+Function SaveFileEncoded(FileName As String, Text As String, ByVal Enc As String) As Boolean
+    Dim Stream As ADODB.Stream
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Charset = Enc
+    Stream.WriteText Text
+    Stream.SaveToFile FileName, adSaveCreateOverWrite
+    Stream.Close
+    Set Stream = Nothing
+End Function
+
+' save a text into a file encoded by UTF-8 without BOM, using the ADODB.Stream
+Function SaveFileNoBom(FileName As String, Text As String) As Boolean
+    Dim Stream As ADODB.Stream
+    Dim x As Variant
+    Dim bs As Variant
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Charset = "UTF-8"
+    Stream.WriteText Text
+    
+    ' skip 3 bytes BOM
+    Stream.Position = 0
+    Stream.Type = adTypeBinary
+    Stream.Position = 3
+    bs = Stream.Read
+    Stream.Close
+    
+    ' save as binary
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write bs
+    Stream.SaveToFile FileName, adSaveCreateOverWrite
+    Stream.Close
+    Set Stream = Nothing
+End Function
+
+' detect BOMs, locate the position after the BOM, and return a length of the BOM.
+' adTypeText and Charset must be set to the Stream before calling this.
+Function SkipBom(Stream As ADODB.Stream) As Long
+    ' detect the stream is utf8 with bom or others.
+    ' skip 5 or utf-8 bom, skip 2 for others.
+    ' Position method works as binary counts while the Steram type is text.
+    ' NOTE that the detected length in text type stream has no meaning for this boms,
+    ' so we cann't do anything by string functions or binary functions after read.
+    
+    ' utf-8 bom are following 5 bytes in binary stream
+    ' FF FE EF BB BF
+    ' and are following 4 bytes in text stream of utf-8, is 2 length string
+    ' 20 00 FF FE
+    ' we detect this.
+    
+    ' unicode stream works without calling this, means skip 2 byte automatically,
+    ' and also work at skipped one.
+    ' others (shift_jis,,,) will not work without explicit skipping of thie 2 bytes.
+    ' Position start at 0
+    
+    Dim bs As String
+    Dim i As Long
+    Dim TextBom As Variant
+    
+    TextBom = Array(&H20, &H0, &HFF, &HFE)
+    bs = Stream.ReadText(2)
+    For i = 1 To 4
+        If AscB(MidB(bs, i, 1)) <> CByte(TextBom(i - 1)) Then GoTo NOBOM
+    Next
+    
+BOM:
+    Stream.Position = 5
+    SkipBom = 5
+    Exit Function
+    
+NOBOM:
+    Stream.Position = 2
+    SkipBom = 2
+End Function
+'}}}
+}}}
+
+=== Result ===
+
+{{{
+SaveFiles()
+
+charset: unicode
+FF FE 4A 30 30 5E 8A 30 6A 30 55 30 44 30 7E 30 5B 30 
+charset: utf-8
+EF BB BF E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 
+charset: shift_jis
+82 A8 8B 41 82 E8 82 C8 82 B3 82 A2 82 DC 82 B9 
+charset: euc-jp
+A4 AA B5 A2 A4 EA A4 CA A4 B5 A4 A4 A4 DE A4 BB 
+charset: iso-2022-jp
+1B 24 42 24 2A 35 22 24 6A 24 4A 24 35 24 24 24 5E 24 3B 1B 28 42 
+
+ReadFiles()
+
+charset: unicode
+FF FE 4A 30 30 5E 8A 30 6A 30 55 30 44 30 7E 30 5B 30 
+お帰りなさいませ
+charset: utf-8
+FF FE EF BB BF E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 
+お帰りなさいませ
+charset: shift_jis
+FF FE 82 A8 8B 41 82 E8 82 C8 82 B3 82 A2 82 DC 82 B9 
+お帰りなさいませ
+charset: euc-jp
+FF FE A4 AA B5 A2 A4 EA A4 CA A4 B5 A4 A4 A4 DE A4 BB 
+お帰りなさいませ
+charset: iso-2022-jp
+FF FE 1B 24 42 24 2A 35 22 24 6A 24 4A 24 35 24 24 24 5E 24 3B 1B 28 42 
+お帰りなさいませ
+
+SaveFileAsUTF8withoutBOM()
+
+charset: utf8-nobom
+E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 
+}}}
+
+= More Code =
+
+constants defined by the ADODB.Stream
+
+ * no use for early bindings in VB and VBA
+ * useful for late bindings, include VBScript or so
+
+{{{
+    'LineSeparator
+    Const adCR = 13
+    Const adCRLF = -1 ' Default
+    Const adLF = 10
+
+    'Mode (ConnectMode)
+    Const adModeRead = 1
+    Const adModeReadWrite = 3
+    Const adModeRecursive = &H400000 '(4194304)
+    Const adModeShareDenyNone = 16
+    Const adModeShareDenyRead = 4
+    Const adModeShareDenyWrite = 8
+    Const adModeShareExclusive = 12
+    Const adModeUnknown = 0 ' Default
+    Const adModeWrite = 2
+
+    'State
+    Const adStateClosed = 0 ' Default
+    Const adStateConnecting = 2
+    Const adStateExecuting = 4
+    Const adStateFetching = 8
+    Const adStateOpen = 1
+
+    'Type
+    Const adTypeBinary = 1
+    Const adTypeText = 2 ' Default
+
+    'SaveOptions at SaveToFile
+    Const adSaveCreateNotExist = 1 ' default, avoid overwritings
+    Const adSaveCreateOverWrite = 2
+
+    'StreamWrite at WriteText
+    Const adWriteChar = 0
+    Const adWriteLine = 1
+
+    'StreamOpenOptions at Open
+    Const adOpenStreamAsync = 1
+    Const adOpenStreamFromRecord = 4
+    Const adOpenStreamUnspecified = -1 ' default
+
+    ' Charset
+    ' Default="Unicode"
+    ' this method is not depend upper or lower cases.
+    ' Microsoft says refer to the following window registry to check available character sets.
+    ' HKEY_CLASSES_ROOT\MIME\Database\Charset
+}}}
