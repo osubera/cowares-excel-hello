@@ -1,0 +1,127 @@
+#summary how to get texts and files from web using http in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to get texts and files from web using http in vba
+
+== 概要 ==
+ * VBAで http を使ってウェブからテキストやファイルを取得する
+
+= Details =
+
+ * we use the Microsoft XML v6.0 to process a request.
+ * this code has a explicit version as MSXML2.XMLHTTP60, maybe you can use MSXML2.XMLHTTP instead.
+ * MSXML uses an Internet Explorer insalled on the Windows OS, thus
+    * the request goes to a web server by the IE.
+    * the user agent string is same as your browser.
+    * it uses caches of the IE.
+ * it may raise an error for bad url requested.
+ * a responsed body is stored as a byte array, and also a stream is provided.
+ * when server response headers have an explicit character set for text body, it uses the information to decode the body into a unicode text string.
+    * otherwise, always utf-8 is assumed for text encoding. means no html meta tags are reffered, nor no information in body itself are used to decide the character set.
+    * no way to change this default encoding to another one but utf-8.
+ * it goes to an asynchronous request at default, but this example uses it synchronously.
+
+== 説明 ==
+ * Microsoft XML v6.0 でリクエストを処理する。
+ * MSXML2.XMLHTTP60 のようにバージョンまで明示しているが、 MSXML2.XMLHTTP だけで良い場合もある。
+ * MSXML はウィンドウズに入っているインターネットエクスプローラを使うので、
+    * サーバーへのリクエストは IE が投げていることになる。
+    * ユーザーエージェント文字はブラウザと同じもの。
+    * IEのキャッシュを使う。
+ * URL が悪いとエラーになったりする。
+ * 本文のレスポンスはバイト列に格納される。ストリームも提供している。
+ * サーバーヘッダーのレスポンスに、明確な文字コード指定があれば、その情報を使って本文をユニコード文字に変換する。
+    * 明示されないときは、テキストの文字コードは常に utf-8 となる。 html meta タグ情報はいっさい使わないし、そもそも本文にある情報は文字コードを決める材料として使われない。
+    * このデフォルト utf-8 というのを変更することはできない。
+ * 普通は非同期通信で使うのだが、ここでは同期通信の見本を示す。
+
+= How to use =
+
+ # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
+ # test1() and test2() are executable examples.
+
+== 使い方 ==
+ # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+ # test1() と test2() が実行可能な見本。
+
+= Code =
+
+{{{
+'workbook
+'  name;hello_http_get.xls
+
+'require
+'  ;{F5078F18-C551-11D3-89B9-0000F81FE221} 6 0 Microsoft XML, v6.0
+
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    Const URL = "http://cowares.nobody.jp/license/ja.txt"
+    
+    Dim tp As MSXML2.XMLHTTP60
+    Set tp = New MSXML2.XMLHTTP60
+    
+    tp.Open "GET", URL, False
+    tp.send
+    Debug.Print tp.responseText
+    
+    Set tp = Nothing
+End Sub
+
+Sub test2()
+    Const URL = "http://cowares.nobody.jp/favicon.ico"
+    Const FileName = "C:\tmp\favicon.ico"
+    
+    Dim tp As MSXML2.XMLHTTP60
+    Set tp = New MSXML2.XMLHTTP60
+    
+    tp.Open "GET", URL, False
+    tp.send
+    SaveBinaryFile tp.responseBody, FileName
+    
+    Set tp = Nothing
+End Sub
+
+Function SaveBinaryFile(Data() As Byte, FileName As String) As Boolean
+    Open FileName For Binary Access Write As #1
+    Put #1, , Data
+    Close #1
+End Function
+'}}}
+
+}}}
+
+=== Result ===
+
+test1()
+
+{{{
+コ・ウェア・ライセンス - 自律、自由、公正
+
+1. 保証はありません。 (自律)
+既知の欠陥も未知の欠陥も含めたまま公開されています。 
+品質や正確さはご自身で判断してください。 
+使用により生じた損失など、すべての責任はあなたが負います。 
+
+2. フリーです。 (自由)
+どなたでも目的によらず無料で無期限に使えます。 
+登録や承諾は不要です。 
+商用も可です。 
+自由な加工を含む再利用も再配布もできます。 
+
+3. 公正であれ。 (公正)
+オリジナルが、あなたの作品と無関係に利用できることを明示する。 
+オリジナルの仕事とあなたの仕事を、正直に区別する。 
+オリジナルの著作権とライセンスを尊重する。 
+
+ライセンスの詳細は http://cowares.nobody.jp/license/ で公開されています。
+}}}
+
+test2()
+
