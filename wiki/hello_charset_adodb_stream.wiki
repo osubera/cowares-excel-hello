@@ -346,6 +346,6 @@ constants defined by the ADODB.Stream
     ' Charset
     ' Default="Unicode"
     ' this method is not depend upper or lower cases.
-    ' Microsoft says refer to the following window registry to check available character sets.
+    ' Microsoft says refer to the following Windows registry to check available character sets.
     ' HKEY_CLASSES_ROOT\MIME\Database\Charset
 }}}
