@@ -4,12 +4,12 @@
 = Introduction =
 
  * how to convert euc-jp and iso-2022-jp to shift_jis at a low level in vba
- * today we have other built-in functions as described at [helo_charst_adodb_stream] , no needs to these old fashoned code.
+ * today we have other built-in functions as described at [hello_charst_adodb_stream] , no needs to these old fashoned code.
  * i just post it here, to remember the rule of basic conversion.
 
 == 概要 ==
  * VBAで euc-jp と iso-2022-jp を shift_jis に低レベルな変換をする
- * 今では [helo_charst_adodb_stream] で使ったような組み込み関数を使うので、こんな時代物を使うことはない。
+ * 今では [hello_charst_adodb_stream] で使ったような組み込み関数を使うので、こんな時代物を使うことはない。
  * 変換規則の記録として、ここに投稿しておく。
 
 = Details =
@@ -19,7 +19,7 @@
  * the purpose is to use it as a VBA string, so our goal is to get a unicode string
  * Chr() function returns a unicode string for a given long value of an ANSI (Shift_JIS) code. so converting a sjis value into a unicode string is easy.
  * this converter is not completed, just what as-is working.
- * test module uses the result of [helo_charst_adodb_stream] , we define constants for each character set as a byte array.
+ * test module uses the result of [hello_charst_adodb_stream] , we define constants for each character set as a byte array.
 
 == 説明 ==
  * euc の１文字（２バイト）を sjis の２バイトに変換する基本関数と、それをつかってバイト列をユニコード文字列へと変換する関数がある。
@@ -27,7 +27,7 @@
  * VBA の文字列として使うために、ユニコード文字列が最終形になる。
  * Chr() 関数に ANSI コード（シフトJIS）をロング値で渡せば、ユニコード文字を返すので、 sjis コードのロング値からユニコード文字への変換は、この関数を使うだけだ。
  * 変換関数は完成されたものでなく、動いていたものを持ってきただけだ。
- * テストモジュールでは、 [helo_charst_adodb_stream] の結果を利用して、それぞれの文字コードに対応したバイト配列を定数で定義して利用する。
+ * テストモジュールでは、 [hello_charst_adodb_stream] の結果を利用して、それぞれの文字コードに対応したバイト配列を定数で定義して利用する。
 
 = How to use =
 
