@@ -1,6 +1,8 @@
 #summary how to get texts and files from web using http in vba
 #labels Phase-Requirements,Phase-Design,Phase-Deploy
 
+<wiki:toc max_depth="3" />
+
 = Introduction =
 
  * how to get texts and files from web using http in vba
@@ -16,6 +18,8 @@
     * the request goes to a web server by the IE.
     * the user agent string is same as your browser.
     * it uses caches of the IE.
+    * it uses cookies of the IE.
+    * it depends to the IE settings on connections and securities.
  * it may raise an error for bad url requested.
  * a responsed body is stored as a byte array, and also a stream is provided.
  * when server response headers have an explicit character set for text body, it uses the information to decode the body into a unicode text string.
@@ -30,6 +34,8 @@
     * サーバーへのリクエストは IE が投げていることになる。
     * ユーザーエージェント文字はブラウザと同じもの。
     * IEのキャッシュを使う。
+    * IEのクッキーを使う。
+    * IEの接続、セキュリティ設定に依存する。
  * URL が悪いとエラーになったりする。
  * 本文のレスポンスはバイト列に格納される。ストリームも提供している。
  * サーバーヘッダーのレスポンスに、明確な文字コード指定があれば、その情報を使って本文をユニコード文字に変換する。
@@ -126,3 +132,63 @@ test1()
 test2()
 
 http://3.bp.blogspot.com/_EUW0nrj9XlM/TRvEMuKlI3I/AAAAAAAAAA0/qdqy_v2BZJU/s1600/shot1.png
+
+= Cookies =
+
+ * above simple code does cookies inside, when your Internet Explorer settings allow them. means this code can walk through web pages with session controled. 
+    上の単純なコードでも、インターネットエクスプローラの設定に依存して、内部でクッキー処理が行われている。ということは、これでセッション制御のあるウェブページが渡り歩ける。
+ * we can check this ability with a simple server page script below.
+    下の簡単なサーバースクリプトで、実際に試すことができる。
+ * !getAllResponseHeaders and !getResponseHeader methods show server response headers.
+    サーバーレスポンスヘッダは、 !getAllResponseHeaders メソッドと !getResponseHeader メソッドで取得できる。
+
+{{{
+<?php
+  $header_charset="Content-Type: text/html; charset=utf-8";
+  $counter = $_COOKIE["counter"] + 1;
+  setcookie("counter",$counter);
+  $title="お帰りなさいませ";
+  $message=($counter>1) ? $counter."回目の".$title : "はじめまして";
+  header($header_charset);
+  header("Cache-Control: no-cache, must-revalidate");
+  header("Expires: Thu, 30 Dec 2010 00:00:00 GMT");
+  echo "<html>
+<head><title>".$title."</title></head>
+<body><h1>".$message."</h1></body></html>";
+?>
+}}}
+
+=== Result ===
+
+{{{
+Date: Thu, 30 Dec 2010 00:15:35 GMT
+Set-Cookie: counter=1
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>はじめまして</h1></body></html>
+
+Date: Thu, 30 Dec 2010 00:15:37 GMT
+Set-Cookie: counter=2
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>2回目のお帰りなさいませ</h1></body></html>
+
+Date: Thu, 30 Dec 2010 00:34:16 GMT
+Set-Cookie: counter=3
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>3回目のお帰りなさいませ</h1></body></html>
+}}}
+
