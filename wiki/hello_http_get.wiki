@@ -194,11 +194,15 @@ Content-Type: text/html; charset=utf-8
 
 = Status 300 =
 
- * the Open method handles server redirections inside automatically.
-    Open メソッドは、サーバーによるリダイレクトを自動で内部処理する。
+ * the send method handles server redirections inside automatically.
+    send メソッドは、サーバーによるリダイレクトを自動で内部処理する。
  * we only get a result of the last one, so there's nothing to indicate the redirection and the real url gotten.
     最後の飛び先の結果を得るだけなので、リダイレクトされたことや実際の url 情報などを示すものは手に入らない。
  * the response shows 200 OK status.
     レスポンスは 200 OK のステータスを示す。
- * the Open method may raise a runtime error when the Location header shows another host to go and the IE security settings deny this.
-    Location ヘッダのリダイレクト先が他のサーバーの時、インターネットエクスプローラのセキュリティ設定がこれを認めなければ、 Open メソッドは実行時エラーになる。
+ * the send method may raise a runtime error when the Location header shows another host to go and the IE security settings deny this.
+    Location ヘッダのリダイレクト先が他のサーバーの時、インターネットエクスプローラのセキュリティ設定がこれを認めなければ、 send メソッドは実行時エラーになる。
+    {{{
+-2147024891 
+アクセスが拒否されました。
+    }}}
