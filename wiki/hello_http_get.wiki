@@ -192,3 +192,12 @@ Content-Type: text/html; charset=utf-8
 <body><h1>3回目のお帰りなさいませ</h1></body></html>
 }}}
 
+= Status 300 =
+
+ * the Open method handles server redirections inside automatically.
+    Open メソッドは、サーバーによるリダイレクトを自動で内部処理する。
+ * we only get a result of the last one, so there's nothing to indicate the redirection and the real url gotten.
+    最後の飛び先の結果を得るだけなので、リダイレクトされたことや実際の url 情報などを示すものは手に入らない。
+ * the response shows 200 OK status.
+    レスポンスは 200 OK のステータスを示す。
+
