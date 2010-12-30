@@ -139,8 +139,8 @@ http://3.bp.blogspot.com/_EUW0nrj9XlM/TRvEMuKlI3I/AAAAAAAAAA0/qdqy_v2BZJU/s1600/
     上の単純なコードでも、インターネットエクスプローラの設定に依存して、内部でクッキー処理が行われている。ということは、これでセッション制御のあるウェブページが渡り歩ける。
  * we can check this ability with a simple server page script below.
     下の簡単なサーバースクリプトで、実際に試すことができる。
- * !getAllResponseHeaders and !getResponseHeader methods show server response headers.
-    サーバーレスポンスヘッダは、 !getAllResponseHeaders メソッドと !getResponseHeader メソッドで取得できる。
+ * getAllResponseHeaders and getResponseHeader methods show server response headers.
+    サーバーレスポンスヘッダは、 getAllResponseHeaders メソッドと getResponseHeader メソッドで取得できる。
 
 {{{
 <?php
