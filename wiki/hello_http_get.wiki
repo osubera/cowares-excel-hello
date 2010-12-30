@@ -207,3 +207,9 @@ Content-Type: text/html; charset=utf-8
 アクセスが拒否されました。
     }}}
     このエラーメッセージと、 msxml6.dll でエラー259が発生したことは検知できるが、それ以上の情報は返ってこない。
+
+= Cache =
+
+ * see the url below, to clear the cache.
+    キャッシュを消したいなら、この url を参考に。
+    http://support.microsoft.com/kb/262110/en-us
