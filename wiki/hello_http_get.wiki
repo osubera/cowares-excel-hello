@@ -210,6 +210,7 @@ Content-Type: text/html; charset=utf-8
 
 = Cache =
 
+=== How To Clear Cache When Your Application Hosts a WebBrowser Control ===
  * see the url below, to clear the cache.
     キャッシュを消したいなら、この url を参考に。
  * http://support.microsoft.com/kb/262110/en-us
