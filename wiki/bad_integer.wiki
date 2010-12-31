@@ -1,0 +1,71 @@
+#summary bad vba: be aware of dangerous integer constants
+#labels Phase-Design
+
+= Introduction =
+
+ * be aware of dangerous integer constants
+
+== 概要 ==
+ * 失敗マクロ: VBAの Integer 定数の危うさを知っておこう
+
+= Details =
+
+ * the 32bit vba has 2 types of integer numbers. the Long and the Integer.
+ * the Integer uses 16bit, while the Long uses 32bit.
+ * general concepts of the 16bit Integer type in vba comes from a backward compatibility to old 16bit visual basic.
+ * thus, sometime the implicit type decided by vba causes a strangeness.
+ * in the following code, integer constants described as `&H7FFF` break continuity at `&H8000` and `&H10000` .
+ * and the type conversion function `CLng()` cannot convert this to a long integer as we expect, because the value is done before it passed to the function. 
+ * when the same conversion function receives string, it doese as we expect, because the function decides the type and the value. 
+
+== 説明 ==
+ * 32bit VBA には、整数値に２つの型、 Long と Integer がある。
+ * Integer は 16bit で、 Long は 32bit だ。
+ * vba の 16bit Integer 型は概して、古い 16bit ビジュアルベーシックとの互換性を重視している。
+ * そのためたまに、 vba が決める暗黙の型により奇妙なことになる。
+ * 次のコードでは、 `&H7FFF` などと記述した整定数で、 `&H8000` と `&H10000` で不連続がおこっている。
+ * しかも、 `CLng()` 関数の Long への型変換が、期待したように起こらない。これは、関数が処理する前に、値が決まってしまっているからだ。
+ * 同じ型変換関数が文字列を受け取ったときは、期待した変換になる。関数が型も値も決められるからだ。
+
+= Bad Code =
+
+{{{
+
+'module
+'  name;BadInteger
+'{{{
+Option Explicit
+
+Sub test1()
+    Debug.Print &H7FFF, "it's a signed integer."
+    Debug.Print &H8000, "it's a signed integer with minus bit."
+    Debug.Print &HFFFF, "it's a signed integer with minus bit."
+    Debug.Print &H10000, "it's a signed long."
+    
+    Debug.Print &H7FFF, CInt(&H7FFF), CLng(&H7FFF)
+    Debug.Print &H8000, CInt(&H8000), CLng(&H8000)
+    Debug.Print "&H8000", CInt("&H8000"), CLng("&H8000")
+    Debug.Print "&HFFFF", CInt("&HFFFF"), CLng("&HFFFF")
+    Debug.Print "&H10000", "next line", CLng("&H10000")
+    On Error Resume Next
+    Debug.Print CInt("&H10000")
+    Debug.Print Error
+End Sub
+'}}}
+
+}}}
+
+=== Result ===
+
+{{{
+ 32767        it's a signed integer.
+-32768        it's a signed integer with minus bit.
+-1            it's a signed integer with minus bit.
+ 65536        it's a signed long.
+ 32767         32767         32767 
+-32768        -32768        -32768 
+&H8000        -32768         32768 
+&HFFFF        -1             65535 
+&H10000       next line      65536 
+オーバーフローしました。
+}}}
