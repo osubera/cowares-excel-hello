@@ -14,11 +14,22 @@
 
 = Details / 説明 =
 
-|| BomUnicode || constant array of unicode bom, FF FE <br/> ユニコードBOMの定数配列 ||
-||  ||  ||
-||  ||  ||
-||  ||  ||
-||  ||  ||
+|| !BomUnicode || constant array of unicode bom, FF FE. <br/> ユニコードBOMの定数配列 ||
+|| !BomUTF8 || utf-8 encoded unicode bom.  <br/> UTF-8 に変換したユニコードBOM ||
+|| !EncUTF8 || convert unicode words (integers) into utf-8 bytes. <br/> ユニコードワード（整数）列を utf-8 バイト列に ||
+|| !DecUTF8 || convert utf-8 bytes into unicode integers. <br/> utf-8 バイト列をユニコード整数列に ||
+|| !BytesToString || convert bytes array into a text String. <br/> バイト列を String 型テキストに ||
+|| !StringToBytes || convert a text String into bytes array. <br/> String 型テキストをバイト列に ||
+|| !WordsToString || convert words array into a text String. <br/> ワード列を String 型テキストに ||
+|| !StringToWords || convert a text String into words array. <br/> String 型テキストをワード列に ||
+|| !LongsToString || convert ANSI long integers array into a text String. <br/> ANSI (!Shift_JIS) ロング列を String 型テキストに ||
+|| !StringToLongs || convert a text String into ANSI long integers array. <br/> String 型テキストを ANSI ロング列に ||
+|| !BytesToWords || convert bytes array into words array. <br/> バイト列をワード列に ||
+|| !WordsToBytes || convert words array into bytes array. <br/> ワード列をバイト列に ||
+|| !EncHexDelimited || convert numbers array into a text String as hexadecimal representation. <br/> 数値列を１６進表記のテキストに ||
+|| !DecHexDelimited || convert a hexadecimal text String into bytes array. <br/> １６進表記のテキストをバイト列に ||
+|| !DecHexDelimitedL || convert a hexadecimal text String into long integers array. <br/> １６進表記のテキストをロング列に ||
+|| !FixLineFeed || replace every linefeed character into the specified one. <br/> 改行記号を指定のものに揃える ||
 
 == 説明 ==
  * euc の１文字（２バイト）を sjis の２バイトに変換する基本関数と、それをつかってバイト列をユニコード文字列へと変換する関数がある。
