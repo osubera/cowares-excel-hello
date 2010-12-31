@@ -3,7 +3,7 @@
 
 = Introduction =
 
- * be aware of dangerous integer constants
+ * bad vba: be aware of dangerous integer constants
 
 == 概要 ==
  * 失敗マクロ: VBAの Integer 定数の危うさを知っておこう
