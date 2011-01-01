@@ -1,15 +1,15 @@
 #summary how to encode and decode as Base64 (ASCII Armor) at a low level in vba
 #labels Phase-Requirements,Phase-Design,Phase-Deploy
 
+<wiki:toc max_depth="3" />
+
 = Introduction =
 
  * how to encode and decode as Base64 (ASCII Armor) at a low level in vba
- * this code is primitive and slow.  good for tutorial use, bad for practical use.
  * also provides binary dump tools.
 
 == 概要 ==
  * VBAで Base64 (ASCII Armor) のエンコードとデコードを低レベルに行う
- * 完成度が低くて遅い。教育的だけど実用的でない。
  * また、バイト列を書き出すツールも一緒に入れている。
 
 = Details / 説明 =
@@ -810,3 +810,24 @@ see below.
 }}}
 
 http://3.bp.blogspot.com/_EUW0nrj9XlM/TR6wi9RIH-I/AAAAAAAAAA4/8625GmEbkB4/s1600/shot1.png
+
+= More Code =
+
+ * below code improve the speed of test5() significantly.
+    次のコードは test5() の実行速度を飛躍的に良くする。
+ * putting a whole task into small segments is improtant for practical uses.
+    作業を小さなパーツに分解することで、実用的になる。
+
+{{{
+Sub test5Faster()
+    ' decode to a binary file
+    Const FileTo = "C:\tmp\favicon_decoded_again.ico"
+    Dim Ce As Range
+    
+    Open FileTo For Binary Access Write As #1
+    For Each Ce In Sheet1.UsedRange.Cells
+        Put #1, , DecBase64(CStr(Ce.Value))
+    Next
+    Close #1
+End Sub
+}}}
