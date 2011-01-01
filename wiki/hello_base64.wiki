@@ -8,7 +8,7 @@
  * also provides binary dump tools.
 
 == 概要 ==
- * VBAで Base64 (ASCII Armor) のエンコードとでコードを低レベルに行う
+ * VBAで Base64 (ASCII Armor) のエンコードとデコードを低レベルに行う
  * 完成度が低くて遅い。教育的だけど実用的でない。
  * また、バイト列を書き出すツールも一緒に入れている。
 
@@ -809,4 +809,4 @@ test5()
 see below.
 }}}
 
-
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TR6wi9RIH-I/AAAAAAAAAA4/8625GmEbkB4/s1600/shot1.png
