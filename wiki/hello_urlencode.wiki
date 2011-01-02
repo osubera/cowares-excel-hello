@@ -23,6 +23,11 @@
 || !EncUrlBytes || url encode from bytes array. <br/> バイト列を URL エンコードする ||
 || !DecUrlBytes || url decode to bytes array. <br/> バイト列を URL デコードする ||
 
+ * a !HelloUrlencode module contains everything required above functions. they do not call !UtilText functions.
+    !HelloUrlencode 標準モジュールに、上記の関数に必要なものがすべて入っている。 !UtilText の関数は呼び出さない。
+ * a !UtilText module functions are required to execute the test1().
+    !UtilText 標準モジュールの関数は、 test1() を実行するために必要。
+
 = How to use =
 
  # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
