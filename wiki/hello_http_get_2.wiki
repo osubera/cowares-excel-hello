@@ -34,6 +34,8 @@
  # test1() から test2() までが実行可能な見本。
  # `Search Keywords` ワークシートに検索用の言葉がある。他の言葉に変えて試してみよう。
 
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TSGeqSWcJDI/AAAAAAAAABA/UQ-IIU3qj9o/s1600/shot2.png
+
 = Code =
 
 {{{
@@ -1347,5 +1349,7 @@ http://www.google.co.jp/search?q=utf8+bom+%E6%B6%88&hl=ja&start=10
 
 from test2() to test5() generates a new worksheet to store the results.
   test2() から test5() までは、新規ワークシートに結果を格納する。
+
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TSGeptBFabI/AAAAAAAAAA8/gJMqFC3h-0g/s1600/shot1.png
 
 
