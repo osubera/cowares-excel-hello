@@ -48,6 +48,9 @@
 '  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
 '  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 
+'worksheet
+'  name;Sheet1
+
 
 'module
 '  name;UtilText
@@ -274,6 +277,21 @@ Public Function EncHexDelimited(Data As Variant, Optional ByVal Length As Long =
     Next
     
     EncHexDelimited = out
+End Function
+
+Public Function EncHexDelimitedB(Data As Variant, Optional ByVal Length As Long = -1, Optional ByVal Width As Long = 2) As String
+    Dim out As String
+    Dim i As Long
+    Dim s As String
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    s = String(Width, "0")
+    For i = 0 To Length - 1
+        out = out & Right(s & Hex(Data(i)), Width) & DefaultDelimiter
+    Next
+    
+    EncHexDelimitedB = out
 End Function
 
 Public Function DecHexDelimited(Text As String) As Byte()
@@ -737,6 +755,15 @@ Sub test1()
     Debug.Print IIf(s = EncUrlParameters(q), "OK", "NG")
     q.RemoveAll
     Set q = Nothing
+    
+    ' check the issue 1
+    Debug.Print EncUrlBytes(Array(&HD))
+    Debug.Print EncUrlBytes(DecHexDelimited("0 1 2 3 4 5 6 7 8 9 A B C D E F 10"))
+    Debug.Print IIf("%0D" = EncUrlBytes(Array(&HD)), "OK", "NG")
+    
+    ' check null
+    Debug.Print EncUrlString("")
+    Debug.Print DecUrlString("")
 End Sub
 
 
@@ -848,8 +875,10 @@ End Function
 Function EncUrlString(Text As String, Optional Charset = "utf-8") As String
     Dim bs As Variant
     Dim Stream As ADODB.Stream
-    Set Stream = New ADODB.Stream
     
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
     Stream.Open
     Stream.Charset = Charset
     Stream.WriteText Text
@@ -871,8 +900,10 @@ End Function
 
 Function DecUrlString(Text As String, Optional Charset = "utf-8") As String
     Dim Stream As ADODB.Stream
-    Set Stream = New ADODB.Stream
     
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
     Stream.Open
     Stream.Type = adTypeBinary
     Stream.Write DecUrlBytes(Text)
@@ -900,6 +931,8 @@ Function EncUrlBytes(Data As Variant, Optional ByVal Length As Long = -1) As Str
             out = out & "+"
         Case &H30 To &H39, &H41 To &H5A, &H61 To &H7A, &H2E, &H2D, &H5F '"0" To "9", "A" To "Z", "a" To "z", ".", "-", "_"
             out = out & Chr(Data(i))
+        Case Is < &H10
+            out = out & "%0" & Hex(Data(i))
         Case Else
             out = out & "%" & Hex(Data(i))
         End Select
@@ -916,6 +949,8 @@ Function DecUrlBytes(Text As String) As Byte()
     Dim Ps As Variant
     Dim i As Long
     Dim Counter As Long
+    
+    If Text = "" Then Exit Function
     
     pan = Empty
     Counter = 0
@@ -1000,5 +1035,16 @@ hl=ja
 
 q=url+%E3%82%A8%E3%83%B3%E3%82%B3%E3%83%BC%E3%83%89&hl=ja&%E5%B1%B1=%E5%B7%9D
 OK
+%0D
+%00%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F%10
+OK
+
+
 }}}
+
+=== Changes / 修正履歴 ===
+
+ * above code is r172
+ * see r170, r171 and r172
+ * includ fixes for issue 1
 
