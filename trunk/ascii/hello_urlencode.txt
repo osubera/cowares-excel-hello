@@ -636,7 +636,6 @@ Public Function DecDictionary(Text As String) As Scripting.Dictionary
     
     Set DecDictionary = out
 End Function
-
 '}}}
 
 'module
@@ -704,6 +703,9 @@ Sub test1()
     Debug.Print EncUrlBytes(DecHexDelimited("0 1 2 3 4 5 6 7 8 9 A B C D E F 10"))
     Debug.Print IIf("%0D" = EncUrlBytes(Array(&HD)), "OK", "NG")
     
+    ' check null
+    Debug.Print EncUrlString("")
+    Debug.Print DecUrlString("")
 End Sub
 
 
@@ -815,8 +817,10 @@ End Function
 Function EncUrlString(Text As String, Optional Charset = "utf-8") As String
     Dim bs As Variant
     Dim Stream As ADODB.Stream
-    Set Stream = New ADODB.Stream
     
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
     Stream.Open
     Stream.Charset = Charset
     Stream.WriteText Text
@@ -838,8 +842,10 @@ End Function
 
 Function DecUrlString(Text As String, Optional Charset = "utf-8") As String
     Dim Stream As ADODB.Stream
-    Set Stream = New ADODB.Stream
     
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
     Stream.Open
     Stream.Type = adTypeBinary
     Stream.Write DecUrlBytes(Text)
@@ -885,6 +891,8 @@ Function DecUrlBytes(Text As String) As Byte()
     Dim Ps As Variant
     Dim i As Long
     Dim Counter As Long
+    
+    If Text = "" Then Exit Function
     
     pan = Empty
     Counter = 0
