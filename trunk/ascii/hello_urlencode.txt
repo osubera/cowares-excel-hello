@@ -5,6 +5,9 @@
 '  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
 '  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 
+'worksheet
+'  name;Sheet1
+
 
 'module
 '  name;UtilText
@@ -633,6 +636,7 @@ Public Function DecDictionary(Text As String) As Scripting.Dictionary
     
     Set DecDictionary = out
 End Function
+
 '}}}
 
 'module
@@ -694,6 +698,12 @@ Sub test1()
     Debug.Print IIf(s = EncUrlParameters(q), "OK", "NG")
     q.RemoveAll
     Set q = Nothing
+    
+    ' check the issue 1
+    Debug.Print EncUrlBytes(Array(&HD))
+    Debug.Print EncUrlBytes(DecHexDelimited("0 1 2 3 4 5 6 7 8 9 A B C D E F 10"))
+    Debug.Print IIf("%0D" = EncUrlBytes(Array(&HD)), "OK", "NG")
+    
 End Sub
 
 
@@ -857,6 +867,8 @@ Function EncUrlBytes(Data As Variant, Optional ByVal Length As Long = -1) As Str
             out = out & "+"
         Case &H30 To &H39, &H41 To &H5A, &H61 To &H7A, &H2E, &H2D, &H5F '"0" To "9", "A" To "Z", "a" To "z", ".", "-", "_"
             out = out & Chr(Data(i))
+        Case Is < &H10
+            out = out & "%0" & Hex(Data(i))
         Case Else
             out = out & "%" & Hex(Data(i))
         End Select
