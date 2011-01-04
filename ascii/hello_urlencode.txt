@@ -236,6 +236,21 @@ Public Function EncHexDelimited(Data As Variant, Optional ByVal Length As Long =
     EncHexDelimited = out
 End Function
 
+Public Function EncHexDelimitedB(Data As Variant, Optional ByVal Length As Long = -1, Optional ByVal Width As Long = 2) As String
+    Dim out As String
+    Dim i As Long
+    Dim s As String
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    s = String(Width, "0")
+    For i = 0 To Length - 1
+        out = out & Right(s & Hex(Data(i)), Width) & DefaultDelimiter
+    Next
+    
+    EncHexDelimitedB = out
+End Function
+
 Public Function DecHexDelimited(Text As String) As Byte()
     Dim Line As Variant
     Dim ByteData As Variant
