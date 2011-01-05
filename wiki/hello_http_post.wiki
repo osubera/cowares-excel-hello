@@ -26,13 +26,13 @@
 = How to use =
 
  # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
- # from test1() to test3() are executable examples.
+ # from test1() to test3() in Translations module are executable examples.
  # Worksheet `Sheet1` contains some Japanese to be translated.
  # you may want to run Sheet1.fix_imported_linefeed() before tests, because current [ssf_reader_primitive] cannot import a multiline cell correctly. 
 
 == 使い方 ==
  # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
- # test1() から test2() までが実行可能な見本。
+ # Translations 標準モジュールにある test1() から test2() までが実行可能な見本。
  # `Sheet1` ワークシートに翻訳用の日本語がある。
  # Sheet1.fix_imported_linefeed() をテスト前に実行しておくとよい。今の [ssf_reader_primitive] は複数行のセルデータを正確に読み込めないから。
 
@@ -1346,4 +1346,4 @@ Return.
 
 test3()
 
-
+http://2.bp.blogspot.com/_EUW0nrj9XlM/TSPt_rvL6DI/AAAAAAAAABE/uVmy_iVhif0/s1600/shot1.png
