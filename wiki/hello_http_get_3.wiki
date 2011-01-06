@@ -1,0 +1,1674 @@
+#summary how to get web pages asynchronouly in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * how to get web pages asynchronouly in vba
+
+== 概要 ==
+ * VBAで、ウェブのページを非同期に取得する
+
+= Details =
+
+ * perform web dictionary searches on Goo Dictionary on excel.
+ * [hello_http_get] , [hello_urlencode] , [hello_charset_adodb_stream] , [hello_timer] and [hello_array_collection] give us everything required.
+ * also see [hello_http_get_2] and [hello_http_post] .
+ * we use rough approaches to cut texts here, to avoid precise analysis of html source. 
+
+== 説明 ==
+ * グー辞書のウェブ辞書引きをエクセルから実行する。
+ * [hello_http_get] と [hello_urlencode] と [hello_charset_adodb_stream] と [hello_timer] と [hello_array_collection] とに必要なものは全部ある。
+ * [hello_http_get_2] と [hello_http_post] も参考に。
+ * ここでは、 HTML ソースの細かい解析をしないで、大雑把にテキストを切る手法を使った。
+
+= How to use =
+
+ # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
+ # from test1() to test3() are executable examples.
+ # Worksheet `Sheet1` contains words to search, try another word.
+
+== 使い方 ==
+ # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+ # test1() から test3() までが実行可能な見本。
+ # `Sheet1` ワークシートに検索用の言葉がある。他の言葉に変えて試してみよう。
+
+
+= Code =
+
+{{{
+
+'workbook
+'  name;hello_http_get_3.xls
+
+'require
+'  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'  ;{F5078F18-C551-11D3-89B9-0000F81FE221} 6 0 Microsoft XML, v6.0
+
+'worksheet
+'  name;Sheet1
+
+'cells-formula
+'  address;A1:A14
+'         ;桃
+'         ;jane
+'         ;エクセル
+'         ;excel
+'         ;vba
+'         ;オープンソース
+'         ;code
+'         ;自律
+'         ;自由
+'         ;公正
+'         ;fortitudinous
+'         ;free
+'         ;fair
+'         ;ssf
+
+
+'module
+'  name;QueManager
+'{{{
+Option Explicit
+
+' MSXML2.XMLHTTP を async(非同期)で使う。
+' これはイベントを返さないので、 readyState をこちらからポーリングする。
+'
+' VBA Class では Application.OnTime が使えないので、
+' この標準モジュールで実際のポーリングを行う。
+' WebDictionaries のインスタンス (tp) をキュー管理する。
+'
+' 動作メモ
+'
+' Manager の一生
+'  0. 休止 (Nothing)
+'  1. 生成
+'  2. Add
+'  3. Status: wait -> busy -> done
+'  4. Remove
+'  5. 消滅 (Nothing)
+' Mangaer 全体 = 0,1,5
+' Que 単位 = 2,3,4
+'
+' タイマー
+'  Activate   at 1
+'  Work       at 2,3,4
+'  Deactivate at 5
+'
+' イベント
+'  a. 生成
+'     Manager Is Nothing なら生成する
+'  b. 消滅
+'     Manager.Count = 0 なら消滅する
+'     生成と、直後の Add の間に DoEvents を入れてはいけない
+'  c. 追加
+'     新しいリクエストを wait 状態で Add する
+'  d. 接続
+'     wait 状態の tp に send を送り、 busy 状態にする
+'  e. 除去
+'     done 状態の tp を Remove する
+'  f. タイマー
+'     接続枠があれば、接続する
+'     終了したものを除去する
+'     不要になれば消滅する
+'     次のタイマーを投入する(１回ごとのタスクなので）
+'
+' tp の状態判定
+'  Status プロパティ: 0=initializing, 1=wait, 2=busy, 3=done
+'
+
+Const RepeatAfter = "0:00:01"
+Const MaxDelay = "0:00:16"
+Const RequestTimeout = 16
+Const CallMe = "QueManager.Continue"
+Const MaxRequest = 2
+
+Private Submitted As Variant
+Private Manager As Collection
+
+' 検索を開始する、公開インターフェース
+Public Sub send(Url As String, PublishTo As Variant, Optional NameMe As String = "John Doe", _
+        Optional ClassifyMe As String = "")
+    DoManagedRequest "GET", Url, PublishTo, RequestTimeout, NameMe, ClassifyMe
+End Sub
+
+' タイマーが使う公開インターフェース
+Public Sub Continue()
+    WatchTimer
+End Sub
+
+' タイマー用
+
+Private Sub WatchTimer()
+    Dim TheTime As Date
+    Dim TheDelay As Date
+    Dim TheProc As String
+    
+    If Not Fire Then Exit Sub
+    CheckStatus
+    
+    TheTime = Now() + TimeValue(RepeatAfter)
+    TheDelay = TheTime + TimeValue(MaxDelay)
+    TheProc = CallMe
+    Submitted = Array(TheTime, TheProc, TheDelay)
+    Application.OnTime TheTime, TheProc, TheDelay
+End Sub
+
+Private Sub RemoveTimer()
+    If Not IsArray(Submitted) Then Exit Sub
+    On Error Resume Next
+    Application.OnTime Submitted(0), Submitted(1), Submitted(2), False
+End Sub
+
+Private Function Fire() As Boolean
+    Fire = False
+    
+    If Manager Is Nothing Then Exit Function
+    If Manager.Count = 0 Then
+        DeactivateTimer
+        Exit Function
+    End If
+    
+    Fire = True
+End Function
+
+Private Sub ActivateTimer()
+    Debug.Print "Activate: " & Now()
+    Continue
+End Sub
+
+Private Sub DeactivateTimer()
+    Debug.Print "Deactivate: " & Now()
+    Set Manager = Nothing
+    RemoveTimer
+End Sub
+
+' リクエストと管理
+
+Private Sub DoManagedRequest(Method As String, Url As String, PublishTo As Variant, _
+            Timeout As Long, NameMe As String, ClassifyMe As String)
+    Dim tp As WebDictionaries
+    Dim NeedActivate As Boolean
+    
+    NeedActivate = (Manager Is Nothing)
+    
+    If NeedActivate Then Set Manager = New Collection
+    Set tp = New WebDictionaries
+    Manager.Add tp
+    
+    tp.Name = NameMe
+    tp.Tag = ClassifyMe
+    tp.SetPublish PublishTo
+    tp.Timeout = Timeout
+    tp.HttpOpen Method, Url
+    
+    If NeedActivate Then ActivateTimer
+End Sub
+
+Private Sub GoBusy(tp As WebDictionaries)
+    tp.send
+End Sub
+
+Private Sub CheckStatus()
+    Dim tp As Variant
+    Dim i As Long
+    Dim iKeep As Long
+    
+    Debug.Print "Task: " & Now()
+    If Manager Is Nothing Then Exit Sub
+    
+    iKeep = Manager.Count
+    For i = iKeep To 1 Step -1
+        Debug.Print i, Manager(i).Name, Manager(i).Status
+        Select Case Manager(i).Status
+        Case 1  ' wait
+            If RunningRequest < MaxRequest Then GoBusy Manager(i)
+        Case 2  ' busy
+            Manager(i).Task
+        Case 3  ' done
+            Manager.Remove i
+        End Select
+    Next
+End Sub
+
+Private Function RunningRequest() As Long
+    Dim i As Long
+    Dim out As Long
+    
+    out = 0
+    For i = 1 To Manager.Count
+        If Manager(i).Status = 2 Then out = out + 1
+    Next
+    
+    RunningRequest = out
+End Function
+'}}}
+
+'class
+'  name;WebDictionaries
+'{{{
+Option Explicit
+
+' MSXML2.XMLHTTP を async(非同期)で使う。
+' これはイベントを返さないので、 readyState をこちらからポーリングする。
+' 外部タイマーから断続的に Task が呼び出されて、状態チェックを行う。
+'
+' readyState
+' 0   uninitialized
+' 1   loading
+' 2   loaded
+' 3   interactive
+' 4   completed
+' 結果を書き込むセルアドレスは予めプロパティに入っている。
+' 結果が出次第、こちらから書き込む。
+'
+' 自分の状態は、上記と別に Status プロパティで公開する
+'  Status プロパティ: 0=initializing, 1=wait, 2=busy, 3=done
+
+Private tp As MSXML2.XMLHTTP60
+Private MyPublish As Variant
+Private MyTimeout As Long
+Private MyTag As String
+Private MyName As String
+Private MyStarted As Date
+Private MyStatus As Long
+
+Private Sub Class_Initialize()
+    MyStatus = 0
+    Set tp = New MSXML2.XMLHTTP60
+End Sub
+
+Private Sub Class_Terminate()
+    If tp.readyState <> 0 Then tp.abort
+    Set tp = Nothing
+End Sub
+
+' 識別に使う表示名
+Public Property Get Name() As String
+    Name = MyName
+End Property
+
+Public Property Let Name(NameMe As String)
+    MyName = NameMe
+End Property
+
+' DoPublish メソッドが使う、ページ識別名
+Public Property Get Tag() As String
+    Tag = MyTag
+End Property
+
+Public Property Let Tag(ClassifyMe As String)
+    MyTag = ClassifyMe
+End Property
+
+Public Property Get Timeout() As Long
+    Timeout = MyTimeout
+End Property
+
+Public Property Let Timeout(Seconds As Long)
+    MyTimeout = Seconds
+End Property
+
+Public Sub SetPublish(PublishTo As Variant)
+    Set MyPublish = PublishTo
+End Sub
+
+Public Function HttpOpen(bstrMethod As String, bstrUrl As String, _
+        Optional bstrUser As String = "", Optional bstrPassword As String = "") As Boolean
+    tp.Open bstrMethod, bstrUrl, True, bstrUser, bstrPassword
+    MyStatus = 1
+    HttpOpen = True
+End Function
+
+Public Function send(Optional varBody As Variant) As Boolean
+    On Error GoTo Denied
+    
+    MyStatus = 2
+    If IsMissing(varBody) Then
+        tp.send
+    Else
+        tp.send varBody
+    End If
+    MyStarted = Now()
+    PreparePublish
+    send = True
+    Exit Function
+    
+Denied:
+    DoPublish Err.Description
+    tp.abort
+    MyStatus = 3
+    send = False
+End Function
+
+Public Sub HttpStop()
+    tp.abort
+    MyStatus = 3
+End Sub
+
+' QueManager 向けに、情報を集約する
+Public Property Get Status() As Long
+    Status = MyStatus
+End Property
+
+' QueManager がポーリングに使う
+Public Sub Task()
+    Select Case tp.readyState
+    Case 0  ' uninitialized
+        ' ready to delete
+    Case 4  ' completed
+        OnCompleted
+    Case Else
+    'Case 1  ' loading
+    'Case 2  ' loaded
+    'Case 3  ' interactive
+        If DateDiff("s", MyStarted, Now()) > MyTimeout Then OnTimeout
+    End Select
+End Sub
+
+
+Private Sub OnCompleted()
+    Select Case tp.Status   ' http response status
+    Case 0
+        DoPublish "no responses"
+    Case Else
+        DoPublish tp.responseText
+    End Select
+    tp.abort
+    MyStatus = 3
+End Sub
+
+Private Sub OnTimeout()
+    DoPublish "request timeout"
+    tp.abort
+    MyStatus = 3
+End Sub
+
+Private Sub DoPublish(Text As Variant)
+    Dim Dics As Variant
+    Dim i As Long
+    
+    MyPublish.Interior.ColorIndex = 0
+    
+    Select Case MyTag
+    Case "goo"
+        ' <!--RIGHTSIDE--> 以下は右側の広告等なので捨てる
+        ' <dl>..</dl> が１つの辞書から引いた結果
+        Dics = LaserKnife(LaserKnife(LaserKnives(LaserKnife(Text, "<!--RIGHTSIDE-->", -1, True), "<dl "), "</dl>", -1, True), "<dt>")
+        For i = 0 To UBound(Dics)
+            MyPublish.Offset(0, i).Value = Replace(Replace(FixLineFeed(CStr(Dics(i)), ""), "</dt><dd>", "★"), "</dd><dt>", vbLf & "☆")
+        Next
+        MyPublish.Offset(0, UBound(Dics) + 1).Clear
+    Case Else
+        MyPublish.Value = Text
+    End Select
+End Sub
+
+Private Sub PreparePublish()
+    MyPublish.Clear
+    MyPublish.Interior.ColorIndex = 6
+End Sub
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    QueManager.send "http://cowares.nobody.jp/license/en.txt", Sheet1.Range("C1")
+End Sub
+
+Sub test2()
+    QueManager.send "http://cowares.nobody.jp/license/ja.txt", Sheet1.Range("C4"), "風"
+    QueManager.send "http://cowares.nobody.jp/license/en.txt", Sheet1.Range("D4"), "林"
+    QueManager.send "http://cowares.nobody.jp/license/de.txt", Sheet1.Range("E4"), "火"
+    QueManager.send "http://cowares.nobody.jp/license/", Sheet1.Range("F4"), "山"
+End Sub
+
+Sub test3()
+    Dim r As Long
+    Dim c As Long
+    Dim Before As String
+    Dim After As String
+    
+    r = 1
+    c = 1
+    With Sheet1
+        Do While .Cells(r, c).Value <> ""
+            Before = .Cells(r, c).Value
+            GooDictionary Before, .Cells(r, c + 1)
+            r = r + 1
+            DoEvents
+        Loop
+    End With
+
+End Sub
+
+
+' Goo 辞書
+' http://dictionary.goo.ne.jp
+' method=get
+' action=http://dictionary.goo.ne.jp/freewordsearcher.html
+' MT=検索したい語
+' mode=0 で始まる  ,2 で一致する  ,3 を説明文に含む  ,6 を見出し語に含む
+' submit, name=dict 辞書検索, name=web ウェブ検索
+' kind=all 辞書すべて  ,jn 国語  ,thsrs 類語  ,ej 英和  ,je 和英
+' リダイレクトした検索結果は次の書式
+' http://dictionary.goo.ne.jp/srch/all/風林火山/m0u/
+
+Function GooDictionary(Text As String, PublishTo As Range) As String
+    QueManager.send GooDicUrl(Text), PublishTo, Text, "goo"
+End Function
+
+Function GooDicUrl(Text As String) As String
+    Const Url = "http://dictionary.goo.ne.jp/freewordsearcher.html"
+    Dim Parameters As Variant
+    Parameters = Array(Array("MT", Text), Array("mode", "0"), Array("dict", "辞書検索"), Array("kind", "all"))
+    GooDicUrl = Url & "?" & EncUrlParameters(Parameters)
+End Function
+'}}}
+
+'module
+'  name;HelloUrlencode
+'{{{
+Option Explicit
+
+' URL Encode
+
+' references
+' http://www.faqs.org/rfcs/rfc2396.html
+' http://www.kinet.or.jp/hiromin/cgi_introduction/appendix/url_encode.html
+
+' 変換の対象外とする文字は、最小限のものを採用し、次のとおりとする。
+' 英数字、.(x2e)、-(x2d)、_(x5f)
+'
+' 特殊扱いの変換は、 " "(x20) を +(x2b) にすること。
+'
+' 残りは %xx 表記
+
+Sub test1()
+    Dim enc As Variant
+    Dim tb As Variant
+    Dim s As String
+    Dim t As String
+    Dim p As Variant
+    Dim q As Scripting.Dictionary
+    
+    s = "E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 20 30 39 41 5A 61 7A 2E 2D 5F"
+    tb = DecHexDelimited(s)
+    Debug.Print EncUrlBytes(tb)
+    Debug.Print EncHexDelimited(DecUrlBytes(EncUrlBytes(tb)))
+    Debug.Print IIf(s & " " = EncHexDelimited(DecUrlBytes(EncUrlBytes(tb))), "OK", "NG")
+    
+    s = "お帰りなさいませ 09AZaz.-_"
+    Debug.Print EncUrlString(s)
+    Debug.Print DecUrlString(EncUrlString(s))
+    
+    For Each enc In Array("utf-8", "iso-2022-jp", "shift_jis", "euc-jp")
+        Debug.Print CStr(enc)
+        Debug.Print EncUrlString(s, CStr(enc))
+        Debug.Print DecUrlString(EncUrlString(s, CStr(enc)), CStr(enc))
+        Debug.Print IIf(s = DecUrlString(EncUrlString(s, CStr(enc)), CStr(enc)), "OK", "NG")
+    Next
+    
+    t = "((q,url エンコード,),(hl,ja,),(山,川,),)"
+    p = DecVariantArray(t)
+    Debug.Print EncVariantArray(p)
+    s = EncUrlParameters(p)
+    Debug.Print s
+    Debug.Print DecUrlParametersValue(s, "q")
+    Debug.Print DecUrlParametersValue(s, "hl")
+    Debug.Print DecUrlParametersValue(s, "山")
+    Debug.Print IIf(t = EncVariantArray(DecUrlParametersArray(s)), "OK", "NG")
+    
+    Set q = DecUrlParameters(s)
+    Debug.Print EncDictionary(q)
+    Debug.Print EncUrlParameters(q)
+    Debug.Print IIf(s = EncUrlParameters(q), "OK", "NG")
+    q.RemoveAll
+    Set q = Nothing
+    
+    ' check the issue 1
+    Debug.Print EncUrlBytes(Array(&HD))
+    Debug.Print EncUrlBytes(DecHexDelimited("0 1 2 3 4 5 6 7 8 9 A B C D E F 10"))
+    Debug.Print IIf("%0D" = EncUrlBytes(Array(&HD)), "OK", "NG")
+    
+    ' check null
+    Debug.Print EncUrlString("")
+    Debug.Print DecUrlString("")
+End Sub
+
+
+' key=value の集合（ハッシュデータ）を URL エンコードする
+' Scripting.Dictionary 形式と、Variant Array ((key1,value1), (key2,value2), ,,,) 形式を受け取る
+' 文字列を受け取ったときは、 http://www.....com/?one_value_only のように解釈する。
+
+Function EncUrlParameters(Params As Variant, Optional Charset = "utf-8") As String
+    Dim Key As Variant
+    Dim Value As Variant
+    Dim KeyValue As Variant
+    Dim out As String
+    
+    out = ""
+    If IsEmpty(Params) Then
+        ' exit now
+    ElseIf IsObject(Params) Then
+        For Each Key In Params.Keys
+            Value = Params(Key)
+            If Not out = "" Then out = out & "&"
+            out = out & EncUrlString(CStr(Key), Charset) & "=" & EncUrlString(CStr(Value), Charset)
+        Next
+    ElseIf IsArray(Params) Then
+        For Each KeyValue In Params
+            Key = KeyValue(0)
+            Value = KeyValue(1)
+            If Not out = "" Then out = out & "&"
+            out = out & EncUrlString(CStr(Key), Charset) & "=" & EncUrlString(CStr(Value), Charset)
+        Next
+    Else
+        out = EncUrlString(CStr(Params), Charset)
+    End If
+    EncUrlParameters = out
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' key を１つ受け取り、それに対応する value 値だけをテキストで返す。
+
+Function DecUrlParametersValue(Text As String, Key As String, Optional Charset = "utf-8") As String
+    Dim KeyValue As Scripting.Dictionary
+    
+    Set KeyValue = DecUrlParameters(Text, Charset)
+    DecUrlParametersValue = KeyValue(Key)
+    
+    KeyValue.RemoveAll
+    Set KeyValue = Nothing
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' Scripting.Dictionary 形式を返す。
+
+Function DecUrlParameters(Text As String, Optional Charset = "utf-8") As Scripting.Dictionary
+    Dim KeyValue As Variant
+    Dim out As Scripting.Dictionary
+    Set out = New Scripting.Dictionary
+    
+    For Each KeyValue In DecUrlParametersArray(Text, Charset)
+        out(KeyValue(0)) = KeyValue(1)
+    Next
+    
+    Set DecUrlParameters = out
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' Variant Array ((key1,value1), (key2,value2), ,,,) 形式を返す。
+
+Function DecUrlParametersArray(Text As String, Optional Charset = "utf-8") As Variant
+    Dim Params As Variant
+    Dim Param As Variant
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim i As Long
+    Dim pan As Variant
+    Dim out() As Variant
+    
+    pan = Empty
+    Counter = 0
+    
+    Params = Split(Text, "&")
+    For Each Param In Params
+        If Param <> "" Then
+            KeyValue = Split(CStr(Param), "=", 2)
+            Key = DecUrlString(CStr(KeyValue(0)), Charset)
+            If UBound(KeyValue) = 1 Then
+                Value = DecUrlString(CStr(KeyValue(1)), Charset)
+            Else
+                Value = ""
+            End If
+            pan = Array(Array(Key, Value), pan)
+            Counter = Counter + 1
+        End If
+    Next
+
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecUrlParametersArray = out
+End Function
+
+' 文字列を URL エンコードする
+
+Function EncUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim bs As Variant
+    Dim Stream As ADODB.Stream
+    
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Charset = Charset
+    Stream.WriteText Text
+    
+    Stream.Position = 0
+    Stream.Type = adTypeBinary
+    
+    ' skip 3 bytes BOM
+    If Charset = "utf-8" Then Stream.Position = 3
+    
+    bs = Stream.Read
+    Stream.Close
+    Set Stream = Nothing
+    
+    EncUrlString = EncUrlBytes(bs)
+End Function
+
+' 文字列を URL デコードする
+
+Function DecUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim Stream As ADODB.Stream
+    
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write DecUrlBytes(Text)
+    
+    Stream.Position = 0
+    Stream.Type = adTypeText
+    Stream.Charset = Charset
+    DecUrlString = Stream.ReadText
+    
+    Stream.Close
+    Set Stream = Nothing
+End Function
+
+' バイト列を URL エンコードする
+
+Function EncUrlBytes(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        Select Case Data(i)
+        Case &H20   '" "
+            out = out & "+"
+        Case &H30 To &H39, &H41 To &H5A, &H61 To &H7A, &H2E, &H2D, &H5F '"0" To "9", "A" To "Z", "a" To "z", ".", "-", "_"
+            out = out & Chr(Data(i))
+        Case Is < &H10
+            out = out & "%0" & Hex(Data(i))
+        Case Else
+            out = out & "%" & Hex(Data(i))
+        End Select
+    Next
+    
+    EncUrlBytes = out
+End Function
+
+' バイト列を URL デコードする
+
+Function DecUrlBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Ps As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    If Text = "" Then Exit Function
+    
+    pan = Empty
+    Counter = 0
+    Ps = Split(Replace(Text, "+", " "), "%")
+    ' Ps(0)   : all raw characters
+    ' Ps(1) - : the first pair bytes make a byte char, the left are raw characters
+    
+    pan = StackPushAscii(pan, CStr(Ps(0)), Counter)
+    For i = 1 To UBound(Ps)
+        If Len(Ps(i)) >= 2 Then
+            pan = Array(CByte("&H" & Left(Ps(i), 2)), pan)
+            Counter = Counter + 1
+            pan = StackPushAscii(pan, Mid(Ps(i), 3), Counter)
+        Else
+            pan = StackPushAscii(pan, CStr(Ps(i)), Counter)
+        End If
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecUrlBytes = out
+End Function
+
+' 文字列を１文字ずつ分解して、そのユニコード値をスタックに積む
+
+Function StackPushAscii(Stack As Variant, Text As String, ByRef Counter As Long) As Variant
+    Dim i As Long
+    Dim pan As Variant
+    
+    pan = Stack
+    For i = 1 To Len(Text)
+        pan = Array(AscW(Mid(Text, i, 1)), pan)
+        Counter = Counter + 1
+    Next
+    
+    StackPushAscii = pan
+End Function
+
+
+'}}}
+
+'module
+'  name;UtilText
+'{{{
+Option Explicit
+
+Const DefaultLineFeed = vbCrLf
+Const DefaultDelimiter = " "
+
+' 検索、切り取り
+
+Public Function DivideAtFirstMatch( _
+    ByRef MatchedTag As String, ByRef BeforeTag As String, ByRef AfterTag As String, _
+    Text As String, Tags As Variant, Optional Compare As VbCompareMethod = vbBinaryCompare) As Boolean
+    ' 配列でもらった Tag のいずれかの、最初の位置に見つかったもので、文字列を前後に分けて返す。
+    ' MatchedTag: 実際に見つかったタグ、見つからないときは "" を返す。
+    ' BeforeTag:  Text の Tag より前の部分 を返す。
+    ' AfterTag:   Text の Tag より後の部分 を返す。
+    ' Text:       検索対象の文字列を指定する。
+    ' Tags:       検索するタグを指定する。 Array("<b>","<i>") など
+    ' 戻り値:     タグが１つも無ければ false
+    ' 同一順位なら、先に指定されたタグを優先する。 ("<b","<br" のようにどちらにも一致する場合)
+    
+    Dim Tag As Variant
+    Dim At As Long
+    Dim AtFirst As Long
+    Dim AtTag As String
+    
+    If Not IsArray(Tags) Then
+        DivideAtFirstMatch = DivideAtFirstMatch(MatchedTag, BeforeTag, AfterTag, Text, Array(CStr(Tags)))
+        Exit Function
+    End If
+    
+    AtFirst = Len(Text) + 1
+    AtTag = ""
+    For Each Tag In Tags
+        If Tag = "" Then GoTo Ignore
+        At = InStr(1, Text, CStr(Tag), Compare)
+        If At = 0 Then GoTo Ignore
+        If At >= AtFirst Then GoTo Ignore
+        
+        AtFirst = At
+        AtTag = CStr(Tag)
+Ignore:
+    Next
+    
+    MatchedTag = AtTag
+    BeforeTag = Left(Text, AtFirst - 1)
+    AfterTag = Right(Text, Len(Text) - AtFirst + 1 - Len(AtTag))
+    DivideAtFirstMatch = (AtTag <> "")
+End Function
+
+' 検索語の直後からや直前を切り取る
+
+Public Function LaserKnife(Text As Variant, SearchMe As Variant, Optional ByVal Length As Long = -1, _
+        Optional TakeBefore As Boolean = False, Optional SayNo As Boolean = False) As Variant
+    Dim out As String
+    Dim SearchText As String
+    Dim FoundAt As Long
+    Dim i As Long
+    Dim outArray() As String
+    
+    SearchText = CStr(SearchMe)
+    
+    If IsArray(Text) Then
+        ReDim outArray(LBound(Text) To UBound(Text))
+        For i = LBound(Text) To UBound(Text)
+            outArray(i) = LaserKnife(Text(i), SearchText, Length, TakeBefore, SayNo)
+        Next
+        LaserKnife = outArray
+        Exit Function
+    End If
+    
+    Select Case TypeName(Text)
+    Case "String"
+        If Length = -1 Then Length = Len(Text)
+        If Length = 0 Then
+            out = ""
+        Else
+            FoundAt = InStr(1, Text, SearchText, vbTextCompare)
+            If FoundAt = 0 Then
+                If SayNo Then
+                    out = ""
+                ElseIf TakeBefore Then
+                    out = Right(Text, Length)
+                Else
+                    out = Left(Text, Length)
+                End If
+            ElseIf TakeBefore Then
+                out = Right(Left(Text, FoundAt - 1), Length)
+            Else
+                out = Mid(Text, FoundAt + Len(SearchText), Length)
+            End If
+        End If
+    Case Else
+        If SayNo Then
+            out = ""
+        Else
+            out = TypeName(Text)
+        End If
+    End Select
+    
+    LaserKnife = out
+End Function
+
+Public Function LaserKnives(Text As Variant, SearchMe As Variant, Optional ByVal Length As Long = -1, _
+        Optional TakeBefore As Boolean = False) As Variant
+        
+    Dim out() As String
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim MyText As String
+    Dim MyTake As String
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    MyText = CStr(Text)
+    Do
+        MyTake = LaserKnife(MyText, SearchMe, Length, TakeBefore, True)
+        If MyTake = "" Then Exit Do
+        pan = Array(MyTake, pan)
+        Counter = Counter + 1
+        MyText = LaserKnife(MyText, SearchMe, -1, False, True)
+    Loop
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    LaserKnives = out
+End Function
+
+Public Function BinaryKnife(Data As Variant, SearchMe As Variant, Optional ByVal Length As Long = -1, _
+        Optional TakeBefore As Boolean = False, Optional SayNo As Boolean = False) As Byte()
+    Dim outBin() As Byte
+    Dim out As String
+    Dim SearchText As String
+    Dim Text As String
+    Dim FoundAt As Long
+    Dim i As Long
+    Dim outArray() As String
+    
+    BinaryKnife = outBin
+    If Not IsArray(Data) Then Exit Function
+    If Not IsArray(SearchMe) Then Exit Function
+    If Length = -1 Then Length = UBound(Data) + 1
+    If Length = 0 Then Exit Function
+    
+    Length = Length * 3
+    Text = EncHexDelimitedB(Data)
+    SearchText = EncHexDelimitedB(SearchMe)
+            
+    FoundAt = InStr(1, Text, SearchText)
+    If FoundAt = 0 Then
+        If SayNo Then
+            out = ""
+        ElseIf TakeBefore Then
+            out = Right(Text, Length)
+        Else
+            out = Left(Text, Length)
+        End If
+    ElseIf TakeBefore Then
+        out = Right(Left(Text, FoundAt - 1), Length)
+    Else
+        out = Mid(Text, FoundAt + Len(SearchText), Length)
+    End If
+    
+    outBin = DecHexDelimited(out)
+    BinaryKnife = outBin
+End Function
+
+
+' ユニコード文字とバイト配列間の変換
+
+Public Function BytesToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrB(Data(i))
+    Next
+    
+    BytesToString = out
+End Function
+
+Public Function StringToBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = LenB(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscB(MidB(Text, i, 1))
+    Next
+    
+    StringToBytes = out
+End Function
+
+' ユニコード文字とワード配列間の変換
+
+Public Function WordsToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrW(Data(i))
+    Next
+    
+    WordsToString = out
+End Function
+
+Public Function StringToWords(Text As String) As Integer()
+    Dim out() As Integer
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscW(Mid(Text, i, 1))
+    Next
+    
+    StringToWords = out
+End Function
+
+' ユニコード文字とロング配列間の変換
+
+Public Function LongsToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & Chr(Data(i))
+    Next
+    
+    LongsToString = out
+End Function
+
+Public Function StringToLongs(Text As String) As Long()
+    Dim out() As Long
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = Asc(Mid(Text, i, 1))
+    Next
+    
+    StringToLongs = out
+End Function
+
+' ワードまとめと分離
+
+Public Function BytesToWords(Data As Variant, Optional ByVal Length As Long = -1) As Integer()
+    Dim WordLength As Long
+    Dim i As Long
+    Dim out() As Integer
+    
+    If Length = -1 Then Length = UBound(Data) + 1
+    WordLength = Int(Length / 2) + Length Mod 2
+    ' this will lose an information of the original length, odd
+    If WordLength > 0 Then
+        ReDim out(0 To WordLength - 1)
+        For i = 0 To Length - 1 Step 2
+            out(i / 2) = Data(i)
+        Next
+        For i = 1 To Length - 1 Step 2
+            If Data(i) < &H80 Then
+                out((i - 1) / 2) = out((i - 1) / 2) + Data(i) * CLng(&H100)
+            Else    ' minus bit
+                out((i - 1) / 2) = out((i - 1) / 2) + (Data(i) - &H100) * CLng(&H100)
+            End If
+        Next
+    End If
+    
+    BytesToWords = out
+End Function
+
+Public Function WordsToBytes(Data As Variant, Optional ByVal Length As Long = -1) As Byte()
+    Dim ByteLength As Long
+    Dim i As Long
+    Dim out() As Byte
+    
+    If Length = -1 Then Length = UBound(Data) + 1
+    ByteLength = Length * 2
+    If ByteLength > 0 Then
+        ReDim out(0 To ByteLength - 1)
+        For i = 0 To Length - 1
+            out(i * 2) = CByte(Data(i) And &HFF)
+            If Data(i) >= 0 Then
+                out(i * 2 + 1) = CByte(Int(Data(i) / &H100))
+            Else
+                out(i * 2 + 1) = CByte(Int(Data(i) / &H100) + &H100)
+            End If
+        Next
+    End If
+    
+    WordsToBytes = out
+End Function
+
+' バイト配列と16進ダンプ間の変換
+
+Public Function EncHexDelimited(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & Hex(Data(i)) & DefaultDelimiter
+    Next
+    
+    EncHexDelimited = out
+End Function
+
+Public Function EncHexDelimitedB(Data As Variant, Optional ByVal Length As Long = -1, Optional ByVal Width As Long = 2) As String
+    Dim out As String
+    Dim i As Long
+    Dim s As String
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    s = String(Width, "0")
+    For i = 0 To Length - 1
+        out = out & Right(s & Hex(Data(i)), Width) & DefaultDelimiter
+    Next
+    
+    EncHexDelimitedB = out
+End Function
+
+Public Function DecHexDelimited(Text As String) As Byte()
+    Dim Line As Variant
+    Dim ByteData As Variant
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, DefaultLineFeed)
+        For Each ByteData In Split(Line, DefaultDelimiter)
+            If ByteData <> "" Then
+                pan = Array(CByte("&H" & ByteData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimited = out
+End Function
+
+Public Function DecHexDelimitedL(Text As String) As Long()
+    Dim Line As Variant
+    Dim LongData As Variant
+    Dim out() As Long
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, DefaultLineFeed)
+        For Each LongData In Split(Line, DefaultDelimiter)
+            If LongData <> "" Then
+                pan = Array(CLng("&H" & LongData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimitedL = out
+End Function
+
+' 改行統一 (vbCrLF, vbLF, vbCr を指定のものに統一する)
+
+Public Function FixLineFeed(Text As String, Optional NewLineFeed As String = vbCrLf) As String
+    Dim pan As Collection
+    Dim out As String
+    Dim Line As Variant
+    Dim MoreLine As Variant
+    Dim MoreEnd As Long
+    Dim i As Long
+    
+    Set pan = New Collection
+    For Each Line In Split(Text, vbLf)
+        If Line = "" Then
+            pan.Add ""
+        Else
+            MoreLine = Split(Line, vbCr)
+            MoreEnd = UBound(MoreLine)
+            If MoreLine(MoreEnd) = "" Then MoreEnd = MoreEnd - 1
+            For i = 0 To MoreEnd
+                pan.Add MoreLine(i)
+            Next
+        End If
+    Next
+    Do While pan.Count > 0
+        out = out & pan(1) & NewLineFeed
+        pan.Remove 1
+    Loop
+    
+    If out = "" Then
+        FixLineFeed = ""
+    Else
+        FixLineFeed = Left(out, Len(out) - Len(NewLineFeed))
+    End If
+End Function
+
+' 整数配列とビット列ダンプ間の変換
+
+Public Function EncBits(Data As Variant, Optional ByVal Length As Long = -1, _
+                Optional ByVal LowbitFirst As Boolean = True, _
+                Optional ByVal FixedBitLength As Long = -1, _
+                Optional Delimiter As String = " ") As String
+    Dim out As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As Long
+    Dim BitLength As Long
+    Dim Bits() As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    
+    If FixedBitLength = -1 Then
+        ReDim Bits(0 To 31)
+    Else
+        BitLength = FixedBitLength
+        ReDim Bits(0 To FixedBitLength - 1)
+    End If
+    
+    For i = 0 To Length - 1
+        If FixedBitLength = -1 Then
+            Select Case TypeName(Data(i))
+            Case "Byte"
+                BitLength = 8
+            Case "Integer"
+                BitLength = 16
+            Case "Long"
+                BitLength = 32
+            Case Else
+                BitLength = 0
+            End Select
+        End If
+        
+        x = Data(i)
+        For j = 0 To BitLength - 1
+            Bits(j) = Abs(x Mod 2)
+            x = Int(x / 2)
+        Next
+        
+        If LowbitFirst Then
+            For j = 0 To BitLength - 1
+                out = out & CStr(Bits(j))
+            Next
+        Else
+            For j = BitLength - 1 To 0 Step -1
+                out = out & CStr(Bits(j))
+            Next
+        End If
+        out = out & Delimiter
+    Next
+    
+    EncBits = out
+End Function
+
+Public Function DecBits(Text As String, Optional ByVal LowbitFirst As Boolean = True) As Variant
+    Dim out() As Variant
+    Dim DataValue As Variant
+    Dim Bitter As Long
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Dim TextAddEnd As String
+    
+    pan = Empty
+    Counter = 0
+    Bitter = 0
+    DataValue = 0
+    TextAddEnd = Text & " "
+    
+    For i = 1 To Len(TextAddEnd)
+        Select Case Mid(TextAddEnd, i, 1)
+        Case "0"
+            If Not LowbitFirst Then
+                DataValue = DataValue * 2
+            End If
+            Bitter = Bitter + 1
+        Case "1"
+            If LowbitFirst Then
+                DataValue = DataValue + 2 ^ Bitter
+            Else
+                DataValue = DataValue * 2 + 1
+            End If
+            Bitter = Bitter + 1
+        Case Else
+            If Bitter > 1 Then
+                If Bitter <= 8 Then
+                    DataValue = CByte(DataValue)
+                ElseIf Bitter <= 15 Then
+                    DataValue = CInt(DataValue)
+                ElseIf Bitter = 16 Then
+                    If DataValue >= 32768 Then
+                        DataValue = CInt(DataValue - 65536)
+                    Else
+                        DataValue = CInt(DataValue)
+                    End If
+                ElseIf Bitter <= 31 Then
+                    DataValue = CLng(DataValue)
+                ElseIf Bitter = 32 Then
+                    If DataValue >= 2147483648# Then
+                        DataValue = CLng(DataValue - 4294967296#)
+                    Else
+                        DataValue = CLng(DataValue)
+                    End If
+                End If
+                pan = Array(DataValue, pan)
+                Counter = Counter + 1
+                Bitter = 0
+                DataValue = 0
+            End If
+        End Select
+    Next
+    
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecBits = out
+End Function
+
+
+' バリアント配列のテキスト変換
+' Array(1, Array(2, 3), 4, 5) を次のように記す
+' (1,(2,3,)4,5,)
+
+Private Function DefineParenthes() As Variant
+    DefineParenthes = Array("(", ")", ",")
+End Function
+
+Public Function EncVariantArray(Data As Variant) As String
+    Dim Parenthes As Variant
+    Dim KeyValue As Variant
+    Dim out As String
+    Dim Delimiter As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    
+    Parenthes = DefineParenthes
+    ArrayBegin = Parenthes(0)
+    ArrayEnd = Parenthes(1)
+    Delimiter = Parenthes(2)
+    
+    If IsArray(Data) Then
+        out = ArrayBegin
+        For Each KeyValue In Data
+            out = out & EncVariantArray(KeyValue) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        out = TypeName(Data)
+    Else
+        out = CStr(Data)
+    End If
+    
+    EncVariantArray = out
+End Function
+
+Public Function DecVariantArray(ByVal Text As String) As Variant
+    Dim Evaluated As Variant
+    EvalAfter Evaluated, Text
+    DecVariantArray = Evaluated(0)
+End Function
+
+Private Function EvalComma(ByRef MatchedTag As String, ByRef BeforeTag As String, ByRef Text As String) As Long
+    Dim i As Long
+    Dim AfterTag As String
+    Dim Tags As Variant
+    
+    Tags = DefineParenthes
+    EvalComma = -1
+    If DivideAtFirstMatch(MatchedTag, BeforeTag, AfterTag, Text, Tags) Then
+        For i = 0 To UBound(Tags)
+            If MatchedTag = Tags(i) Then
+                EvalComma = i
+                Exit For
+            End If
+        Next
+    End If
+    
+    Text = AfterTag
+End Function
+
+Private Function EvalBefore(ByRef Evaluated As Variant, Text As String) As Boolean
+    If IsNumeric(Text) Then
+        Evaluated = Array(Val(Text), Evaluated)
+    Else
+        Evaluated = Array(Text, Evaluated)
+    End If
+    EvalBefore = True
+End Function
+
+Private Function EvalAfter(ByRef Evaluated As Variant, ByRef Text As String) As Boolean
+    Dim MatchedTag As String
+    Dim BeforeTag As String
+    Dim MyEvaluated As Variant
+    Dim Divider As String
+    Dim Counter As Long
+    Dim i As Long
+    Dim out() As Variant
+    
+    Divider = DefineParenthes(2)
+    Counter = 0
+    
+    Do Until Text = ""
+        Select Case EvalComma(MatchedTag, BeforeTag, Text)
+        Case 0  'new child
+            ' ignore BeforeTag
+            MyEvaluated = Empty
+            If EvalAfter(MyEvaluated, Text) Then Evaluated = Array(MyEvaluated, Evaluated)
+            Counter = Counter + 1
+            'skip to next comma
+            Text = LaserKnife(Text, Divider)
+        Case 2  'next
+            EvalBefore Evaluated, BeforeTag
+            Counter = Counter + 1
+        'Case 1  'end
+        Case Else   'end or not found
+            ' ignore BeforeTag and AfterTag
+            Exit Do
+        End Select
+    Loop
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = Evaluated(0)
+            Evaluated = Evaluated(1)
+        Next
+    End If
+    
+    Evaluated = out
+    EvalAfter = Not IsEmpty(Evaluated)
+End Function
+
+' 辞書のテキスト変換
+' Dic(key) = value を次のように記す
+' key1=value1
+' key2=value2
+
+Private Function DefineDictionarySymbols() As Variant
+    DefineDictionarySymbols = Array(vbCrLf, "=")
+End Function
+
+Public Function EncDictionary(Dic As Scripting.Dictionary) As String
+    Dim Tags As Variant
+    Dim Equal As String
+    Dim LineFeed As String
+    Dim Key As Variant
+    Dim out As String
+    
+    Tags = DefineDictionarySymbols
+    LineFeed = Tags(0)
+    Equal = Tags(1)
+    out = ""
+    For Each Key In Dic.Keys
+        out = out & Key & Equal & Dic(Key) & LineFeed
+    Next
+    
+    EncDictionary = out
+End Function
+
+Public Function DecDictionary(Text As String) As Scripting.Dictionary
+    Dim Tags As Variant
+    Dim LineFeed As String
+    Dim Equal As String
+    Dim Lines As Variant
+    Dim Line As Variant
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim out As Scripting.Dictionary
+    
+    Tags = DefineDictionarySymbols
+    LineFeed = Tags(0)
+    Equal = Tags(1)
+    Set out = New Scripting.Dictionary
+    
+    Lines = Split(Text, LineFeed)
+    For Each Line In Lines
+        KeyValue = Split(CStr(Line), Equal, 2)
+        If UBound(KeyValue) >= 0 Then
+            Key = KeyValue(0)
+            If Key <> "" Then
+                If UBound(KeyValue) = 1 Then
+                    Value = KeyValue(1)
+                Else
+                    Value = ""
+                End If
+                out(Key) = Value
+            End If
+        End If
+    Next
+    
+    Set DecDictionary = out
+End Function
+
+'}}}
+
+}}}
+
+=== Result ===
+
+test1()
+
+{{{
+Activate: 2011/01/06 10:06:20
+Task: 2011/01/06 10:06:20
+ 1            John Doe       1 
+Task: 2011/01/06 10:06:21
+ 1            John Doe       2 
+Task: 2011/01/06 10:06:22
+ 1            John Doe       3 
+Deactivate: 2011/01/06 10:06:23
+}}}
+
+test2()
+
+{{{
+Activate: 2011/01/06 10:20:17
+Task: 2011/01/06 10:20:17
+ 1            風              1 
+Task: 2011/01/06 10:20:18
+ 4            山              1 
+ 3            火              1 
+ 2            林              1 
+ 1            風              2 
+Task: 2011/01/06 10:20:19
+ 4            山              2 
+ 3            火              1 
+ 2            林              1 
+ 1            風              3 
+Task: 2011/01/06 10:20:20
+ 3            山              3 
+ 2            火              2 
+ 1            林              2 
+Task: 2011/01/06 10:20:21
+ 2            火              3 
+ 1            林              3 
+Deactivate: 2011/01/06 10:20:22
+}}}
+
+test3()
+
+{{{
+Activate: 2011/01/06 10:27:12
+Task: 2011/01/06 10:27:12
+ 1            桃              1 
+Task: 2011/01/06 10:27:13
+ 3            エクセル        1 
+ 2            jane           1 
+ 1            桃              2 
+Task: 2011/01/06 10:27:14
+ 14           ssf            1 
+ 13           fair           1 
+ 12           free           1 
+ 11           fortitudinous  1 
+ 10           公正            1 
+ 9            自由            1 
+ 8            自律            1 
+ 7            code           1 
+ 6            オープンソース  1 
+ 5            vba            1 
+ 4            excel          1 
+ 3            エクセル        2 
+ 2            jane           1 
+ 1            桃              2 
+Task: 2011/01/06 10:27:15
+ 14           ssf            1 
+ 13           fair           1 
+ 12           free           1 
+ 11           fortitudinous  1 
+ 10           公正            1 
+ 9            自由            1 
+ 8            自律            1 
+ 7            code           1 
+ 6            オープンソース  1 
+ 5            vba            1 
+ 4            excel          1 
+ 3            エクセル        3 
+ 2            jane           2 
+ 1            桃              3 
+Task: 2011/01/06 10:27:16
+ 12           ssf            2 
+ 11           fair           1 
+ 10           free           1 
+ 9            fortitudinous  1 
+ 8            公正            1 
+ 7            自由            1 
+ 6            自律            1 
+ 5            code           1 
+ 4            オープンソース  1 
+ 3            vba            1 
+ 2            excel          1 
+ 1            jane           3 
+Task: 2011/01/06 10:27:17
+ 11           ssf            2 
+ 10           fair           2 
+ 9            free           1 
+ 8            fortitudinous  1 
+ 7            公正            1 
+ 6            自由            1 
+ 5            自律            1 
+ 4            code           1 
+ 3            オープンソース  1 
+ 2            vba            1 
+ 1            excel          1 
+Task: 2011/01/06 10:27:18
+ 11           ssf            3 
+ 10           fair           3 
+ 9            free           2 
+ 8            fortitudinous  2 
+ 7            公正            1 
+ 6            自由            1 
+ 5            自律            1 
+ 4            code           1 
+ 3            オープンソース  1 
+ 2            vba            1 
+ 1            excel          1 
+Task: 2011/01/06 10:27:19
+ 9            free           3 
+ 8            fortitudinous  3 
+ 7            公正            2 
+ 6            自由            2 
+ 5            自律            1 
+ 4            code           1 
+ 3            オープンソース  1 
+ 2            vba            1 
+ 1            excel          1 
+Task: 2011/01/06 10:27:20
+ 7            公正            3 
+ 6            自由            3 
+ 5            自律            2 
+ 4            code           2 
+ 3            オープンソース  1 
+ 2            vba            1 
+ 1            excel          1 
+Task: 2011/01/06 10:27:21
+ 5            自律            3 
+ 4            code           3 
+ 3            オープンソース  2 
+ 2            vba            2 
+ 1            excel          1 
+Task: 2011/01/06 10:27:22
+ 3            オープンソース  3 
+ 2            vba            3 
+ 1            excel          2 
+Task: 2011/01/06 10:27:23
+ 1            excel          3 
+Deactivate: 2011/01/06 10:27:24
+}}}
+
+
