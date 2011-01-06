@@ -1,0 +1,260 @@
+#summary how to get html document from web using http in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * how to get html document from web using http in vba
+
+== 概要 ==
+ * VBAで http を使ってウェブから HTML 文書を取得する
+
+= Details =
+
+ * we use the Microsoft HTML Object Library 4.0 to process a request.
+ * this library is troublesome and chaotic, because it has many differenct interfaces depend machines while it shows exactly same version 4.0.
+ * we use the `MSHTML.IHTMLDocument4` interface here, so XP and later may go well, but 2000 and earliar may not work. 
+ * this code has a explicit interface as IHTMLDocument4, maybe you can use HTMLDocument instead.
+ * the `createDocumentFromUrl` method gets document from the specified url, and parse it into a html dom document. 
+ * after an HTML Document is gotten, we can use familiar dom functions to analyse the document. 
+ * when a Charset used to parse is wrong, we can specify a correct one to this property and "Refresh" the document. 
+ * it goes to an asynchronous request, so we must watch the status, or use event procedures.
+ * this sample shows a simple polling. 
+
+== 説明 ==
+ * Microsoft HTML Object Library 4.0 でリクエストを処理する。
+ * このライブラリはやっかいでカオスだ。同じバージョン 4.0 なのにマシンによって異なる、多くのインターフェースを持っている。
+ * ここでは `MSHTML.IHTMLDocument4` インターフェースを使うので、 XP 以降は良いが 2000 とかもっと古いとだめ。
+ * コードに IHTMLDocument4 と明確なインターフェースを指示しているところは、単に HTMLDocument と置き換えてもよい。
+ * `createDocumentFromUrl` メソッドは URL から文書を取得して HTML DOM への解析まで行う。
+ * HTML 文書が手に入れば、使い慣れた DOM の機能で文書を解析できる。
+ * Charset が間違って使われている場合、プロパティに正しいものを指示して "Refresh" すればよい。
+ * これは非同期に動作するので、ステータス監視をするか、イベントプロシジャを使わないといけない。
+ * ここでは単純なポーリングを使った。
+
+= How to use =
+
+ # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
+ # test1() are executable examples, it lists links.
+
+== 使い方 ==
+ # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+ # test1() が実行可能な見本。リンクを抽出する。
+
+= Code =
+
+{{{
+
+'workbook
+'  name;htllo_http_get_html.xlsm
+
+'require
+'  ;{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B} 4 0 Microsoft HTML Object Library
+
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    Const Timeout As Long = 5
+    Const Url As String = "http://www.nic.ad.jp"
+    
+    Dim tp As MSHTML.IHTMLDocument4
+    Dim doc As MSHTML.HTMLDocument
+    Dim tags As MSHTML.IHTMLElementCollection
+    Dim tag As MSHTML.IHTMLElement
+    Dim TimeUp As Date
+
+    Set tp = New MSHTML.HTMLDocument
+    Set doc = tp.createDocumentFromUrl(Url, vbNullString)
+    
+    TimeUp = Now() + Timeout / 24 / 3600
+    Do
+        DoEvents
+        If (doc.readyState = "complete") Then Exit Do
+    Loop While (Now() < TimeUp)
+    
+    If doc.readyState <> "complete" Then
+        Debug.Print "timeout"
+        GoTo Done
+    End If
+    
+    If LenB(doc.DocumentElement.outerHTML) = 0 Then
+        Debug.Print "blank document"
+        GoTo Done
+    End If
+    
+    Debug.Print doc.Charset
+    'doc.Charset = "iso-2022-jp"
+    'doc.execCommand "Refresh"
+    
+    Set tags = doc.getElementsByTagName("H1")
+    For Each tag In tags
+        Debug.Print tag.innerText
+        Debug.Print tag.outerHTML
+    Next
+    Set tags = doc.body.getElementsByTagName("A")
+    For Each tag In tags
+        Debug.Print tag.innerText, tag.getAttribute("href")
+    Next
+    
+    
+Done:
+        doc.Close
+        tp.Close
+        Set doc = Nothing
+        Set tp = Nothing
+End Sub
+'}}}
+
+}}}
+
+=== Result ===
+
+test1()
+
+{{{
+iso-2022-jp
+社団法人日本ネットワークインフォメーションセンター
+
+<H1><A href="/ja/"><SPAN class=hide>社団法人日本ネットワークインフォメーションセンター</SPAN></A></H1>
+メインコンテンツへスキップ  http://www.nic.ad.jp/#primaryContent
+TOP           http://www.nic.ad.jp/ja/
+ENGLISH       http://www.nic.ad.jp/en/
+SITEMAP       http://www.nic.ad.jp/ja/sitemap.html
+RSS           http://www.nic.ad.jp/ja/index.xml
+社団法人日本ネットワークインフォメーションセンター      http://www.nic.ad.jp/ja/
+WHOISとは     http://www.nic.ad.jp/ja/whois/index.html
+JPNIC WHOIS Gateway         http://www.nic.ad.jp/ja/whois/ja-gateway.html
+Q&A           http://www.nic.ad.jp/ja/question/ip5.html
+              http://www.nic.ad.jp/ja/ip/application.html
+              http://www.nic.ad.jp/ja/profile/beginner.html
+              http://www.nic.ad.jp/ja/member/guide/
+              http://www.nic.ad.jp/member/
+              http://www.nic.ad.jp/#notice1
+              http://www.nic.ad.jp/#event1
+              http://www.nic.ad.jp/ja/member/list/index.html
+              http://www.nic.ad.jp/ja/member/list/6.html
+              http://www.nic.ad.jp/ja/member/list/131.html
+              http://www.nic.ad.jp/ja/member/list/494.html
+              http://www.venus.gr.jp/opf-jp/events/showcase4/
+              http://www.nic.ad.jp/ja/mailmagazine/
+              http://www.nic.ad.jp/ja/ip/ipv4pool/
+JPNICとは     http://www.nic.ad.jp/ja/profile/index.html
+活動理念      http://www.nic.ad.jp/ja/profile/view.html
+組織概要      http://www.nic.ad.jp/ja/profile/about.html
+定款・細則    http://www.nic.ad.jp/ja/profile/rule.html
+情報公開      http://www.nic.ad.jp/ja/profile/disclose/index.html
+プレスリリース              http://www.nic.ad.jp/ja/pressrelease/index.html
+会員リスト    http://www.nic.ad.jp/ja/member/list/index.html
+入会案内      http://www.nic.ad.jp/ja/member/guide/index.html
+関連団体へのリンク          http://www.nic.ad.jp/ja/profile/link.html
+Q&A           http://www.nic.ad.jp/ja/question/nic.html
+IPアドレス    http://www.nic.ad.jp/ja/ip/index.html
+IPアドレス管理の基礎知識    http://www.nic.ad.jp/ja/ip/admin-basic.html
+IPアドレス・AS番号が欲しい時は            http://www.nic.ad.jp/ja/ip/whereto/
+IPアドレス登録管理業務について            http://www.nic.ad.jp/ja/ip/about-regist-admin.html
+ドキュメント一覧            http://www.nic.ad.jp/ja/ip/doc/
+IPアドレス関連のミーティング              http://www.nic.ad.jp/ja/ip/event/
+IPアドレストピックス        http://www.nic.ad.jp/ja/ip/topics/
+統計・各種リスト            http://www.nic.ad.jp/ja/stat/ip/
+JPIRR         http://www.nic.ad.jp/ja/irr/
+逆引きネームサーバの適切な設定について    http://www.nic.ad.jp/ja/dns/lame/
+Q&A           http://www.nic.ad.jp/ja/question/ip.html
+インターネットガバナンス    http://www.nic.ad.jp/ja/governance/index.html
+歴史と背景    http://www.nic.ad.jp/ja/newsletter/No26/020.html
+ICANN情報     http://www.nic.ad.jp/ja/icann/index.html
+JPNICからの発信             http://www.nic.ad.jp/ja/opinion/index.html
+国際関係組織一覧            http://www.nic.ad.jp/ja/intl/org/org.html
+インターネットの基礎        http://www.nic.ad.jp/ja/basics/index.html
+インターネットのしくみ      http://www.nic.ad.jp/ja/basics/beginners/index.html
+用語集        http://www.nic.ad.jp/ja/tech/glossary.html
+1分解説       http://www.nic.ad.jp/ja/basics/terms/index.html
+10分講座      http://www.nic.ad.jp/ja/newsletter/10minute.html
+歴史の一幕    http://www.nic.ad.jp/ja/newsletter/history.html
+インターネットの技術        http://www.nic.ad.jp/ja/tech/index.html
+JPIRR         http://www.nic.ad.jp/ja/irr/index.html
+VoIP/SIP相互接続検証タスクフォース        http://www.nic.ad.jp/ja/voip-sip-tf/index.html
+ENUM          http://www.nic.ad.jp/ja/enum/index.html
+DNS運用健全化タスクフォース http://www.nic.ad.jp/ja/dnsqc/index.html
+IETFとRFC     http://www.nic.ad.jp/ja/tech/rfc-jp.html
+ドメイン名の国際化          http://www.nic.ad.jp/ja/tech/idn.html
+セキュリティ関連情報        http://www.nic.ad.jp/ja/security/
+リンク集      http://www.nic.ad.jp/ja/tech/links.html
+JPNIC認証局   http://www.nic.ad.jp/ja/research/ca/
+JPNIC認証局とは             http://www.nic.ad.jp/ja/research/ca/about-jpnic-ca.html
+資源一括登録システム        http://www.nic.ad.jp/ja/research/ca/about-web-transaction.html
+経路情報の登録認可機構      http://www.nic.ad.jp/ja/research/ca/routereg-outline/
+Q&A           http://www.nic.ad.jp/ja/question/ca.html
+fingerprintのページ         https://serv.nic.ad.jp/capub/fingerprint.html
+ドメイン名    http://www.nic.ad.jp/ja/dom/
+ドメイン名とは              http://www.nic.ad.jp/ja/dom/basics.html
+国際化ドメイン名            http://www.nic.ad.jp/ja/dom/idn.html
+JPNICが行っているドメイン名関連事業紹介   http://www.nic.ad.jp/ja/dom/intro.html
+ドメイン名トピックス        http://www.nic.ad.jp/ja/dom/topics.html
+gTLD          http://www.nic.ad.jp/ja/dom/gtld.html
+ドメイン名紛争処理方針(DRP) http://www.nic.ad.jp/ja/drp/index.html
+データエスクロー            http://www.nic.ad.jp/ja/dom/escrow/
+統計          http://www.nic.ad.jp/ja/stat/dom/index.html
+イベント      http://www.nic.ad.jp/ja/dom/mtg.html
+Q&A           http://www.nic.ad.jp/ja/question/domain.html
+意見募集      http://www.nic.ad.jp/ja/dom/opinion/
+JPNICライブラリ             http://www.nic.ad.jp/ja/library.html
+ドキュメントライブラリ      http://www.nic.ad.jp/ja/doc/index.html
+イベント・講演会資料        http://www.nic.ad.jp/ja/materials/index.html
+ニュースレター              http://www.nic.ad.jp/ja/newsletter/index.html
+メールマガジン              http://www.nic.ad.jp/ja/mailmagazine/index.html
+執筆記事      http://www.nic.ad.jp/ja/pub/index.html
+調査報告書    http://www.nic.ad.jp/ja/research/index.html
+会議資料      http://www.nic.ad.jp/ja/profile/mtg/index.html
+JPNICからの提言             http://www.nic.ad.jp/ja/opinion/
+インターネットの歴史・統計  http://www.nic.ad.jp/ja/history.html
+JPNICの歩み   http://www.nic.ad.jp/ja/history/index.html
+歴史の一幕    http://www.nic.ad.jp/ja/newsletter/history.html
+JPドメイン名の歩み          http://www.nic.ad.jp/ja/dom/jpdom.html
+統計          http://www.nic.ad.jp/ja/stat/index.html
+各種メーリングリストへの参加、退会        http://www.nic.ad.jp/ja/profile/ml.html
+第29回ICANN報告会開催のご案内             http://www.nic.ad.jp/ja/topics/2011/20110106-01.html
+IPレジストリシステムおよびJPIRRシステム1月の定期メンテナンスに伴うサービス一時停止のお知らせ      http://www.nic.ad.jp/ja/topics/2010/20101228-01.html
+IPv4アドレス在庫枯渇予測に関するAPNIC理事会の声明について             http://www.nic.ad.jp/ja/topics/2010/20101215-02.html
+ICANNトピックス：ICANN理事会(2010年12月10日開催)決議概要              http://www.nic.ad.jp/ja/topics/2010/20101215-01.html
+IPアドレス等料金体系改定の見送りについて  http://www.nic.ad.jp/ja/topics/2010/20101213-01.html
+第19回JPNICオープンポリシーミーティング参加登録締め切り間近のお知らせ http://www.nic.ad.jp/ja/topics/2010/20101210-01.html
+トピックス一覧へ            http://www.nic.ad.jp/ja/topics/index.html
+ICANNアナウンスメント一覧   http://www.nic.ad.jp/ja/icann/announcements.html
+第42回総会    http://www.nic.ad.jp/ja/materials/general-meeting/20101210/
+JPNICが管理するIPアドレス・AS番号・IRRサービスに関する統計            http://www.nic.ad.jp/ja/stat/ip/20101208.html
+アジア太平洋地域の国別IPv4アドレス、IPv6アドレス、AS番号配分状況      http://www.nic.ad.jp/ja/stat/ip/asia-pacific.html
+地域インターネットレジストリ(RIR)ごとのIPv4アドレス、IPv6アドレス、AS番号配分状況   http://www.nic.ad.jp/ja/stat/ip/world.html
+Web更新情報一覧へ           http://www.nic.ad.jp/ja/changelog/index.html
+vol.811       http://www.nic.ad.jp/ja/mailmagazine/backnumber/2011/vol811.html
+vol.810       http://www.nic.ad.jp/ja/mailmagazine/backnumber/2010/vol810.html
+メールマガジン一覧へ        http://www.nic.ad.jp/ja/mailmagazine/backnumber/index.html
+重要なお知らせ              
+IPアドレス等料金体系改定の見送りについて  http://www.nic.ad.jp/ja/topics/2010/20101213-01.html
+IPv6アドレスの分配方法の簡略化について    http://www.nic.ad.jp/ja/topics/2010/20100726-02.html
+whois.jpサービスのJPNIC／JPRS共同運営およびJPNIC WHOIS転送の終了について            http://www.nic.ad.jp/ja/topics/2010/20100701-01.html
+イベント情報  
+JPNICオープンポリシミーティングショーケース4            http://www.venus.gr.jp/opf-jp/events/showcase4/
+JANOG27       http://www.janog.gr.jp/meeting/janog27/
+第29回ICANN報告会           http://www.nic.ad.jp/ja/topics/2011/20110106-01.html
+HOSTING PRO 2011            http://hosting-pro.jp/
+イベントカレンダーへ        http://www.nic.ad.jp/ja/event/calendar.html
+              http://etjp.jp/
+              http://icann.nic.ad.jp/
+              http://igtf.jp/
+              http://www.kokatsu.jp/
+              http://www.v6pc.jp/
+              http://www.jdna.jp/
+              http://thinkquest.jp/
+              http://www.nic.ad.jp/ja/voip-sip-tf/index.html
+お問い合わせ先              http://www.nic.ad.jp/ja/profile/info.html
+著作権／リンク              http://www.nic.ad.jp/ja/copyright.html
+JPNIC個人情報保護方針       http://www.nic.ad.jp/ja/privacy.html
+Q&A           http://www.nic.ad.jp/ja/question/index.html
+ IPv6 Enabled http://www.ipv6forum.com/ipv6_enabled/approval_list.php
+}}}
+
