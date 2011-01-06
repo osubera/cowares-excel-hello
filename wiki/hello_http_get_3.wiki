@@ -34,6 +34,7 @@
  # test1() から test3() までが実行可能な見本。
  # `Sheet1` ワークシートに検索用の言葉がある。他の言葉に変えて試してみよう。
 
+http://1.bp.blogspot.com/_EUW0nrj9XlM/TSUfSEbsr4I/AAAAAAAAABI/f1E0xqrUCiY/s1600/shot1.png
 
 = Code =
 
@@ -1535,6 +1536,8 @@ Task: 2011/01/06 10:06:22
 Deactivate: 2011/01/06 10:06:23
 }}}
 
+http://1.bp.blogspot.com/_EUW0nrj9XlM/TSUfSl0bDlI/AAAAAAAAABM/W3w1-tciqdI/s1600/shot2.png
+
 test2()
 
 {{{
@@ -1560,6 +1563,8 @@ Task: 2011/01/06 10:20:21
  1            林              3 
 Deactivate: 2011/01/06 10:20:22
 }}}
+
+http://1.bp.blogspot.com/_EUW0nrj9XlM/TSUfTMqrL3I/AAAAAAAAABQ/CijKmprVdYA/s1600/shot3.png
 
 test3()
 
@@ -1671,4 +1676,4 @@ Task: 2011/01/06 10:27:23
 Deactivate: 2011/01/06 10:27:24
 }}}
 
-
+http://1.bp.blogspot.com/_EUW0nrj9XlM/TSUfTrV2fsI/AAAAAAAAABU/Cq5CFnsFBtM/s1600/shot4.png
