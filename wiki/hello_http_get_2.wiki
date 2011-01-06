@@ -31,7 +31,7 @@
 
 == 使い方 ==
  # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
- # test1() から test2() までが実行可能な見本。
+ # test1() から test5() までが実行可能な見本。
  # `Search Keywords` ワークシートに検索用の言葉がある。他の言葉に変えて試してみよう。
 
 http://2.bp.blogspot.com/_EUW0nrj9XlM/TSGeqSWcJDI/AAAAAAAAABA/UQ-IIU3qj9o/s1600/shot2.png
