@@ -1,0 +1,162 @@
+'worksheet
+'  name;tool_bar_more
+
+'cells-formula
+'  address;A1:M9
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタン
+'         ;通常のボタン
+'         ;you
+'         ;
+'         ;1
+'         ;2
+'         ;2
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;トグル
+'         ;オンとオフを切り替えるトグルボタン
+'         ;must
+'         ;
+'         ;1
+'         ;2
+'         ;2
+'         ;
+'         ;tool_bar_add.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;テキスト
+'         ;テキストボックスに入力する
+'         ;set
+'         ;
+'         ;2
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;リスト
+'         ;リストから選ぶ
+'         ;a
+'         ;
+'         ;3
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;りんご
+'         ;みかん
+'         ;いちご
+'         ;
+'         ;コンボ
+'         ;リストから選ぶことも入力することもできる
+'         ;tag
+'         ;
+'         ;4
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;林檎
+'         ;蜜柑
+'         ;苺
+'         ;葡萄
+'         ;長いボタン
+'         ;説明が長いボタン
+'         ;to
+'         ;
+'         ;1
+'         ;14
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ポップアップ
+'         ;階層メニューにする
+'         ;every
+'         ;
+'         ;10
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+
+'cells-name
+'  ;=tool_bar_more!R3C1
+'  ;tool_bar_more!_ButtonCaption
+
+'code
+'  name;tool_bar_more
+'{{{
+Option Explicit
+ 
+' ツールバーから直接呼ばれるメイン関数。
+Friend Sub BarMain()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' ユーザー定義のメインプロシジャにボタンを引き渡す。
+    Main oAC
+    Set oAC = Nothing
+End Sub
+
+' BarMain から呼ばれるメイン関数。
+Private Sub Main(oAC As Object)
+    ' ボタンのタグで識別する
+    Select Case oAC.Tag
+    Case "you"
+    Case "must"
+    Case "set"
+    Case "a"
+    Case "tag"
+    Case "to"
+    Case "every"
+    Case "item"
+    Case Else
+    End Select
+    
+    MsgBox oAC.Tag & oAC.Index & oAC.Parameter
+End Sub
+
+'}}}
+
