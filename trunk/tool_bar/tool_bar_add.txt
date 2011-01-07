@@ -1,0 +1,969 @@
+'workbook
+'  name;tool_bar_add.xls
+
+'require
+
+'worksheet
+'  name;tool_bar_add
+
+'cells-formula
+'  address;A1:M22
+'         ;名称
+'         ;tool_bar_add
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;コメント
+'         ;マクロ用の簡易ツールバーを生成する。(動的追加可能)
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;comment
+'         ;easy toolbar generator (dynamic addon enabled)
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;初版
+'         ;2002
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/tool_bar_add
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;更新
+'         ;40550.625
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;keyword
+'         ;toolbar,vba,excel
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタン
+'         ;通常のボタン
+'         ;you
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;トグル
+'         ;オンとオフを切り替えるトグルボタン
+'         ;must
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;
+'         ;tool_bar_add.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;テキスト
+'         ;テキストボックスに入力する
+'         ;set
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;リスト
+'         ;リストから選ぶ
+'         ;a
+'         ;
+'         ;3
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;りんご
+'         ;みかん
+'         ;いちご
+'         ;
+'         ;コンボ
+'         ;リストから選ぶことも入力することもできる
+'         ;tag
+'         ;
+'         ;4
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;林檎
+'         ;蜜柑
+'         ;苺
+'         ;葡萄
+'         ;長いボタン
+'         ;説明が長いボタン
+'         ;to
+'         ;
+'         ;1
+'         ;14
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ポップアップ
+'         ;階層メニューにする
+'         ;every
+'         ;
+'         ;10
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=R1C2 & " について"
+'         ;このシートを表示する。
+'         ;item
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+
+'cells-numberformat
+'  address;A1:M22
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'cells-name
+'  ;=tool_bar_add!R15C1
+'  ;tool_bar_add!_ButtonCaption
+'  ;=tool_bar_add!R3C2
+'  ;tool_bar_add!_Comment
+'  ;=tool_bar_add!R6C2
+'  ;tool_bar_add!_Contributor
+'  ;=tool_bar_add!R4C2
+'  ;tool_bar_add!_Copyright
+'  ;=tool_bar_add!R5C2
+'  ;tool_bar_add!_License
+'  ;=tool_bar_add!R2C2
+'  ;tool_bar_add!_LocalComment
+'  ;=tool_bar_add!R1C2
+'  ;tool_bar_add!_PublicName
+'  ;=tool_bar_add!R7C2
+'  ;tool_bar_add!_Since
+'  ;=tool_bar_add!R10C2
+'  ;tool_bar_add!_Tag
+'  ;=tool_bar_add!R9C2
+'  ;tool_bar_add!_Timestamp
+'  ;=tool_bar_add!R8C2
+'  ;tool_bar_add!_Url
+
+'code
+'  name;tool_bar_add
+'{{{
+Option Explicit
+ 
+' シートの定義情報から、マクロ用の簡易ツールバーを生成する。
+' 複数シートに対応した、動的追加可能版。
+ 
+Private oApplication As Application
+Private oThisWorkbook As Workbook
+ 
+Private MyBar As Office.CommandBar
+Private MyButtons As Collection
+Private MyAddOns As Collection
+ 
+' ツールバーから直接呼ばれるメイン関数。
+' 追加シートでは、そちらの BarMain が直接呼ばれる。
+Friend Sub BarMain()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' ユーザー定義のメインプロシジャにボタンを引き渡す。
+    Main oAC
+    Set oAC = Nothing
+End Sub
+
+' 便宜上定義しておく、自前の Main (これを消せば、標準モジュールの Main が呼ばれる)
+' ツールバーから呼ばれるメインプロシジャ
+Private Sub Main(oAC As Object)
+    ' ボタンのタグで識別する
+    Select Case oAC.Tag
+    Case "you"
+        MsgBox oAC.Tag & oAC.Index & oAC.Parameter
+    Case "must"
+    Case "set"
+    Case "a"
+    Case "tag"
+    Case "to"
+    Case "every"
+    Case "item"
+        About
+    Case Else
+        About
+    End Select
+End Sub
+
+' 設定シートの表示をAbout Box の代わりにする
+Private Sub About()
+    Me.Activate
+End Sub
+
+' トグル制御
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    If oAC.State = msoButtonUp Then
+        oAC.State = msoButtonDown
+    Else
+        oAC.State = msoButtonUp
+    End If
+    Set oAC = Nothing
+End Sub
+
+' 通常はこれより下をカスタマイズする必要は無い
+
+Friend Property Get BarButtons() As Variant
+    BarButtons = MyButtons
+End Property
+
+Friend Property Get BarAddOns() As Variant
+    BarAddOns = MyAddOns
+End Property
+
+' ボタンだけの簡易ツールバーを生成する。
+' シートに定義されたボタン名称の数だけボタンを追加する。
+Friend Function BarInitialize() As CommandBar
+    Dim BAUDISTRIB As String
+    Dim strBarName As String
+    Dim Ra As Range
+    Dim Ws As Worksheet
+    Dim AddOn As Variant
+    
+    Set oApplication = Application
+    Set oThisWorkbook = ThisWorkbook
+    Set MyButtons = New Collection
+    Set MyAddOns = New Collection
+    
+    ' 名前の衝突回避用に Url 情報を使う。
+    BAUDISTRIB = " - " & Me.Name
+    If IsValidRange(Me, "_Url") Then BAUDISTRIB = " - " & Me.Range("_Url").Value
+    
+    ' CodeName が tool_bar_ で始まるシートがボタン定義の候補
+    For Each Ws In oThisWorkbook.Worksheets
+        If InStr(Ws.CodeName, "tool_bar_") = 1 Then
+            If IsValidRange(Ws, "_ButtonCaption") Then MyAddOns.Add Ws
+        End If
+    Next
+    
+    ' 対象シート上のボタン定義を読む
+    For Each AddOn In MyAddOns
+        For Each Ra In AddOn.Range("_ButtonCaption").CurrentRegion.Columns(1).Cells
+            MyButtons.Add MakeButtonData(Ra)
+        Next
+    Next
+    
+    ' バー生成
+    strBarName = oThisWorkbook.Name & BAUDISTRIB
+    RemoveExistingSameBar strBarName
+    Set MyBar = oApplication.CommandBars.Add(Name:=strBarName, Temporary:=True)
+    AddButtons MyBar, MyButtons
+    
+    ' 仕上げ
+    MyBar.Visible = True
+    MyBar.Position = msoBarTop
+    Set BarInitialize = MyBar
+End Function
+ 
+' ツールバーを除去する。
+Friend Sub BarTerminate()
+    On Error Resume Next
+    MyBar.Delete
+    Set MyButtons = Nothing
+    Set oApplication = Nothing
+    Set oThisWorkbook = Nothing
+End Sub
+
+' 同一名称の既存バーを強制削除
+Private Function RemoveExistingSameBar(BarName As String) As Boolean
+    On Error GoTo NotFound
+    
+    oApplication.CommandBars(BarName).Delete
+    RemoveExistingSameBar = True
+    Exit Function
+    
+NotFound:
+    RemoveExistingSameBar = False
+End Function
+
+' 範囲名未定義のエラー回避
+Private Function IsValidRange(Obj As Object, Name As String) As Boolean
+    On Error Resume Next
+    Dim Dummy As Long
+    Dummy = Obj.Range(Name).Row
+    IsValidRange = (Err.Number = 0)
+End Function
+
+' バーにボタンを追加
+Private Sub AddButtons(Bar As Object, Data As Variant)
+    Dim ButtonDef As Variant
+    For Each ButtonDef In Data
+        AddButton Bar, ButtonDef
+    Next
+End Sub
+
+' ボタン１個を追加
+Private Sub AddButton(Bar As Object, Data As Variant)
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    Set ButtonA = Nothing
+End Sub
+
+' ボタンデータの低レベルな取り扱い
+
+Private Function MakeButtonData(Ra As Range) As Variant
+    MakeButtonData = Array( _
+        Ra.Worksheet.CodeName, _
+        Ra.Worksheet.Name, _
+        Ra.EntireRow.Columns(Ra.Worksheet.UsedRange.EntireColumn.Address).Value, _
+        Ra.Address)
+End Function
+
+Private Function ButtonCaption(Data As Variant) As String
+    On Error Resume Next
+    ButtonCaption = Data(2)(1, 1)
+End Function
+
+Private Function ButtonDescription(Data As Variant) As String
+    On Error Resume Next
+    ButtonDescription = Data(2)(1, 2)
+End Function
+
+Private Function ButtonTag(Data As Variant) As String
+    On Error Resume Next
+    ButtonTag = ButtonCaption(Data)
+    ButtonTag = Data(2)(1, 3)
+End Function
+
+Private Function ButtonParameter(Data As Variant) As String
+    On Error Resume Next
+    ButtonParameter = Data(2)(1, 4)
+End Function
+
+Private Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = msoControlButton
+    ButtonControlType = Val(Data(2)(1, 5))
+End Function
+
+Private Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = msoButtonCaption
+    ButtonStyle = Val(Data(2)(1, 6))
+End Function
+
+Private Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    ButtonWidth = Val(Data(2)(1, 7)) * 45
+End Function
+
+Private Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    On Error Resume Next
+    ButtonGroup = Not IsEmpty(Data(2)(1, 8))
+End Function
+
+Private Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' デフォルトのアクション名
+    ButtonAction = Data(0) & ".BarMain"
+    If Not IsEmpty(Data(2)(1, 9)) Then
+        ButtonAction = Data(2)(1, 9)
+    End If
+End Function
+
+Private Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    Dim iMax As Long
+    
+    On Error Resume Next
+    pan = Empty
+    i = 10
+    iMax = UBound(Data(2), 2)
+    
+    Do Until IsEmpty(Data(2)(1, i))
+        pan = Array(Data(2)(1, i), pan)
+        i = i + 1
+        If i > iMax Then Exit Do
+    Loop
+    
+    ButtonItems = pan
+End Function
+
+Private Function ButtonPopup(Data As Variant) As Variant
+    Dim ChildAddress As Variant
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim ChildButtons As Collection
+    Dim out() As Variant
+    Dim i As Long
+    
+    On Error GoTo Dame
+    ButtonPopup = Empty
+    
+    ChildAddress = Data(2)(1, 10)
+    Set Ws = oThisWorkbook.Worksheets(Data(1))
+    If IsEmpty(ChildAddress) Then Exit Function
+    If Not IsValidRange(Ws, CStr(ChildAddress)) Then Exit Function
+    
+    Set ChildButtons = New Collection
+    
+    For Each Ra In Ws.Range(ChildAddress).CurrentRegion.Columns(1).Cells
+        ChildButtons.Add MakeButtonData(Ra)
+    Next
+    
+    If ChildButtons.Count > 0 Then
+        ReDim out(1 To ChildButtons.Count)
+        For i = 1 To ChildButtons.Count
+            out(i) = ChildButtons(i)
+        Next
+        ButtonPopup = out
+    End If
+    
+Dame:
+    Set ChildButtons = Nothing
+End Function
+
+Private Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Private Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' ボタンの種類により受け付ける Style に制約があるが、いちいちチェックしない
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Private Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Private Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Private Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = ButtonPopup(Data)
+    If Not IsEmpty(MyChild) Then AddButtons ButtonA, MyChild
+End Sub
+
+
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+' ツールバー初期化と終了
+ 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    tool_bar_add.BarTerminate
+End Sub
+ 
+Private Sub Workbook_Open()
+    tool_bar_add.BarInitialize
+    ThisWorkbook.Saved = True
+End Sub
+'}}}
+
+
