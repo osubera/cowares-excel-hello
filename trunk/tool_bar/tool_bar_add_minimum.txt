@@ -1,0 +1,28 @@
+'worksheet
+'  name;tool_bar_more
+
+'cells-formula
+'  address;A1:B3
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;
+'         ;
+'         ;ボタン
+'         ;通常のボタン
+
+'cells-name
+'  ;=tool_bar_more!R3C1
+'  ;tool_bar_more!_ButtonCaption
+
+'code
+'  name;tool_bar_more
+'{{{
+Option Explicit
+ 
+' ツールバーから直接呼ばれるメイン関数。
+Friend Sub BarMain()
+    MsgBox "Hello World"
+End Sub
+
+'}}}
+
