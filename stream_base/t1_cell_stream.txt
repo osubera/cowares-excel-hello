@@ -1,0 +1,192 @@
+'class
+'  name;T1CellStream
+'{{{
+Option Explicit
+
+' Cell Stream T1
+' primitive implements without any optimisations nor error considerations
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+Private T3 As Collection
+Private T2 As Collection
+
+' Tier1 data is closed here, so you can change this to another data type
+Private T1 As Range
+
+
+' about this class
+
+Public Property Get Description() As String
+    Description = "Tier 1 cell stream primitive"
+End Property
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set oT1 = Me
+    Set oT2 = Me
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+End Sub
+
+
+' connect other Tiers
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+Public Sub SetT3(Roll As Object)
+    Set oT3 = Roll
+    Set T3 = oT3.Que
+    SetT2 oT3
+End Sub
+
+Public Sub SetT2(Roll As Object)
+    Set oT2 = Roll
+    Set T2 = oT2.Que
+End Sub
+
+
+' required interfaces to T3
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = oT3.EncVariant(T1)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT1"
+    InitializeEnvT1
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT1 " & oT3.EncVariant(Args)
+    OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT1 " & oT3.EncVariant(Args)
+    OpenWriteTx = OpenWriteT1(Args)
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT1 " & oT3.EncVariant(Arg)
+    CloseReadTx = True
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT1 " & oT3.EncVariant(Arg)
+    CloseWriteTx = True
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = SearchEndOfStreamT1
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function WriteTx() As Boolean
+    Debug.Print "WriteT1"
+    WriteTx = WriteT1
+End Function
+
+
+' Tier1 implements
+
+Public Sub ClearQue()
+
+End Sub
+
+Private Sub InitializeEnvT1()
+    Set T1 = ActiveCell
+End Sub
+
+' take a beginning cell
+Private Function OpenReadT1(StartAt As Variant) As Boolean
+    If UBound(StartAt) >= 0 Then Set T1 = StartAt(0).Cells(1)
+    OpenReadT1 = True
+End Function
+
+' take a beginning cell. clear queues before writings
+Private Function OpenWriteT1(StartAt As Variant) As Boolean
+    If UBound(StartAt) >= 0 Then Set T1 = StartAt(0).Cells(1)
+    oT3.ClearQue
+    ClearQue
+    OpenWriteT1 = True
+End Function
+
+' transact from T1 to T2
+Private Function SearchEndOfStreamT1() As Boolean
+    Dim Data As String
+    Dim Size As Long
+    
+    SearchEndOfStreamT1 = IsEmptyQueue(T1)
+    
+    Do Until IsEmptyQueue(T1)
+        Data = Dequeue(T1)
+        Size = 1
+        oT3.Enqueue T2, oT2.MakeQueueData(Data, Size)
+    Loop
+End Function
+
+' transact from T2 to T1
+Private Function WriteT1() As Boolean
+    Dim Data As String
+    
+    If T1 Is Nothing Then
+        WriteT1 = False
+    Else
+        Do Until oT3.IsEmptyQueue(T2)
+            Data = oT2.DataQueueData(oT3.Dequeue(T2))
+            Enqueue T1, Data
+        Loop
+        WriteT1 = True
+    End If
+End Function
+
+' cell Dequeue
+Private Function Dequeue(ByRef Q As Range) As Variant
+    On Error GoTo MAXROW
+    
+    Dequeue = Q.FormulaR1C1
+    Set Q = Q.Offset(1, 0)
+    Exit Function
+    
+MAXROW:
+    Set T1 = Nothing
+    Err.Raise Err.Number
+End Function
+
+' cell Enqueue
+Private Sub Enqueue(ByRef Q As Range, Data As Variant)
+    On Error GoTo MAXROW
+    
+    Q.FormulaR1C1 = Data
+    Set Q = Q.Offset(1, 0)
+    Exit Sub
+    
+MAXROW:
+    Set T1 = Nothing
+    Err.Raise Err.Number
+End Sub
+
+' cell IsEmptyQueue
+Private Function IsEmptyQueue(ByRef Q As Range) As Boolean
+    IsEmptyQueue = True
+    If Q Is Nothing Then Exit Function
+    If Q.FormulaR1C1 = "" Then Exit Function
+    IsEmptyQueue = False
+End Function
+'}}}
