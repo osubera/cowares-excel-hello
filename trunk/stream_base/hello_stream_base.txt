@@ -1,0 +1,1006 @@
+'workbook
+'  name;hello_stream_base.xls
+
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+
+'worksheet
+'  name;Sheet1
+
+'cells-formula
+'  address;A1:A4
+'         ;123
+'         ;456
+'         ;789
+'         ;=SUM(R[-3]C:R[-1]C)
+
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+' Tier3 is a Collection with a stream interface
+Sub test1()
+    Dim Data As String
+    Dim Size As Long
+    Dim T3 As StreamBase
+    
+    Set T3 = New StreamBase
+    
+    Debug.Print T3.Description
+    Debug.Print
+    
+    T3.OpenWrite
+    T3.WriteLine "Hello"
+    T3.WriteLine "World", 123
+    T3.CloseWrite
+    
+    Debug.Print T3.EncVariant(T3.Que)
+    Debug.Print
+    
+    T3.OpenRead
+    Do Until T3.AtEndOfStream
+        T3.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    T3.CloseRead
+    
+    Debug.Print T3.EncVariant(T3.Que)
+    Debug.Print
+    
+    Debug.Print T3.ErrorCount
+    If T3.ErrorCount > 0 Then
+        Debug.Print T3.EncVariant(T3.ErrorLogs)
+    End If
+    
+    Set T3 = Nothing
+End Sub
+
+' Tier1 attach a lower interface on Tier3
+Sub test2()
+    Dim T3 As StreamBase
+    Dim T1 As T1StringStream
+    
+    Set T3 = New StreamBase
+    Set T1 = New T1StringStream
+    
+    Debug.Print "without Tier1"
+    Debug.Print T3.Description
+    Debug.Print T3.EncVariant(T3.Properties)
+    Debug.Print T3.HasT1
+    Debug.Print
+    
+    Debug.Print "with Tier1"
+    T3.SetT1 T1
+    Debug.Print T3.Description
+    Debug.Print T3.EncVariant(T3.Properties)
+    Debug.Print T3.HasT1
+    Debug.Print
+    
+    Debug.Print "remove Tier1"
+    T3.SetT1
+    Debug.Print T3.Description
+    Debug.Print T3.EncVariant(T3.Properties)
+    Debug.Print T3.HasT1
+    Debug.Print
+    
+    Set T1 = Nothing
+    Set T3 = Nothing
+End Sub
+
+' test a string stream
+Sub test3()
+    Dim Data As String
+    Dim Size As Long
+    Dim T3 As StreamBase
+    Dim T1 As T1StringStream
+    
+    Set T3 = New StreamBase
+    Set T1 = New T1StringStream
+    T3.SetT1 T1
+    
+    Debug.Print T3.Description
+    Debug.Print
+    
+    T3.OpenRead "Hello", "World"
+    Do Until T3.AtEndOfStream
+        T3.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    T3.CloseRead
+    Debug.Print
+    
+    T3.OpenWrite
+    T3.WriteLine "Hello"
+    T3.WriteLine "String"
+    T3.WriteLine "Stream"
+    T3.Properties("string-line-feed") = "%"
+    T3.CloseWrite Data
+    Debug.Print Data
+    Debug.Print
+    
+    Debug.Print T3.ErrorCount
+    If T3.ErrorCount > 0 Then
+        Debug.Print T3.EncVariant(T3.ErrorLogs)
+    End If
+    
+    T3.SetT1
+    Set T1 = Nothing
+    Set T3 = Nothing
+End Sub
+
+' test a cell stream
+Sub test4()
+    Dim Data As String
+    Dim Size As Long
+    Dim T3 As StreamBase
+    Dim T1 As T1CellStream
+    
+    Set T3 = New StreamBase
+    Set T1 = New T1CellStream
+    T3.SetT1 T1
+    
+    Debug.Print T3.Description
+    Debug.Print
+    
+    T3.OpenRead Sheet1.Range("A1")
+    Do Until T3.AtEndOfStream
+        T3.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    T3.CloseRead
+    Debug.Print
+    
+    T3.OpenWrite Sheet1.Range("C3")
+    T3.WriteLine "Hello "
+    T3.WriteLine "Cell "
+    T3.WriteLine "Stream "
+    T3.WriteLine "=R[-3]C & R[-2]C & R[-1]C"
+    T3.CloseWrite
+    Debug.Print
+    
+    Debug.Print T3.ErrorCount
+    If T3.ErrorCount > 0 Then
+        Debug.Print T3.EncVariant(T3.ErrorLogs)
+    End If
+    
+    T3.SetT1
+    Set T1 = Nothing
+    Set T3 = Nothing
+End Sub
+
+'}}}
+
+'class
+'  name;StreamBase
+'{{{
+Option Explicit
+
+' Buffered Stream Base (sequential) T3
+
+' Tier 1 : at the lowest surface, depend on low level implements, optional
+' Tier 2 : act a conversion of data in stream, filters, optional
+' Tier 3 : at the highest surface, required
+
+' data flow for stream reader
+' media -> T1 -> T2 -> T3 -> application
+
+' data flow for stream writer
+' application -> T3 -> T2 -> T1 -> media
+
+' forward only stream
+' T3 is discarded line to line, just a queue
+
+' this T3 class has many public methods, grouped into 2 types.
+' the one group includes methods for application interface.
+' another group includes methods for T1 and T2 interface.
+' usually the latters are to be hidden in a smaller scope,
+' but VBA cannot do that by design.
+
+
+Private Logs As Collection
+Private Env As Scripting.Dictionary
+Private T3 As Collection
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+
+' about this class
+
+Public Property Get Description() As String
+    Dim out As String
+    out = "Tier 3 sequential stream base"
+    If HasT2 Then out = out & " : " & oT2.Description
+    If HasT1 Then out = out & " : " & oT1.Description
+    Description = out
+End Property
+
+
+' public properties and methods for application interface
+
+Public Property Get Que() As Collection
+    Set Que = T3
+End Property
+
+Public Property Get Properties() As Scripting.Dictionary
+    Set Properties = Env
+End Property
+
+Public Property Get ErrorCount() As Long
+    ErrorCount = Logs.Count
+End Property
+
+Public Property Get ErrorLogs() As Collection
+    Set ErrorLogs = Logs
+End Property
+
+Public Property Get AtEndOfStream() As Boolean
+    AtEndOfStream = SearchEndOfStream
+End Property
+
+Public Property Get AtEndOfLine() As Boolean
+    AtEndOfLine = SearchEndOfLine
+End Property
+
+
+Public Function OpenRead(ParamArray Args() As Variant) As Boolean
+    On Error GoTo OTL
+    OpenRead = oT1.OpenReadTx(CVar(Args))
+    Exit Function
+    
+OTL:
+    LogError "OpenRead"
+    OpenRead = False
+End Function
+
+Public Function OpenWrite(ParamArray Args() As Variant) As Boolean
+    On Error GoTo OTL
+    OpenWrite = oT1.OpenWriteTx(CVar(Args))
+    Exit Function
+    
+OTL:
+    LogError "OpenWrite"
+    OpenWrite = False
+End Function
+
+Public Function CloseRead(Optional ByRef Arg As Variant) As Boolean
+    On Error GoTo OTL
+    If IsMissing(Arg) Then
+        Dim DummyArg As Variant
+        CloseRead = oT1.CloseReadTx(DummyArg)
+    Else
+        CloseRead = oT1.CloseReadTx(Arg)
+    End If
+    Exit Function
+    
+OTL:
+    LogError "CloseRead"
+    CloseRead = False
+End Function
+
+Public Function CloseWrite(Optional ByRef Arg As Variant) As Boolean
+    On Error GoTo OTL
+    If IsMissing(Arg) Then
+        Dim DummyArg As Variant
+        CloseWrite = oT1.CloseWriteTx(DummyArg)
+    Else
+        CloseWrite = oT1.CloseWriteTx(Arg)
+    End If
+    Exit Function
+    
+OTL:
+    LogError "CloseWrite"
+    CloseWrite = False
+End Function
+
+Public Function ReadLine(ByRef Data As Variant, Optional ByRef Size As Variant) As Boolean
+    ' byref arguments return data, those are valid only when the function returns True.
+    On Error GoTo OTL
+    Dim DataSize As Long
+    ReadLine = ReadTx(Data, DataSize)
+    If Not IsMissing(Size) Then Size = DataSize
+    Exit Function
+    
+OTL:
+    LogError "ReadLine"
+    ReadLine = False
+End Function
+
+Public Function WriteLine(ByRef Data As Variant, Optional ByVal Size As Long = -1) As Boolean
+    ' byref arguments return data, those are valid only when the function returns True.
+    On Error GoTo OTL
+    WriteLine = WriteTx(Data, Size)
+    Exit Function
+    
+OTL:
+    LogError "WriteLine"
+    WriteLine = False
+End Function
+
+Public Function FeedLine(Optional ByVal Repeat As Long = 1) As Boolean
+    On Error GoTo OTL
+    FeedLine = FeedLineTx(Repeat)
+    Exit Function
+    
+OTL:
+    LogError "FeedLine"
+    FeedLine = False
+End Function
+
+
+
+'=== above this line is for application interface ===
+'=== below this line is for T1 and T2 interface ===
+
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set Logs = New Collection
+    Set Env = New Scripting.Dictionary
+    Set T3 = New Collection
+    Set oT3 = Me
+    Set oT2 = Me
+    Set oT1 = Me
+    
+    InitializeEnvTx
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+    Set T3 = Nothing
+    Set Env = Nothing
+    Set Logs = Nothing
+End Sub
+
+
+' logging
+
+Public Sub LogError(ParamArray Args() As Variant)
+    Dim Data As Variant
+    Dim Data1 As Variant
+    Dim Data2 As Variant
+    
+    If HasT1 Then Data1 = oT1.LogErrorTx
+    If HasT2 Then Data2 = oT2.LogErrorTx
+    Data = Array(LogErrorTx, Data2, Data1)
+    Logs.Add Array(Err.Number, Err.Description, Data, CVar(Args))
+End Sub
+
+
+' connect Tier1 and Tier2
+
+Public Sub SetT1(Optional Roll As Object = Nothing)
+    If Roll Is Nothing Then
+        Set oT1 = Me
+    Else
+        Set oT1 = Roll
+        oT1.SetT3 Me
+        oT1.InitializeEnvTx
+        If HasT2 Then oT2.SetT1 oT1
+    End If
+End Sub
+
+Public Sub SetT2(Optional Roll As Object = Nothing)
+    If Roll Is Nothing Then
+        Set oT2 = Me
+    Else
+        Set oT2 = Roll
+        Set oT2.T3 = Me
+        oT2.InitializeEnvTx
+        If HasT1 Then oT1.SetT2 oT2
+    End If
+End Sub
+
+Public Property Get HasT1() As Boolean
+    HasT1 = Not (oT1 Is Me)
+End Property
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+
+' finder
+
+Public Function SearchEndOfStream() As Boolean
+    Dim Found As Boolean
+    Dim Found2 As Boolean
+    
+    Found = False
+    If SearchEndOfStreamTx Then
+        If HasT2 Then
+            Found2 = oT2.SearchEndOfStreamTx
+        Else
+            Found2 = True
+        End If
+        If Found2 Then
+            If HasT1 Then
+                Found = oT1.SearchEndOfStreamTx
+            Else
+                Found = True
+            End If
+        End If
+    End If
+    
+    SearchEndOfStream = Found
+End Function
+
+Public Function SearchEndOfLine() As Boolean
+    Dim Found As Boolean
+    Dim Found3 As Boolean
+    Dim Found2 As Boolean
+    Dim Found1 As Boolean
+    
+    Found1 = False
+    Found2 = False
+    If HasT1 Then Found1 = oT1.SearchEndOfLineTx
+    If HasT2 Then Found2 = oT2.SearchEndOfLineTx
+    Found3 = SearchEndOfLineTx
+    Found = Found3 Or Found2 Or Found1
+    
+    SearchEndOfLine = Found3
+End Function
+
+
+' Tier3 implements
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = T3.Count & EncVariant(T3)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT3"
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT3 " & EncVariant(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT3 " & EncVariant(Args)
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT3 " & EncVariant(Arg)
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT3 " & EncVariant(Arg)
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = IsEmptyQueue(T3)
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    Debug.Print "ReadT3"
+    
+    Size = SizeQueueData(CheatQueue(T3))
+    Data = DataQueueData(Dequeue(T3))
+    ReadTx = True
+End Function
+
+Public Function WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    Debug.Print "WriteT3"
+    
+    Enqueue T3, MakeQueueData(Data, Size)
+    If HasT2 Then
+        oT2.WriteTx
+    ElseIf HasT1 Then
+        oT1.WriteTx
+    End If
+    
+    WriteTx = True
+End Function
+
+Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+    ' nop
+    FeedLineTx = True
+End Function
+
+
+' queue management
+
+Public Sub Enqueue(Tx As Collection, ParamArray Args() As Variant)
+    Dim Arg As Variant
+    For Each Arg In Args
+        Tx.Add Arg
+    Next
+End Sub
+
+Public Function Dequeue(Tx As Collection, ParamArray Args() As Variant) As Variant
+    Dequeue = Tx(1)
+    Tx.Remove 1
+End Function
+
+Public Function CheatQueue(Tx As Collection, ParamArray Args() As Variant) As Variant
+    CheatQueue = Tx(1)
+End Function
+
+Public Sub EditFirstQueue(Tx As Collection, ParamArray Args() As Variant)
+    Tx.Add Args(0), After:=1
+    Tx.Remove 1
+End Sub
+
+Public Sub InsertBeforeFirstQueue(Tx As Collection, ParamArray Args() As Variant)
+    Dim Arg As Variant
+    For Each Arg In Args
+        Tx.Add Arg, Before:=1
+    Next
+End Sub
+
+Public Function IsEmptyQueue(Tx As Collection) As Boolean
+    IsEmptyQueue = (Tx.Count = 0)
+End Function
+
+Public Sub ClearAll(Tx As Collection)
+    Do While Tx.Count > 0
+        Tx.Remove 1
+    Loop
+End Sub
+
+Public Sub ClearQue()
+    ClearAll T3
+End Sub
+
+
+' queue data structure
+
+Public Function MakeQueueData(Data As Variant, ByVal Size As Long) As Variant
+    MakeQueueData = Array(Data, Size)
+End Function
+
+Public Function DataQueueData(QueueData As Variant) As Variant
+    DataQueueData = QueueData(0)
+End Function
+
+Public Function SizeQueueData(QueueData As Variant) As Long
+    SizeQueueData = QueueData(1)
+End Function
+
+
+' helper functions
+
+Public Function EncVariant(Data As Variant) As String
+    Dim KeyValue As Variant
+    Dim out As String
+    
+    Const ArrayBegin = "("
+    Const ArrayEnd = ")"
+    Const Delimiter = ","
+    
+    If IsArray(Data) Then
+        out = ArrayBegin
+        For Each KeyValue In Data
+            out = out & EncVariant(KeyValue) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        Select Case TypeName(Data)
+        Case "Collection"
+            out = EncCollection(Data)
+        Case "Dictionary"
+            out = EncDictionary(Data)
+        Case Else
+            out = TypeName(Data)
+        End Select
+    Else
+        out = CStr(Data)
+    End If
+    
+    EncVariant = out
+End Function
+
+Public Function EncDictionary(Data As Variant) As String
+    Dim Key As Variant
+    Dim out As String
+    
+    Const LineFeed = "##"
+    Const Equal = "="
+    
+    out = LineFeed
+    For Each Key In Data.Keys
+        out = out & Key & Equal & EncVariant(Data(Key)) & LineFeed
+    Next
+    
+    EncDictionary = out
+End Function
+
+Public Function EncCollection(Data As Variant) As String
+    Dim x As Variant
+    Dim out As String
+    
+    Const LineFeed = "##"
+    
+    out = LineFeed
+    For Each x In Data
+        out = out & EncVariant(x) & LineFeed
+    Next
+    
+    EncCollection = out
+End Function
+
+
+'}}}
+
+'class
+'  name;T1StringStream
+'{{{
+Option Explicit
+
+' String Stream T1
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+Private T3 As Collection
+Private T2 As Collection
+
+' Tier1 data is closed here, so you can change this to another data type
+Private T1 As Collection
+
+
+' about this class
+
+Public Property Get Description() As String
+    Description = "Tier 1 string stream"
+End Property
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set oT1 = Me
+    Set oT2 = Me
+    Set T1 = New Collection
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+End Sub
+
+
+' connect other Tiers
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+Public Sub SetT3(Roll As Object)
+    Set oT3 = Roll
+    Set T3 = oT3.Que
+    SetT2 oT3
+End Sub
+
+Public Sub SetT2(Roll As Object)
+    Set oT2 = Roll
+    Set T2 = oT2.Que
+End Sub
+
+
+' required interfaces for T3
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = T1.Count & oT3.EncVariant(T1)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT1"
+    InitializeEnvT1
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT1 " & oT3.EncVariant(Args)
+    OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT1 " & oT3.EncVariant(Args)
+    OpenWriteTx = OpenWriteT1
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT1 " & oT3.EncVariant(Arg)
+    CloseReadTx = True
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT1 " & oT3.EncVariant(Arg)
+    CloseWriteTx = CloseWriteT1(Arg)
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = SearchEndOfStreamT1
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function WriteTx() As Boolean
+    Debug.Print "WriteT1"
+    WriteTx = WriteT1
+End Function
+
+
+' Tier1 implements
+
+Public Sub ClearQue()
+    oT3.ClearAll T1
+End Sub
+
+Private Sub InitializeEnvT1()
+    oT3.Properties("string-line-feed") = vbCrLf
+    oT3.Properties("string-append") = False
+End Sub
+
+' take multiple Strings and push them into T1
+Private Function OpenReadT1(InitTexts As Variant) As Boolean
+    Dim Arg As Variant
+    For Each Arg In InitTexts
+        oT3.Enqueue T1, Arg
+    Next
+    OpenReadT1 = True
+End Function
+
+' clear queues before writings
+Private Function OpenWriteT1() As Boolean
+    If Not oT3.Properties("string-append") Then oT3.ClearQue
+    ClearQue
+    OpenWriteT1 = True
+End Function
+
+' give a String result, because i am a String Stream
+Private Function CloseWriteT1(ByRef out As Variant) As Boolean
+    Dim Lf As String
+    Dim i As Long
+    
+    Lf = oT3.Properties("string-line-feed")
+    out = ""
+    For i = 1 To T1.Count
+        out = out & T1(i) & Lf
+    Next
+    
+    CloseWriteT1 = True
+End Function
+
+' transact from T1 to T2
+Private Function SearchEndOfStreamT1() As Boolean
+    Dim Data As String
+    Dim Size As Long
+    
+    SearchEndOfStreamT1 = (T1.Count = 0)
+    
+    Do While T1.Count > 0
+        Data = oT3.Dequeue(T1)
+        Size = Len(Data)
+        oT3.Enqueue T2, oT2.MakeQueueData(Data, Size)
+    Loop
+End Function
+
+' transact from T2 to T1
+Private Function WriteT1() As Boolean
+    Dim Data As String
+    Do Until oT3.IsEmptyQueue(T2)
+        Data = oT2.DataQueueData(oT3.Dequeue(T2))
+        oT3.Enqueue T1, Data
+    Loop
+    WriteT1 = True
+End Function
+
+
+'}}}
+
+'class
+'  name;T1CellStream
+'{{{
+Option Explicit
+
+' Cell Stream T1
+' primitive implements without any optimisations nor error considerations
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+Private T3 As Collection
+Private T2 As Collection
+
+' Tier1 data is closed here, so you can change this to another data type
+Private T1 As Range
+
+
+' about this class
+
+Public Property Get Description() As String
+    Description = "Tier 1 cell stream primitive"
+End Property
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set oT1 = Me
+    Set oT2 = Me
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+End Sub
+
+
+' connect other Tiers
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+Public Sub SetT3(Roll As Object)
+    Set oT3 = Roll
+    Set T3 = oT3.Que
+    SetT2 oT3
+End Sub
+
+Public Sub SetT2(Roll As Object)
+    Set oT2 = Roll
+    Set T2 = oT2.Que
+End Sub
+
+
+' required interfaces to T3
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = oT3.EncVariant(T1)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT1"
+    InitializeEnvT1
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT1 " & oT3.EncVariant(Args)
+    OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT1 " & oT3.EncVariant(Args)
+    OpenWriteTx = OpenWriteT1(Args)
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT1 " & oT3.EncVariant(Arg)
+    CloseReadTx = True
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT1 " & oT3.EncVariant(Arg)
+    CloseWriteTx = True
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = SearchEndOfStreamT1
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function WriteTx() As Boolean
+    Debug.Print "WriteT1"
+    WriteTx = WriteT1
+End Function
+
+
+' Tier1 implements
+
+Public Sub ClearQue()
+
+End Sub
+
+Private Sub InitializeEnvT1()
+    Set T1 = ActiveCell
+End Sub
+
+' take a beginning cell
+Private Function OpenReadT1(StartAt As Variant) As Boolean
+    If UBound(StartAt) >= 0 Then Set T1 = StartAt(0).Cells(1)
+    OpenReadT1 = True
+End Function
+
+' take a beginning cell. clear queues before writings
+Private Function OpenWriteT1(StartAt As Variant) As Boolean
+    If UBound(StartAt) >= 0 Then Set T1 = StartAt(0).Cells(1)
+    oT3.ClearQue
+    ClearQue
+    OpenWriteT1 = True
+End Function
+
+' transact from T1 to T2
+Private Function SearchEndOfStreamT1() As Boolean
+    Dim Data As String
+    Dim Size As Long
+    
+    SearchEndOfStreamT1 = IsEmptyQueue(T1)
+    
+    Do Until IsEmptyQueue(T1)
+        Data = Dequeue(T1)
+        Size = 1
+        oT3.Enqueue T2, oT2.MakeQueueData(Data, Size)
+    Loop
+End Function
+
+' transact from T2 to T1
+Private Function WriteT1() As Boolean
+    Dim Data As String
+    
+    If T1 Is Nothing Then
+        WriteT1 = False
+    Else
+        Do Until oT3.IsEmptyQueue(T2)
+            Data = oT2.DataQueueData(oT3.Dequeue(T2))
+            Enqueue T1, Data
+        Loop
+        WriteT1 = True
+    End If
+End Function
+
+' cell Dequeue
+Private Function Dequeue(ByRef Q As Range) As Variant
+    On Error GoTo MAXROW
+    
+    Dequeue = Q.FormulaR1C1
+    Set Q = Q.Offset(1, 0)
+    Exit Function
+    
+MAXROW:
+    Set T1 = Nothing
+    Err.Raise Err.Number
+End Function
+
+' cell Enqueue
+Private Sub Enqueue(ByRef Q As Range, Data As Variant)
+    On Error GoTo MAXROW
+    
+    Q.FormulaR1C1 = Data
+    Set Q = Q.Offset(1, 0)
+    Exit Sub
+    
+MAXROW:
+    Set T1 = Nothing
+    Err.Raise Err.Number
+End Sub
+
+' cell IsEmptyQueue
+Private Function IsEmptyQueue(ByRef Q As Range) As Boolean
+    IsEmptyQueue = True
+    If Q Is Nothing Then Exit Function
+    If Q.FormulaR1C1 = "" Then Exit Function
+    IsEmptyQueue = False
+End Function
+'}}}
+
+
+

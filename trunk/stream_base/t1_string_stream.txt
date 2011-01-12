@@ -1,0 +1,172 @@
+'class
+'  name;T1StringStream
+'{{{
+Option Explicit
+
+' String Stream T1
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+Private T3 As Collection
+Private T2 As Collection
+
+' Tier1 data is closed here, so you can change this to another data type
+Private T1 As Collection
+
+
+' about this class
+
+Public Property Get Description() As String
+    Description = "Tier 1 string stream"
+End Property
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set oT1 = Me
+    Set oT2 = Me
+    Set T1 = New Collection
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+End Sub
+
+
+' connect other Tiers
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+Public Sub SetT3(Roll As Object)
+    Set oT3 = Roll
+    Set T3 = oT3.Que
+    SetT2 oT3
+End Sub
+
+Public Sub SetT2(Roll As Object)
+    Set oT2 = Roll
+    Set T2 = oT2.Que
+End Sub
+
+
+' required interfaces for T3
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = T1.Count & oT3.EncVariant(T1)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT1"
+    InitializeEnvT1
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT1 " & oT3.EncVariant(Args)
+    OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT1 " & oT3.EncVariant(Args)
+    OpenWriteTx = OpenWriteT1
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT1 " & oT3.EncVariant(Arg)
+    CloseReadTx = True
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT1 " & oT3.EncVariant(Arg)
+    CloseWriteTx = CloseWriteT1(Arg)
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = SearchEndOfStreamT1
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function WriteTx() As Boolean
+    Debug.Print "WriteT1"
+    WriteTx = WriteT1
+End Function
+
+
+' Tier1 implements
+
+Public Sub ClearQue()
+    oT3.ClearAll T1
+End Sub
+
+Private Sub InitializeEnvT1()
+    oT3.Properties("string-line-feed") = vbCrLf
+    oT3.Properties("string-append") = False
+End Sub
+
+' take multiple Strings and push them into T1
+Private Function OpenReadT1(InitTexts As Variant) As Boolean
+    Dim Arg As Variant
+    For Each Arg In InitTexts
+        oT3.Enqueue T1, Arg
+    Next
+    OpenReadT1 = True
+End Function
+
+' clear queues before writings
+Private Function OpenWriteT1() As Boolean
+    If Not oT3.Properties("string-append") Then oT3.ClearQue
+    ClearQue
+    OpenWriteT1 = True
+End Function
+
+' give a String result, because i am a String Stream
+Private Function CloseWriteT1(ByRef out As Variant) As Boolean
+    Dim Lf As String
+    Dim i As Long
+    
+    Lf = oT3.Properties("string-line-feed")
+    out = ""
+    For i = 1 To T1.Count
+        out = out & T1(i) & Lf
+    Next
+    
+    CloseWriteT1 = True
+End Function
+
+' transact from T1 to T2
+Private Function SearchEndOfStreamT1() As Boolean
+    Dim Data As String
+    Dim Size As Long
+    
+    SearchEndOfStreamT1 = (T1.Count = 0)
+    
+    Do While T1.Count > 0
+        Data = oT3.Dequeue(T1)
+        Size = Len(Data)
+        oT3.Enqueue T2, oT2.MakeQueueData(Data, Size)
+    Loop
+End Function
+
+' transact from T2 to T1
+Private Function WriteT1() As Boolean
+    Dim Data As String
+    Do Until oT3.IsEmptyQueue(T2)
+        Data = oT2.DataQueueData(oT3.Dequeue(T2))
+        oT3.Enqueue T1, Data
+    Loop
+    WriteT1 = True
+End Function
+
+
+'}}}
