@@ -1,0 +1,377 @@
+'class
+'  name;T1BinaryFileStream
+'{{{
+Option Explicit
+
+' Binary File Stream T1
+
+Private oT3 As Object
+Private oT2 As Object
+Private oT1 As Object
+
+Private T3 As Collection
+Private T2 As Collection
+Private Env As Scripting.Dictionary
+
+' Tier1 data is closed here, so you can change this to another data type
+Private T1() As Byte
+Private T1size As Long
+Private T1used As Long
+Private FileNo As Integer
+Private FileSize As Long
+Private FileList As Collection
+
+
+' about this class
+
+Public Property Get Description() As String
+    Description = "Tier 1 binary file stream"
+End Property
+
+
+' event procedures
+
+Private Sub Class_Initialize()
+    Set oT1 = Me
+    Set oT2 = Me
+End Sub
+
+Private Sub Class_Terminate()
+    Set Env = Nothing
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set oT3 = Nothing
+End Sub
+
+
+' connect other Tiers
+
+Public Property Get HasT2() As Boolean
+    HasT2 = Not (oT2 Is Me)
+End Property
+
+Public Sub SetT3(Roll As Object)
+    Set oT3 = Roll
+    Set T3 = oT3.Que
+    Set Env = oT3.Properties
+    SetT2 oT3
+End Sub
+
+Public Sub SetT2(Roll As Object)
+    Set oT2 = Roll
+    Set T2 = oT2.Que
+End Sub
+
+
+' required interfaces for T3
+
+Public Function LogErrorTx() As Variant
+    Dim out As String
+    out = oT3.EncVariant(T1)
+    LogErrorTx = out
+End Function
+
+Public Sub InitializeEnvTx()
+    Debug.Print "InitializeEnvT1"
+    InitializeEnvT1
+End Sub
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    Debug.Print "OpenReadT1 " & oT3.EncVariant(Args)
+    OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    Debug.Print "OpenWriteT1 " & oT3.EncVariant(Args)
+    OpenWriteTx = OpenWriteT1(Args(0))
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    Debug.Print "CloseReadT1 " & oT3.EncVariant(Arg)
+    CloseReadTx = CloseReadT1(Arg)
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    Debug.Print "CloseWriteT1 " & oT3.EncVariant(Arg)
+    CloseWriteTx = CloseWriteT1(Arg)
+End Function
+
+Public Function SearchEndOfStreamTx() As Boolean
+    SearchEndOfStreamTx = SearchEndOfStreamT1
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    SearchEndOfLineTx = SearchEndOfStreamTx
+End Function
+
+Public Function WriteTx() As Boolean
+    Debug.Print "WriteT1"
+    WriteTx = WriteT1
+End Function
+
+
+' Tier1 implements
+
+Public Sub ClearQue()
+    T1used = 0
+End Sub
+
+Public Sub SetBufferSize(Optional Size As Long = 8192)
+    If Size < 0 Then Exit Sub
+    T1size = Size
+    ReDim T1(0 To Size - 1)
+End Sub
+
+Private Sub InitializeEnvT1()
+    SetBufferSize
+End Sub
+
+' take multiple file names to open
+Private Function OpenReadT1(FileNames As Variant) As Boolean
+    Dim Arg As Variant
+    Set FileList = New Collection
+    For Each Arg In FileNames
+        oT3.Enqueue FileList, Arg
+    Next
+    OpenReadT1 = SwitchFileRead
+End Function
+
+' flush buffers and close the file
+Private Function CloseReadT1(ByRef out As Variant) As Boolean
+    CloseCurrentFile
+    Set FileList = Nothing
+    CloseReadT1 = True
+End Function
+
+' clear queues before writings
+Private Function OpenWriteT1(ByVal FileName As String) As Boolean
+    If Not Env("binary-file-append") Then oT3.ClearQue
+    ClearQue
+    OpenWriteT1 = OpenBinaryWrite(FileName)
+End Function
+
+' flush buffers and close the file
+Private Function CloseWriteT1(ByRef out As Variant) As Boolean
+    LowFilePut  ' flush
+    CloseCurrentFile
+    CloseWriteT1 = True
+End Function
+
+' transact from T1 to T2
+Private Function SearchEndOfStreamT1() As Boolean
+    Dim Data As String
+    Dim Size As Long
+    
+    SearchEndOfStreamT1 = LowEndOfFileList
+    
+    Do Until LowEndOfFileList
+        If DequeueT1 Then
+            oT3.Enqueue T2, oT2.MakeQueueData(T1, T1used)
+        End If
+    Loop
+End Function
+
+' transact from T2 to T1
+Private Function WriteT1() As Boolean
+    Dim Data As Variant
+    Dim Size As Long
+    Do Until oT3.IsEmptyQueue(T2)
+        Size = oT2.SizeQueueData(oT3.CheatQueue(T2))
+        Data = oT2.DataQueueData(oT3.Dequeue(T2))
+        EnqueueT1 Data, Size
+    Loop
+    WriteT1 = True
+End Function
+
+
+' file functions
+
+Private Function SwitchFileRead() As Boolean
+    Dim FileName As String
+    
+    SwitchFileRead = False
+    
+    CloseCurrentFile
+    If GetNextFileName(FileName) Then
+        If OpenBinaryRead(FileName) Then
+            SwitchFileRead = True
+        End If
+    End If
+End Function
+
+Private Function GetNextFileName(ByRef FileName As String) As Boolean
+    Dim out As Boolean
+    
+    out = Not oT3.IsEmptyQueue(FileList)
+    If out Then FileName = oT3.Dequeue(FileList)
+    
+    GetNextFileName = out
+End Function
+
+Private Function CloseCurrentFile()
+    If FileNo > 0 Then Close FileNo
+    FileNo = 0
+End Function
+
+Private Function OpenBinaryRead(FileName As String) As Boolean
+    On Error GoTo OTL
+    If Dir(FileName) = "" Then Err.Raise 53 ' File Not Found
+    
+    FileNo = FreeFile
+    Open FileName For Binary Access Read As FileNo
+    FileSize = LOF(FileNo)
+    
+    OpenBinaryRead = True
+    Exit Function
+    
+OTL:
+    oT3.LogError "OpenBinaryRead", FileName, Err.Number, Err.Description
+    OpenBinaryRead = False
+End Function
+
+Private Function OpenBinaryWrite(FileName As String) As Boolean
+    On Error GoTo OTL
+    
+    FileNo = FreeFile
+    Open FileName For Binary Access Write As FileNo
+    T1used = 0
+    
+    OpenBinaryWrite = True
+    Exit Function
+    
+OTL:
+    oT3.LogError "OpenBinaryWrite", FileName, Err.Number, Err.Description
+    OpenBinaryWrite = False
+End Function
+
+Private Function LowEndOfFileList() As Boolean
+    Dim out As Boolean
+    
+    out = False
+    If LowEndOfFile Then
+        If SwitchFileRead Then
+            out = LowEndOfFileList
+        Else
+            out = True
+        End If
+    End If
+    
+    LowEndOfFileList = out
+End Function
+
+Private Function LowEndOfFile() As Boolean
+    If FileNo <= 0 Then
+        LowEndOfFile = True
+    Else
+        LowEndOfFile = EOF(FileNo)
+    End If
+End Function
+
+Private Sub LowFileGet()
+    Dim RawPosition As Long
+    
+    Get FileNo, , T1
+    
+    RawPosition = Loc(FileNo)
+    If RawPosition > FileSize Then
+        T1used = T1size + FileSize - RawPosition
+    Else
+        T1used = T1size
+    End If
+End Sub
+
+Private Sub LowFilePut()
+    If T1used <= 0 Then Exit Sub
+    
+    If T1used < T1size Then
+        Put FileNo, , LeftOf(T1, T1used)
+    Else
+        Put FileNo, , T1
+    End If
+    T1used = 0
+End Sub
+
+Private Function DequeueT1() As Boolean
+    On Error GoTo OTL
+    
+    LowFileGet
+    DequeueT1 = True
+    Exit Function
+    
+OTL:
+    oT3.LogError "DequeueT1", Err.Number, Err.Description
+    DequeueT1 = False
+End Function
+
+Private Function EnqueueT1(Data As Variant, ByVal Size As Long) As Boolean
+    On Error GoTo OTL
+    
+    Dim Start As Long
+    
+    EnqueueT1 = True
+    If Size = -1 Then Size = LenOf(Data)
+    If Size = 0 Then Exit Function
+    
+    Start = 0
+    Do Until LowDoneEnqueueT1(Data, Start, Size)
+        LowFilePut
+    Loop
+    
+    Exit Function
+    
+OTL:
+    oT3.LogError "EnqueueT1", Err.Number, Err.Description
+    EnqueueT1 = False
+End Function
+
+Private Function LowDoneEnqueueT1(Data As Variant, ByRef Start As Long, ByRef Size As Long) As Boolean
+    Dim out As Boolean
+    Dim i As Long
+    
+    If T1used + Size > T1size Then
+        For i = T1used To UBound(T1)
+            T1(i) = Data(i - T1used + Start)
+        Next
+        Start = Start + T1size - T1used
+        Size = Size - T1size + T1used
+        T1used = T1size
+        out = False
+    Else
+        For i = 0 To Size - 1
+            T1(i + T1used) = Data(i + Start)
+        Next
+        Start = 0
+        T1used = T1used + Size
+        out = True
+    End If
+    
+    LowDoneEnqueueT1 = out
+End Function
+
+' binary tools
+
+Private Function LenOf(Data As Variant) As Long
+    LenOf = UBound(Data) - LBound(Data) + 1
+End Function
+
+Private Function LeftOf(Data As Variant, Size As Long) As Byte()
+    Dim out() As Byte
+    Dim i As Long
+    
+    If Size <= 0 Then Exit Function
+    
+    ReDim out(0 To Size - 1)
+    
+    If LenOf(Data) < Size Then
+        For i = LBound(Data) To UBound(Data)
+            out(i - LBound(Data)) = Data(i)
+        Next
+    Else
+        For i = 0 To Size - 1
+            out(i) = Data(i + LBound(Data))
+        Next
+    End If
+    
+    LeftOf = out
+End Function
+'}}}

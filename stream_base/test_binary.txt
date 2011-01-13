@@ -1,0 +1,134 @@
+'module
+'  name;testBinary
+'{{{
+Option Explicit
+
+' test a binary stream
+Sub test1()
+    Dim Data As Variant
+    Dim Size As Long
+    Dim T3 As StreamBase
+    Dim T1 As T1BinaryStream
+    
+    Set T3 = New StreamBase
+    Set T1 = New T1BinaryStream
+    T3.SetT1 T1
+    
+    Debug.Print T3.Description
+    Debug.Print
+    
+    T3.OpenRead Array(1, 2, 3, 4, 5, 6, 7), Array(77, 78, 79), Array(128)
+    Do Until T3.AtEndOfStream
+        T3.ReadLine Data, Size
+        Debug.Print EncHexDelimitedB(Data), Size
+    Loop
+    T3.CloseRead
+    Debug.Print
+    
+    T3.OpenWrite
+    T3.WriteLine Array(&HA0, &HA1, &HA2)
+    T3.WriteLine Array(&HB0, &HB1, &HB2)
+    T3.WriteLine Array(&HC0, &HC1, &HC2)
+    T3.CloseWrite Data
+    Debug.Print EncHexDelimitedB(Data)
+    Debug.Print TypeName(Data), LBound(Data), UBound(Data)
+    Debug.Print
+    
+    Debug.Print T3.ErrorCount
+    If T3.ErrorCount > 0 Then
+        Debug.Print T3.EncVariant(T3.ErrorLogs)
+    End If
+    
+    T3.SetT1
+    Set T1 = Nothing
+    Set T3 = Nothing
+End Sub
+
+' test a binary file stream
+Sub test2()
+    Dim Data As Variant
+    Dim Size As Long
+    Dim T3 As StreamBase
+    Dim T1 As T1BinaryFileStream
+    
+    Set T3 = New StreamBase
+    Set T1 = New T1BinaryFileStream
+    T3.SetT1 T1
+    
+    Debug.Print T3.Description
+    Debug.Print
+    
+    'T1.SetBufferSize 2
+    T3.OpenRead "C:\tmp\test1.txt", "C:\tmp\test2.txt"
+    Do Until T3.AtEndOfStream
+        T3.ReadLine Data, Size
+        Debug.Print EncHexDelimitedB(Data, Size), Size
+    Loop
+    T3.CloseRead
+    Debug.Print
+    
+    T3.OpenWrite "C:\tmp\test3.txt"
+    T3.WriteLine Array(65, 66, 67, 68, 69)
+    T3.WriteLine Array(13, 10)
+    T3.WriteLine Array(70)
+    T3.CloseWrite
+    
+    Debug.Print T3.ErrorCount
+    If T3.ErrorCount > 0 Then
+        Debug.Print T3.EncVariant(T3.ErrorLogs)
+    End If
+    
+    T3.SetT1
+    Set T1 = Nothing
+    Set T3 = Nothing
+End Sub
+
+Public Function EncHexDelimitedB(Data As Variant, Optional ByVal Length As Long = -1, Optional ByVal Width As Long = 2) As String
+    Dim out As String
+    Dim i As Long
+    Dim s As String
+    Const DefaultDelimiter = " "
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    s = String(Width, "0")
+    For i = 0 To Length - 1
+        out = out & Right(s & Hex(Data(i)), Width) & DefaultDelimiter
+    Next
+    
+    EncHexDelimitedB = out
+End Function
+
+Public Function DecHexDelimited(Text As String) As Byte()
+    Dim Line As Variant
+    Dim ByteData As Variant
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Const DefaultLineFeed = vbCrLf
+    Const DefaultDelimiter = " "
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, DefaultLineFeed)
+        For Each ByteData In Split(Line, DefaultDelimiter)
+            If ByteData <> "" Then
+                pan = Array(CByte("&H" & ByteData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimited = out
+End Function
+'}}}
