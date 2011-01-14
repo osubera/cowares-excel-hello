@@ -28,8 +28,8 @@ Option Explicit
 'identity
 '      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
 '   status;beta
-'   source;
-' revision;0+
+'   source;http://code.google.com/p/cowares-excel-hello/source/browse/trunk/stream_base/i_stream_base.txt
+' revision;r188+
 
 
 ' about this class
@@ -99,8 +99,9 @@ End Function
 
 ' reader
 
-Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
-End Function
+' finder does transactions from T1er to T3er, instead of reader
+'Public Function ReadTx() As Boolean
+'End Function
 
 Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
 End Function
@@ -108,7 +109,7 @@ End Function
 
 ' writer
 
-Public Function WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+Public Function WriteTx() As Boolean
 End Function
 
 Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -129,7 +130,7 @@ End Function
 Public Property Get Que() As Collection
 End Property
 
-Public Sub Enqueue(ParamArray Args() As Variant)
+Public Sub Enqueue(Arg As Variant)
 End Sub
 
 Public Function Dequeue() As Variant
@@ -141,7 +142,7 @@ End Function
 Public Sub EditFirstQueue(Data As Variant)
 End Sub
 
-Public Sub InsertBeforeFirstQueue(ParamArray Args() As Variant)
+Public Sub InsertBeforeFirstQueue(Arg As Variant)
 End Sub
 
 Public Function IsEmptyQueue() As Boolean
@@ -162,4 +163,12 @@ End Sub
 Public Function LogErrorTx() As String
 End Function
 
+
+' local variables
+
+Public Property Get Properties(Key As String) As Variant
+End Property
+
+Public Property Let Properties(Key As String, Value As Variant)
+End Property
 '}}}

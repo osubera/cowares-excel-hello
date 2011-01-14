@@ -3,7 +3,9 @@
 '{{{
 Option Explicit
 
-Sub test_ALL()
+' designed for IStreamBase revision r188+
+
+Sub test_All()
     test_Can_Initialize_Helper
     test_Can_Initialize_T2
     test_Description
@@ -285,9 +287,8 @@ Sub test_Read_Write()
     Debug.Assert x3.OpenWriteTx(Array())
     Debug.Assert x3.CloseReadTx("dummy")
     Debug.Assert x3.CloseWriteTx("dummy")
-    Debug.Assert x3.ReadTx(Empty, 0)
     Debug.Assert x3.SkipLineTx
-    Debug.Assert x3.WriteTx(Empty, 0)
+    Debug.Assert x3.WriteTx
     Debug.Assert x3.FeedLineTx
     x3.SetPositionTx 0
     Debug.Assert x3.GetPositionTx() = -1
@@ -314,19 +315,24 @@ Sub test_Que()
     
     Debug.Assert TypeName(x3.Que) = "Collection"
     Debug.Assert x3.IsEmptyQueue
-    x3.Enqueue 1, 2, 3
+    x3.Enqueue 1
+    x3.Enqueue 2
+    x3.Enqueue 3
     Debug.Assert Not x3.IsEmptyQueue
     Debug.Assert x3.Dequeue = 1
     Debug.Assert x3.CheatQueue = 2
     x3.EditFirstQueue 4
     Debug.Assert x3.Dequeue = 4
     Debug.Assert x3.CheatQueue = 3
-    x3.InsertBeforeFirstQueue 11, 12
+    x3.InsertBeforeFirstQueue 11
+    x3.InsertBeforeFirstQueue 12
     Debug.Assert x3.Dequeue = 12
     Debug.Assert x3.Dequeue = 11
     Debug.Assert x3.Dequeue = 3
     Debug.Assert x3.IsEmptyQueue
-    x3.Enqueue 21, 22, 23
+    x3.Enqueue 21
+    x3.Enqueue 22
+    x3.Enqueue 23
     Debug.Assert Not x3.IsEmptyQueue
     x3.ClearQueue
     Debug.Assert x3.IsEmptyQueue

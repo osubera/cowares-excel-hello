@@ -5,7 +5,7 @@ Option Explicit
 
 Const ABOUT_THIS_CLASS = "Tier 2 interface tester"
 
-' designed for IStreamBase revision 0+
+' designed for IStreamBase revision r188+
 
 Private Helper As StreamBaseHelper
 
@@ -117,10 +117,6 @@ End Function
 
 ' reader
 
-Public Function IStreamBase_ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
-    IStreamBase_ReadTx = Helper.ReadTx(Data, Size)
-End Function
-
 Public Function IStreamBase_SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
     IStreamBase_SkipLineTx = Helper.SkipLineTx(Repeat)
 End Function
@@ -128,8 +124,8 @@ End Function
 
 ' writer
 
-Public Function IStreamBase_WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
-    IStreamBase_WriteTx = Helper.WriteTx(Data, Size)
+Public Function IStreamBase_WriteTx() As Boolean
+    IStreamBase_WriteTx = Helper.WriteTx()
 End Function
 
 Public Function IStreamBase_FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -154,8 +150,8 @@ Public Property Get IStreamBase_Que() As Collection
     Set IStreamBase_Que = Helper.Que
 End Property
 
-Public Sub IStreamBase_Enqueue(ParamArray Args() As Variant)
-    Helper.Enqueue CVar(Args)
+Public Sub IStreamBase_Enqueue(Arg As Variant)
+    Helper.Enqueue Arg
 End Sub
 
 Public Function IStreamBase_Dequeue() As Variant
@@ -170,8 +166,8 @@ Public Sub IStreamBase_EditFirstQueue(Data As Variant)
     Helper.EditFirstQueue Data
 End Sub
 
-Public Sub IStreamBase_InsertBeforeFirstQueue(ParamArray Args() As Variant)
-    Helper.InsertBeforeFirstQueue CVar(Args)
+Public Sub IStreamBase_InsertBeforeFirstQueue(Arg As Variant)
+    Helper.InsertBeforeFirstQueue Arg
 End Sub
 
 Public Function IStreamBase_IsEmptyQueue() As Boolean
@@ -196,6 +192,17 @@ End Sub
 Public Function IStreamBase_LogErrorTx() As String
     IStreamBase_LogErrorTx = Helper.LogErrorTx
 End Function
+
+
+' local variables
+
+Public Property Get IStreamBase_Properties(Key As String) As Variant
+
+End Property
+
+Public Property Let IStreamBase_Properties(Key As String, Value As Variant)
+
+End Property
 
 
 '=== IStreamBase end ===
