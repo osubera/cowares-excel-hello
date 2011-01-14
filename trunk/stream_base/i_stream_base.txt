@@ -1,0 +1,165 @@
+'class
+'  name;IStreamBase
+'{{{
+Option Explicit
+
+' Interface for Buffered Stream Base
+
+' Tier 1 : at the lowest surface, depend on low level implements, optional
+' Tier 2 : act a conversion of data in stream, filters, optional
+' Tier 3 : at the highest surface, required
+
+' data flow for stream reader
+' media -> T1 -> T2 -> T2 -> T3 -> application
+
+' data flow for stream writer
+' application -> T3 -> T2 -> T2 -> T1 -> media
+
+' this class defines internal interfaces
+' for communications between neighboring Tiers.
+
+' thus these methods are better to have narrower scopes,
+' but vba cannot do this by design.
+
+
+'class
+'  name;IStreamBase
+
+'identity
+'      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
+'   status;beta
+'   source;
+' revision;0+
+
+
+' about this class
+
+Public Property Get AboutMe() As String
+End Property
+
+Public Sub NameMe(Optional ByVal NewName As String = "")
+End Sub
+
+Public Property Get Description() As String
+End Property
+
+
+' connect to neighbor Tiers
+
+Public Function InsertT1(Tier As IStreamBase) As IStreamBase
+End Function
+
+Public Function InsertT3(Tier As IStreamBase) As IStreamBase
+End Function
+
+Public Function ConnectT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+End Function
+
+Public Function ConnectT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+End Function
+
+Public Function SetT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+End Function
+
+Public Function SetT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+End Function
+
+Public Function HasT1() As Boolean
+End Function
+
+Public Function HasT3() As Boolean
+End Function
+
+Public Function IsMe(Tier As Object) As Boolean
+End Function
+
+' finder
+
+Public Function SearchEndOfStreamTx() As Boolean
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+End Function
+
+
+' open / close
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+End Function
+
+
+' reader
+
+Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+End Function
+
+Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+End Function
+
+
+' writer
+
+Public Function WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+End Function
+
+Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+End Function
+
+
+' cursor
+
+Public Sub SetPositionTx(Optional ByVal Position As Long = 0)
+End Sub
+
+Public Function GetPositionTx() As Long
+End Function
+
+
+' queue
+
+Public Property Get Que() As Collection
+End Property
+
+Public Sub Enqueue(ParamArray Args() As Variant)
+End Sub
+
+Public Function Dequeue() As Variant
+End Function
+
+Public Function CheatQueue() As Variant
+End Function
+
+Public Sub EditFirstQueue(Data As Variant)
+End Sub
+
+Public Sub InsertBeforeFirstQueue(ParamArray Args() As Variant)
+End Sub
+
+Public Function IsEmptyQueue() As Boolean
+End Function
+
+Public Sub ClearQueue()
+End Sub
+
+
+' status and logging
+
+Public Function IsBusy() As Boolean
+End Function
+
+Public Sub LogError(Optional Arg As Variant = Empty)
+End Sub
+
+Public Function LogErrorTx() As String
+End Function
+
+'}}}

@@ -1,0 +1,518 @@
+'class
+'  name;StreamBaseHelper
+'{{{
+Option Explicit
+
+' Stream Base Helper
+
+' this class contains implements and utility functions
+' commonly used in stream base classes.
+
+' designed for IStreamBase revision 0+
+
+
+Private oT2 As IStreamBase  ' caller
+Private oT1 As IStreamBase
+Private oT3 As IStreamBase
+
+Private T2 As Collection
+Private MyDescription As String
+
+
+'=== event procedures begin ===
+
+Private Sub Class_Initialize()
+    Set T2 = New Collection
+End Sub
+
+Private Sub Class_Terminate()
+    Set oT3 = Nothing
+    Set oT1 = Nothing
+    Set oT2 = Nothing
+    Set T2 = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== connet to caller begin ===
+
+
+' know who owns me
+
+Public Function GetCaller() As IStreamBase
+    Set GetCaller = oT2
+End Function
+
+Public Sub SetCaller(Who As IStreamBase)
+    Set oT2 = Who
+    Set oT1 = Who
+    Set oT3 = Who
+End Sub
+
+
+'=== connet to caller end ===
+'=== common implements begin ===
+
+
+' about this class
+
+Public Property Get AboutMe() As String
+    AboutMe = MyDescription
+End Property
+
+Public Sub NameMe(NewName As String)
+    MyDescription = NewName
+End Sub
+
+Public Property Get Description() As String
+    Dim out As String
+    out = AboutMe
+    If HasT1 Then out = out & " : " & oT1.Description
+    Description = out
+End Property
+
+
+' manage connections to neighbor Tiers
+
+Public Function InsertT1(Tier As IStreamBase) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2b.InsertT1(Tier)
+    ' after:  T1 - T2a - Tier - T2b - T3
+    ' return T2a or nothing
+    
+    Dim Prev As IStreamBase
+    
+    Set Prev = ConnectT1(Tier)
+    If Prev Is Nothing Then Exit Function
+    
+    Prev.ConnectT3 Tier
+    Set InsertT1 = Prev
+End Function
+
+Public Function InsertT3(Tier As IStreamBase) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2a.InsertT3(Tier)
+    ' after:  T1 - T2a - Tier - T2b - T3
+    ' return T2b or nothing
+    
+    Dim Prev As IStreamBase
+    
+    Set Prev = ConnectT3(Tier)
+    If Prev Is Nothing Then Exit Function
+    
+    Prev.ConnectT1 Tier
+    Set InsertT3 = Prev
+End Function
+
+Public Function ConnectT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2b.ConnectT1(Tier)
+    ' after:  Tier - T2b - T3
+    '        change both side of T2b and Tier
+    ' return T2a or nothing
+    
+    Dim Prev As IStreamBase
+    
+    Set Prev = SetT1(Tier)
+    If Not Prev Is Nothing Then Prev.SetT3
+    If Not Tier Is Nothing Then Tier.SetT3 oT2
+    Set ConnectT1 = Prev
+End Function
+
+Public Function ConnectT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2a.SetT3(Tier)
+    ' after:  T1 - T2a - Tier
+    '        change both side of T2a and Tier
+    ' return T2b or nothing
+    
+    Dim Prev As IStreamBase
+    
+    Set Prev = SetT3(Tier)
+    If Not Prev Is Nothing Then Prev.SetT1
+    If Not Tier Is Nothing Then Tier.SetT1 oT2
+    Set ConnectT3 = Prev
+End Function
+
+Public Function SetT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2b.SetT1(Tier)
+    ' after:  (Tier) - T2b - T3
+    '        change only T2b side, no changes to Tier side
+    ' return T2a or nothing
+
+    If HasT1 Then Set SetT1 = oT1
+    If Tier Is Nothing Then
+        Set oT1 = oT2
+    Else
+        Set oT1 = Tier
+    End If
+End Function
+
+Public Function SetT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    ' before: T1 - T2a - T2b -T3
+    ' call T2a.SetT3(Tier)
+    ' after:  T1 - T2a - (Tier)
+    '        change only T2a side, no changes to Tier side
+    ' return T2b or nothing
+    
+    If HasT3 Then Set SetT3 = oT3
+    If Tier Is Nothing Then
+        Set oT3 = oT2
+    Else
+        Set oT3 = Tier
+    End If
+End Function
+
+Public Function HasT1() As Boolean
+    HasT1 = Not IsMe(oT1)
+End Function
+
+Public Function HasT3() As Boolean
+    HasT3 = Not IsMe(oT3)
+End Function
+
+Public Function IsMe(Tier As Object) As Boolean
+    IsMe = (Tier Is oT2)
+End Function
+
+
+' finder
+
+Public Function SearchEndOfStreamTx() As Boolean
+    Dim Found As Boolean
+    
+    Found = SearchEndOfStreamT2
+    If Not Found Then GoTo DONE
+    If Not HasT1 Then GoTo DONE
+    Found = oT1.SearchEndOfStreamTx
+DONE:
+    SearchEndOfStreamTx = Found
+End Function
+
+Public Function SearchEndOfLineTx() As Boolean
+    Dim Found As Boolean
+    
+    Found = SearchEndOfLineT2
+    If Found Then GoTo DONE
+    If Not HasT1 Then GoTo DONE
+    Found = oT1.SearchEndOfLineTx
+DONE:
+    SearchEndOfLineTx = Found
+End Function
+
+
+' open / close
+
+Public Function OpenReadTx(Args As Variant) As Boolean
+    If HasT1 Then
+        OpenReadTx = oT1.OpenReadTx(Args)
+    Else
+        OpenReadTx = True
+    End If
+End Function
+
+Public Function OpenWriteTx(Args As Variant) As Boolean
+    If HasT1 Then
+        OpenWriteTx = oT1.OpenWriteTx(Args)
+    Else
+        OpenWriteTx = True
+    End If
+End Function
+
+Public Function CloseReadTx(Arg As Variant) As Boolean
+    If HasT1 Then
+        CloseReadTx = oT1.CloseReadTx(Arg)
+    Else
+        CloseReadTx = True
+    End If
+End Function
+
+Public Function CloseWriteTx(Arg As Variant) As Boolean
+    If HasT1 Then
+        CloseWriteTx = oT1.CloseWriteTx(Arg)
+    Else
+        CloseWriteTx = True
+    End If
+End Function
+
+
+' reader
+
+Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    If HasT1 Then
+        ReadTx = oT1.ReadTx(Data, Size)
+    Else
+        ReadTx = True
+    End If
+End Function
+
+Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+    If HasT1 Then
+        SkipLineTx = oT1.SkipLineTx(Repeat)
+    Else
+        SkipLineTx = True
+    End If
+End Function
+
+
+' writer
+
+Public Function WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    If HasT1 Then
+        WriteTx = oT1.WriteTx(Data, Size)
+    Else
+        WriteTx = True
+    End If
+End Function
+
+Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+    If HasT1 Then
+        FeedLineTx = oT1.FeedLineTx(Repeat)
+    Else
+        FeedLineTx = True
+    End If
+End Function
+
+
+' cursor
+
+Public Sub SetPositionTx(Optional ByVal Position As Long = 0)
+    If HasT1 Then
+        oT1.SetPositionTx Position
+    Else
+        SetPositionT1 Position
+    End If
+End Sub
+
+Public Function GetPositionTx() As Long
+    If HasT1 Then
+        GetPositionTx = oT1.GetPositionTx
+    Else
+        GetPositionTx = GetPositionT1
+    End If
+End Function
+
+
+' queue
+
+Public Property Get Que() As Collection
+    Set Que = T2
+End Property
+
+Public Sub Enqueue(Args As Variant)
+    Dim Arg As Variant
+    For Each Arg In Args
+        T2.Add Arg
+    Next
+End Sub
+
+Public Function Dequeue() As Variant
+    Dequeue = T2(1)
+    T2.Remove 1
+End Function
+
+Public Function CheatQueue() As Variant
+    CheatQueue = T2(1)
+End Function
+
+Public Sub EditFirstQueue(Data As Variant)
+    T2.Add Data, After:=1
+    T2.Remove 1
+End Sub
+
+Public Sub InsertBeforeFirstQueue(Args As Variant)
+    Dim Arg As Variant
+    For Each Arg In Args
+        T2.Add Arg, Before:=1
+    Next
+End Sub
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = (T2.Count = 0)
+End Function
+
+Public Sub ClearQueue()
+    Do While T2.Count > 0
+        T2.Remove 1
+    Loop
+End Sub
+
+
+' status and logging
+
+Public Function IsBusy() As Boolean
+    Dim out As Boolean
+    
+    out = IsBusyT2
+    If out Then GoTo DONE
+    If Not HasT1 Then GoTo DONE
+    out = oT1.IsBusy
+DONE:
+    IsBusy = out
+End Function
+
+Public Sub LogError(Optional Arg As Variant = Empty)
+    If HasT3 Then
+        oT3.LogError Arg
+    Else
+        LogErrorT3 Arg
+    End If
+End Sub
+
+Public Function LogErrorTx() As String
+    Dim out As String
+    out = T2.Count & EncVariant(T2)
+    If HasT1 Then out = out & " : " & oT1.LogErrorTx
+    LogErrorTx = out
+End Function
+
+
+'=== common implements end ===
+'=== T1 implements begin ===
+
+
+Public Sub SetPositionT1(ByVal Position As Long)
+
+End Sub
+
+Public Function GetPositionT1() As Long
+    GetPositionT1 = -1
+End Function
+
+
+'=== T1 implements end ===
+'=== T2 implements begin ===
+
+
+' finder
+
+Public Function SearchEndOfStreamT2() As Boolean
+    SearchEndOfStreamT2 = IsEmptyQueue
+End Function
+
+Public Function SearchEndOfLineT2() As Boolean
+    SearchEndOfLineT2 = SearchEndOfStreamT2
+End Function
+
+
+' status and logging
+
+Public Function IsBusyT2() As Boolean
+    IsBusyT2 = Not IsEmptyQueue
+End Function
+
+
+'=== T2 implements end ===
+'=== T3 implements begin ===
+
+
+' status and logging
+
+Public Function LogErrorT3(Arg As Variant)
+    'Logs.Add Array(Err.Number, Err.Description, LogErrorTx, Arg)
+    Debug.Print EncVariant(Array(Err.Number, Err.Description, LogErrorTx, Arg))
+End Function
+
+
+'=== T3 implements end ===
+'=== data structure begin ===
+
+
+' queue data structure
+
+Public Function MakeQueueData(Optional Data As Variant = Empty, Optional ByVal Size As Long = -1) As Variant
+    If IsEmpty(Data) Then
+        MakeQueueData = Array(Size, Empty)
+    Else
+        MakeQueueData = Array(Size, Array(Data, Empty))
+    End If
+End Function
+
+Public Function SizeQueueData(QueueData As Variant) As Long
+    SizeQueueData = QueueData(0)
+End Function
+
+Public Function NoDataQueueData(QueueData As Variant) As Boolean
+    NoDataQueueData = IsEmpty(QueueData(1))
+End Function
+
+Public Function DataQueueData(QueueData As Variant) As Variant
+    If NoDataQueueData(QueueData) Then Exit Function
+    DataQueueData = QueueData(1)(0)
+End Function
+
+Public Function EditDataQueueData(QueueData As Variant, Optional Data As Variant = Empty) As Variant
+    EditDataQueueData = MakeQueueData(Data, SizeQueueData(QueueData))
+End Function
+
+Public Function EditSizeQueueData(QueueData As Variant, Optional ByVal Size As Long = -1) As Variant
+    EditSizeQueueData = MakeQueueData(DataQueueData(QueueData), Size)
+End Function
+
+
+'=== data structure end ===
+'=== helper functions begin ===
+
+
+Public Function EncVariant(Data As Variant) As String
+    Dim KeyValue As Variant
+    Dim out As String
+    
+    Const ArrayBegin = "("
+    Const ArrayEnd = ")"
+    Const Delimiter = ","
+    
+    If IsArray(Data) Then
+        out = ArrayBegin
+        For Each KeyValue In Data
+            out = out & EncVariant(KeyValue) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        Select Case TypeName(Data)
+        Case "Collection"
+            out = EncCollection(Data)
+        Case "Dictionary"
+            out = EncDictionary(Data)
+        Case Else
+            out = TypeName(Data)
+        End Select
+    Else
+        out = CStr(Data)
+    End If
+    
+    EncVariant = out
+End Function
+
+Public Function EncDictionary(Data As Variant) As String
+    Dim Key As Variant
+    Dim out As String
+    
+    Const LineFeed = "##"
+    Const Equal = "="
+    
+    out = LineFeed
+    For Each Key In Data.Keys
+        out = out & Key & Equal & EncVariant(Data(Key)) & LineFeed
+    Next
+    
+    EncDictionary = out
+End Function
+
+Public Function EncCollection(Data As Variant) As String
+    Dim x As Variant
+    Dim out As String
+    
+    Const LineFeed = "##"
+    
+    out = LineFeed
+    For Each x In Data
+        out = out & EncVariant(x) & LineFeed
+    Next
+    
+    EncCollection = out
+End Function
+
+'=== helper functions end ===
+'}}}
