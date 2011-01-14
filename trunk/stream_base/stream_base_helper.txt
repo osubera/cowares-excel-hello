@@ -8,7 +8,7 @@ Option Explicit
 ' this class contains implements and utility functions
 ' commonly used in stream base classes.
 
-' designed for IStreamBase revision 0+
+' designed for IStreamBase revision r188+
 
 
 Private oT2 As IStreamBase  ' caller
@@ -240,11 +240,10 @@ End Function
 ' reader
 
 Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
-    If HasT1 Then
-        ReadTx = oT1.ReadTx(Data, Size)
-    Else
-        ReadTx = True
-    End If
+    ' transact from T1er to T3er
+    ' nop
+    ' finder does the transaction
+    ReadTx = True
 End Function
 
 Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -258,12 +257,14 @@ End Function
 
 ' writer
 
-Public Function WriteTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
-    If HasT1 Then
-        WriteTx = oT1.WriteTx(Data, Size)
-    Else
-        WriteTx = True
-    End If
+Public Function WriteTx() As Boolean
+    ' transact from T3er to T1er
+    Do Until oT3.IsEmptyQueue
+        Enqueue oT3.Dequeue
+        ' enqueue of T1 does real writing to low i/o
+    Loop
+    
+    WriteTx = True
 End Function
 
 Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -300,11 +301,8 @@ Public Property Get Que() As Collection
     Set Que = T2
 End Property
 
-Public Sub Enqueue(Args As Variant)
-    Dim Arg As Variant
-    For Each Arg In Args
-        T2.Add Arg
-    Next
+Public Sub Enqueue(Arg As Variant)
+    T2.Add Arg
 End Sub
 
 Public Function Dequeue() As Variant
@@ -321,11 +319,8 @@ Public Sub EditFirstQueue(Data As Variant)
     T2.Remove 1
 End Sub
 
-Public Sub InsertBeforeFirstQueue(Args As Variant)
-    Dim Arg As Variant
-    For Each Arg In Args
-        T2.Add Arg, Before:=1
-    Next
+Public Sub InsertBeforeFirstQueue(Arg As Variant)
+    T2.Add Arg, Before:=1
 End Sub
 
 Public Function IsEmptyQueue() As Boolean
@@ -405,6 +400,31 @@ End Function
 
 '=== T2 implements end ===
 '=== T3 implements begin ===
+
+
+' reader
+
+Public Function ReadLineT3(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    ' transact from T1er to T3
+    Dim QData As Variant
+    
+    QData = Dequeue
+    Size = SizeQueueData(QData)
+    Data = DataQueueData(QData)
+    
+    ReadLineT3 = True
+End Function
+
+
+' writer
+
+Public Function WriteLineT3(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+    ' transact from T3 to T1er
+    Enqueue MakeQueueData(Data, Size)
+    If HasT1 Then oT1.WriteTx
+    
+    WriteLineT3 = True
+End Function
 
 
 ' status and logging
