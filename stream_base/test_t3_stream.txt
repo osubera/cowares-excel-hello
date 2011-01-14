@@ -1,0 +1,89 @@
+'module
+'  name;testT3Stream
+'{{{
+Option Explicit
+
+' designed for IStreamBase revision r188+ and IStreamT3 revision 0+
+
+Sub test_All()
+    test_Can_Initialize_T3Stream
+    test_Description
+    test_Properties
+    test_Read_Write
+End Sub
+
+Sub test_Can_Initialize_T3Stream()
+    Dim x As IStreamT3
+    Dim y As IStreamBase
+    
+    Set x = New T3Stream
+    Set y = New T3Stream
+    
+    Debug.Assert TypeName(x) = "T3Stream"
+    Debug.Assert TypeName(y) = "T3Stream"
+    
+    Set y = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Description()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Debug.Print x.Description
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Properties()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Debug.Assert x.Properties("hello") = ""
+    x.Properties("hello") = "world"
+    Debug.Assert x.Properties("hello") = "world"
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Read_Write()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    Debug.Assert x.SkipLine
+    Debug.Assert x.FeedLine
+    x.SetPosition 0
+    Debug.Assert x.GetPosition() = -1
+    
+    x.OpenWrite
+    x.WriteLine "Hello"
+    x.WriteLine "World", 123
+    x.CloseWrite
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    
+    x.OpenRead
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+'}}}

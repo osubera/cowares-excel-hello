@@ -1,0 +1,82 @@
+'class
+'  name;IStreamT3
+'{{{
+Option Explicit
+
+' Application Interface for Buffered Stream Base Tier3
+
+'class
+'  name;IStreamT3
+
+'identity
+'      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
+'   status;beta
+'   source;http://code.google.com/p/cowares-excel-hello/source/browse/trunk/stream_base/i_stream_t3.txt
+' revision;r188+
+
+
+' about this class
+
+Public Property Get Description() As String
+End Property
+
+
+' information
+
+Public Property Get Que() As Collection
+End Property
+
+Public Property Get ErrorCount() As Long
+End Property
+
+Public Property Get ErrorLogs() As Collection
+End Property
+
+
+' local variables
+
+Public Property Get Properties(Key As String) As Variant
+End Property
+
+Public Property Let Properties(Key As String, Value As Variant)
+End Property
+
+
+' stream read / write
+
+Public Property Get AtEndOfStream() As Boolean
+End Property
+
+Public Property Get AtEndOfLine() As Boolean
+End Property
+
+Public Function OpenRead(ParamArray Args() As Variant) As Boolean
+End Function
+
+Public Function OpenWrite(ParamArray Args() As Variant) As Boolean
+End Function
+
+Public Function CloseRead(Optional ByRef Arg As Variant) As Boolean
+End Function
+
+Public Function CloseWrite(Optional ByRef Arg As Variant) As Boolean
+End Function
+
+Public Function ReadLine(ByRef Data As Variant, Optional ByRef Size As Variant) As Boolean
+End Function
+
+Public Function SkipLine(Optional ByVal Repeat As Long = 1) As Boolean
+End Function
+
+Public Function WriteLine(ByRef Data As Variant, Optional ByVal Size As Long = -1) As Boolean
+End Function
+
+Public Function FeedLine(Optional ByVal Repeat As Long = 1) As Boolean
+End Function
+
+Public Sub SetPosition(Optional ByVal Position As Long = 0)
+End Sub
+
+Public Function GetPosition() As Long
+End Function
+'}}}
