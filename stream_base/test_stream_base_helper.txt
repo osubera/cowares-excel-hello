@@ -1,0 +1,412 @@
+'module
+'  name;testStreamBaseHelper
+'{{{
+Option Explicit
+
+Sub test_ALL()
+    test_Can_Initialize_Helper
+    test_Can_Initialize_T2
+    test_Description
+    test_Connections
+    test_Finder
+    test_Read_Write
+    test_Que
+    test_Log
+    test_Que_Data_Structure
+End Sub
+
+Sub test_Can_Initialize_Helper()
+    Dim x As StreamBaseHelper
+    Set x = New StreamBaseHelper
+    
+    Debug.Assert TypeName(x) = "StreamBaseHelper"
+    
+    Debug.Print x.EncVariant(Array("OK", x))
+    Set x = Nothing
+End Sub
+
+Sub test_Can_Initialize_T2()
+    Dim x As IStreamBase
+    Dim y As T2
+    Set x = New T2
+    Set y = New T2
+    
+    Debug.Assert TypeName(x) = "T2"
+    Debug.Assert TypeName(y) = "T2"
+    
+    Set y = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Description()
+    Dim x As IStreamBase
+    Set x = New T2
+    
+    Debug.Print x.AboutMe
+    Debug.Print x.Description
+    
+    x.NameMe "Hello"
+    Debug.Assert x.AboutMe = "Hello"
+    Debug.Print x.AboutMe
+    Debug.Print x.Description
+    
+    x.NameMe
+    Debug.Print x.AboutMe
+    Debug.Print x.Description
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Connections()
+    Dim x1 As IStreamBase
+    Dim x2 As IStreamBase
+    Dim x3 As IStreamBase
+    Set x1 = New T2
+    Set x2 = New T2
+    Set x3 = New T2
+    
+    x1.NameMe "x1"
+    x2.NameMe "x2"
+    x3.NameMe "x3"
+    
+    Debug.Assert Not x2.IsMe(x1)
+    Debug.Assert x2.IsMe(x2)
+    Debug.Assert Not x2.IsMe(x3)
+    
+    Debug.Print x2.Description
+    Debug.Assert Not x2.HasT1
+    Debug.Assert Not x2.HasT3
+    
+    x2.SetT1 x1
+    Debug.Print x2.Description
+    Debug.Assert x2.HasT1
+    Debug.Assert Not x2.HasT3
+    Debug.Assert Not x1.HasT3
+    
+    x2.SetT1
+    x2.SetT3 x3
+    Debug.Print x2.Description
+    Debug.Assert x2.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert Not x1.HasT3
+    Debug.Assert Not x3.HasT1
+    
+    x2.SetT1 x1
+    Debug.Print x2.Description
+    Debug.Assert x2.HasT3
+    Debug.Assert x2.HasT1
+    Debug.Assert Not x1.HasT3
+    Debug.Assert Not x3.HasT1
+    Debug.Assert Not x1.HasT1
+    Debug.Assert Not x3.HasT3
+    
+    Debug.Assert x2.SetT1 Is x1
+    Debug.Assert x2.SetT3 Is x3
+    Debug.Print x2.Description
+    Debug.Assert Not x2.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert Not x1.HasT3
+    Debug.Assert Not x3.HasT1
+    
+    x2.ConnectT1 x1
+    Debug.Print x2.Description
+    Debug.Assert x2.HasT1
+    Debug.Assert Not x2.HasT3
+    Debug.Assert x1.HasT3
+    
+    x2.ConnectT1
+    x2.ConnectT3 x3
+    Debug.Print x3.Description
+    Debug.Assert x2.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert Not x1.HasT3
+    Debug.Assert x3.HasT1
+    
+    x2.ConnectT1 x1
+    Debug.Print x3.Description
+    Debug.Assert x2.HasT3
+    Debug.Assert x2.HasT1
+    Debug.Assert x1.HasT3
+    Debug.Assert x3.HasT1
+    Debug.Assert Not x1.HasT1
+    Debug.Assert Not x3.HasT3
+    
+    Debug.Assert x2.ConnectT1 Is x1
+    Debug.Assert x2.ConnectT3 Is x3
+    Debug.Print x3.Description
+    Debug.Assert Not x2.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert Not x1.HasT3
+    Debug.Assert Not x3.HasT1
+    
+    x2.ConnectT3 x3
+    x2.ConnectT3 x1
+    Debug.Print x3.Description
+    Debug.Print x1.Description
+    Debug.Assert Not x3.HasT1
+    Debug.Assert Not x3.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert x2.HasT3
+    Debug.Assert x1.HasT1
+    Debug.Assert Not x1.HasT3
+    
+    x2.ConnectT3
+    
+    x3.ConnectT1 x1
+    Debug.Print x3.Description
+    
+    x3.InsertT1 x2
+    Debug.Print x3.Description
+    Debug.Assert Not x3.HasT3
+    Debug.Assert x3.HasT1
+    Debug.Assert x2.HasT3
+    Debug.Assert x2.HasT1
+    Debug.Assert x1.HasT3
+    Debug.Assert Not x1.HasT1
+    
+    x2.ConnectT1
+    x2.ConnectT3
+    
+    x1.ConnectT3 x3
+    Debug.Print x3.Description
+    
+    x1.InsertT3 x2
+    Debug.Print x3.Description
+    Debug.Assert Not x3.HasT3
+    Debug.Assert x3.HasT1
+    Debug.Assert x2.HasT3
+    Debug.Assert x2.HasT1
+    Debug.Assert x1.HasT3
+    Debug.Assert Not x1.HasT1
+    
+    x2.ConnectT1
+    x2.ConnectT3
+    
+    x1.ConnectT3 x3
+    Debug.Print x3.Description
+    
+    x1.InsertT1 x2
+    Debug.Print x3.Description
+    Debug.Assert Not x3.HasT3
+    Debug.Assert x3.HasT1
+    Debug.Assert x2.HasT3
+    Debug.Assert Not x2.HasT1
+    Debug.Assert x1.HasT3
+    Debug.Assert x1.HasT1
+    
+    Set x3 = Nothing
+    Set x2 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Sub test_Finder()
+    Dim x1 As IStreamBase
+    Dim x2 As IStreamBase
+    Dim x3 As IStreamBase
+    Set x1 = New T2
+    Set x2 = New T2
+    Set x3 = New T2
+    x1.NameMe "x1"
+    x2.NameMe "x2"
+    x3.NameMe "x3"
+    x3.ConnectT1 x2
+    x2.ConnectT1 x1
+    
+    Debug.Print x3.Description
+    
+    Debug.Assert x3.IsEmptyQueue
+    Debug.Assert x2.IsEmptyQueue
+    Debug.Assert x1.IsEmptyQueue
+    Debug.Assert Not x3.IsBusy
+    Debug.Assert Not x2.IsBusy
+    Debug.Assert Not x1.IsBusy
+    Debug.Assert x3.SearchEndOfStreamTx
+    Debug.Assert x2.SearchEndOfStreamTx
+    Debug.Assert x1.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
+    Debug.Assert x2.SearchEndOfLineTx
+    Debug.Assert x1.SearchEndOfLineTx
+    
+    x3.Que.Add "dummy"
+    Debug.Assert Not x3.IsEmptyQueue
+    Debug.Assert x3.IsBusy
+    Debug.Assert Not x3.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
+    
+    x3.Que.Remove 1
+    Debug.Assert x3.IsEmptyQueue
+    Debug.Assert Not x3.IsBusy
+    Debug.Assert x3.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
+    
+    x2.Que.Add "dummy"
+    Debug.Assert Not x2.IsEmptyQueue
+    Debug.Assert x3.IsBusy
+    Debug.Assert x2.IsBusy
+    Debug.Assert Not x3.SearchEndOfStreamTx
+    Debug.Assert Not x2.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
+    Debug.Assert x2.SearchEndOfLineTx
+    
+    x2.Que.Remove 1
+    x1.Que.Add "dummy"
+    Debug.Assert Not x1.IsEmptyQueue
+    Debug.Assert x3.IsBusy
+    Debug.Assert x2.IsBusy
+    Debug.Assert x1.IsBusy
+    Debug.Assert Not x3.SearchEndOfStreamTx
+    Debug.Assert Not x2.SearchEndOfStreamTx
+    Debug.Assert Not x1.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
+    Debug.Assert x2.SearchEndOfLineTx
+    Debug.Assert Not x1.SearchEndOfLineTx
+    
+    Set x3 = Nothing
+    Set x2 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Sub test_Read_Write()
+    Dim x1 As IStreamBase
+    Dim x2 As IStreamBase
+    Dim x3 As IStreamBase
+    Set x1 = New T2
+    Set x2 = New T2
+    Set x3 = New T2
+    x1.NameMe "x1"
+    x2.NameMe "x2"
+    x3.NameMe "x3"
+    x3.ConnectT1 x2
+    x2.ConnectT1 x1
+    
+    Debug.Print x3.Description
+    
+    Debug.Assert x3.OpenReadTx(Array())
+    Debug.Assert x3.OpenWriteTx(Array())
+    Debug.Assert x3.CloseReadTx("dummy")
+    Debug.Assert x3.CloseWriteTx("dummy")
+    Debug.Assert x3.ReadTx(Empty, 0)
+    Debug.Assert x3.SkipLineTx
+    Debug.Assert x3.WriteTx(Empty, 0)
+    Debug.Assert x3.FeedLineTx
+    x3.SetPositionTx 0
+    Debug.Assert x3.GetPositionTx() = -1
+    
+    Set x3 = Nothing
+    Set x2 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Sub test_Que()
+    Dim x1 As IStreamBase
+    Dim x2 As IStreamBase
+    Dim x3 As IStreamBase
+    Set x1 = New T2
+    Set x2 = New T2
+    Set x3 = New T2
+    x1.NameMe "x1"
+    x2.NameMe "x2"
+    x3.NameMe "x3"
+    x3.ConnectT1 x2
+    x2.ConnectT1 x1
+    
+    Debug.Print x3.Description
+    
+    Debug.Assert TypeName(x3.Que) = "Collection"
+    Debug.Assert x3.IsEmptyQueue
+    x3.Enqueue 1, 2, 3
+    Debug.Assert Not x3.IsEmptyQueue
+    Debug.Assert x3.Dequeue = 1
+    Debug.Assert x3.CheatQueue = 2
+    x3.EditFirstQueue 4
+    Debug.Assert x3.Dequeue = 4
+    Debug.Assert x3.CheatQueue = 3
+    x3.InsertBeforeFirstQueue 11, 12
+    Debug.Assert x3.Dequeue = 12
+    Debug.Assert x3.Dequeue = 11
+    Debug.Assert x3.Dequeue = 3
+    Debug.Assert x3.IsEmptyQueue
+    x3.Enqueue 21, 22, 23
+    Debug.Assert Not x3.IsEmptyQueue
+    x3.ClearQueue
+    Debug.Assert x3.IsEmptyQueue
+    
+    Set x3 = Nothing
+    Set x2 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Sub test_Log()
+    Dim x1 As IStreamBase
+    Dim x2 As IStreamBase
+    Dim x3 As IStreamBase
+    Set x1 = New T2
+    Set x2 = New T2
+    Set x3 = New T2
+    x1.NameMe "x1"
+    x2.NameMe "x2"
+    x3.NameMe "x3"
+    x3.ConnectT1 x2
+    x2.ConnectT1 x1
+    
+    Debug.Print x3.Description
+    
+    Debug.Print x3.LogErrorTx
+    x3.LogError "Hello"
+    
+    On Error Resume Next
+    Dim i As Long
+    i = 1 / 0
+    x3.LogError "World"
+    
+    Set x3 = Nothing
+    Set x2 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Sub test_Que_Data_Structure()
+    Dim Q As Variant
+    Dim Data As Variant
+    Dim Size As Long
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Data = "Hello World"
+    Size = 1234
+    
+    Q = Helper.MakeQueueData()
+    Debug.Print Helper.EncVariant(Q)
+    Debug.Assert Helper.SizeQueueData(Q) = -1
+    Debug.Assert Helper.NoDataQueueData(Q)
+    Debug.Assert IsEmpty(Helper.DataQueueData(Q))
+    
+    Q = Helper.MakeQueueData(Size:=Size)
+    Debug.Print Helper.EncVariant(Q)
+    Debug.Assert Helper.SizeQueueData(Q) = Size
+    Debug.Assert Helper.NoDataQueueData(Q)
+    Debug.Assert IsEmpty(Helper.DataQueueData(Q))
+    
+    Q = Helper.MakeQueueData(Data)
+    Debug.Print Helper.EncVariant(Q)
+    Debug.Assert Helper.SizeQueueData(Q) = -1
+    Debug.Assert Not Helper.NoDataQueueData(Q)
+    Debug.Assert Helper.DataQueueData(Q) = Data
+    
+    Q = Helper.MakeQueueData(Data, Size)
+    Debug.Print Helper.EncVariant(Q)
+    Debug.Assert Helper.SizeQueueData(Q) = Size
+    Debug.Assert Not Helper.NoDataQueueData(Q)
+    Debug.Assert Helper.DataQueueData(Q) = Data
+    
+    Q = Helper.EditDataQueueData(Q, Array("Hello", "World"))
+    Debug.Print Helper.EncVariant(Q)
+    Q = Helper.EditSizeQueueData(Q, 567)
+    Debug.Print Helper.EncVariant(Q)
+    Q = Helper.EditDataQueueData(Q)
+    Debug.Print Helper.EncVariant(Q)
+    Q = Helper.EditSizeQueueData(Q)
+    Debug.Print Helper.EncVariant(Q)
+    
+    Set Helper = Nothing
+End Sub
+'}}}
