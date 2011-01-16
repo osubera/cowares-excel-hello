@@ -8,7 +8,7 @@ Option Explicit
 ' this class contains implements and utility functions
 ' commonly used in stream base classes.
 
-' designed for IStreamBase revision r188+
+' designed for IStreamBase revision r189+
 
 
 Private oT2 As IStreamBase  ' caller
@@ -17,6 +17,8 @@ Private oT3 As IStreamBase
 
 Private T2 As Collection
 Private MyDescription As String
+Private NoMoreT1 As Boolean
+Private NoMoreT3 As Boolean
 
 
 '=== event procedures begin ===
@@ -49,6 +51,16 @@ Public Sub SetCaller(Who As IStreamBase)
     Set oT3 = Who
 End Sub
 
+' know status
+
+Public Function NoMoreDataT1() As Boolean
+    NoMoreDataT1 = NoMoreT1
+End Function
+
+Public Function NoMoreDataT3() As Boolean
+    NoMoreDataT3 = NoMoreT3
+End Function
+
 
 '=== connet to caller end ===
 '=== common implements begin ===
@@ -64,10 +76,13 @@ Public Sub NameMe(NewName As String)
     MyDescription = NewName
 End Sub
 
-Public Property Get Description() As String
+Public Property Get Description(Optional ByVal Depth As Long = -1) As String
     Dim out As String
     out = AboutMe
-    If HasT1 Then out = out & " : " & oT1.Description
+    If Depth = 0 Then GoTo DONE
+    If Depth > 0 Then Depth = Depth - 1
+    If HasT1 Then out = out & " : " & oT1.Description(Depth)
+DONE:
     Description = out
 End Property
 
@@ -164,6 +179,16 @@ Public Function SetT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
     End If
 End Function
 
+Public Function GetT1(Optional OrMe As Boolean = False) As IStreamBase
+    If Not (HasT1 Or OrMe) Then Exit Function
+    Set GetT1 = oT1
+End Function
+
+Public Function GetT3(Optional OrMe As Boolean = False) As IStreamBase
+    If Not (HasT3 Or OrMe) Then Exit Function
+    Set GetT3 = oT3
+End Function
+
 Public Function HasT1() As Boolean
     HasT1 = Not IsMe(oT1)
 End Function
@@ -175,6 +200,43 @@ End Function
 Public Function IsMe(Tier As Object) As Boolean
     IsMe = (Tier Is oT2)
 End Function
+
+
+'status
+
+Public Function IsBusyT1(Optional ByVal Depth As Long = -1) As Boolean
+    Dim out As Boolean
+    
+    out = IsBusyT2
+    If out Then GoTo DONE
+    If Not HasT1 Then GoTo DONE
+    If Depth = 0 Then GoTo DONE
+    If Depth > 0 Then Depth = Depth - 1
+    out = oT1.IsBusyT1(Depth)
+DONE:
+    IsBusyT1 = out
+End Function
+
+Public Function IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
+    Dim out As Boolean
+    
+    out = IsBusyT2
+    If out Then GoTo DONE
+    If Not HasT3 Then GoTo DONE
+    If Depth = 0 Then GoTo DONE
+    If Depth > 0 Then Depth = Depth - 1
+    out = oT3.IsBusyT3(Depth)
+DONE:
+    IsBusyT3 = out
+End Function
+
+Public Sub DoneT1(Args As Variant)
+    NoMoreT1 = True
+End Sub
+
+Public Sub DoneT3(Args As Variant)
+    NoMoreT3 = True
+End Sub
 
 
 ' finder
@@ -201,10 +263,16 @@ DONE:
     SearchEndOfLineTx = Found
 End Function
 
+Public Function FlushEndOfLineTx() As Boolean
+
+End Function
+
 
 ' open / close
 
 Public Function OpenReadTx(Args As Variant) As Boolean
+    NoMoreT1 = False
+    NoMoreT3 = False
     If HasT1 Then
         OpenReadTx = oT1.OpenReadTx(Args)
     Else
@@ -213,6 +281,8 @@ Public Function OpenReadTx(Args As Variant) As Boolean
 End Function
 
 Public Function OpenWriteTx(Args As Variant) As Boolean
+    NoMoreT1 = False
+    NoMoreT3 = False
     If HasT1 Then
         OpenWriteTx = oT1.OpenWriteTx(Args)
     Else
@@ -239,7 +309,7 @@ End Function
 
 ' reader
 
-Public Function ReadTx(ByRef Data As Variant, ByRef Size As Variant) As Boolean
+Public Function ReadTx() As Boolean
     ' transact from T1er to T3er
     ' nop
     ' finder does the transaction
@@ -278,7 +348,7 @@ End Function
 
 ' cursor
 
-Public Sub SetPositionTx(Optional ByVal Position As Long = 0)
+Public Sub SetPositionTx(Optional Position As Variant = Empty)
     If HasT1 Then
         oT1.SetPositionTx Position
     Else
@@ -286,7 +356,7 @@ Public Sub SetPositionTx(Optional ByVal Position As Long = 0)
     End If
 End Sub
 
-Public Function GetPositionTx() As Long
+Public Function GetPositionTx() As Variant
     If HasT1 Then
         GetPositionTx = oT1.GetPositionTx
     Else
@@ -334,18 +404,7 @@ Public Sub ClearQueue()
 End Sub
 
 
-' status and logging
-
-Public Function IsBusy() As Boolean
-    Dim out As Boolean
-    
-    out = IsBusyT2
-    If out Then GoTo DONE
-    If Not HasT1 Then GoTo DONE
-    out = oT1.IsBusy
-DONE:
-    IsBusy = out
-End Function
+' logging
 
 Public Sub LogError(Optional Arg As Variant = Empty)
     If HasT3 Then
@@ -355,10 +414,13 @@ Public Sub LogError(Optional Arg As Variant = Empty)
     End If
 End Sub
 
-Public Function LogErrorTx() As String
+Public Function LogErrorTx(Optional ByVal Depth As Long = -1) As String
     Dim out As String
     out = T2.Count & EncVariant(T2)
-    If HasT1 Then out = out & " : " & oT1.LogErrorTx
+    If Depth = 0 Then GoTo DONE
+    If Depth > 0 Then Depth = Depth - 1
+    If HasT1 Then out = out & " : " & oT1.LogErrorTx(Depth)
+DONE:
     LogErrorTx = out
 End Function
 
@@ -367,11 +429,11 @@ End Function
 '=== T1 implements begin ===
 
 
-Public Sub SetPositionT1(ByVal Position As Long)
+Public Sub SetPositionT1(Position As Variant)
 
 End Sub
 
-Public Function GetPositionT1() As Long
+Public Function GetPositionT1() As Variant
     GetPositionT1 = -1
 End Function
 
@@ -384,6 +446,11 @@ End Function
 
 Public Function SearchEndOfStreamT2() As Boolean
     SearchEndOfStreamT2 = IsEmptyQueue
+    If Not HasT3 Then Exit Function
+    
+    Do Until IsEmptyQueue
+        oT3.Enqueue Dequeue
+    Loop
 End Function
 
 Public Function SearchEndOfLineT2() As Boolean
@@ -427,7 +494,7 @@ Public Function WriteLineT3(ByRef Data As Variant, ByRef Size As Variant) As Boo
 End Function
 
 
-' status and logging
+' logging
 
 Public Function LogErrorT3(Arg As Variant)
     'Logs.Add Array(Err.Number, Err.Description, LogErrorTx, Arg)

@@ -29,7 +29,7 @@ Option Explicit
 '      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
 '   status;beta
 '   source;http://code.google.com/p/cowares-excel-hello/source/browse/trunk/stream_base/i_stream_base.txt
-' revision;r188+
+' revision;r189+
 
 
 ' about this class
@@ -40,7 +40,7 @@ End Property
 Public Sub NameMe(Optional ByVal NewName As String = "")
 End Sub
 
-Public Property Get Description() As String
+Public Property Get Description(Optional ByVal Depth As Long = -1) As String
 End Property
 
 
@@ -73,12 +73,31 @@ End Function
 Public Function IsMe(Tier As Object) As Boolean
 End Function
 
+
+' status
+
+Public Function IsBusyT1(Optional ByVal Depth As Long = -1) As Boolean
+End Function
+
+Public Function IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
+End Function
+
+Public Sub DoneT1(ParamArray Args() As Variant)
+End Sub
+
+Public Sub DoneT3(ParamArray Args() As Variant)
+End Sub
+
+
 ' finder
 
 Public Function SearchEndOfStreamTx() As Boolean
 End Function
 
 Public Function SearchEndOfLineTx() As Boolean
+End Function
+
+Public Function FlushEndOfLineTx() As Boolean
 End Function
 
 
@@ -99,9 +118,8 @@ End Function
 
 ' reader
 
-' finder does transactions from T1er to T3er, instead of reader
-'Public Function ReadTx() As Boolean
-'End Function
+Public Function ReadTx() As Boolean
+End Function
 
 Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
 End Function
@@ -118,10 +136,10 @@ End Function
 
 ' cursor
 
-Public Sub SetPositionTx(Optional ByVal Position As Long = 0)
+Public Sub SetPositionTx(Optional Position As Variant = Empty)
 End Sub
 
-Public Function GetPositionTx() As Long
+Public Function GetPositionTx() As Variant
 End Function
 
 
@@ -152,23 +170,24 @@ Public Sub ClearQueue()
 End Sub
 
 
-' status and logging
-
-Public Function IsBusy() As Boolean
-End Function
+' logging
 
 Public Sub LogError(Optional Arg As Variant = Empty)
 End Sub
 
-Public Function LogErrorTx() As String
+Public Function LogErrorTx(Optional ByVal Depth As Long = -1) As String
 End Function
 
 
-' local variables
+' extentions
 
 Public Property Get Properties(Key As String) As Variant
 End Property
 
 Public Property Let Properties(Key As String, Value As Variant)
 End Property
+
+Public Function Execute(ParamArray Args() As Variant) As Variant
+End Function
+
 '}}}
