@@ -5,7 +5,7 @@ Option Explicit
 
 Const ABOUT_THIS_CLASS = "Tier 3 interface tester"
 
-' designed for IStreamBase revision r188+
+' designed for IStreamBase revision r189+ and IStreamT3 revision r190+
 
 Private Helper As StreamBaseHelper
 
@@ -117,16 +117,6 @@ OTL:
     IStreamT3_AtEndOfStream = False
 End Property
 
-Public Property Get IStreamT3_AtEndOfLine() As Boolean
-    On Error GoTo OTL
-    IStreamT3_AtEndOfLine = Helper.SearchEndOfLineTx
-    Exit Function
-    
-OTL:
-    LogError "AtEndOfLine"
-    IStreamT3_AtEndOfLine = False
-End Property
-
 Public Function IStreamT3_OpenRead(ParamArray Args() As Variant) As Boolean
     On Error GoTo OTL
     IStreamT3_OpenRead = Helper.OpenReadTx(CVar(Args))
@@ -219,7 +209,7 @@ OTL:
     IStreamT3_FeedLine = False
 End Function
 
-Public Sub IStreamT3_SetPosition(Optional ByVal Position As Long = 0)
+Public Sub IStreamT3_SetPosition(Optional ByVal Position As Variant = Empty)
     On Error GoTo OTL
     Helper.SetPositionTx Position
     Exit Sub
@@ -228,7 +218,7 @@ OTL:
     LogError "SetPosition"
 End Sub
 
-Public Function IStreamT3_GetPosition() As Long
+Public Function IStreamT3_GetPosition() As Variant
     On Error GoTo OTL
     IStreamT3_GetPosition = Helper.GetPositionTx
     Exit Function
@@ -254,8 +244,8 @@ Public Sub IStreamBase_NameMe(Optional ByVal NewName As String = "")
     Helper.NameMe NewName
 End Sub
 
-Public Property Get IStreamBase_Description() As String
-    IStreamBase_Description = Helper.Description
+Public Property Get IStreamBase_Description(Optional ByVal Depth As Long = -1) As String
+    IStreamBase_Description = Helper.Description(Depth)
 End Property
 
 
@@ -298,6 +288,25 @@ Public Function IStreamBase_IsMe(Tier As Object) As Boolean
 End Function
 
 
+' status
+
+Public Function IStreamBase_IsBusyT1(Optional ByVal Depth As Long = -1) As Boolean
+    IStreamBase_IsBusyT1 = Helper.IsBusyT1(Depth)
+End Function
+
+Public Function IStreamBase_IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
+    IStreamBase_IsBusyT3 = Helper.IsBusyT3(Depth)
+End Function
+
+Public Sub IStreamBase_DoneT1(ParamArray Args() As Variant)
+    Helper.DoneT1 CVar(Args)
+End Sub
+
+Public Sub IStreamBase_DoneT3(ParamArray Args() As Variant)
+    Helper.DoneT3 CVar(Args)
+End Sub
+
+
 ' finder
 
 Public Function IStreamBase_SearchEndOfStreamTx() As Boolean
@@ -306,6 +315,10 @@ End Function
 
 Public Function IStreamBase_SearchEndOfLineTx() As Boolean
     IStreamBase_SearchEndOfLineTx = Helper.SearchEndOfLineTx
+End Function
+
+Public Function IStreamBase_FlushEndOfLineTx() As Boolean
+    IStreamBase_FlushEndOfLineTx = Helper.FlushEndOfLineTx
 End Function
 
 
@@ -330,6 +343,10 @@ End Function
 
 ' reader
 
+Public Function IStreamBase_ReadTx() As Boolean
+    IStreamBase_ReadTx = Helper.ReadTx()
+End Function
+
 Public Function IStreamBase_SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
     IStreamBase_SkipLineTx = Helper.SkipLineTx(Repeat)
 End Function
@@ -348,11 +365,11 @@ End Function
 
 ' cursor
 
-Public Sub IStreamBase_SetPositionTx(Optional ByVal Position As Long = 0)
-    Helper.SetPositionTx (Position)
+Public Sub IStreamBase_SetPositionTx(Optional Position As Variant = Empty)
+    Helper.SetPositionTx Position
 End Sub
 
-Public Function IStreamBase_GetPositionTx() As Long
+Public Function IStreamBase_GetPositionTx() As Variant
     IStreamBase_GetPositionTx = Helper.GetPositionTx
 End Function
 
@@ -392,23 +409,19 @@ Public Sub IStreamBase_ClearQueue()
 End Sub
 
 
-' status and logging
-
-Public Function IStreamBase_IsBusy() As Boolean
-    IStreamBase_IsBusy = Helper.IsBusy
-End Function
+' logging
 
 Public Sub IStreamBase_LogError(Optional Arg As Variant = Empty)
     'Helper.LogError Arg
     LogError Arg
 End Sub
 
-Public Function IStreamBase_LogErrorTx() As String
-    IStreamBase_LogErrorTx = Helper.LogErrorTx
+Public Function IStreamBase_LogErrorTx(Optional ByVal Depth As Long = -1) As String
+    IStreamBase_LogErrorTx = Helper.LogErrorTx(Depth)
 End Function
 
 
-' local variables
+' extentions
 
 Public Property Get IStreamBase_Properties(Key As String) As Variant
     IStreamBase_Properties = GetEnv(Key)
@@ -417,6 +430,10 @@ End Property
 Public Property Let IStreamBase_Properties(Key As String, Value As Variant)
     SetEnv Key, Value
 End Property
+
+Public Function IStreamBase_Execute(ParamArray Args() As Variant) As Variant
+
+End Function
 
 
 '=== IStreamBase end ===
