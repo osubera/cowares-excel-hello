@@ -1,0 +1,103 @@
+'module
+'  name;testT1StringStream
+'{{{
+Option Explicit
+
+' designed for IStreamBase revision r189 and IStreamT3 revision r190
+
+Sub test_All()
+    test_Can_Initialize
+    test_Description
+    test_Properties
+    test_Read_Write
+End Sub
+
+Sub test_Can_Initialize()
+    Dim x As T1StringStream
+    Dim y As IStreamBase
+    
+    Set x = New T1StringStream
+    Set y = New T1StringStream
+    
+    Debug.Assert TypeName(x) = "T1StringStream"
+    Debug.Assert TypeName(y) = "T1StringStream"
+    
+    Set y = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Description()
+    Dim x As IStreamBase
+    Set x = New T1StringStream
+    
+    Debug.Print x.Description
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Properties()
+    Dim x As IStreamBase
+    Set x = New T1StringStream
+    
+    Debug.Assert x.Properties("line-feed") = vbCrLf
+    Debug.Assert x.Properties("write-append") = False
+    x.Properties("line-feed") = "#"
+    Debug.Assert x.Properties("line-feed") = "#"
+    x.Properties("write-append") = True
+    Debug.Assert x.Properties("write-append") = True
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Read_Write()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 x
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    Debug.Assert x.SkipLine
+    Debug.Assert x.FeedLine
+    x.SetPosition 0
+    Debug.Assert x.GetPosition() = -1
+    
+    x.OpenWrite
+    x.WriteLine "Hello"
+    x.WriteLine "String"
+    x.WriteLine "Stream"
+    T1.Properties("line-feed") = "%"
+    x.CloseWrite Data
+    Debug.Print Data
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    Set T1 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+'}}}
