@@ -5,7 +5,7 @@ Option Explicit
 
 Const ABOUT_THIS_CLASS = "Tier 1 string stream"
 
-' designed for IStreamBase revision r189+
+' designed for IStreamBase revision r191+
 
 Private Helper As StreamBaseHelper
 
@@ -18,35 +18,30 @@ Implements IStreamBase
 
 '=== T1 implements for my own begin ===
 
-
-' take multiple Strings and push them into T1
-Private Function OpenReadT1(InitTexts As Variant) As Boolean
-    Dim Arg As Variant
-    
+Private Function OpenT1(ReadWrite As String, Args As Variant) As Boolean
+    OpenT1 = True
     If Not Append Then Helper.ClearQueue
-    For Each Arg In InitTexts
+    
+    If ReadWrite = "w" Then Exit Function
+    
+    ' read: take multiple Strings and push them into T1
+    Dim Arg As Variant
+    For Each Arg In Args
         Helper.Enqueue Helper.MakeQueueData(Arg, Len(Arg))
     Next
+End Function
+
+Private Function CloseT1(ReadWrite As String, out As Variant) As Boolean
+    CloseT1 = True
     
-    OpenReadT1 = True
-End Function
-
-' clear queues before writings
-Private Function OpenWriteT1() As Boolean
-    If Not Append Then Helper.ClearQueue
-    OpenWriteT1 = True
-End Function
-
-' give a String result, because i am a String Stream
-Private Function CloseWriteT1(ByRef out As Variant) As Boolean
+    If ReadWrite = "r" Then Exit Function
+    
+    ' write: give a String result
     Dim i As Long
-    
     out = ""
     For i = 1 To T1.Count
         out = out & Helper.DataQueueData(T1(i)) & LF
     Next
-    
-    CloseWriteT1 = True
 End Function
 
 Private Function GetEnv(Key As String) As Variant
@@ -69,6 +64,16 @@ End Sub
 
 
 '=== T1 implements for my own end ===
+'=== T2 implements for my own begin ===
+
+Public Function FilterT2(ReadWrite As String, Force As Boolean) As Boolean
+    FilterT2 = True
+    If Force Then Exit Function
+    
+End Function
+
+
+'=== T2 implements for my own end ===
 '=== event procedures begin ===
 
 Private Sub Class_Initialize()
@@ -155,20 +160,16 @@ Public Function IStreamBase_IsBusyT3(Optional ByVal Depth As Long = -1) As Boole
     IStreamBase_IsBusyT3 = Helper.IsBusyT3(Depth)
 End Function
 
-Public Sub IStreamBase_DoneT1(ParamArray Args() As Variant)
-    Helper.DoneT1 CVar(Args)
-End Sub
+Public Function IStreamBase_IsBusyT2() As Boolean
+    IStreamBase_IsBusyT2 = Helper.IsBusyT2()
+End Function
 
-Public Sub IStreamBase_DoneT3(ParamArray Args() As Variant)
-    Helper.DoneT3 CVar(Args)
+Public Sub IStreamBase_Request(Command As String)
+    Helper.Request Command
 End Sub
 
 
 ' finder
-
-Public Function IStreamBase_SearchEndOfStreamTx() As Boolean
-    IStreamBase_SearchEndOfStreamTx = Helper.SearchEndOfStreamTx
-End Function
 
 Public Function IStreamBase_SearchEndOfLineTx() As Boolean
     IStreamBase_SearchEndOfLineTx = Helper.SearchEndOfLineTx
@@ -178,23 +179,19 @@ Public Function IStreamBase_FlushEndOfLineTx() As Boolean
     IStreamBase_FlushEndOfLineTx = Helper.FlushEndOfLineTx
 End Function
 
+Public Function IStreamBase_FilterT2(ReadWrite As String, Force As Boolean) As Boolean
+    IStreamBase_FilterT2 = FilterT2(ReadWrite, Force)
+End Function
+
 
 ' open / close
 
-Public Function IStreamBase_OpenReadTx(Args As Variant) As Boolean
-    IStreamBase_OpenReadTx = OpenReadT1(Args)
+Public Function IStreamBase_OpenTx(ReadWrite As String, Args As Variant) As Boolean
+    IStreamBase_OpenTx = OpenT1(ReadWrite, Args)
 End Function
 
-Public Function IStreamBase_OpenWriteTx(Args As Variant) As Boolean
-    IStreamBase_OpenWriteTx = OpenWriteT1
-End Function
-
-Public Function IStreamBase_CloseReadTx(Arg As Variant) As Boolean
-    IStreamBase_CloseReadTx = Helper.CloseReadTx(Arg)
-End Function
-
-Public Function IStreamBase_CloseWriteTx(Arg As Variant) As Boolean
-    IStreamBase_CloseWriteTx = CloseWriteT1(Arg)
+Public Function IStreamBase_CloseTx(ReadWrite As String, Arg As Variant) As Boolean
+    IStreamBase_CloseTx = CloseT1(ReadWrite, Arg)
 End Function
 
 

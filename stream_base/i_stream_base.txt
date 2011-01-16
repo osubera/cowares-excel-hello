@@ -29,7 +29,7 @@ Option Explicit
 '      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
 '   status;beta
 '   source;http://code.google.com/p/cowares-excel-hello/source/browse/trunk/stream_base/i_stream_base.txt
-' revision;r189+
+' revision;r191+
 
 
 ' about this class
@@ -82,17 +82,14 @@ End Function
 Public Function IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
 End Function
 
-Public Sub DoneT1(ParamArray Args() As Variant)
-End Sub
+Public Function IsBusyT2() As Boolean
+End Function
 
-Public Sub DoneT3(ParamArray Args() As Variant)
+Public Sub Request(Command As String)
 End Sub
 
 
 ' finder
-
-Public Function SearchEndOfStreamTx() As Boolean
-End Function
 
 Public Function SearchEndOfLineTx() As Boolean
 End Function
@@ -100,19 +97,16 @@ End Function
 Public Function FlushEndOfLineTx() As Boolean
 End Function
 
+Public Function FilterT2(ReadWrite As String, Force As Boolean) As Boolean
+End Function
+
 
 ' open / close
 
-Public Function OpenReadTx(Args As Variant) As Boolean
+Public Function OpenTx(ReadWrite As String, Args As Variant) As Boolean
 End Function
 
-Public Function OpenWriteTx(Args As Variant) As Boolean
-End Function
-
-Public Function CloseReadTx(Arg As Variant) As Boolean
-End Function
-
-Public Function CloseWriteTx(Arg As Variant) As Boolean
+Public Function CloseTx(ReadWrite As String, Arg As Variant) As Boolean
 End Function
 
 
