@@ -8,7 +8,7 @@ Option Explicit
 ' this class contains implements and utility functions
 ' commonly used in stream base classes.
 
-' designed for IStreamBase revision r189+
+' designed for IStreamBase revision r191+
 
 
 Private oT2 As IStreamBase  ' caller
@@ -19,6 +19,7 @@ Private T2 As Collection
 Private MyDescription As String
 Private NoMoreT1 As Boolean
 Private NoMoreT3 As Boolean
+Private OpenMode As String
 
 
 '=== event procedures begin ===
@@ -230,34 +231,24 @@ DONE:
     IsBusyT3 = out
 End Function
 
-Public Sub DoneT1(Args As Variant)
-    NoMoreT1 = True
-End Sub
+Public Function IsBusyT2() As Boolean
+    IsBusyT2 = Not IsEmptyQueue
+End Function
 
-Public Sub DoneT3(Args As Variant)
-    NoMoreT3 = True
+Public Sub Request(Command As String)
+    'NoMoreT1 = True
+    'NoMoreT3 = True
+    'CloseForce
+    'Close
 End Sub
 
 
 ' finder
 
-Public Function SearchEndOfStreamTx() As Boolean
-    Dim Found As Boolean
-    
-    Found = SearchEndOfStreamT2
-    If Not Found Then GoTo DONE
-    If Not HasT1 Then GoTo DONE
-    If NoMoreT1 Then GoTo DONE
-    Found = oT1.SearchEndOfStreamTx
-DONE:
-    'If Not Found And NoMoreT1 And HasT3 Then oT3.DoneT1
-    SearchEndOfStreamTx = Found
-End Function
-
 Public Function SearchEndOfLineTx() As Boolean
     Dim Found As Boolean
     
-    Found = SearchEndOfLineT2(NoMoreT1)
+    Found = FinderEndOfLineT2(NoMoreT1)
     If Found Then GoTo DONE
     If Not HasT1 Then GoTo DONE
     Found = oT1.SearchEndOfLineTx
@@ -269,7 +260,7 @@ End Function
 Public Function FlushEndOfLineTx() As Boolean
     Dim Found As Boolean
     
-    Found = SearchEndOfLineT2(NoMoreT3)
+    Found = FinderEndOfLineT2(NoMoreT3)
     If Not Found Then GoTo DONE
     WriteTx
     If Not HasT1 Then GoTo DONE
@@ -281,41 +272,24 @@ End Function
 
 ' open / close
 
-Public Function OpenReadTx(Args As Variant) As Boolean
+Public Function OpenTx(ReadWrite As String, Args As Variant) As Boolean
+    OpenMode = ReadWrite
     NoMoreT1 = False
     NoMoreT3 = False
     If HasT1 Then
-        OpenReadTx = oT1.OpenReadTx(Args)
+        OpenTx = oT1.OpenTx(ReadWrite, Args)
     Else
-        OpenReadTx = True
+        OpenTx = True
     End If
 End Function
 
-Public Function OpenWriteTx(Args As Variant) As Boolean
-    NoMoreT1 = False
-    NoMoreT3 = False
+Public Function CloseTx(ReadWrite As String, Arg As Variant) As Boolean
     If HasT1 Then
-        OpenWriteTx = oT1.OpenWriteTx(Args)
+        CloseTx = oT1.CloseTx(ReadWrite, Arg)
     Else
-        OpenWriteTx = True
+        CloseTx = True
     End If
-End Function
-
-Public Function CloseReadTx(Arg As Variant) As Boolean
-    If HasT1 Then
-        CloseReadTx = oT1.CloseReadTx(Arg)
-    Else
-        CloseReadTx = True
-    End If
-End Function
-
-Public Function CloseWriteTx(Arg As Variant) As Boolean
-    'FlushEndOfStreamTx
-    If HasT1 Then
-        CloseWriteTx = oT1.CloseWriteTx(Arg)
-    Else
-        CloseWriteTx = True
-    End If
+    OpenMode = ""
 End Function
 
 
@@ -460,32 +434,12 @@ End Function
 
 ' finder
 
-Public Function SearchEndOfStreamT2() As Boolean
-    SearchEndOfStreamT2 = IsEmptyQueue
-    If Not HasT3 Then Exit Function
-    
-    Do Until IsEmptyQueue
-        oT3.Enqueue Dequeue
-    Loop
-End Function
-
-Public Function SearchEndOfLineT2(Optional Force As Boolean = False) As Boolean
-    SearchEndOfLineT2 = False
+Public Function FinderEndOfLineT2(Optional Force As Boolean = False) As Boolean
+    FinderEndOfLineT2 = False
     If IsEmptyQueue Then Exit Function
-    If Not (Force Or SearchDelimiterT2) Then Exit Function
+    If Not oT2.FilterT2(OpenMode, Force) Then Exit Function
     
-    SearchEndOfLineT2 = True
-End Function
-
-Public Function SearchDelimiterT2() As Boolean
-    SearchDelimiterT2 = True
-End Function
-
-
-' status
-
-Public Function IsBusyT2() As Boolean
-    IsBusyT2 = Not IsEmptyQueue
+    FinderEndOfLineT2 = True
 End Function
 
 

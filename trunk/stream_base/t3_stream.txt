@@ -5,7 +5,7 @@ Option Explicit
 
 Const ABOUT_THIS_CLASS = "Tier 3 interface tester"
 
-' designed for IStreamBase revision r189+ and IStreamT3 revision r190+
+' designed for IStreamBase revision r191+ and IStreamT3 revision r191
 
 Private Helper As StreamBaseHelper
 
@@ -49,6 +49,16 @@ End Sub
 
 
 '=== T3 implements for my own end ===
+'=== T2 implements for my own begin ===
+
+Public Function FilterT2(ReadWrite As String, Force As Boolean) As Boolean
+    FilterT2 = True
+    If Force Then Exit Function
+    
+End Function
+
+
+'=== T2 implements for my own end ===
 '=== event procedures begin ===
 
 
@@ -119,7 +129,7 @@ End Property
 
 Public Function IStreamT3_OpenRead(ParamArray Args() As Variant) As Boolean
     On Error GoTo OTL
-    IStreamT3_OpenRead = Helper.OpenReadTx(CVar(Args))
+    IStreamT3_OpenRead = Helper.OpenTx("r", CVar(Args))
     Exit Function
     
 OTL:
@@ -129,7 +139,7 @@ End Function
 
 Public Function IStreamT3_OpenWrite(ParamArray Args() As Variant) As Boolean
     On Error GoTo OTL
-    IStreamT3_OpenWrite = Helper.OpenWriteTx(CVar(Args))
+    IStreamT3_OpenWrite = Helper.OpenTx("w", CVar(Args))
     Exit Function
     
 OTL:
@@ -141,9 +151,9 @@ Public Function IStreamT3_CloseRead(Optional ByRef Arg As Variant) As Boolean
     On Error GoTo OTL
     If IsMissing(Arg) Then
         Dim DummyArg As Variant
-        IStreamT3_CloseRead = Helper.CloseReadTx(DummyArg)
+        IStreamT3_CloseRead = Helper.CloseTx("r", DummyArg)
     Else
-        IStreamT3_CloseRead = Helper.CloseReadTx(Arg)
+        IStreamT3_CloseRead = Helper.CloseTx("r", Arg)
     End If
     Exit Function
     
@@ -156,9 +166,9 @@ Public Function IStreamT3_CloseWrite(Optional ByRef Arg As Variant) As Boolean
     On Error GoTo OTL
     If IsMissing(Arg) Then
         Dim DummyArg As Variant
-        IStreamT3_CloseWrite = Helper.CloseWriteTx(DummyArg)
+        IStreamT3_CloseWrite = Helper.CloseTx("w", DummyArg)
     Else
-        IStreamT3_CloseWrite = Helper.CloseWriteTx(Arg)
+        IStreamT3_CloseWrite = Helper.CloseTx("w", Arg)
     End If
     Exit Function
     
@@ -298,20 +308,16 @@ Public Function IStreamBase_IsBusyT3(Optional ByVal Depth As Long = -1) As Boole
     IStreamBase_IsBusyT3 = Helper.IsBusyT3(Depth)
 End Function
 
-Public Sub IStreamBase_DoneT1(ParamArray Args() As Variant)
-    Helper.DoneT1 CVar(Args)
-End Sub
+Public Function IStreamBase_IsBusyT2() As Boolean
+    IStreamBase_IsBusyT2 = Helper.IsBusyT2()
+End Function
 
-Public Sub IStreamBase_DoneT3(ParamArray Args() As Variant)
-    Helper.DoneT3 CVar(Args)
+Public Sub IStreamBase_Request(Command As String)
+    Helper.Request Command
 End Sub
 
 
 ' finder
-
-Public Function IStreamBase_SearchEndOfStreamTx() As Boolean
-    IStreamBase_SearchEndOfStreamTx = Helper.SearchEndOfStreamTx
-End Function
 
 Public Function IStreamBase_SearchEndOfLineTx() As Boolean
     IStreamBase_SearchEndOfLineTx = Helper.SearchEndOfLineTx
@@ -321,23 +327,19 @@ Public Function IStreamBase_FlushEndOfLineTx() As Boolean
     IStreamBase_FlushEndOfLineTx = Helper.FlushEndOfLineTx
 End Function
 
+Public Function IStreamBase_FilterT2(ReadWrite As String, Force As Boolean) As Boolean
+    IStreamBase_FilterT2 = FilterT2(ReadWrite, Force)
+End Function
+
 
 ' open / close
 
-Public Function IStreamBase_OpenReadTx(Args As Variant) As Boolean
-    IStreamBase_OpenReadTx = Helper.OpenReadTx(Args)
+Public Function IStreamBase_OpenTx(ReadWrite As String, Args As Variant) As Boolean
+    IStreamBase_OpenTx = Helper.OpenTx(ReadWrite, Args)
 End Function
 
-Public Function IStreamBase_OpenWriteTx(Args As Variant) As Boolean
-    IStreamBase_OpenWriteTx = Helper.OpenWriteTx(Args)
-End Function
-
-Public Function IStreamBase_CloseReadTx(Arg As Variant) As Boolean
-    IStreamBase_CloseReadTx = Helper.CloseReadTx(Arg)
-End Function
-
-Public Function IStreamBase_CloseWriteTx(Arg As Variant) As Boolean
-    IStreamBase_CloseWriteTx = Helper.CloseWriteTx(Arg)
+Public Function IStreamBase_CloseTx(ReadWrite As String, Arg As Variant) As Boolean
+    IStreamBase_CloseTx = Helper.CloseTx(ReadWrite, Arg)
 End Function
 
 

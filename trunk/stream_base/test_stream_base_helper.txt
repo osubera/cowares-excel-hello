@@ -3,7 +3,7 @@
 '{{{
 Option Explicit
 
-' designed for IStreamBase revision r189+
+' designed for IStreamBase revision r191+
 
 Sub test_All()
     test_Can_Initialize_Helper
@@ -231,9 +231,6 @@ Sub test_Finder()
     Debug.Assert Not x3.IsBusyT3
     Debug.Assert Not x2.IsBusyT3
     Debug.Assert Not x1.IsBusyT3
-    Debug.Assert x3.SearchEndOfStreamTx
-    Debug.Assert x2.SearchEndOfStreamTx
-    Debug.Assert x1.SearchEndOfStreamTx
     Debug.Assert Not x3.SearchEndOfLineTx
     Debug.Assert Not x2.SearchEndOfLineTx
     Debug.Assert Not x1.SearchEndOfLineTx
@@ -242,14 +239,12 @@ Sub test_Finder()
     Debug.Assert Not x3.IsEmptyQueue
     Debug.Assert x3.IsBusyT1
     Debug.Assert x3.IsBusyT3
-    Debug.Assert Not x3.SearchEndOfStreamTx
     Debug.Assert x3.SearchEndOfLineTx
     
     x3.Que.Remove 1
     Debug.Assert x3.IsEmptyQueue
     Debug.Assert Not x3.IsBusyT1
     Debug.Assert Not x3.IsBusyT3
-    Debug.Assert x3.SearchEndOfStreamTx
     Debug.Assert Not x3.SearchEndOfLineTx
     
     x2.Que.Add "dummy"
@@ -258,14 +253,12 @@ Sub test_Finder()
     Debug.Assert x2.IsBusyT1
     Debug.Assert Not x3.IsBusyT3
     Debug.Assert x2.IsBusyT3
-    Debug.Assert Not x3.SearchEndOfStreamTx
+    Debug.Assert x3.SearchEndOfLineTx
     Debug.Assert x3.Que.Count = 1
     Debug.Assert x2.Que.Count = 0
     Debug.Assert Not x2.IsBusyT1
     Debug.Assert x2.IsBusyT3
-    Debug.Assert x2.SearchEndOfStreamTx
     Debug.Assert x3.SearchEndOfLineTx
-    Debug.Assert Not x2.SearchEndOfLineTx
     
     x1.Que.Add "dummy"
     x1.Que.Add "dummy"
@@ -277,23 +270,14 @@ Sub test_Finder()
     Debug.Assert x3.IsBusyT3
     Debug.Assert x2.IsBusyT3
     Debug.Assert x1.IsBusyT3
-    Debug.Assert Not x3.SearchEndOfStreamTx
     Debug.Assert x3.Que.Count = 1
     Debug.Assert x2.Que.Count = 0
     Debug.Assert x1.Que.Count = 3
-    Debug.Assert Not x2.SearchEndOfStreamTx
-    Debug.Assert x3.Que.Count = 1
-    Debug.Assert x2.Que.Count = 3
-    Debug.Assert x1.Que.Count = 0
-    Debug.Assert x1.SearchEndOfStreamTx
-    Debug.Assert x3.Que.Count = 1
-    Debug.Assert x2.Que.Count = 3
-    Debug.Assert x1.Que.Count = 0
     Debug.Assert x3.SearchEndOfLineTx
     Debug.Assert x2.SearchEndOfLineTx
-    Debug.Assert Not x1.SearchEndOfLineTx
+    Debug.Assert x1.SearchEndOfLineTx
     
-    x1.Que.Add "dummy"
+    x2.Que.Add "dummy"
     x1.Que.Add "dummy"
     x1.Que.Add "dummy"
     Debug.Assert x3.Que.Count = 2
@@ -330,7 +314,6 @@ Sub test_Finder()
     Debug.Assert x2.Que.Count = 0
     Debug.Assert x1.Que.Count = 0
     x3.Dequeue
-    Debug.Assert x3.SearchEndOfStreamTx
     Debug.Assert Not x3.SearchEndOfLineTx
     Debug.Assert x3.Que.Count = 0
     Debug.Assert x2.Que.Count = 0
@@ -357,10 +340,10 @@ Sub test_Read_Write()
     
     Debug.Print x3.Description
     
-    Debug.Assert x3.OpenReadTx(Array())
-    Debug.Assert x3.OpenWriteTx(Array())
-    Debug.Assert x3.CloseReadTx("dummy")
-    Debug.Assert x3.CloseWriteTx("dummy")
+    Debug.Assert x3.OpenTx("r", Array())
+    Debug.Assert x3.OpenTx("w", Array())
+    Debug.Assert x3.CloseTx("r", "dummy")
+    Debug.Assert x3.CloseTx("w", "dummy")
     Debug.Assert x3.SkipLineTx
     x3.Que.Add "dummy"
     Debug.Assert x3.WriteTx

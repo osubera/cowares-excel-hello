@@ -12,7 +12,7 @@ Option Explicit
 '      url;http://code.google.com/p/cowares-excel-hello/wiki/stream_base
 '   status;beta
 '   source;http://code.google.com/p/cowares-excel-hello/source/browse/trunk/stream_base/i_stream_t3.txt
-' revision;r190+
+' revision;r191
 
 
 ' about this class

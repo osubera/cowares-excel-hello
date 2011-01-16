@@ -3,7 +3,7 @@
 '{{{
 Option Explicit
 
-' designed for IStreamBase revision r189+ and IStreamT3 revision r190+
+' designed for IStreamBase revision r191+ and IStreamT3 revision r191
 
 Sub test_All()
     test_Can_Initialize_T3Stream
