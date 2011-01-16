@@ -109,7 +109,7 @@ End Property
 
 Public Property Get IStreamT3_AtEndOfStream() As Boolean
     On Error GoTo OTL
-    IStreamT3_AtEndOfStream = Helper.SearchEndOfStreamTx
+    IStreamT3_AtEndOfStream = Helper.AtEndOfStreamT3
     Exit Function
     
 OTL:

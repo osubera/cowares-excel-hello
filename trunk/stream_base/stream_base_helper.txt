@@ -247,24 +247,35 @@ Public Function SearchEndOfStreamTx() As Boolean
     Found = SearchEndOfStreamT2
     If Not Found Then GoTo DONE
     If Not HasT1 Then GoTo DONE
+    If NoMoreT1 Then GoTo DONE
     Found = oT1.SearchEndOfStreamTx
 DONE:
+    'If Not Found And NoMoreT1 And HasT3 Then oT3.DoneT1
     SearchEndOfStreamTx = Found
 End Function
 
 Public Function SearchEndOfLineTx() As Boolean
     Dim Found As Boolean
     
-    Found = SearchEndOfLineT2
+    Found = SearchEndOfLineT2(NoMoreT1)
     If Found Then GoTo DONE
     If Not HasT1 Then GoTo DONE
     Found = oT1.SearchEndOfLineTx
 DONE:
+    If Found Then ReadTx
     SearchEndOfLineTx = Found
 End Function
 
 Public Function FlushEndOfLineTx() As Boolean
-
+    Dim Found As Boolean
+    
+    Found = SearchEndOfLineT2(NoMoreT3)
+    If Not Found Then GoTo DONE
+    WriteTx
+    If Not HasT1 Then GoTo DONE
+    Found = oT1.FlushEndOfLineTx
+DONE:
+    FlushEndOfLineTx = Found
 End Function
 
 
@@ -299,6 +310,7 @@ Public Function CloseReadTx(Arg As Variant) As Boolean
 End Function
 
 Public Function CloseWriteTx(Arg As Variant) As Boolean
+    'FlushEndOfStreamTx
     If HasT1 Then
         CloseWriteTx = oT1.CloseWriteTx(Arg)
     Else
@@ -311,9 +323,12 @@ End Function
 
 Public Function ReadTx() As Boolean
     ' transact from T1er to T3er
-    ' nop
-    ' finder does the transaction
-    ReadTx = True
+    If HasT3 Then
+        oT3.Enqueue Dequeue
+        ReadTx = True
+    Else
+        ReadTx = False
+    End If
 End Function
 
 Public Function SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -329,12 +344,13 @@ End Function
 
 Public Function WriteTx() As Boolean
     ' transact from T3er to T1er
-    Do Until oT3.IsEmptyQueue
-        Enqueue oT3.Dequeue
+    If HasT1 Then
+        oT1.Enqueue Dequeue
         ' enqueue of T1 does real writing to low i/o
-    Loop
-    
-    WriteTx = True
+        WriteTx = True
+    Else
+        WriteTx = False
+    End If
 End Function
 
 Public Function FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
@@ -453,12 +469,20 @@ Public Function SearchEndOfStreamT2() As Boolean
     Loop
 End Function
 
-Public Function SearchEndOfLineT2() As Boolean
-    SearchEndOfLineT2 = SearchEndOfStreamT2
+Public Function SearchEndOfLineT2(Optional Force As Boolean = False) As Boolean
+    SearchEndOfLineT2 = False
+    If IsEmptyQueue Then Exit Function
+    If Not (Force Or SearchDelimiterT2) Then Exit Function
+    
+    SearchEndOfLineT2 = True
+End Function
+
+Public Function SearchDelimiterT2() As Boolean
+    SearchDelimiterT2 = True
 End Function
 
 
-' status and logging
+' status
 
 Public Function IsBusyT2() As Boolean
     IsBusyT2 = Not IsEmptyQueue
@@ -468,6 +492,12 @@ End Function
 '=== T2 implements end ===
 '=== T3 implements begin ===
 
+
+' finder
+
+Public Function AtEndOfStreamT3() As Boolean
+    AtEndOfStreamT3 = Not SearchEndOfLineTx
+End Function
 
 ' reader
 
@@ -488,7 +518,7 @@ End Function
 Public Function WriteLineT3(ByRef Data As Variant, ByRef Size As Variant) As Boolean
     ' transact from T3 to T1er
     Enqueue MakeQueueData(Data, Size)
-    If HasT1 Then oT1.WriteTx
+    If HasT1 Then FlushEndOfLineTx
     
     WriteLineT3 = True
 End Function
