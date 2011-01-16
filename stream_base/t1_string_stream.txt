@@ -12,7 +12,7 @@ Private Helper As StreamBaseHelper
 Private T1 As Collection
 Const DEFAULT_LINE_FEED = vbCrLf
 Private LF As String
-Private WriteAppend As Boolean
+Private Append As Boolean
 
 Implements IStreamBase
 
@@ -22,18 +22,18 @@ Implements IStreamBase
 ' take multiple Strings and push them into T1
 Private Function OpenReadT1(InitTexts As Variant) As Boolean
     Dim Arg As Variant
+    
+    If Not Append Then Helper.ClearQueue
     For Each Arg In InitTexts
         Helper.Enqueue Helper.MakeQueueData(Arg, Len(Arg))
     Next
+    
     OpenReadT1 = True
 End Function
 
 ' clear queues before writings
 Private Function OpenWriteT1() As Boolean
-    If Not WriteAppend Then
-        Helper.GetT3(True).ClearQueue
-        Helper.ClearQueue
-    End If
+    If Not Append Then Helper.ClearQueue
     OpenWriteT1 = True
 End Function
 
@@ -53,8 +53,8 @@ Private Function GetEnv(Key As String) As Variant
     Select Case Key
     Case "line-feed"
         GetEnv = LF
-    Case "write-append"
-        GetEnv = WriteAppend
+    Case "append"
+        GetEnv = Append
     End Select
 End Function
 
@@ -62,8 +62,8 @@ Private Sub SetEnv(Key As String, Value As Variant)
     Select Case Key
     Case "line-feed"
         LF = Value
-    Case "write-append"
-        WriteAppend = Value
+    Case "append"
+        Append = Value
     End Select
 End Sub
 
@@ -78,7 +78,7 @@ Private Sub Class_Initialize()
     
     Set T1 = Helper.Que
     LF = DEFAULT_LINE_FEED
-    WriteAppend = False
+    Append = False
 End Sub
 
 Private Sub Class_Terminate()

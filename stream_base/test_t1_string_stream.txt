@@ -3,7 +3,7 @@
 '{{{
 Option Explicit
 
-' designed for IStreamBase revision r189 and IStreamT3 revision r190
+' designed for IStreamBase revision r189+ and IStreamT3 revision r190+
 
 Sub test_All()
     test_Can_Initialize
@@ -40,11 +40,11 @@ Sub test_Properties()
     Set x = New T1StringStream
     
     Debug.Assert x.Properties("line-feed") = vbCrLf
-    Debug.Assert x.Properties("write-append") = False
+    Debug.Assert x.Properties("append") = False
     x.Properties("line-feed") = "#"
     Debug.Assert x.Properties("line-feed") = "#"
-    x.Properties("write-append") = True
-    Debug.Assert x.Properties("write-append") = True
+    x.Properties("append") = True
+    Debug.Assert x.Properties("append") = True
     
     Set x = Nothing
 End Sub
@@ -72,13 +72,45 @@ Sub test_Read_Write()
     x.OpenWrite
     x.WriteLine "Hello"
     x.WriteLine "String"
-    x.WriteLine "Stream"
     T1.Properties("line-feed") = "%"
     x.CloseWrite Data
     Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 2
     
     Debug.Print Helper.EncVariant(x.Que)
     Debug.Print Helper.EncVariant(T1.Que)
+    
+    T1.Properties("append") = True
+    x.OpenWrite
+    x.WriteLine "Stream"
+    T1.Properties("line-feed") = "_"
+    x.CloseWrite Data
+    Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 3
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenWrite
+    x.WriteLine "dummy"
+    x.CloseWrite Data
+    
+    T1.Properties("append") = False
     
     x.OpenRead "Hello", "World"
     Do Until x.AtEndOfStream
