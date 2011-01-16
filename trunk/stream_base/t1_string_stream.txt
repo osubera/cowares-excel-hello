@@ -1,0 +1,296 @@
+'class
+'  name;T1StringStream
+'{{{
+Option Explicit
+
+Const ABOUT_THIS_CLASS = "Tier 1 string stream"
+
+' designed for IStreamBase revision r189+
+
+Private Helper As StreamBaseHelper
+
+Private T1 As Collection
+Const DEFAULT_LINE_FEED = vbCrLf
+Private LF As String
+Private WriteAppend As Boolean
+
+Implements IStreamBase
+
+'=== T1 implements for my own begin ===
+
+
+' take multiple Strings and push them into T1
+Private Function OpenReadT1(InitTexts As Variant) As Boolean
+    Dim Arg As Variant
+    For Each Arg In InitTexts
+        Helper.Enqueue Helper.MakeQueueData(Arg, Len(Arg))
+    Next
+    OpenReadT1 = True
+End Function
+
+' clear queues before writings
+Private Function OpenWriteT1() As Boolean
+    If Not WriteAppend Then
+        Helper.GetT3(True).ClearQueue
+        Helper.ClearQueue
+    End If
+    OpenWriteT1 = True
+End Function
+
+' give a String result, because i am a String Stream
+Private Function CloseWriteT1(ByRef out As Variant) As Boolean
+    Dim i As Long
+    
+    out = ""
+    For i = 1 To T1.Count
+        out = out & Helper.DataQueueData(T1(i)) & LF
+    Next
+    
+    CloseWriteT1 = True
+End Function
+
+Private Function GetEnv(Key As String) As Variant
+    Select Case Key
+    Case "line-feed"
+        GetEnv = LF
+    Case "write-append"
+        GetEnv = WriteAppend
+    End Select
+End Function
+
+Private Sub SetEnv(Key As String, Value As Variant)
+    Select Case Key
+    Case "line-feed"
+        LF = Value
+    Case "write-append"
+        WriteAppend = Value
+    End Select
+End Sub
+
+
+'=== T1 implements for my own end ===
+'=== event procedures begin ===
+
+Private Sub Class_Initialize()
+    Set Helper = New StreamBaseHelper
+    Helper.SetCaller Me
+    Helper.NameMe ABOUT_THIS_CLASS
+    
+    Set T1 = Helper.Que
+    LF = DEFAULT_LINE_FEED
+    WriteAppend = False
+End Sub
+
+Private Sub Class_Terminate()
+    Set T1 = Nothing
+    Set Helper = Nothing
+End Sub
+
+'=== event procedures end ===
+'=== IStreamBase begin ===
+
+
+' about this class
+
+Public Property Get IStreamBase_AboutMe() As String
+    IStreamBase_AboutMe = Helper.AboutMe
+End Property
+
+Public Sub IStreamBase_NameMe(Optional ByVal NewName As String = "")
+    If NewName = "" Then NewName = ABOUT_THIS_CLASS
+    Helper.NameMe NewName
+End Sub
+
+Public Property Get IStreamBase_Description(Optional ByVal Depth As Long = -1) As String
+    IStreamBase_Description = Helper.Description(Depth)
+End Property
+
+
+' connect to neighbor Tiers
+
+Public Function IStreamBase_InsertT1(Tier As IStreamBase) As IStreamBase
+    Set IStreamBase_InsertT1 = Helper.InsertT1(Tier)
+End Function
+
+Public Function IStreamBase_InsertT3(Tier As IStreamBase) As IStreamBase
+    Set IStreamBase_InsertT3 = Helper.InsertT3(Tier)
+End Function
+
+Public Function IStreamBase_ConnectT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    Set IStreamBase_ConnectT1 = Helper.ConnectT1(Tier)
+End Function
+
+Public Function IStreamBase_ConnectT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    Set IStreamBase_ConnectT3 = Helper.ConnectT3(Tier)
+End Function
+
+Public Function IStreamBase_SetT1(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    Set IStreamBase_SetT1 = Helper.SetT1(Tier)
+End Function
+
+Public Function IStreamBase_SetT3(Optional Tier As IStreamBase = Nothing) As IStreamBase
+    Set IStreamBase_SetT3 = Helper.SetT3(Tier)
+End Function
+
+Public Function IStreamBase_HasT1() As Boolean
+    IStreamBase_HasT1 = Helper.HasT1
+End Function
+
+Public Function IStreamBase_HasT3() As Boolean
+    IStreamBase_HasT3 = Helper.HasT3
+End Function
+
+Public Function IStreamBase_IsMe(Tier As Object) As Boolean
+    IStreamBase_IsMe = Helper.IsMe(Tier)
+End Function
+
+
+' status
+
+Public Function IStreamBase_IsBusyT1(Optional ByVal Depth As Long = -1) As Boolean
+    IStreamBase_IsBusyT1 = Helper.IsBusyT1(Depth)
+End Function
+
+Public Function IStreamBase_IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
+    IStreamBase_IsBusyT3 = Helper.IsBusyT3(Depth)
+End Function
+
+Public Sub IStreamBase_DoneT1(ParamArray Args() As Variant)
+    Helper.DoneT1 CVar(Args)
+End Sub
+
+Public Sub IStreamBase_DoneT3(ParamArray Args() As Variant)
+    Helper.DoneT3 CVar(Args)
+End Sub
+
+
+' finder
+
+Public Function IStreamBase_SearchEndOfStreamTx() As Boolean
+    IStreamBase_SearchEndOfStreamTx = Helper.SearchEndOfStreamTx
+End Function
+
+Public Function IStreamBase_SearchEndOfLineTx() As Boolean
+    IStreamBase_SearchEndOfLineTx = Helper.SearchEndOfLineTx
+End Function
+
+Public Function IStreamBase_FlushEndOfLineTx() As Boolean
+    IStreamBase_FlushEndOfLineTx = Helper.FlushEndOfLineTx
+End Function
+
+
+' open / close
+
+Public Function IStreamBase_OpenReadTx(Args As Variant) As Boolean
+    IStreamBase_OpenReadTx = OpenReadT1(Args)
+End Function
+
+Public Function IStreamBase_OpenWriteTx(Args As Variant) As Boolean
+    IStreamBase_OpenWriteTx = OpenWriteT1
+End Function
+
+Public Function IStreamBase_CloseReadTx(Arg As Variant) As Boolean
+    IStreamBase_CloseReadTx = Helper.CloseReadTx(Arg)
+End Function
+
+Public Function IStreamBase_CloseWriteTx(Arg As Variant) As Boolean
+    IStreamBase_CloseWriteTx = CloseWriteT1(Arg)
+End Function
+
+
+' reader
+
+Public Function IStreamBase_ReadTx() As Boolean
+    IStreamBase_ReadTx = Helper.ReadTx()
+End Function
+
+Public Function IStreamBase_SkipLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+    IStreamBase_SkipLineTx = Helper.SkipLineTx(Repeat)
+End Function
+
+
+' writer
+
+Public Function IStreamBase_WriteTx() As Boolean
+    IStreamBase_WriteTx = Helper.WriteTx()
+End Function
+
+Public Function IStreamBase_FeedLineTx(Optional ByVal Repeat As Long = 1) As Boolean
+    IStreamBase_FeedLineTx = Helper.FeedLineTx(Repeat)
+End Function
+
+
+' cursor
+
+Public Sub IStreamBase_SetPositionTx(Optional Position As Variant = Empty)
+    Helper.SetPositionTx Position
+End Sub
+
+Public Function IStreamBase_GetPositionTx() As Variant
+    IStreamBase_GetPositionTx = Helper.GetPositionTx
+End Function
+
+
+' queue
+
+Public Property Get IStreamBase_Que() As Collection
+    Set IStreamBase_Que = Helper.Que
+End Property
+
+Public Sub IStreamBase_Enqueue(Arg As Variant)
+    Helper.Enqueue Arg
+End Sub
+
+Public Function IStreamBase_Dequeue() As Variant
+    IStreamBase_Dequeue = Helper.Dequeue
+End Function
+
+Public Function IStreamBase_CheatQueue() As Variant
+    IStreamBase_CheatQueue = Helper.CheatQueue
+End Function
+
+Public Sub IStreamBase_EditFirstQueue(Data As Variant)
+    Helper.EditFirstQueue Data
+End Sub
+
+Public Sub IStreamBase_InsertBeforeFirstQueue(Arg As Variant)
+    Helper.InsertBeforeFirstQueue Arg
+End Sub
+
+Public Function IStreamBase_IsEmptyQueue() As Boolean
+    IStreamBase_IsEmptyQueue = Helper.IsEmptyQueue
+End Function
+
+Public Sub IStreamBase_ClearQueue()
+    Helper.ClearQueue
+End Sub
+
+
+' logging
+
+Public Sub IStreamBase_LogError(Optional Arg As Variant = Empty)
+    Helper.LogError Arg
+End Sub
+
+Public Function IStreamBase_LogErrorTx(Optional ByVal Depth As Long = -1) As String
+    IStreamBase_LogErrorTx = Helper.LogErrorTx(Depth)
+End Function
+
+
+' extentions
+
+Public Property Get IStreamBase_Properties(Key As String) As Variant
+    IStreamBase_Properties = GetEnv(Key)
+End Property
+
+Public Property Let IStreamBase_Properties(Key As String, Value As Variant)
+    SetEnv Key, Value
+End Property
+
+Public Function IStreamBase_Execute(ParamArray Args() As Variant) As Variant
+
+End Function
+
+
+'=== IStreamBase end ===
+'}}}
