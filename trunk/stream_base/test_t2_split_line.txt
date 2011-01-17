@@ -1,0 +1,197 @@
+'module
+'  name;testT2SplitLine
+'{{{
+Option Explicit
+
+' designed for IStreamBase revision r194 and IStreamT3 revision r194
+
+Sub test_All()
+    test_Can_Initialize
+    test_Description
+    test_Read
+    test_Read2
+    test_Write
+End Sub
+
+Sub test_Can_Initialize()
+    Dim x As T2SplitLine
+    Dim y As IStreamBase
+    
+    Set x = New T2SplitLine
+    Set y = New T2SplitLine
+    
+    Debug.Assert TypeName(x) = "T2SplitLine"
+    Debug.Assert TypeName(y) = "T2SplitLine"
+    
+    Set y = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Description()
+    Dim x As IStreamBase
+    Set x = New T2SplitLine
+    
+    Debug.Print x.Description
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Read()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T2 As IStreamBase
+    Set T2 = New T2SplitLine
+    T2.ConnectT3 x
+
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 T2
+    
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    T2.Properties("line-splitters") = Array(" ")
+    
+    x.OpenRead "Hello", "Splitter World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T2.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    T2.ConnectT3
+    Set T1 = Nothing
+    Set T2 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Read2()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T2 As IStreamBase
+    Set T2 = New T2SplitLine
+    T2.ConnectT3 x
+
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 T2
+    
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    T2.Properties("line-splitters") = Array("li", "l")
+    
+    x.OpenRead "Hello", "Splitter World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T2.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    Debug.Print
+    
+    T2.Properties("line-splitters") = Array(" ")
+    T2.Properties("join-before-split") = True
+    
+    x.OpenRead "Hello", "Joiner an", "d", "Splitter World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T2.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    T2.ConnectT3
+    Set T1 = Nothing
+    Set T2 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Write()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T2 As IStreamBase
+    Set T2 = New T2SplitLine
+    T2.ConnectT3 x
+
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 T2
+    
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    T2.Properties("line-splitters") = Array(" ")
+    
+    x.OpenWrite
+    x.WriteLine "Hello"
+    x.WriteLine "Splitter World"
+    x.CloseWrite Data
+    Debug.Print Data
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T2.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T2.Que.Count = 0
+    Debug.Assert T1.Que.Count = 3
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    T2.ConnectT3
+    Set T1 = Nothing
+    Set T2 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+'}}}
+
+
