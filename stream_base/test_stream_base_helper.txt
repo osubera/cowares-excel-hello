@@ -231,6 +231,11 @@ Sub test_Finder()
     Debug.Assert Not x3.IsBusyT3
     Debug.Assert Not x2.IsBusyT3
     Debug.Assert Not x1.IsBusyT3
+    
+    Debug.Assert Not x3.SearchEndOfLineTx
+    ' the above puts an error message, it needs open
+    
+    x3.OpenTx "r", "dummy"
     Debug.Assert Not x3.SearchEndOfLineTx
     Debug.Assert Not x2.SearchEndOfLineTx
     Debug.Assert Not x1.SearchEndOfLineTx
@@ -240,12 +245,16 @@ Sub test_Finder()
     Debug.Assert x3.IsBusyT1
     Debug.Assert x3.IsBusyT3
     Debug.Assert x3.SearchEndOfLineTx
+    x3.Request "more-t1"
+    x2.Request "more-t1"
     
     x3.Que.Remove 1
     Debug.Assert x3.IsEmptyQueue
     Debug.Assert Not x3.IsBusyT1
     Debug.Assert Not x3.IsBusyT3
     Debug.Assert Not x3.SearchEndOfLineTx
+    x3.Request "more-t1"
+    x2.Request "more-t1"
     
     x2.Que.Add "dummy"
     Debug.Assert Not x2.IsEmptyQueue
@@ -259,6 +268,8 @@ Sub test_Finder()
     Debug.Assert Not x2.IsBusyT1
     Debug.Assert x2.IsBusyT3
     Debug.Assert x3.SearchEndOfLineTx
+    x3.Request "more-t1"
+    x2.Request "more-t1"
     
     x1.Que.Add "dummy"
     x1.Que.Add "dummy"
@@ -276,6 +287,8 @@ Sub test_Finder()
     Debug.Assert x3.SearchEndOfLineTx
     Debug.Assert x2.SearchEndOfLineTx
     Debug.Assert x1.SearchEndOfLineTx
+    x3.Request "more-t1"
+    x2.Request "more-t1"
     
     x2.Que.Add "dummy"
     x1.Que.Add "dummy"
@@ -318,6 +331,8 @@ Sub test_Finder()
     Debug.Assert x3.Que.Count = 0
     Debug.Assert x2.Que.Count = 0
     Debug.Assert x1.Que.Count = 0
+    x3.Request "more-t1"
+    x2.Request "more-t1"
     
     
     Set x3 = Nothing
@@ -475,3 +490,5 @@ Sub test_Que_Data_Structure()
     Set Helper = Nothing
 End Sub
 '}}}
+
+
