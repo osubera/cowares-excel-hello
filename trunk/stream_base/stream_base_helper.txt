@@ -8,7 +8,7 @@ Option Explicit
 ' this class contains implements and utility functions
 ' commonly used in stream base classes.
 
-' designed for IStreamBase revision r191+
+' designed for IStreamBase revision r194
 
 
 Private oT2 As IStreamBase  ' caller
@@ -19,7 +19,10 @@ Private T2 As Collection
 Private MyDescription As String
 Private NoMoreT1 As Boolean
 Private NoMoreT3 As Boolean
+Private PrepareClose As Boolean
 Private OpenMode As String
+
+Public Event Requested(Command As String)
 
 
 '=== event procedures begin ===
@@ -248,8 +251,13 @@ Public Sub Request(Command As String)
     Case "more-t3"
         NoMoreT3 = False
     Case "close"
-    Case "close-force"
+        PrepareClose = True
+    Case "quit"
+    Case "flush-all"
     End Select
+    
+    RaiseEvent Requested(Command)
+    DoEvents
 End Sub
 
 
@@ -265,16 +273,18 @@ Public Function SearchEndOfLineTx() As Boolean
         Exit Function
     End If
     
-    Found = True
     If Not (NoMoreT1 Or HasT1) Then NoMoreT1 = True
+    
+    Found = True
     Do Until FinderEndOfLineT2(NoMoreT1)
         If NoMoreT1 Then
-            Found = False
             If HasT3 Then oT3.Request "no-more-t1"
+            DoEvents
+            Found = False
+            Exit Do
         Else
-            Found = oT1.SearchEndOfLineTx
+            oT1.SearchEndOfLineTx
         End If
-        If Not Found Then Exit Do
     Loop
     
     SearchEndOfLineTx = Found
@@ -283,9 +293,29 @@ End Function
 Public Function FlushEndOfLineTx() As Boolean
     Dim Found As Boolean
     
-    Found = FinderEndOfLineT2(NoMoreT3)
-    If Found And HasT1 Then
-        Found = oT1.FlushEndOfLineTx
+    If OpenMode <> "w" Then
+        LogError Array("SearchEndOfLineTx", oT2.AboutMe, OpenMode, _
+                        "rejected to avoid an eternal loop in non writable streams")
+        FlushEndOfLineTx = False
+        Exit Function
+    End If
+    
+    If PrepareClose Then
+        If Not (NoMoreT3 Or HasT3) Then NoMoreT3 = True
+    End If
+    
+    If NoMoreT3 Then
+        Found = True
+        Do While FinderEndOfLineT2(True)
+            If HasT1 Then oT1.FlushEndOfLineTx
+        Loop
+        If HasT1 Then oT1.Request "no-more-t3"
+        DoEvents
+    Else
+        Found = FinderEndOfLineT2(NoMoreT3)
+        If Found And HasT1 Then
+            Found = oT1.FlushEndOfLineTx
+        End If
     End If
     
     FlushEndOfLineTx = Found
@@ -298,6 +328,7 @@ Public Function OpenTx(ReadWrite As String, Args As Variant) As Boolean
     OpenMode = ReadWrite
     NoMoreT1 = False
     NoMoreT3 = False
+    PrepareClose = False
     If HasT1 Then
         OpenTx = oT1.OpenTx(ReadWrite, Args)
     Else
@@ -306,6 +337,9 @@ Public Function OpenTx(ReadWrite As String, Args As Variant) As Boolean
 End Function
 
 Public Function CloseTx(ReadWrite As String, Arg As Variant) As Boolean
+    PrepareClose = True
+    oT2.Request "close"
+    FlushAll
     If HasT1 Then
         CloseTx = oT1.CloseTx(ReadWrite, Arg)
     Else
@@ -404,7 +438,11 @@ Public Sub EditFirstQueue(Data As Variant)
 End Sub
 
 Public Sub InsertBeforeFirstQueue(Arg As Variant)
-    T2.Add Arg, Before:=1
+    If T2.Count = 0 Then
+        T2.Add Arg
+    Else
+        T2.Add Arg, Before:=1
+    End If
 End Sub
 
 Public Function IsEmptyQueue() As Boolean
@@ -459,17 +497,20 @@ End Function
 ' finder
 
 Public Function FinderEndOfLineT2(Optional Force As Boolean = False) As Boolean
+    Dim out As Boolean
+    
     FinderEndOfLineT2 = False
     If IsEmptyQueue Then Exit Function
     If Not oT2.FilterT2(OpenMode, Force) Then Exit Function
     
+    out = True
     Select Case OpenMode
     Case "r"
         ReadTx
     Case "w"
-        WriteTx
+        out = WriteTx
     End Select
-    FinderEndOfLineT2 = True
+    FinderEndOfLineT2 = out
 End Function
 
 
@@ -614,6 +655,13 @@ Public Function EncCollection(Data As Variant) As String
     
     EncCollection = out
 End Function
+
+Public Sub FlushAll()
+    If OpenMode <> "w" Then Exit Sub
+    PrepareClose = True
+    oT2.FlushEndOfLineTx
+End Sub
+
 
 '=== helper functions end ===
 '}}}
