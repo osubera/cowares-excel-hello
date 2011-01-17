@@ -210,6 +210,7 @@ Public Function IsBusyT1(Optional ByVal Depth As Long = -1) As Boolean
     
     out = IsBusyT2
     If out Then GoTo DONE
+    If NoMoreT1 Then GoTo DONE
     If Not HasT1 Then GoTo DONE
     If Depth = 0 Then GoTo DONE
     If Depth > 0 Then Depth = Depth - 1
@@ -223,6 +224,7 @@ Public Function IsBusyT3(Optional ByVal Depth As Long = -1) As Boolean
     
     out = IsBusyT2
     If out Then GoTo DONE
+    If NoMoreT3 Then GoTo DONE
     If Not HasT3 Then GoTo DONE
     If Depth = 0 Then GoTo DONE
     If Depth > 0 Then Depth = Depth - 1
@@ -236,10 +238,18 @@ Public Function IsBusyT2() As Boolean
 End Function
 
 Public Sub Request(Command As String)
-    'NoMoreT1 = True
-    'NoMoreT3 = True
-    'CloseForce
-    'Close
+    Select Case Command
+    Case "no-more-t1"
+        NoMoreT1 = True
+    Case "no-more-t3"
+        NoMoreT3 = True
+    Case "more-t1"
+        NoMoreT1 = False
+    Case "more-t3"
+        NoMoreT3 = False
+    Case "close"
+    Case "close-force"
+    End Select
 End Sub
 
 
@@ -248,12 +258,25 @@ End Sub
 Public Function SearchEndOfLineTx() As Boolean
     Dim Found As Boolean
     
-    Found = FinderEndOfLineT2(NoMoreT1)
-    If Found Then GoTo DONE
-    If Not HasT1 Then GoTo DONE
-    Found = oT1.SearchEndOfLineTx
-DONE:
-    If Found Then ReadTx
+    If OpenMode <> "r" Then
+        LogError Array("SearchEndOfLineTx", oT2.AboutMe, OpenMode, _
+                        "rejected to avoid an eternal loop in non readable streams")
+        SearchEndOfLineTx = False
+        Exit Function
+    End If
+    
+    Found = True
+    If Not (NoMoreT1 Or HasT1) Then NoMoreT1 = True
+    Do Until FinderEndOfLineT2(NoMoreT1)
+        If NoMoreT1 Then
+            Found = False
+            If HasT3 Then oT3.Request "no-more-t1"
+        Else
+            Found = oT1.SearchEndOfLineTx
+        End If
+        If Not Found Then Exit Do
+    Loop
+    
     SearchEndOfLineTx = Found
 End Function
 
@@ -261,11 +284,10 @@ Public Function FlushEndOfLineTx() As Boolean
     Dim Found As Boolean
     
     Found = FinderEndOfLineT2(NoMoreT3)
-    If Not Found Then GoTo DONE
-    WriteTx
-    If Not HasT1 Then GoTo DONE
-    Found = oT1.FlushEndOfLineTx
-DONE:
+    If Found And HasT1 Then
+        Found = oT1.FlushEndOfLineTx
+    End If
+    
     FlushEndOfLineTx = Found
 End Function
 
@@ -298,6 +320,7 @@ End Function
 Public Function ReadTx() As Boolean
     ' transact from T1er to T3er
     If HasT3 Then
+        'Debug.Print "READER: " & Left(oT2.AboutMe, 6) & ":" & EncVariant(T2)
         oT3.Enqueue Dequeue
         ReadTx = True
     Else
@@ -319,6 +342,7 @@ End Function
 Public Function WriteTx() As Boolean
     ' transact from T3er to T1er
     If HasT1 Then
+        'Debug.Print "WRITER: " & Left(oT2.AboutMe, 6) & ":" & EncVariant(T2)
         oT1.Enqueue Dequeue
         ' enqueue of T1 does real writing to low i/o
         WriteTx = True
@@ -439,6 +463,12 @@ Public Function FinderEndOfLineT2(Optional Force As Boolean = False) As Boolean
     If IsEmptyQueue Then Exit Function
     If Not oT2.FilterT2(OpenMode, Force) Then Exit Function
     
+    Select Case OpenMode
+    Case "r"
+        ReadTx
+    Case "w"
+        WriteTx
+    End Select
     FinderEndOfLineT2 = True
 End Function
 
@@ -587,3 +617,5 @@ End Function
 
 '=== helper functions end ===
 '}}}
+
+

@@ -187,10 +187,12 @@ End Function
 ' open / close
 
 Public Function IStreamBase_OpenTx(ReadWrite As String, Args As Variant) As Boolean
+    IStreamBase_OpenTx = Helper.OpenTx(ReadWrite, Args)
     IStreamBase_OpenTx = OpenT1(ReadWrite, Args)
 End Function
 
 Public Function IStreamBase_CloseTx(ReadWrite As String, Arg As Variant) As Boolean
+    IStreamBase_CloseTx = Helper.CloseTx(ReadWrite, Arg)
     IStreamBase_CloseTx = CloseT1(ReadWrite, Arg)
 End Function
 
@@ -291,3 +293,5 @@ End Function
 
 '=== IStreamBase end ===
 '}}}
+
+
