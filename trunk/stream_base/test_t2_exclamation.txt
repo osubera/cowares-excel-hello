@@ -1,0 +1,230 @@
+'module
+'  name;testT2Exclamation
+'{{{
+Option Explicit
+
+' designed for IStreamBase revision r191+ and IStreamT3 revision r191
+
+Sub test_All()
+    test_Can_Initialize
+    test_Description
+    test_Read_Write
+    test_Twice
+End Sub
+
+Sub test_Can_Initialize()
+    Dim x As T2Exclamation
+    Dim y As IStreamBase
+    
+    Set x = New T2Exclamation
+    Set y = New T2Exclamation
+    
+    Debug.Assert TypeName(x) = "T2Exclamation"
+    Debug.Assert TypeName(y) = "T2Exclamation"
+    
+    Set y = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Description()
+    Dim x As IStreamBase
+    Set x = New T2Exclamation
+    
+    Debug.Print x.Description
+    
+    Set x = Nothing
+End Sub
+
+Sub test_Read_Write()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T2 As IStreamBase
+    Set T2 = New T2Exclamation
+    T2.ConnectT3 x
+    Debug.Print x.Description
+
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 T2
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    Debug.Assert x.SkipLine
+    Debug.Assert x.FeedLine
+    x.SetPosition 0
+    Debug.Assert x.GetPosition() = -1
+    
+    x.OpenWrite
+    x.WriteLine "Hello"
+    x.WriteLine "String"
+    T1.Properties("line-feed") = "%"
+    x.CloseWrite Data
+    Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 2
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    T1.Properties("append") = True
+    x.OpenWrite
+    x.WriteLine "Stream"
+    T1.Properties("line-feed") = "_"
+    x.CloseWrite Data
+    Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 3
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenWrite
+    x.WriteLine "dummy"
+    x.CloseWrite Data
+    
+    T1.Properties("append") = False
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    T2.ConnectT3
+    Set T1 = Nothing
+    Set T2 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+Sub test_Twice()
+    Dim x As IStreamT3
+    Set x = New T3Stream
+    
+    Dim T2 As IStreamBase
+    Set T2 = New T2Exclamation
+    T2.ConnectT3 x
+    Debug.Print x.Description
+
+    Dim T1 As IStreamBase
+    Set T1 = New T1StringStream
+    T1.ConnectT3 T2
+    Debug.Print x.Description
+
+    Dim MoreT2 As IStreamBase
+    Set MoreT2 = New T2Exclamation
+    MoreT2.NameMe "Tier 2 again"
+    T2.InsertT1 MoreT2
+    Debug.Print x.Description
+
+    Dim Helper As StreamBaseHelper
+    Set Helper = New StreamBaseHelper
+    
+    Dim Data As Variant
+    Dim Size As Long
+    
+    Debug.Assert x.SkipLine
+    Debug.Assert x.FeedLine
+    x.SetPosition 0
+    Debug.Assert x.GetPosition() = -1
+    
+    x.OpenWrite
+    x.WriteLine "Hello"
+    x.WriteLine "String"
+    T1.Properties("line-feed") = "%"
+    x.CloseWrite Data
+    Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 2
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    T1.Properties("append") = True
+    x.OpenWrite
+    x.WriteLine "Stream"
+    T1.Properties("line-feed") = "_"
+    x.CloseWrite Data
+    Debug.Print Data
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 3
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Assert x.Que.Count = 0
+    Debug.Assert T1.Que.Count = 0
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    x.OpenWrite
+    x.WriteLine "dummy"
+    x.CloseWrite Data
+    
+    T1.Properties("append") = False
+    
+    x.OpenRead "Hello", "World"
+    Do Until x.AtEndOfStream
+        x.ReadLine Data, Size
+        Debug.Print Data, Size
+    Loop
+    x.CloseRead
+    
+    Debug.Print Helper.EncVariant(x.Que)
+    Debug.Print Helper.EncVariant(T1.Que)
+    
+    Debug.Assert x.ErrorCount = 0
+    If x.ErrorCount > 0 Then
+        Debug.Print Helper.EncVariant(x.ErrorLogs)
+    End If
+    
+    T1.ConnectT3
+    T2.ConnectT3
+    MoreT2.ConnectT3
+    Set MoreT2 = Nothing
+    Set T1 = Nothing
+    Set T2 = Nothing
+    Set Helper = Nothing
+    Set x = Nothing
+End Sub
+
+'}}}
+
+
