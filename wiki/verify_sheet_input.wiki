@@ -1,0 +1,23 @@
+#summary verify input for excel against a reference sheet
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * verify input for excel against a reference sheet
+
+== 概要 ==
+ * エクセルで別のシートを参照して入力のベリファイを行う
+
+= Details =
+
+
+== 説明 ==
+ * 同一のデータをシートに２回入力することで、入力検証を行う。
+    * １次入力は提出用（参照用）シートに行う。これは任意のブック、シートで構わない。
+    * ２次入力は、検証専用シートに行う。検証用シートがマクロを持っている。
+ * 入力検証は、検証用への入力の都度、自動で行われる。
+    * １次入力と違う文字が入力されたら、検証用シートのセルが警告色になる。
+    * 正しく入力しなおせば色は元に戻る。
+    * エンターだけでなく、タブキーなどによる移動でも検証する。
+ * 検証用ブックを開くと、操作用のボタンがツールバー（リボン）に追加される。
+    * 参照用シートの設定など
