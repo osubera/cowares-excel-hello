@@ -1,0 +1,236 @@
+Files wSettingsKeyValue.txt and xSettingsKeyValue.txt are identical
+--- wSettingsKeyValueFile.txt	2011-01-19 07:38:39.000000000 +0900
++++ xSettingsKeyValueFile.txt	2011-01-19 08:31:49.000000000 +0900
+@@ -112 +112 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Excel ===
+@@ -116 +116 @@
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = ThisWorkbook.FullName & ".ini"
+--- wSettingsKeyValueTable.txt	2011-01-19 07:38:14.000000000 +0900
++++ xSettingsKeyValueTable.txt	2011-01-19 08:31:27.000000000 +0900
+@@ -124 +124 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Excel ===
+@@ -127 +127 @@
+-    ' replace the full path of this document from ".doc" to ".mdb"
++    ' replace the full path of this document from ".xls" to ".mdb"
+@@ -131 +131 @@
+-    out = ThisDocument.FullName
++    out = ThisWorkbook.FullName
+@@ -133 +133 @@
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
++    FoundAt = InStrRev(out, ".xls", -1, vbTextCompare)
+Files wSettingsList.txt and xSettingsList.txt are identical
+--- wSettingsListFile.txt	2011-01-19 07:38:51.000000000 +0900
++++ xSettingsListFile.txt	2011-01-19 08:32:00.000000000 +0900
+@@ -100 +100 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Excel ===
+@@ -104 +104 @@
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = ThisWorkbook.FullName & ".ini"
+--- wSettingsListTable.txt	2011-01-19 07:38:27.000000000 +0900
++++ xSettingsListTable.txt	2011-01-19 08:31:38.000000000 +0900
+@@ -119 +119 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Excel ===
+@@ -122 +122 @@
+-    ' replace the full path of this document from ".doc" to ".mdb"
++    ' replace the full path of this document from ".xls" to ".mdb"
+@@ -126 +126 @@
+-    out = ThisDocument.FullName
++    out = ThisWorkbook.FullName
+@@ -128 +128 @@
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
++    FoundAt = InStrRev(out, ".xls", -1, vbTextCompare)
+--- wtestSettingsOnWord.txt	2011-01-19 07:39:42.000000000 +0900
++++ xtestSettingsOnExcel.txt	2011-01-19 08:32:23.000000000 +0900
+@@ -2 +2 @@
+-'  name;testSettingsOnWord
++'  name;testSettingsOnExcel
+@@ -98,0 +99,31 @@
++
++Sub test_ListSheet()
++    Dim x As SettingsListSheet
++    Dim Data As Variant
++    Dim a As Variant
++    
++    Set x = SettingsListSheet
++    x.SetSetting Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
++    Data = x.GetSettings
++    Set x = Nothing
++    
++    For Each a In Data
++        Debug.Print a
++    Next
++End Sub
++
++Sub test_KeyValueSheet()
++    Dim x As SettingsKeyValueSheet
++    Dim Data As Variant
++    Dim a As Variant
++    
++    Set x = SettingsKeyValueSheet
++    Debug.Print x.Properties("Hello")
++    x.Properties("Hello") = Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
++    Data = x.GetSettings
++    Set x = Nothing
++    
++    For Each a In Data
++        Debug.Print a(0), a(1)
++    Next
++End Sub
+--- wSettingsKeyValue.txt	2011-01-19 07:39:06.000000000 +0900
++++ aSettingsKeyValue.txt	2011-01-19 10:28:39.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+--- wSettingsKeyValueFile.txt	2011-01-19 07:38:39.000000000 +0900
++++ aSettingsKeyValueFile.txt	2011-01-19 10:28:01.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+@@ -112 +113 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Access ===
+@@ -116 +117 @@
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = CurrentDb.Name & ".ini"
+--- wSettingsKeyValueTable.txt	2011-01-19 07:38:14.000000000 +0900
++++ aSettingsKeyValueTable.txt	2011-01-19 10:27:32.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+@@ -7 +7,0 @@
+-Private MyFileName As String
+@@ -56,0 +57,3 @@
++
++'=== procedures below this line work only for MS Access ===
++
+@@ -63,3 +66 @@
+-    Set Con = New ADODB.Connection
+-    Con.Open GetConnectionString
+-    
++    Set Con = CurrentProject.Connection
+@@ -74,2 +74,0 @@
+-    Con.Close
+-    
+@@ -89,3 +88 @@
+-    Set Con = New ADODB.Connection
+-    Con.Open GetConnectionString
+-    
++    Set Con = CurrentProject.Connection
+@@ -102,2 +98,0 @@
+-    
+-    Con.Close
+@@ -110,32 +104,0 @@
+-
+-Private Function GetConnectionString() As String
+-    GetConnectionString = _
+-        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+-        GetFileName() & _
+-        ";User ID=Admin;Password=;"
+-End Function
+-
+-Private Function GetFileName() As String
+-    If MyFileName = "" Then MyFileName = DefaultFileName
+-    GetFileName = MyFileName
+-End Function
+-
+-
+-'=== procedures below this line work only for MS Word ===
+-
+-Private Function DefaultFileName() As String
+-    ' replace the full path of this document from ".doc" to ".mdb"
+-    Dim out As String
+-    Dim FoundAt As Long
+-    
+-    out = ThisDocument.FullName
+-    
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+-    If FoundAt = 0 Then
+-        out = out & ".mdb"
+-    Else
+-        out = Left(out, FoundAt - 1) & ".mdb"
+-    End If
+-    
+-    DefaultFileName = out
+-End Function
+--- wSettingsList.txt	2011-01-19 07:39:22.000000000 +0900
++++ aSettingsList.txt	2011-01-19 10:28:26.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+--- wSettingsListFile.txt	2011-01-19 07:38:51.000000000 +0900
++++ aSettingsListFile.txt	2011-01-19 10:28:14.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+@@ -100 +101 @@
+-'=== procedures below this line work only for MS Word ===
++'=== procedures below this line work only for MS Access ===
+@@ -104 +105 @@
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = CurrentDb.Name & ".ini"
+--- wSettingsListTable.txt	2011-01-19 07:38:27.000000000 +0900
++++ aSettingsListTable.txt	2011-01-19 10:27:48.000000000 +0900
+@@ -3,0 +4 @@
++Option Compare Database
+@@ -7 +7,0 @@
+-Private MyFileName As String
+@@ -52,0 +53,3 @@
++
++'=== procedures below this line work only for MS Access ===
++
+@@ -59,3 +62 @@
+-    Set Con = New ADODB.Connection
+-    Con.Open GetConnectionString
+-    
++    Set Con = CurrentProject.Connection
+@@ -70,2 +70,0 @@
+-    Con.Close
+-    
+@@ -85,3 +84 @@
+-    Set Con = New ADODB.Connection
+-    Con.Open GetConnectionString
+-    
++    Set Con = CurrentProject.Connection
+@@ -97,2 +93,0 @@
+-    
+-    Con.Close
+@@ -105,32 +99,0 @@
+-
+-Private Function GetConnectionString() As String
+-    GetConnectionString = _
+-        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+-        GetFileName() & _
+-        ";User ID=Admin;Password=;"
+-End Function
+-
+-Private Function GetFileName() As String
+-    If MyFileName = "" Then MyFileName = DefaultFileName
+-    GetFileName = MyFileName
+-End Function
+-
+-
+-'=== procedures below this line work only for MS Word ===
+-
+-Private Function DefaultFileName() As String
+-    ' replace the full path of this document from ".doc" to ".mdb"
+-    Dim out As String
+-    Dim FoundAt As Long
+-    
+-    out = ThisDocument.FullName
+-    
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+-    If FoundAt = 0 Then
+-        out = out & ".mdb"
+-    Else
+-        out = Left(out, FoundAt - 1) & ".mdb"
+-    End If
+-    
+-    DefaultFileName = out
+-End Function
+--- wtestSettingsOnWord.txt	2011-01-19 07:39:42.000000000 +0900
++++ atestSettingsOnAccess.txt	2011-01-19 10:28:53.000000000 +0900
+@@ -2 +2 @@
+-'  name;testSettingsOnWord
++'  name;testSettingsOnAccess
+@@ -3,0 +4 @@
++Option Compare Database

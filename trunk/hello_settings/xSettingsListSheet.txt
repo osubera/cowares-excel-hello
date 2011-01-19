@@ -1,0 +1,68 @@
+'code
+'  name;SettingsListSheet
+'{{{
+Option Explicit
+
+Public Function GetCollection() As Collection
+    Dim out As Collection
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then Exit Function
+    
+    Set out = New Collection
+    For r = 1 To UBoundRow - LBoundRow + 1
+        out.Add GetSetting(r)
+    Next
+    
+    Set GetCollection = out
+End Function
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then
+        out = Array()
+    Else
+        ReDim out(0 To UBoundRow - LBoundRow)
+        For r = 1 To UBoundRow - LBoundRow + 1
+            out(r - 1) = GetSetting(r)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    Dim out As String
+    If UBoundRow < LBoundRow Or Number - 1 > UBoundRow - LBoundRow Then Exit Function
+    
+    out = Me.Cells(Number + 1, 1).Value
+    If Left(out, 1) = "'" Then out = Mid(out, 2)
+    GetSetting = out
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If UBoundRow < LBoundRow Or Number < 0 Or Number - 1 > UBoundRow - LBoundRow Then
+        Number = UBoundRow + 1
+    ElseIf Number = 0 Then
+        Number = LBoundRow
+        Me.Cells(Number, 1).Insert xlShiftDown
+    Else
+        Number = Number + 1
+        Me.Cells(Number, 1).Insert xlShiftDown
+    End If
+    Me.Cells(Number, 1).Value = "'" & Data
+End Sub
+
+Public Function LBoundRow() As Long
+    ' we ignore Row=1, because the Excel always assumes that $A$1 is a used cell.
+    LBoundRow = 2
+End Function
+
+Public Function UBoundRow() As Long
+    UBoundRow = Me.Cells.SpecialCells(xlCellTypeLastCell).Row
+End Function
+'}}}
+
+

@@ -1,0 +1,139 @@
+'class
+'  name;SettingsListTable
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    MyTableName = "settings_list"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings.Add Stream.Fields("list").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+    Con.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For i = 1 To MySettings.Count
+        Stream.AddNew
+        Stream.Fields("list") = MySettings(i)
+        Stream.Update
+    Next
+    Stream.Close
+    
+    Con.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetConnectionString() As String
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetFileName() & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Word ===
+
+Private Function DefaultFileName() As String
+    ' replace the full path of this document from ".doc" to ".mdb"
+    Dim out As String
+    Dim FoundAt As Long
+    
+    out = ThisDocument.FullName
+    
+    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+    If FoundAt = 0 Then
+        out = out & ".mdb"
+    Else
+        out = Left(out, FoundAt - 1) & ".mdb"
+    End If
+    
+    DefaultFileName = out
+End Function
+'}}}
+
+

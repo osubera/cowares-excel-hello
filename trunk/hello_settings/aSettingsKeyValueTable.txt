@@ -1,0 +1,107 @@
+'class
+'  name;SettingsKeyValueTable
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    MyTableName = "settings_key_value"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+
+'=== procedures below this line work only for MS Access ===
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings(Stream.Fields("key").Value) = Stream.Fields("value").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For Each Key In MySettings.Keys
+        Stream.AddNew
+        Stream.Fields("key") = CStr(Key)
+        Stream.Fields("value") = MySettings(Key)
+        Stream.Update
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+'}}}
+
+

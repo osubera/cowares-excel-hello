@@ -1,0 +1,109 @@
+'class
+'  name;SettingsListFile
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        MySettings.Add Stream.ReadLine
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For i = 1 To MySettings.Count
+        Stream.WriteLine MySettings(i)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Access ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = CurrentDb.Name & ".ini"
+End Function
+'}}}
+
+

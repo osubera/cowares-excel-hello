@@ -1,0 +1,107 @@
+'code
+'  name;SettingsKeyValueSheet
+'{{{
+Option Explicit
+
+Public Function GetDictionary() As Scripting.Dictionary
+    Dim out As Scripting.Dictionary
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then Exit Function
+    
+    Set out = New Scripting.Dictionary
+    For r = LBoundRow To UBoundRow
+        out(RemoveQuot(KeyRange.EntireColumn.Rows(r).Value)) = _
+                RemoveQuot(ValueRange.EntireColumn.Rows(r).Value)
+    Next
+    
+    Set GetDictionary = out
+End Function
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then
+        out = Array()
+    Else
+        ReDim out(0 To UBoundRow - LBoundRow)
+        For r = LBoundRow To UBoundRow
+            out(r - LBoundRow) = _
+                Array(RemoveQuot(KeyRange.EntireColumn.Rows(r).Value), _
+                    RemoveQuot(ValueRange.EntireColumn.Rows(r).Value))
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    Dim FoundAt As Long
+    
+    FoundAt = FindRow(Key)
+    If FoundAt = 0 Then Exit Function
+    
+    GetSetting = RemoveQuot(ValueRange.EntireColumn.Rows(FoundAt).Value)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    Dim FoundAt As Long
+    
+    FoundAt = FindRow(Key)
+    If FoundAt = 0 Then FoundAt = UBoundRow + 1
+    
+    Me.Rows(FoundAt).Columns("A:B").Value = Array(AddQuot(Key), AddQuot(Data))
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Public Function LBoundRow() As Long
+    ' we ignore Row=1, because the Excel always assumes that $A$1 is a used cell.
+    LBoundRow = 2
+End Function
+
+Public Function UBoundRow() As Long
+    UBoundRow = Me.Cells.SpecialCells(xlCellTypeLastCell).Row
+End Function
+
+Public Function KeyRange() As Range
+    Set KeyRange = Me.Columns("A").Rows(LBoundRow & ":" & UBoundRow)
+End Function
+
+Public Function ValueRange() As Range
+    Set ValueRange = Me.Columns("B").Rows(LBoundRow & ":" & UBoundRow)
+End Function
+
+Public Function FindRow(ByVal Key As String) As Long
+    Dim Found As Range
+    Dim out As Long
+    
+    Set Found = KeyRange.Find(Key, LookIn:=xlValues, LookAt:=xlWhole, MatchCase:=True)
+    If Found Is Nothing Then
+        out = 0
+    Else
+        out = Found.Row
+        Set Found = Nothing
+    End If
+    
+    FindRow = out
+End Function
+
+Private Function RemoveQuot(ByVal out As String) As String
+    If Left(out, 1) = "'" Then out = Mid(out, 2)
+    RemoveQuot = out
+End Function
+
+Private Function AddQuot(ByVal out As String) As String
+    AddQuot = "'" & out
+End Function
+'}}}
+
+
