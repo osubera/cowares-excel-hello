@@ -1,0 +1,58 @@
+'class
+'  name;SettingsList
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Collection
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    AppendData
+End Sub
+
+Private Sub Class_Terminate()
+    Set MySettings = Nothing
+End Sub
+
+Private Sub AppendData()
+    With MySettings
+        .Add "Hello"
+        .Add "Settings"
+    End With
+End Sub
+'}}}
+
+

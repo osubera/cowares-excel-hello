@@ -1,0 +1,132 @@
+'module
+'  name;testSettingsOnExcel
+'{{{
+Option Explicit
+
+Sub test_List()
+    Dim x As SettingsList
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsList
+    Debug.Print x.GetSetting(1)
+    x.SetSetting "‚±‚ñ‚É‚¿‚Í", 1
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValue()
+    Dim x As SettingsKeyValue
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValue
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = "Hola!"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+
+Sub test_ListFile()
+    Dim x As SettingsListFile
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsListFile
+    x.SetSetting Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueFile()
+    Dim x As SettingsKeyValueFile
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValueFile
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+
+Sub test_ListTable()
+    Dim x As SettingsListTable
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsListTable
+    x.SetSetting Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueTable()
+    Dim x As SettingsKeyValueTable
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValueTable
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+
+Sub test_ListSheet()
+    Dim x As SettingsListSheet
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = SettingsListSheet
+    x.SetSetting Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueSheet()
+    Dim x As SettingsKeyValueSheet
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = SettingsKeyValueSheet
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge”Nooood“ú aaaa ") & Timer() & "•b"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+'}}}
+
+

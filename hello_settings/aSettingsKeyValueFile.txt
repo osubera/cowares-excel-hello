@@ -1,0 +1,121 @@
+'class
+'  name;SettingsKeyValueFile
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim KeyValue As Variant
+    Dim Text As String
+    
+    Const Splitter = "="
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        Text = Stream.ReadLine
+        KeyValue = Split(Text, Splitter, 2)
+        If UBound(KeyValue) = 1 Then
+            MySettings(CStr(KeyValue(0))) = CStr(KeyValue(1))
+        End If
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For Each Key In MySettings.Keys
+        Stream.WriteLine Key & "=" & MySettings(Key)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Access ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = CurrentDb.Name & ".ini"
+End Function
+'}}}
+
+
