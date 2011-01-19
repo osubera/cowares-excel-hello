@@ -13,17 +13,17 @@
  * `Implements` statement is expected by its name to define an abstract interface, but it's not.
  * it is far from the interface of Java, C++ and other languages.
  * remember,
-    + no other methods
-    + no events
-    + forget friend
-    + inconstant
-    + difficult to read
-    + difficult to understand
+    # no other methods
+    # no events
+    # forget friend
+    # inconstant
+    # difficult to read
+    # difficult to understand
  * maybe, it's for,
-    + bring a lot of classes into a single huge class to share some implements.
-    + declare 2 or more tricky methods with a same name, and completely different implemtns.
-    + hide some public methods.
-    + let people go to VB.Net from deprecated VB6 and VBA.
+    # bring a lot of classes into a single huge class to share some implements.
+    # declare 2 or more tricky methods with a same name, and completely different implemtns.
+    # hide some public methods.
+    # let people go to VB.Net from deprecated VB6 and VBA.
 
 == 説明 ==
  * `Implements` 文は、名前からして、抽象化したインターフェースを宣言するように見えるが、実は違う。
