@@ -22,6 +22,7 @@ End Sub
 ' 入力に対してベリファイする
 Private Sub Worksheet_Change(ByVal Target As Range)
     DoVerify Target
+    Set PrevCell = Target
 End Sub
 
 ' セルスキップでもベリファイする
