@@ -1,0 +1,354 @@
+'workbook
+'  name;verify_sheet_input_b2.xls
+
+'require
+
+'worksheet
+'  name;Verify
+
+'worksheet
+'  name;SSF
+
+'cells-formula
+'  address;A1:B15
+'         ;名称
+'         ;verify_sheet_input
+'         ;コメント
+'         ;エクセルで別のシートを参照して入力のベリファイを行う
+'         ;comment
+'         ;verify input for excel against a reference sheet
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;初版
+'         ;2011
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/verify_sheet_input
+'         ;更新
+'         ;40563.9203377314
+'         ;keyword
+'         ;excel,validation
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;
+'         ;
+'         ;参照シート設定
+'         ;アクティブシートを参照用に設定します
+
+'cells-numberformat
+'  address;A1:B15
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'cells-name
+'  ;=SSF!R15C1
+'  ;SSF!_ButtonCaption
+'  ;=SSF!R3C2
+'  ;SSF!_Comment
+'  ;=SSF!R6C2
+'  ;SSF!_Contributor
+'  ;=SSF!R4C2
+'  ;SSF!_Copyright
+'  ;=SSF!R5C2
+'  ;SSF!_License
+'  ;=SSF!R2C2
+'  ;SSF!_LocalComment
+'  ;=SSF!R1C2
+'  ;SSF!_PublicName
+'  ;=SSF!R7C2
+'  ;SSF!_Since
+'  ;=SSF!R10C2
+'  ;SSF!_Tag
+'  ;=SSF!R9C2
+'  ;SSF!_Timestamp
+'  ;=SSF!R8C2
+'  ;SSF!_Url
+
+'code
+'  name;SSF
+'{{{
+Option Explicit
+ 
+' シートの定義情報から、マクロ用の簡易ツールバーを生成する。
+ 
+Private oApplication As Application
+Private oThisWorkbook As Workbook
+ 
+Private ButtonCaption As Variant
+Private MyBar As Office.CommandBar
+ 
+Friend Property Let BarButtons(ButtonArray As Variant)
+    ButtonCaption = ButtonArray
+End Property
+ 
+Friend Property Get BarButtons() As Variant
+    BarButtons = ButtonCaption
+End Property
+ 
+' ツールバーから直接呼ばれるメイン関数。
+Friend Sub BarMain()
+    Dim oAC As Object   ' 押されたボタンをもらう。
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' ユーザー定義のメインプロシジャにボタンを引き渡す。
+    Main oAC
+    Set oAC = Nothing
+End Sub
+ 
+' ボタンだけの簡易ツールバーを生成する。
+' シートに定義されたボタン名称の数だけボタンを追加する。
+Friend Function BarInitialize() As CommandBar
+    Dim BAUDISTRIB As String
+    Dim ButtonA As CommandBarButton
+    Dim strBarName As String
+    Dim strButtonName As String
+    Dim strButtonDesc As String
+    Dim i As Long, j As Long
+    Dim strC() As Variant
+    Dim Ra As Range
+    
+    On Error Resume Next
+    
+    Set oApplication = Application
+    Set oThisWorkbook = ThisWorkbook
+    ' 名前の衝突回避用に Url 情報を使う。
+    BAUDISTRIB = " - " & Me.Parent.Range("_Url").Value
+    BAUDISTRIB = " - " & Me.Range("_Url").Value
+    ' シート上のボタン定義
+    Set Ra = Me.Parent.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    Set Ra = Me.Range("_ButtonCaption").CurrentRegion.Columns(1)
+    j = Ra.Cells.Count
+    ReDim strC(0 To j - 1)
+    For i = 0 To j - 1
+        strC(i) = Array(Ra.Range("A1").Offset(i, 0).Text, Ra.Range("A1").Offset(i, 1).Text)
+    Next
+    ButtonCaption = strC
+    Set Ra = Nothing
+    strBarName = oThisWorkbook.Name & BAUDISTRIB
+    Set MyBar = oApplication.CommandBars.Add(Name:=strBarName, Temporary:=True)
+    For i = LBound(ButtonCaption) To UBound(ButtonCaption)
+        strButtonName = CStr(ButtonCaption(i)(0))
+        strButtonDesc = CStr(ButtonCaption(i)(1))
+        Set ButtonA = MyBar.Controls.Add(Type:=1, Temporary:=True)
+        With ButtonA
+            .Style = msoButtonCaption
+            .OnAction = Me.CodeName & ".BarMain"
+            .Caption = strButtonName
+            .Tag = strButtonName
+            .TooltipText = strButtonDesc
+            .BeginGroup = True
+        End With
+        Set ButtonA = Nothing
+    Next
+    MyBar.Visible = True
+    MyBar.Position = msoBarTop
+    Set BarInitialize = MyBar
+End Function
+ 
+' ツールバーを除去する。
+Friend Sub BarTerminate()
+    On Error Resume Next
+    MyBar.Delete
+    Set oApplication = Nothing
+    Set oThisWorkbook = Nothing
+End Sub
+ 
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+ 
+' ツールバーから呼ばれるメインプロシジャ
+Public Sub Main(oAC As Object)
+    ' ボタンの位置で識別する
+    Select Case oAC.Index
+    Case 1
+        Menu_ReferenceSheet oAC
+    End Select
+End Sub
+ 
+Private Sub Menu_ReferenceSheet(oAC As Object)
+    Dim Ws As Worksheet
+    
+    Set Ws = ActiveSheet
+    Verify.SetReferenceSheet Ws, oAC
+End Sub
+'}}}
+
+'code
+'  name;Verify
+'{{{
+Option Explicit
+
+Private PrevCell As Range
+Private RefSheet As Worksheet
+Private RefButton As Office.CommandBarButton
+
+' 参照シート設定
+Public Sub SetReferenceSheet(Ws As Worksheet, Button As Object)
+    Set RefSheet = Ws
+    Set RefButton = Button
+    Reset
+End Sub
+
+' 初期化
+Public Sub Reset()
+    Me.Activate
+    Range("A1").Select
+    Set PrevCell = ActiveCell
+    SetupButton
+End Sub
+
+' 入力に対してベリファイする
+Private Sub Worksheet_Change(ByVal Target As Range)
+    DoVerify Target
+    Set PrevCell = Target
+End Sub
+
+' セルスキップでもベリファイする
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    DoVerify PrevCell
+    Set PrevCell = Target.Cells(1)
+End Sub
+
+' ベリファイ本体
+Private Sub DoVerify(Target As Range)
+    Dim Ra As Range
+    Dim SmallerTarget As Range
+    
+    If RefSheet Is Nothing Then Exit Sub
+    If Target Is Nothing Then Exit Sub
+    
+    Debug.Print Now(), Target.Address
+    
+    If Target.Cells.Count = 1 Then
+        VerifySingleCell Target
+    Else
+        Set SmallerTarget = Intersect(Target, Union(Me.UsedRange, _
+            Me.Range(RefSheet.UsedRange.Address(True, True, xlA1, False))))
+        For Each Ra In SmallerTarget
+            VerifySingleCell Ra
+        Next
+    End If
+End Sub
+
+' 単一セルのチェック実行
+Private Sub VerifySingleCell(Target As Range)
+    If IsSame(Target, Refered(Target)) Then
+        RemoveAlarm Target
+    Else
+        ShowAlarm Target
+    End If
+End Sub
+
+' 参照先セル
+Private Function Refered(x As Range) As Range
+    On Error GoTo LostSheet
+    Set Refered = RefSheet.Range(x.Address(True, True, xlA1, False))
+    Exit Function
+    
+LostSheet:
+    Set Refered = x
+    Set RefSheet = Nothing
+    SetupButton
+End Function
+
+' 警告を出す
+Private Sub ShowAlarm(x As Range)
+    Const AlarmColor = 3
+    If x.Interior.ColorIndex = AlarmColor Then Exit Sub
+    x.Interior.ColorIndex = AlarmColor
+End Sub
+
+' 警告解除
+Private Sub RemoveAlarm(x As Range)
+    If x.Interior.ColorIndex = xlColorIndexNone Then Exit Sub
+    x.Interior.ColorIndex = xlColorIndexNone
+End Sub
+
+' ボタン設定
+Private Sub SetupButton()
+    If IsAlive(RefSheet) Then
+        With RefButton
+            .Caption = "[" & RefSheet.Parent.Name & "]" & RefSheet.Name
+            .State = msoButtonDown
+        End With
+    Else
+        With RefButton
+            .Caption = "参照シート無し"
+            .State = msoButtonUp
+        End With
+    End If
+End Sub
+
+' シート生死
+Private Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+' 判定関数
+Private Function IsSame(x As Range, y As Range) As Boolean
+    IsSame = (x.Value = y.Value)
+End Function
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+' ツールバー初期化と終了
+ 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    SSF.BarTerminate
+End Sub
+ 
+Private Sub Workbook_Open()
+    SSF.BarInitialize
+    ThisWorkbook.Saved = True
+End Sub
+'}}}
+
+
