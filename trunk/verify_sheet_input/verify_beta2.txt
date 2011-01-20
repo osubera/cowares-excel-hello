@@ -7,7 +7,7 @@
 '  name;Verify
 
 'worksheet
-'  name;SSF
+'  name;about/SSF
 
 'cells-formula
 '  address;A1:B15
@@ -76,28 +76,28 @@
 '         ;General
 
 'cells-name
-'  ;=SSF!R15C1
-'  ;SSF!_ButtonCaption
-'  ;=SSF!R3C2
-'  ;SSF!_Comment
-'  ;=SSF!R6C2
-'  ;SSF!_Contributor
-'  ;=SSF!R4C2
-'  ;SSF!_Copyright
-'  ;=SSF!R5C2
-'  ;SSF!_License
-'  ;=SSF!R2C2
-'  ;SSF!_LocalComment
-'  ;=SSF!R1C2
-'  ;SSF!_PublicName
-'  ;=SSF!R7C2
-'  ;SSF!_Since
-'  ;=SSF!R10C2
-'  ;SSF!_Tag
-'  ;=SSF!R9C2
-'  ;SSF!_Timestamp
-'  ;=SSF!R8C2
-'  ;SSF!_Url
+'  ;=about!R15C1
+'  ;about!_ButtonCaption
+'  ;=about!R3C2
+'  ;about!_Comment
+'  ;=about!R6C2
+'  ;about!_Contributor
+'  ;=about!R4C2
+'  ;about!_Copyright
+'  ;=about!R5C2
+'  ;about!_License
+'  ;=about!R2C2
+'  ;about!_LocalComment
+'  ;=about!R1C2
+'  ;about!_PublicName
+'  ;=about!R7C2
+'  ;about!_Since
+'  ;=about!R10C2
+'  ;about!_Tag
+'  ;=about!R9C2
+'  ;about!_Timestamp
+'  ;=about!R8C2
+'  ;about!_Url
 
 'code
 '  name;SSF
@@ -221,7 +221,14 @@ Private RefButton As Office.CommandBarButton
 
 ' take a reference sheet for 1st input
 Friend Sub SetReferenceSheet(Ws As Worksheet, Button As Object)
-    Set RefSheet = Ws
+    If Ws Is Me Then
+        If RefSheet Is Nothing Then Exit Sub
+        If MayResetReference Then Exit Sub
+        Set RefSheet = Nothing
+    Else
+        Set RefSheet = Ws
+    End If
+    
     Set RefButton = Button
     Reset
 End Sub
@@ -330,6 +337,14 @@ Private Function IsAlive(Ws As Worksheet) As Boolean
     Dim i As Long
     i = Ws.Index
     If Err.Number = 0 Then IsAlive = True
+End Function
+
+' confirm to remove reference
+Private Function MayResetReference() As Boolean
+    MayResetReference = _
+        (MsgBox("参照シートの設定を解除しますか？", vbOKCancel, _
+            "検証シートがアクティブなときに参照ボタンを押すと、設定を解除します。") _
+        = vbCancel)
 End Function
 
 ' valid condition
