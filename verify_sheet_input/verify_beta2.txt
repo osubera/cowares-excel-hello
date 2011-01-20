@@ -195,9 +195,7 @@ End Sub
 '{{{
 Option Explicit
  
-' ツールバーから呼ばれるメインプロシジャ
 Public Sub Main(oAC As Object)
-    ' ボタンの位置で識別する
     Select Case oAC.Index
     Case 1
         Menu_ReferenceSheet oAC
@@ -221,42 +219,42 @@ Private PrevCell As Range
 Private RefSheet As Worksheet
 Private RefButton As Office.CommandBarButton
 
-' 参照シート設定
-Public Sub SetReferenceSheet(Ws As Worksheet, Button As Object)
+' take a reference sheet for 1st input
+Friend Sub SetReferenceSheet(Ws As Worksheet, Button As Object)
     Set RefSheet = Ws
     Set RefButton = Button
     Reset
 End Sub
 
-' 初期化
-Public Sub Reset()
+' initialize
+Friend Sub Reset()
     Me.Activate
     Range("A1").Select
     Set PrevCell = ActiveCell
     SetupButton
 End Sub
 
-' 入力に対してベリファイする
+' verify on input event
 Private Sub Worksheet_Change(ByVal Target As Range)
     DoVerify Target
     Set PrevCell = Target
 End Sub
 
-' セルスキップでもベリファイする
+' verify on cursor movement inter cells
 Private Sub Worksheet_SelectionChange(ByVal Target As Range)
     DoVerify PrevCell
     Set PrevCell = Target.Cells(1)
 End Sub
 
-' ベリファイ本体
+' core logic to verify
 Private Sub DoVerify(Target As Range)
+    On Error GoTo TrapAll
+    
     Dim Ra As Range
     Dim SmallerTarget As Range
     
     If RefSheet Is Nothing Then Exit Sub
     If Target Is Nothing Then Exit Sub
-    
-    Debug.Print Now(), Target.Address
     
     If Target.Cells.Count = 1 Then
         VerifySingleCell Target
@@ -267,9 +265,15 @@ Private Sub DoVerify(Target As Range)
             VerifySingleCell Ra
         Next
     End If
+    Exit Sub
+    
+TrapAll:
+    Debug.Print Now(), Target.Address
+    Debug.Print Err.Number, Err.Description
+    SetupButton
 End Sub
 
-' 単一セルのチェック実行
+' verify a single cell
 Private Sub VerifySingleCell(Target As Range)
     If IsSame(Target, Refered(Target)) Then
         RemoveAlarm Target
@@ -278,7 +282,7 @@ Private Sub VerifySingleCell(Target As Range)
     End If
 End Sub
 
-' 参照先セル
+' get the reference cell against the 2nd
 Private Function Refered(x As Range) As Range
     On Error GoTo LostSheet
     Set Refered = RefSheet.Range(x.Address(True, True, xlA1, False))
@@ -290,20 +294,20 @@ LostSheet:
     SetupButton
 End Function
 
-' 警告を出す
+' activate alarm
 Private Sub ShowAlarm(x As Range)
     Const AlarmColor = 3
     If x.Interior.ColorIndex = AlarmColor Then Exit Sub
     x.Interior.ColorIndex = AlarmColor
 End Sub
 
-' 警告解除
+' deactivate alarm
 Private Sub RemoveAlarm(x As Range)
     If x.Interior.ColorIndex = xlColorIndexNone Then Exit Sub
     x.Interior.ColorIndex = xlColorIndexNone
 End Sub
 
-' ボタン設定
+' update toolbar button for reference sheet
 Private Sub SetupButton()
     If IsAlive(RefSheet) Then
         With RefButton
@@ -318,7 +322,7 @@ Private Sub SetupButton()
     End If
 End Sub
 
-' シート生死
+' tell my reference sheet is void or not
 Private Function IsAlive(Ws As Worksheet) As Boolean
     If Ws Is Nothing Then Exit Function
     
@@ -328,7 +332,8 @@ Private Function IsAlive(Ws As Worksheet) As Boolean
     If Err.Number = 0 Then IsAlive = True
 End Function
 
-' 判定関数
+' valid condition
+' --- change this to get a custom result on verification rules.
 Private Function IsSame(x As Range, y As Range) As Boolean
     IsSame = (x.Value = y.Value)
 End Function
