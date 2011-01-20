@@ -5,10 +5,12 @@ Option Explicit
 
 Private PrevCell As Range
 Private RefSheet As Worksheet
+Private RefButton As Office.CommandBarButton
 
 ' 参照シート設定
-Public Sub SetReferenceSheet(Ws As Worksheet)
+Public Sub SetReferenceSheet(Ws As Worksheet, Button As Object)
     Set RefSheet = Ws
+    Set RefButton = Button
     Reset
 End Sub
 
@@ -17,6 +19,7 @@ Public Sub Reset()
     Me.Activate
     Range("A1").Select
     Set PrevCell = ActiveCell
+    SetupButton
 End Sub
 
 ' 入力に対してベリファイする
@@ -63,7 +66,14 @@ End Sub
 
 ' 参照先セル
 Private Function Refered(x As Range) As Range
+    On Error GoTo LostSheet
     Set Refered = RefSheet.Range(x.Address(True, True, xlA1, False))
+    Exit Function
+    
+LostSheet:
+    Set Refered = x
+    Set RefSheet = Nothing
+    SetupButton
 End Function
 
 ' 警告を出す
@@ -78,6 +88,31 @@ Private Sub RemoveAlarm(x As Range)
     If x.Interior.ColorIndex = xlColorIndexNone Then Exit Sub
     x.Interior.ColorIndex = xlColorIndexNone
 End Sub
+
+' ボタン設定
+Private Sub SetupButton()
+    If IsAlive(RefSheet) Then
+        With RefButton
+            .Caption = "[" & RefSheet.Parent.Name & "]" & RefSheet.Name
+            .State = msoButtonDown
+        End With
+    Else
+        With RefButton
+            .Caption = "参照シート無し"
+            .State = msoButtonUp
+        End With
+    End If
+End Sub
+
+' シート生死
+Private Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
 
 ' 判定関数
 Private Function IsSame(x As Range, y As Range) As Boolean
