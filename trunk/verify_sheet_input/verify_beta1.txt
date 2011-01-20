@@ -1,0 +1,87 @@
+'code
+'  name;Verify
+'{{{
+Option Explicit
+
+Private PrevCell As Range
+Private RefSheet As Worksheet
+
+' 参照シート設定
+Public Sub SetReferenceSheet(Ws As Worksheet)
+    Set RefSheet = Ws
+    Reset
+End Sub
+
+' 初期化
+Public Sub Reset()
+    Me.Activate
+    Range("A1").Select
+    Set PrevCell = ActiveCell
+End Sub
+
+' 入力に対してベリファイする
+Private Sub Worksheet_Change(ByVal Target As Range)
+    DoVerify Target
+End Sub
+
+' セルスキップでもベリファイする
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    DoVerify PrevCell
+    Set PrevCell = Target.Cells(1)
+End Sub
+
+' ベリファイ本体
+Private Sub DoVerify(Target As Range)
+    Dim Ra As Range
+    Dim SmallerTarget As Range
+    
+    If RefSheet Is Nothing Then Exit Sub
+    If Target Is Nothing Then Exit Sub
+    
+    Debug.Print Now(), Target.Address
+    
+    If Target.Cells.Count = 1 Then
+        VerifySingleCell Target
+    Else
+        Set SmallerTarget = Intersect(Target, Union(Me.UsedRange, _
+            Me.Range(RefSheet.UsedRange.Address(True, True, xlA1, False))))
+        For Each Ra In SmallerTarget
+            VerifySingleCell Ra
+        Next
+    End If
+End Sub
+
+' 単一セルのチェック実行
+Private Sub VerifySingleCell(Target As Range)
+    If IsSame(Target, Refered(Target)) Then
+        RemoveAlarm Target
+    Else
+        ShowAlarm Target
+    End If
+End Sub
+
+' 参照先セル
+Private Function Refered(x As Range) As Range
+    Set Refered = RefSheet.Range(x.Address(True, True, xlA1, False))
+End Function
+
+' 警告を出す
+Private Sub ShowAlarm(x As Range)
+    Const AlarmColor = 3
+    If x.Interior.ColorIndex = AlarmColor Then Exit Sub
+    x.Interior.ColorIndex = AlarmColor
+End Sub
+
+' 警告解除
+Private Sub RemoveAlarm(x As Range)
+    If x.Interior.ColorIndex = xlColorIndexNone Then Exit Sub
+    x.Interior.ColorIndex = xlColorIndexNone
+End Sub
+
+' 判定関数
+Private Function IsSame(x As Range, y As Range) As Boolean
+    IsSame = (x.Value = y.Value)
+End Function
+'}}}
+
+
