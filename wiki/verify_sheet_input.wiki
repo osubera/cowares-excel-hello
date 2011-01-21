@@ -1,6 +1,8 @@
 #summary verify input for excel against a reference sheet
 #labels Phase-Requirements,Phase-Design,Phase-Deploy
 
+<wiki:toc max_depth="3" />
+
 = Introduction =
 
  * verify input for excel against a reference sheet
