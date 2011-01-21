@@ -456,8 +456,8 @@ End Sub
 
 = Snapshots =
 
-* Excel 2000 toolbar and on time validation
+ * Excel 2000 toolbar and on time validation
 http://1.bp.blogspot.com/_EUW0nrj9XlM/TTjvy4WLpfI/AAAAAAAAABY/pA7q3A3PsBU/s1600/shot4.png
 
-* Excel 2007 ribbon
+ * Excel 2007 ribbon
 http://3.bp.blogspot.com/_EUW0nrj9XlM/TTj-wzNZxYI/AAAAAAAAABg/hZT1ne5FjLA/s1600/shot1.png
