@@ -10,13 +10,13 @@
 
 = Details =
 
- * this is a system for help verifying data entry, a method to entry twice until match.
-    * you can do the 1st entry on an arbitrary sheet. it is called as a reference sheet and maybe a one to distribute.
-    * you must do the 2nd entry on the specific sheet of this system, because it has the vba code.
+ * this is a system for verifying data entry, a method of double entry until match.
+    * you can do the 1st entry on an arbitrary sheet. it is called as a reference sheet and a one to distribute, maybe.
+    * you must do the 2nd entry on the specific sheet in this system, because it has the vba code.
  * it does live verifications on the 2nd entry.
-    * the cell color of the 2nd sheet changes to alarm when you enter a different data agains the 1st one.
-    * an alarm disappears when you correct the failure.
-    * verify not only for entering, but also skipping by tab keys.
+    * the cell color of the 2nd sheet changes to alarm when you enter a different data against the 1st one.
+    * the alarm disappears when you correct the failure.
+    * will verify not only for entering, but also skipping by tab keys.
  * a toolbar or ribbon appears after the book opened.
     * to specify a reference sheet.
 
@@ -33,12 +33,12 @@
 
 = Downloads =
 
- * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=verify_sheet_input downloads]
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=verify_sheet_input downloads / ダウンロード]
 
 = How to use =
 
  # prepare to verify
-    # a toolbar appears when you open the book. (maybe, buttons in the Addin Ribbon for Excel 2007 or later)
+    # a toolbar appears when you open the book. (buttons in the Addin Ribbon for Excel 2007 or later)
     # activate the 1st entry sheet done, and press the `参照シート設定` button.
     # this activates the `Veify` sheet and sets the name of the 1st entry sheet as a reference on the button face.
  # verifying
