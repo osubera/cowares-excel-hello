@@ -1,0 +1,192 @@
+'class
+'  name;HelloNow
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+Public Helper As ToolBarV2
+
+
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("時計", "クリップボードに日時をコピー", "now", Empty, 1, 2, Empty, 1), _
+        Array("入力", "文書に日時を挿入する", "enter", Empty, 1, 2), _
+        Array("...", "設定項目の表示・非表示を切り替える", "customize", Empty, 1, 2, Empty, 1, Empty, 1), _
+        Array("全角", "全角英数を使う", "zenkaku", Empty, 1, 2), _
+        Array("素", "加工せずそのままの日付型データを挿入する", "datatype", Empty, 1, 2), _
+        Array("時計", "時刻書式を選ぶか、新しく入力する", "format", Empty, 4, Empty, 4, Empty, Empty, "gggee年m月d日 aaaa", "gee/m/d aaa", "c", "ddddd", "dddddd", "ttttt", "yyyy/m/d h:nn:ss", "d dd y ww ddd dddd aaa aaaa w", "m mm mmm mmmm oooo q", "g gg ggg e ee yy yyyy", "h hh n nn s ss :/", "AM/PM am/pm A/P a/p AMPM"), _
+        Array("更新", "表示を更新する頻度", "update", Empty, 3, Empty, 1, Empty, Empty, "日", "時", "分", "秒") _
+        )
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("HelloNowMain")
+End Property
+
+
+'=== button data end ===
+'=== default main procedures begin ===
+
+
+' followings need to be public, because they are called from outside by the Helper
+
+Public Sub Menu_now(oAC As Object)
+    CopyNow
+End Sub
+
+Public Sub Menu_enter(oAC As Object)
+    EnterNow
+End Sub
+
+Public Sub Menu_customize(oAC As Object)
+    ToggleCustomize oAC
+End Sub
+
+Public Sub Menu_format(oAC As Object)
+    FormatNow oAC
+End Sub
+
+Public Sub Menu_update(oAC As Object)
+    SetTimer oAC
+End Sub
+
+Public Sub Menu_datatype(oAC As Object)
+    Helper.OnButtonToggle
+End Sub
+
+Public Sub Menu_zenkaku(oAC As Object)
+    Helper.OnButtonToggle
+End Sub
+
+
+'=== default main procedures end ===
+'=== HelloNow implements begin ===
+
+
+Friend Sub TimerTask()
+    UpdateNow
+    SetTimer Helper.GetButton("update")
+End Sub
+
+Friend Sub ShowCustomize(Optional ShowPanel As Boolean = True)
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = Helper.GetButton("customize")
+    If Helper.IsButtonStateOn(oAC) = ShowPanel Then Exit Sub
+    
+    ToggleCustomize oAC
+End Sub
+
+Private Sub UpdateNow()
+    Helper.SetControlText "now", NowFormatted
+End Sub
+
+Private Sub CopyNow()
+    CopyToClipboard NowFormattedWise
+End Sub
+
+Private Sub EnterNow()
+    HandleEnterNow NowFormattedWise
+End Sub
+
+Private Sub FormatNow(oAC As Office.CommandBarControl)
+    Helper.ComboAddHistory oAC
+    UpdateNow
+End Sub
+
+Private Sub ToggleCustomize(oAC As Office.CommandBarControl)
+    Dim Visible As Boolean
+    Dim TagName As Variant
+    Dim Tags As Variant
+    
+    Tags = Array("zenkaku", "format", "update", "datatype")
+    Visible = Helper.ButtonSwitchToggle(oAC)
+    For Each TagName In Tags
+        Helper.SetControlVisible TagName, Visible
+    Next
+End Sub
+
+Private Sub SetTimer(oAC As Office.CommandBarControl)
+    ResetTimer NextUpdateTime(oAC)
+End Sub
+
+Private Function NextUpdateTime(oAC As Office.CommandBarControl) As Variant
+    Dim out As Date
+    Dim outDelay As Date
+    
+    Select Case oAC.ListIndex
+    Case 1  ' next day
+        out = Date + 1
+        outDelay = out + 1
+    Case 2  ' next hour
+        out = Date + TimeSerial(Hour(Now) + 1, 0, 0)
+        outDelay = out + TimeValue("1:00:00")
+    Case 3  ' next minute
+        out = Date + TimeSerial(Hour(Now), Minute(Now) + 1, 0)
+        outDelay = out + TimeValue("0:01:00")
+    Case 4  ' next second
+        out = Now + TimeValue("0:00:01")
+        outDelay = out + TimeValue("0:00:01")
+    End Select
+    
+    NextUpdateTime = Array(out, outDelay)
+End Function
+
+Private Function NowFormattedWise() As Variant
+    Dim out As Variant
+    
+    If Helper.GetControlState("datatype") Then
+        out = Now()
+    ElseIf Helper.GetControlState("zenkaku") Then
+        out = StrConv(NowFormatted, vbWide)
+    Else
+        out = NowFormatted
+    End If
+    
+    NowFormattedWise = out
+End Function
+
+Private Function NowFormatted() As String
+    NowFormatted = Format(Now(), Helper.GetControlText("format"))
+End Function
+
+Private Sub CopyToClipboard(Text As String)
+    Dim Clip As MSForms.DataObject
+    
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Text
+    Clip.PutInClipboard
+    
+    Set Clip = Nothing
+End Sub
+
+
+'=== HelloNow implements end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName "HelloNow"
+    Helper.NewBar vMe
+    
+    TimerTask
+End Sub
+
+Private Sub Class_Terminate()
+    RemoveTimer
+    
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'}}}
+
+

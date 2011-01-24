@@ -1,0 +1,73 @@
+'module
+'  name;HelloNowMain
+'{{{
+Option Compare Database
+Option Explicit
+
+Private T1 As HelloNow
+'Private TimerSubmitted As Variant
+
+
+Public Function ClockInitialize(Optional Reload As Boolean = False)
+    Set T1 = New HelloNow
+    If Reload Then Exit Function
+    
+    T1.ShowCustomize False
+End Function
+
+Public Function ClockTerminate()
+    Set T1 = Nothing
+End Function
+
+
+' this will called by pressing a button
+Public Function BarMain(Optional oWho As Object = Nothing)
+    On Error GoTo OTL
+    T1.Helper.BarMain T1
+    Exit Function
+    
+OTL:
+    ClockInitialize True
+End Function
+
+
+'=== low level i/o begin ===
+' for Microsoft Access
+
+
+Public Sub HandleEnterNow(Data As Variant)
+    SendKeys Data
+End Sub
+
+
+'=== low level i/o end ===
+'=== timer begin ===
+
+
+Public Sub Task()
+    On Error Resume Next
+    T1.TimerTask
+End Sub
+
+Public Sub ResetTimer(NewTime As Variant)
+    Dim IntervalMilSec As Long
+    
+    IntervalMilSec = Int((NewTime(1) - NewTime(0)) * 24 * 60 * 60 * 1000)
+    If IntervalMilSec > 60 * 60 * 1000& Then
+        IntervalMilSec = IntervalMilSec / 24
+    ElseIf IntervalMilSec > 10 * 1000& Then
+        IntervalMilSec = IntervalMilSec / 10
+    End If
+    
+    Form_HelloNowControler.SetTimerInterval IntervalMilSec
+End Sub
+
+Public Sub RemoveTimer()
+    Form_HelloNowControler.SetTimerInterval 0
+End Sub
+
+
+'=== timer end ===
+'}}}
+
+

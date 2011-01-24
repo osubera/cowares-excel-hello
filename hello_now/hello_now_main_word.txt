@@ -1,0 +1,67 @@
+'module
+'  name;HelloNowMain
+'{{{
+Option Explicit
+
+Private T1 As HelloNow
+
+
+Sub ClockInitialize(Optional Reload As Boolean = False)
+    Set T1 = New HelloNow
+    If Reload Then Exit Sub
+    
+    T1.ShowCustomize False
+End Sub
+
+Sub ClockTerminate()
+    Set T1 = Nothing
+End Sub
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    On Error GoTo OTL
+    T1.Helper.BarMain T1
+    Exit Sub
+    
+OTL:
+    ClockInitialize True
+End Sub
+
+
+'=== low level i/o begin ===
+' for Microsoft Word
+
+
+Public Sub HandleEnterNow(Data As Variant)
+    Selection.TypeText Data
+End Sub
+
+
+'=== low level i/o end ===
+'=== timer begin ===
+
+
+Public Sub Task()
+    On Error Resume Next
+    T1.TimerTask
+End Sub
+
+Public Sub ResetTimer(NewTime As Variant)
+    Const TheProc = "ProjectHelloNow.HelloNowMain.Task"
+    Dim TheTime As Date
+
+    TheTime = NewTime(0)
+    Application.OnTime TheTime, TheProc
+End Sub
+
+' this will remove the timer, because Word has only one timer at once.
+Public Sub RemoveTimer()
+    Application.OnTime Now, ""
+End Sub
+
+
+'=== timer end ===
+'}}}
+
+
