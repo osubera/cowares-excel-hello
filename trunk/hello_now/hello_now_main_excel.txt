@@ -1,0 +1,83 @@
+'module
+'  name;HelloNowMain
+'{{{
+Option Explicit
+
+Private T1 As HelloNow
+Private TimerSubmitted As Variant
+
+
+Sub ClockInitialize(Optional Reload As Boolean = False)
+    Set T1 = New HelloNow
+    If Reload Then Exit Sub
+    
+    T1.ShowCustomize False
+End Sub
+
+Sub ClockTerminate()
+    Set T1 = Nothing
+End Sub
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    On Error GoTo OTL
+    T1.Helper.BarMain T1
+    Exit Sub
+    
+OTL:
+    ClockInitialize True
+End Sub
+
+
+'=== low level i/o begin ===
+' for Microsoft Excel
+
+
+Public Sub HandleEnterNow(Data As Variant)
+    On Error Resume Next
+    
+    Selection.Value = Data
+    If Err.Number = 0 Then Exit Sub
+    
+    Err.Clear
+    Selection.Text = Data
+    If Err.Number = 0 Then Exit Sub
+    
+    Err.Clear
+    Selection.Characters.Text = Data
+End Sub
+
+
+'=== low level i/o end ===
+'=== timer begin ===
+
+
+Public Sub Task()
+    On Error Resume Next
+    T1.TimerTask
+End Sub
+
+Public Sub ResetTimer(NewTime As Variant)
+    Const TheProc = "Task"
+    Dim TheTime As Date
+    Dim TheDelay As Date
+
+    TheTime = NewTime(0)
+    TheDelay = NewTime(1)
+    TimerSubmitted = Array(TheTime, TheProc, TheDelay)
+    Application.OnTime TheTime, TheProc, TheDelay
+End Sub
+
+Public Function RemoveTimer() As Boolean
+    If Not IsArray(TimerSubmitted) Then Exit Function
+    On Error Resume Next
+    Application.OnTime TimerSubmitted(0), TimerSubmitted(1), TimerSubmitted(2), False
+    RemoveTimer = True
+End Function
+
+
+'=== timer end ===
+'}}}
+
+

@@ -1,0 +1,25 @@
+'code
+'  name;Form_HelloNowControler
+'{{{
+Option Compare Database
+Option Explicit
+
+Private Sub Form_Close()
+    ClockTerminate
+End Sub
+
+Private Sub Form_Open(Cancel As Integer)
+    DoCmd.Minimize
+    ClockInitialize
+End Sub
+
+Private Sub Form_Timer()
+    Task
+End Sub
+
+Public Function SetTimerInterval(NewInterval As Long)
+    Me.TimerInterval = NewInterval
+End Function
+'}}}
+
+

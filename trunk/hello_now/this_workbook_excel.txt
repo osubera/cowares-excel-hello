@@ -1,0 +1,15 @@
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    ClockTerminate
+End Sub
+
+Private Sub Workbook_Open()
+    ClockInitialize
+End Sub
+'}}}
+
+

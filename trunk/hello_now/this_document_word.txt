@@ -1,0 +1,15 @@
+'code
+'  name;ThisDocument
+'{{{
+Option Explicit
+
+Private Sub Document_Close()
+    ClockTerminate
+End Sub
+
+Private Sub Document_Open()
+    ClockInitialize
+End Sub
+'}}}
+
+
