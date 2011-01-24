@@ -618,16 +618,18 @@ Public Function NormalizeArray(x As Variant) As Variant
         Exit Function
     End If
     
-    ReDim out(0 To U1 - L1)
-    
-    For i = 0 To UBound(out)
-        If U2 = -1 Then
-            out(i) = x(i - L1)
-        Else
-            out(i) = x(L2, i - L1)
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
             ' we pick up the 1st line only
-        End If
-    Next
+        Next
+    End If
     
     NormalizeArray = out
 End Function
