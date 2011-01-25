@@ -58,7 +58,7 @@ macro: HelloNowMain
  # show the clock bar ( or an addin ribbon for office 2007 and above )
     # a toolbar appears when you open the excel book or the word document
     # a toolbar appears when you open the `HelloNowControler` form  in access mdb
-http://4.bp.blogspot.com/_EUW0nrj9XlM/TT4oWhYQHwI/AAAAAAAAABs/OTeZX_oLQmg/s1600/shot3.png
+      http://4.bp.blogspot.com/_EUW0nrj9XlM/TT4oWhYQHwI/AAAAAAAAABs/OTeZX_oLQmg/s1600/shot3.png
  # work with the clock bar
 http://2.bp.blogspot.com/_EUW0nrj9XlM/TT4oX5fCNmI/AAAAAAAAAB0/ogyWE-J9iIY/s1600/shot5.png
     # the time.  a look can be customized.  copy the time formatted into a clipboard by clicking this button.
