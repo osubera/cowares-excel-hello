@@ -60,17 +60,17 @@ macro: HelloNowMain
     # a toolbar appears when you open the `HelloNowControler` form  in access mdb
       http://4.bp.blogspot.com/_EUW0nrj9XlM/TT4oWhYQHwI/AAAAAAAAABs/OTeZX_oLQmg/s1600/shot3.png
  # work with the clock bar
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TT4oX5fCNmI/AAAAAAAAAB0/ogyWE-J9iIY/s1600/shot5.png
+    http://2.bp.blogspot.com/_EUW0nrj9XlM/TT4oX5fCNmI/AAAAAAAAAB0/ogyWE-J9iIY/s1600/shot5.png
     # the time.  a look can be customized.  copy the time formatted into a clipboard by clicking this button.
     # the time formatted is put into active cell, active document, active table, os so on.
     # show or hide buttons for settings, 4th and later.
-http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oYSAvrOI/AAAAAAAAAB4/hcrURVtBLyM/s1600/shot6.png
+      http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oYSAvrOI/AAAAAAAAAB4/hcrURVtBLyM/s1600/shot6.png
     # use zenkaku characters in output when turned on.
     # ignore formats in output when turned on.
     # select a format or enter a new one.  accepts date time format strings.
-http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oY-vFuKI/AAAAAAAAAB8/GBOtDo-8xDw/s1600/shot7.png
+      http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oY-vFuKI/AAAAAAAAAB8/GBOtDo-8xDw/s1600/shot7.png
     # select a cycle of updating the time shown in a bar.
-http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oZdbNhBI/AAAAAAAAACA/RwUS5zOpRnQ/s1600/shot8.png
+      http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oZdbNhBI/AAAAAAAAACA/RwUS5zOpRnQ/s1600/shot8.png
  # customizing
     # you can customize an appearance of the clock bar and initial values at the `ButtonData` property in the `HelloNow` class.
 
@@ -112,15 +112,15 @@ http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oZdbNhBI/AAAAAAAAACA/RwUS5zOpRnQ/s1600/
 = Snapshots =
 
  * Excel 2000, Word 2000, Access 2000 toolbar
-http://2.bp.blogspot.com/_EUW0nrj9XlM/TT4oX5fCNmI/AAAAAAAAAB0/ogyWE-J9iIY/s1600/shot5.png
-http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oYSAvrOI/AAAAAAAAAB4/hcrURVtBLyM/s1600/shot6.png
+    http://2.bp.blogspot.com/_EUW0nrj9XlM/TT4oX5fCNmI/AAAAAAAAAB0/ogyWE-J9iIY/s1600/shot5.png
+    http://1.bp.blogspot.com/_EUW0nrj9XlM/TT4oYSAvrOI/AAAAAAAAAB4/hcrURVtBLyM/s1600/shot6.png
 
  * Access 2000 From
-http://4.bp.blogspot.com/_EUW0nrj9XlM/TT4oWhYQHwI/AAAAAAAAABs/OTeZX_oLQmg/s1600/shot3.png
+    http://4.bp.blogspot.com/_EUW0nrj9XlM/TT4oWhYQHwI/AAAAAAAAABs/OTeZX_oLQmg/s1600/shot3.png
 
  * Access 2000 Macro
-http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oXfFFysI/AAAAAAAAABw/tOBQ9dhKa1g/s1600/shot4.png
+    http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oXfFFysI/AAAAAAAAABw/tOBQ9dhKa1g/s1600/shot4.png
 
  * Excel 2007 ribbon
-http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oWLjZYWI/AAAAAAAAABo/nErWKPgcCF0/s1600/shot1.png
+    http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oWLjZYWI/AAAAAAAAABo/nErWKPgcCF0/s1600/shot1.png
 
