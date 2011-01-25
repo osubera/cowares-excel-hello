@@ -74,8 +74,9 @@ End Property
  # data structure / データ構造
     # an Array of Arrays is almost described by a two-dimensional worksheet cells.
       入れ子の配列は、二次元ワークシートのセルで、ほぼ表現できる。
+        http://3.bp.blogspot.com/_EUW0nrj9XlM/TT584agYXkI/AAAAAAAAACI/Ibgoco6zgeY/s1600/shot1.png
       * each child array is an Array(face name, description, tag, parameter, type, style, width, group, action, initializer,,,)
-        そえｒぞれの子配列は、 Array(表示名, 説明, タグ, パラメータ, タイプ, スタイル, 幅, 区切り, 動作, 初期化,,,) となっている。
+        それぞれの子配列は、 Array(表示名, 説明, タグ, パラメータ, タイプ, スタイル, 幅, 区切り, 動作, 初期化,,,) となっている。
       * the `tag` should be unique because it is used to identify the button and to determin a default function to be called.
         `タグ` には重複しない名前をつける。これはボタンを区別するのに使い、標準で呼び出される関数名を決める。
       * use the `action` to use a special function directly to override the default `BarMain`.
