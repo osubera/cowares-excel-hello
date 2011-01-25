@@ -63,8 +63,8 @@ Public Property Get ButtonParent() As Variant
     ButtonParent = Array("Module1")
 End Property
       }}}
-      * the 1st item is a namespace of main procedure to be called on every button event, so the above example means that a public Module1.BarMain is called on each button action.
-        最初の要素がボタンイベントで呼ばれるプロシジャの名前空間を表している。上の場合、 Module1.BarMain というパブリック関数がボタン動作の都度呼び出される。
+      * the 1st item is a namespace of main procedure to be called on every button event, so the above example means that a public `Module1.BarMain` is called on each button action.
+        最初の要素がボタンイベントで呼ばれるプロシジャの名前空間を表している。上の場合、 `Module1.BarMain` というパブリック関数がボタン動作の都度呼び出される。
  # 1 optional method / １つのメソッドがオプション
     # `BarMain` method
       * this is a special name to be called at first on each button event.
