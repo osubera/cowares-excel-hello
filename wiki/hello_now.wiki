@@ -14,7 +14,7 @@
 
  * shows a toolbar with clock.
     * when the document is opened for Excel and Word.
-    * when the form HelloNowControler is opned for Access.
+    * when the form !HelloNowControler is opned for Access.
  * uses common core parts for Excel, Word and Access.
  * common parts
 {{{
