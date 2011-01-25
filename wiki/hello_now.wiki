@@ -1,0 +1,114 @@
+#summary show a tiny clock on excel, word and access
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * show a tiny clock on excel, word and access
+
+== 概要 ==
+ * エクセル、ワード、アクセスに小さな時計を表示する
+
+= Details =
+
+ * shows a toolbar with clock.
+    * when the document is opened for Excel and Word.
+    * when the form HelloNowControler is opned for Access.
+ * uses common core parts for Excel, Word and Access.
+ * common parts
+{{{
+class: HelloNow
+  core clock functionals
+class: ToolBarV2
+  tool bar helper
+}}}
+ * for Excel
+{{{
+module: HelloNowMain
+  callback and low level functions to work with excel
+code: ThisWorkbook
+  handles events on open and close
+}}}
+ * for Word
+{{{
+module: HelloNowMain
+  callback and low level functions to work with word
+code: ThisDocument
+  handles events on open and close
+}}}
+ * for Access
+{{{
+module: HelloNowMain
+  callback and low level functions to work with access
+code: Form_HelloNowControler
+  control the clock bar on opening, closing and updating
+macro: HelloNowMain
+  callback from toolbar
+}}}
+
+
+== 説明 ==
+ * 
+
+= How to use =
+
+ # show the clock bar ( or an addin ribbon for office 2007 and above )
+    # a toolbar appears when you open the excel book or the word document
+    # a toolbar appears when you open the `HelloNowControler` form  in access mdb
+ # work with the clock bar
+    # the time.  a look can be customized.  copy the time formatted into a clipboard by clicking this button.
+    # the time formatted is put into active cell, active document, active table, os so on.
+    # show or hide buttons for settings, 4th and later.
+    # use zenkaku characters in output when turned on.
+    # ignore formats in output when turned on.
+    # select a format or enter a new one.  accepts date time format strings.
+    # select a cycle of updating the time shown in a bar.
+ # customizing
+    # you can customize an appearance of the clock bar and initial values at the `ButtonData` property in the `HelloNow` class.
+
+== 使い方 ==
+ # 
+
+= Downloads =
+
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_now downloads]
+
+= Code =
+
+=== Application for Excel ===
+
+{{{
+}}}
+
+=== Common Code ===
+
+{{{
+}}}
+
+=== Code for Excel ===
+
+{{{
+}}}
+
+=== Code for Word ===
+
+{{{
+}}}
+
+=== Code for Access ===
+
+{{{
+}}}
+
+
+= Snapshots =
+
+ * Excel 2000, Word 2000, Access 2000 toolbar
+
+ * Access 2000 From
+
+ * Access 2000 Macro
+
+ * Excel 2007 ribbon
+
