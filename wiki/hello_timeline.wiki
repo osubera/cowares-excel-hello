@@ -1,0 +1,4122 @@
+#summary a homing worksheet along a timeline
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * a homing worksheet along a timeline
+
+== 概要 ==
+ * スケジュールを自動追尾するエクセルワークシート
+
+= Details =
+
+ * add your excel worksheet an automatic cursor that moves along your schedules in the sheet.
+ * a unit of time is flexible.
+ * you can use many worksheets in a single workbook if you want.
+
+== 説明 ==
+ * エクセルワークシートのカーソルを、スケジュールに沿って自動で移動する。
+ * 時間間隔は自由にできる。
+ * 必要なら１つのブックに何枚ものワークシートを置いてよい。
+
+= How to use =
+
+ # circuit breaker
+    # do `Sheet1.Break = True` to stop the automation for maintenances.
+    # do `Sheet1.Break = False` to enable the automation again, or re-open the book.
+    # this function is for a developer and is not for a daily use.
+ # setup the timeline
+    # the timeline of a virtical sheet is located at `Column A` starting at `A1` .
+    # put a full date time value in each cell increasingly.
+ # the cursor is automated when
+    * the workbook is opened.
+    * the workbook is activated.
+    * the worksheet is activated.
+ # the cursor is paused when
+    * the workbook is closed.
+    * the workbook is deactivated.
+    * the worksheet is deactivated.
+
+== 使い方 ==
+ # 動作の停止
+    # `Sheet1.Break = True` を行えば、メンテナンス時に自動追尾を停止できる。
+    # `Sheet1.Break = False` を行うか、ブックを開きなおすと自動追尾が再開する。
+    # この機能は開発者向けで、日常的に使うことは想定していない。
+ # スケジュールの設定
+    # 縦型スケジュールシートでは、日時を `A列` に `A1` から入れる。
+    # 日時は各セルに昇順で入れる。
+ # カーソルが自動追尾するのは、
+    * ワークブックが開いたとき。
+    * ワークブックが前面になったとき。
+    * ワークシートが前面になったとき。
+ # カーソルの自動追尾が止まるのは、
+    * ワークブックが閉じたとき。
+    * ワークブックが後面になったとき。
+    * ワークシートが後面になったとき。
+
+
+= Code =
+
+=== each Worksheet ===
+
+{{{
+'code
+'  name;
+'{{{
+Option Explicit
+
+Private Halt As Boolean             ' for events
+Private CircuitBreaker As Boolean   ' for human
+Private TimerProc As String
+Private LastRow As Long     ' only used on closing this book
+
+Public Property Get Break() As Boolean
+    Break = CircuitBreaker
+End Property
+
+Public Property Let Break(TrueToStop As Boolean)
+    CircuitBreaker = TrueToStop
+    If TrueToStop Then RemoveTimer LastRow
+End Property
+
+Public Property Get Pause() As Boolean
+    Pause = Halt
+End Property
+
+Public Property Let Pause(TrueToPause As Boolean)
+    Halt = TrueToPause
+    If TrueToPause Then
+        RemoveTimer LastRow
+    Else
+        Me.Activate ' this is safe, because the event `activated` is not raised if already active.
+        Continue
+    End If
+End Property
+
+Friend Sub Start()
+    Break = False
+    Pause = False
+End Sub
+
+Friend Sub PrepareClose()
+    Break = True
+End Sub
+
+Friend Sub Continue()
+    If Halt Or CircuitBreaker Then Exit Sub
+    
+    Dim r As Long
+    If TimerProc = "" Then TimerProc = Me.CodeName & ".Continue"
+    r = Task
+    LastRow = r
+    Application.OnTime GetTheTime(r + 1), TimerProc
+End Sub
+
+Private Sub RemoveTimer(r As Long)
+    If TimerProc = "" Then Exit Sub
+    On Error Resume Next
+    Application.OnTime GetTheTime(r + 1), TimerProc, Schedule:=False
+End Sub
+
+Private Function GetTheTime(r As Long) As Date
+    GetTheTime = Cells(r, 1).Value
+End Function
+
+Private Function LocateNow() As Long
+    Dim Ra As Range
+    Dim r As Long
+    Dim NowMin As Double
+    Dim NowMax As Double
+    
+    Set Ra = Range("A1:A" & Cells.SpecialCells(xlCellTypeLastCell).Row)
+    r = ActiveCell.Row
+    
+    If Ra.Count = 1 Then
+        r = 1
+        GoTo DONE
+    End If
+    
+    If r > Ra.Count Then r = Ra.Count - 1
+    
+    NowMin = CDbl(Now()) - 0.000001   ' -0.08sec
+    NowMax = CDbl(Now()) + 0.000001   ' +0.08sec
+    
+    Do While Ra(r).Value > NowMin
+        If r = 1 Then GoTo DONE
+        r = r - 1
+    Loop
+    
+    Do While Ra(r + 1).Value < NowMax
+        If r = Ra.Count Then GoTo DONE
+        r = r + 1
+    Loop
+    
+DONE:
+    If r = Ra.Count Then Halt = True
+    Set Ra = Nothing
+    LocateNow = r
+End Function
+
+Private Function Task() As Long
+    On Error Resume Next
+    ' Range.Select may fail when the book or the sheet is not active
+    Dim r As Long
+    
+    r = LocateNow
+    With Cells(r, 1)
+        .Select
+        .Show
+    End With
+    
+    Task = r
+End Function
+
+Private Sub Worksheet_Activate()
+    Pause = False
+End Sub
+
+Private Sub Worksheet_Deactivate()
+    Pause = True
+End Sub
+'}}}
+
+
+}}}
+
+=== the Workbook ===
+
+* this is an example for a single timeline worksheet as Sheet1.
+    これは、 Sheet1 という１つのスケジュールシートがある時の見本。
+    
+{{{
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    Sheet1.Start
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Sheet1.PrepareClose
+End Sub
+
+Private Sub Workbook_Activate()
+    Sheet1.Pause = False
+End Sub
+
+Private Sub Workbook_Deactivate()
+    Sheet1.Pause = True
+End Sub
+'}}}
+
+
+}}}
+
+=== complete Workbook with 2 Worksheet example ===
+
+{{{
+'workbook
+'  name;hello_timeline.xls
+
+'require
+
+'worksheet
+'  name;Sheet2
+
+'cells-formula
+'  address;A1:A365
+'         ;40544
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+'         ;=R[-1]C+1
+
+'cells-numberformat
+'  address;A1:A365
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+'         ;m"月"d"日" (aaa)
+
+'worksheet
+'  name;Sheet1
+
+'cells-formula
+'  address;A1:A1440
+'         ;40570
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+'         ;=R[-1]C+TIMEVALUE("0:01:00")
+
+'cells-numberformat
+'  address;A1:A1440
+'         ;m/d/yyyy
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+'         ;h"時"m"分" AM/PM
+
+'code
+'  name;Sheet1
+'{{{
+Option Explicit
+
+Private Halt As Boolean             ' for events
+Private CircuitBreaker As Boolean   ' for human
+Private TimerProc As String
+Private LastRow As Long     ' only used on closing this book
+
+Public Property Get Break() As Boolean
+    Break = CircuitBreaker
+End Property
+
+Public Property Let Break(TrueToStop As Boolean)
+    CircuitBreaker = TrueToStop
+    If TrueToStop Then RemoveTimer LastRow
+End Property
+
+Public Property Get Pause() As Boolean
+    Pause = Halt
+End Property
+
+Public Property Let Pause(TrueToPause As Boolean)
+    Halt = TrueToPause
+    If TrueToPause Then
+        RemoveTimer LastRow
+    Else
+        Me.Activate ' this is safe, because the event `activated` is not raised if already active.
+        Continue
+    End If
+End Property
+
+Friend Sub Start()
+    Break = False
+    Pause = False
+End Sub
+
+Friend Sub PrepareClose()
+    Break = True
+End Sub
+
+Friend Sub Continue()
+    If Halt Or CircuitBreaker Then Exit Sub
+    
+    Dim r As Long
+    If TimerProc = "" Then TimerProc = Me.CodeName & ".Continue"
+    r = Task
+    LastRow = r
+    Application.OnTime GetTheTime(r + 1), TimerProc
+End Sub
+
+Private Sub RemoveTimer(r As Long)
+    If TimerProc = "" Then Exit Sub
+    On Error Resume Next
+    Application.OnTime GetTheTime(r + 1), TimerProc, Schedule:=False
+End Sub
+
+Private Function GetTheTime(r As Long) As Date
+    GetTheTime = Cells(r, 1).Value
+End Function
+
+Private Function LocateNow() As Long
+    Dim Ra As Range
+    Dim r As Long
+    Dim NowMin As Double
+    Dim NowMax As Double
+    
+    Set Ra = Range("A1:A" & Cells.SpecialCells(xlCellTypeLastCell).Row)
+    r = ActiveCell.Row
+    
+    If Ra.Count = 1 Then
+        r = 1
+        GoTo DONE
+    End If
+    
+    If r > Ra.Count Then r = Ra.Count - 1
+    
+    NowMin = CDbl(Now()) - 0.000001   ' -0.08sec
+    NowMax = CDbl(Now()) + 0.000001   ' +0.08sec
+    
+    Do While Ra(r).Value > NowMin
+        If r = 1 Then GoTo DONE
+        r = r - 1
+    Loop
+    
+    Do While Ra(r + 1).Value < NowMax
+        If r = Ra.Count Then GoTo DONE
+        r = r + 1
+    Loop
+    
+DONE:
+    If r = Ra.Count Then Halt = True
+    Set Ra = Nothing
+    LocateNow = r
+End Function
+
+Private Function Task() As Long
+    On Error Resume Next
+    ' Range.Select may fail when the book or the sheet is not active
+    Dim r As Long
+    
+    r = LocateNow
+    With Cells(r, 1)
+        .Select
+        .Show
+    End With
+    
+    Task = r
+End Function
+
+Private Sub Worksheet_Activate()
+    Pause = False
+End Sub
+
+Private Sub Worksheet_Deactivate()
+    Pause = True
+End Sub
+'}}}
+
+'code
+'  name;Sheet2
+'{{{
+Option Explicit
+
+Private Halt As Boolean             ' for events
+Private CircuitBreaker As Boolean   ' for human
+Private TimerProc As String
+Private LastRow As Long     ' only used on closing this book
+
+Public Property Get Break() As Boolean
+    Break = CircuitBreaker
+End Property
+
+Public Property Let Break(TrueToStop As Boolean)
+    CircuitBreaker = TrueToStop
+    If TrueToStop Then RemoveTimer LastRow
+End Property
+
+Public Property Get Pause() As Boolean
+    Pause = Halt
+End Property
+
+Public Property Let Pause(TrueToPause As Boolean)
+    Halt = TrueToPause
+    If TrueToPause Then
+        RemoveTimer LastRow
+    Else
+        Me.Activate ' this is safe, because the event `activated` is not raised if already active.
+        Continue
+    End If
+End Property
+
+Friend Sub Start()
+    Break = False
+    Pause = False
+End Sub
+
+Friend Sub PrepareClose()
+    Break = True
+End Sub
+
+Friend Sub Continue()
+    If Halt Or CircuitBreaker Then Exit Sub
+    
+    Dim r As Long
+    If TimerProc = "" Then TimerProc = Me.CodeName & ".Continue"
+    r = Task
+    LastRow = r
+    Application.OnTime GetTheTime(r + 1), TimerProc
+End Sub
+
+Private Sub RemoveTimer(r As Long)
+    If TimerProc = "" Then Exit Sub
+    On Error Resume Next
+    Application.OnTime GetTheTime(r + 1), TimerProc, Schedule:=False
+End Sub
+
+Private Function GetTheTime(r As Long) As Date
+    GetTheTime = Cells(r, 1).Value
+End Function
+
+Private Function LocateNow() As Long
+    Dim Ra As Range
+    Dim r As Long
+    Dim NowMin As Double
+    Dim NowMax As Double
+    
+    Set Ra = Range("A1:A" & Cells.SpecialCells(xlCellTypeLastCell).Row)
+    r = ActiveCell.Row
+    
+    If Ra.Count = 1 Then
+        r = 1
+        GoTo DONE
+    End If
+    
+    If r > Ra.Count Then r = Ra.Count - 1
+    
+    NowMin = CDbl(Now()) - 0.000001   ' -0.08sec
+    NowMax = CDbl(Now()) + 0.000001   ' +0.08sec
+    
+    Do While Ra(r).Value > NowMin
+        If r = 1 Then GoTo DONE
+        r = r - 1
+    Loop
+    
+    Do While Ra(r + 1).Value < NowMax
+        If r = Ra.Count Then GoTo DONE
+        r = r + 1
+    Loop
+    
+DONE:
+    If r = Ra.Count Then Halt = True
+    Set Ra = Nothing
+    LocateNow = r
+End Function
+
+Private Function Task() As Long
+    On Error Resume Next
+    ' Range.Select may fail when the book or the sheet is not active
+    Dim r As Long
+    
+    r = LocateNow
+    With Cells(r, 1)
+        .Select
+        .Show
+    End With
+    
+    Task = r
+End Function
+
+Private Sub Worksheet_Activate()
+    Pause = False
+End Sub
+
+Private Sub Worksheet_Deactivate()
+    Pause = True
+End Sub
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    Sheet1.Start
+    Sheet2.Start
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Sheet1.PrepareClose
+    Sheet2.PrepareClose
+End Sub
+
+Private Sub Workbook_Activate()
+    Sheet1.Pause = False
+    Sheet2.Pause = False
+End Sub
+
+Private Sub Workbook_Deactivate()
+    Sheet1.Pause = True
+    Sheet2.Pause = True
+End Sub
+'}}}
+
+
+}}}
