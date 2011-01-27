@@ -4120,3 +4120,940 @@ End Sub
 
 
 }}}
+
+
+=== Horizontal Worksheet ===
+
+* a code for the horizontal timeline.
+    横方向のスケジュール用コード。
+    
+{{{
+'code
+'  name;
+'{{{
+Option Explicit
+
+Private Halt As Boolean             ' for events
+Private CircuitBreaker As Boolean   ' for human
+Private TimerProc As String
+Private LastRow As Long     ' only used on closing this book
+
+Public Property Get Break() As Boolean
+    Break = CircuitBreaker
+End Property
+
+Public Property Let Break(TrueToStop As Boolean)
+    CircuitBreaker = TrueToStop
+    If TrueToStop Then RemoveTimer LastRow
+End Property
+
+Public Property Get Pause() As Boolean
+    Pause = Halt
+End Property
+
+Public Property Let Pause(TrueToPause As Boolean)
+    Halt = TrueToPause
+    If TrueToPause Then
+        RemoveTimer LastRow
+    Else
+        Me.Activate ' this is safe, because the event `activated` is not raised if already active.
+        Continue
+    End If
+End Property
+
+Friend Sub Start()
+    Break = False
+    Pause = False
+End Sub
+
+Friend Sub PrepareClose()
+    Break = True
+End Sub
+
+Friend Sub Continue()
+    If Halt Or CircuitBreaker Then Exit Sub
+    
+    Dim r As Long
+    If TimerProc = "" Then TimerProc = Me.CodeName & ".Continue"
+    r = Task
+    LastRow = r
+    Application.OnTime GetTheTime(r + 1), TimerProc
+End Sub
+
+Private Sub RemoveTimer(r As Long)
+    If TimerProc = "" Then Exit Sub
+    On Error Resume Next
+    Application.OnTime GetTheTime(r + 1), TimerProc, Schedule:=False
+End Sub
+
+Private Function GetTheTime(c As Long) As Date
+    GetTheTime = Cells(1, c).Value
+End Function
+
+Private Function LocateNow() As Long
+    Dim Ra As Range
+    Dim c As Long
+    Dim NowMin As Double
+    Dim NowMax As Double
+    
+    Set Ra = Range("A1", Cells.SpecialCells(xlCellTypeLastCell)).Rows(1).Cells
+    c = ActiveCell.Column
+    
+    If Ra.Count = 1 Then
+        c = 1
+        GoTo DONE
+    End If
+    
+    If c > Ra.Count Then c = Ra.Count - 1
+    
+    NowMin = CDbl(Now()) - 0.000001   ' -0.08sec
+    NowMax = CDbl(Now()) + 0.000001   ' +0.08sec
+    
+    Do While Ra(c).Value > NowMin
+        If c = 1 Then GoTo DONE
+        c = c - 1
+    Loop
+    
+    Do While Ra(c + 1).Value < NowMax
+        If c = Ra.Count Then GoTo DONE
+        c = c + 1
+    Loop
+    
+DONE:
+    If c = Ra.Count Then Halt = True
+    Set Ra = Nothing
+    LocateNow = c
+End Function
+
+Private Function Task() As Long
+    On Error Resume Next
+    ' Range.Select may fail when the book or the sheet is not active
+    Dim c As Long
+    
+    c = LocateNow
+    With Cells(1, c)
+        .Select
+        .Show
+    End With
+    
+    Task = c
+End Function
+
+Private Sub Worksheet_Activate()
+    Pause = False
+End Sub
+
+Private Sub Worksheet_Deactivate()
+    Pause = True
+End Sub
+'}}}
+
+
+}}}
+
+
+=== 横スクロールの見本、日計の工程表 ===
+
+ * ブックを開くと必ず当日欄が表示される。
+ * 月間作業スケジュールなので、先頭セル `A1` の日付を当月に変更しないと、たぶん動作確認できない。
+
+{{{
+'workbook
+'  name;hello_timeline_h.xls
+
+'require
+
+'worksheet
+'  name;Sheet1
+
+'cells-formula
+'  address;A1:AF10
+'         ;40544
+'         ;=RC[-1]+TIMEVALUE("0:00:01")
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;=RC[-1]+1
+'         ;
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;=R[-1]C
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;仮設工事
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;仮設工事
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;型枠
+'         ;
+'         ;
+'         ;
+'         ;基礎型枠
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;B1階型枠
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;
+'         ;
+'         ;スラブ配筋
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;B1階スラブ配筋
+'         ;〓
+'         ;
+'         ;
+'         ;B1階柱壁配筋
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1階梁スラブ配筋
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;
+'         ;
+'         ;コン打設
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;B1階スラブコン打設
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;B1階立上りコン打設
+'         ;
+'         ;
+'         ;資材搬入
+'         ;
+'         ;
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;〓
+'         ;
+'         ;〓
+'         ;特殊車両
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;生コン
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;生コン
+'         ;
+'         ;
+'         ;検査
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;配筋検査
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;配筋検査
+'         ;
+'         ;
+'         ;
+
+'cells-numberformat
+'  address;A1:AF10
+'         ;m"月""工""程""表"
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;d
+'         ;"第"#"週" _ ;;
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;aaa
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'code
+'  name;Sheet1
+'{{{
+Option Explicit
+
+Private Halt As Boolean             ' for events
+Private CircuitBreaker As Boolean   ' for human
+Private TimerProc As String
+Private LastRow As Long     ' only used on closing this book
+
+Public Property Get Break() As Boolean
+    Break = CircuitBreaker
+End Property
+
+Public Property Let Break(TrueToStop As Boolean)
+    CircuitBreaker = TrueToStop
+    If TrueToStop Then RemoveTimer LastRow
+End Property
+
+Public Property Get Pause() As Boolean
+    Pause = Halt
+End Property
+
+Public Property Let Pause(TrueToPause As Boolean)
+    Halt = TrueToPause
+    If TrueToPause Then
+        RemoveTimer LastRow
+    Else
+        Me.Activate ' this is safe, because the event `activated` is not raised if already active.
+        Continue
+    End If
+End Property
+
+Friend Sub Start()
+    Break = False
+    Pause = False
+End Sub
+
+Friend Sub PrepareClose()
+    Break = True
+End Sub
+
+Friend Sub Continue()
+    If Halt Or CircuitBreaker Then Exit Sub
+    
+    Dim r As Long
+    If TimerProc = "" Then TimerProc = Me.CodeName & ".Continue"
+    r = Task
+    LastRow = r
+    Application.OnTime GetTheTime(r + 1), TimerProc
+End Sub
+
+Private Sub RemoveTimer(r As Long)
+    If TimerProc = "" Then Exit Sub
+    On Error Resume Next
+    Application.OnTime GetTheTime(r + 1), TimerProc, Schedule:=False
+End Sub
+
+Private Function GetTheTime(c As Long) As Date
+    GetTheTime = Cells(1, c).Value
+End Function
+
+Private Function LocateNow() As Long
+    Dim Ra As Range
+    Dim c As Long
+    Dim NowMin As Double
+    Dim NowMax As Double
+    
+    Set Ra = Range("A1", Cells.SpecialCells(xlCellTypeLastCell)).Rows(1).Cells
+    c = ActiveCell.Column
+    
+    If Ra.Count = 1 Then
+        c = 1
+        GoTo DONE
+    End If
+    
+    If c > Ra.Count Then c = Ra.Count - 1
+    
+    NowMin = CDbl(Now()) - 0.000001   ' -0.08sec
+    NowMax = CDbl(Now()) + 0.000001   ' +0.08sec
+    
+    Do While Ra(c).Value > NowMin
+        If c = 1 Then GoTo DONE
+        c = c - 1
+    Loop
+    
+    Do While Ra(c + 1).Value < NowMax
+        If c = Ra.Count Then GoTo DONE
+        c = c + 1
+    Loop
+    
+DONE:
+    If c = Ra.Count Then Halt = True
+    Set Ra = Nothing
+    LocateNow = c
+End Function
+
+Private Function Task() As Long
+    On Error Resume Next
+    ' Range.Select may fail when the book or the sheet is not active
+    Dim c As Long
+    
+    c = LocateNow
+    With Cells(1, c)
+        .Select
+        .Show
+    End With
+    
+    Task = c
+End Function
+
+Private Sub Worksheet_Activate()
+    Pause = False
+End Sub
+
+Private Sub Worksheet_Deactivate()
+    Pause = True
+End Sub
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    Sheet1.Start
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Sheet1.PrepareClose
+End Sub
+
+Private Sub Workbook_Activate()
+    Sheet1.Pause = False
+End Sub
+
+Private Sub Workbook_Deactivate()
+    Sheet1.Pause = True
+End Sub
+'}}}
+
+
+}}}
+
