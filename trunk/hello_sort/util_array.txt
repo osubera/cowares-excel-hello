@@ -1,0 +1,476 @@
+'module
+'  name;UtilArray
+'{{{
+Option Explicit
+
+' a=Data(0) : b=Data(1) : c=Data(2) : ,,,
+Public Sub ArraytoVariables(Data As Variant, ByVal Offset As Long _
+        , Optional ByRef a As Variant _
+        , Optional ByRef b As Variant _
+        , Optional ByRef c As Variant _
+        , Optional ByRef d As Variant _
+        , Optional ByRef e As Variant _
+        , Optional ByRef f As Variant _
+        , Optional ByRef g As Variant _
+        , Optional ByRef h As Variant _
+        , Optional ByRef i As Variant _
+        , Optional ByRef j As Variant _
+        , Optional ByRef k As Variant _
+        , Optional ByRef l As Variant _
+        , Optional ByRef m As Variant _
+        , Optional ByRef n As Variant _
+        , Optional ByRef o As Variant _
+        , Optional ByRef p As Variant _
+        , Optional ByRef q As Variant _
+        , Optional ByRef r As Variant _
+        , Optional ByRef s As Variant _
+        , Optional ByRef t As Variant _
+        , Optional ByRef u As Variant _
+        , Optional ByRef V As Variant _
+        , Optional ByRef w As Variant _
+        , Optional ByRef x As Variant, Optional ByRef y As Variant, Optional ByRef Z As Variant)
+    Dim Arg As Variant
+    
+    If Offset >= LBound(Data) Then
+        If IsMissing(a) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        a = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(b) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        b = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(c) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        c = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(d) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        d = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(e) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        e = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(f) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        f = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(g) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        g = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(h) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        h = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(i) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        i = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(j) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        j = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(k) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        k = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(l) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        l = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(m) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        m = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(n) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        n = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(o) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        o = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(p) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        p = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(q) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        q = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(r) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        r = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(s) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        s = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(t) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        t = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(u) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        u = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(V) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        V = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(w) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        w = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(x) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        x = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(y) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        y = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(Z) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        Z = Data(Offset)
+    End If
+End Sub
+
+' "abcd" -> ("a","b","cd")
+Public Function StringToArray(Text As String, Optional ByVal Unit As Long = 1, _
+                            Optional ByVal Size As Long = -1) As String()
+    Dim out() As String
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    If Unit <= 0 Then Unit = 1
+    If Size = -1 Then
+        Size = Length / Unit
+        If Length Mod Unit > 0 Then Size = Size + 1
+    End If
+    
+    ReDim out(0 To Size - 1)
+    For i = 0 To UBound(out) - 1
+        out(i) = Mid(Text, Unit * i + 1, Unit)
+    Next
+    i = UBound(out)
+    out(i) = Mid(Text, Unit * i + 1)
+    
+    StringToArray = out
+End Function
+
+' ("a","b","cd") -> "abcd"
+Public Function ArrayToString(Texts As Variant) As String
+    Dim Text As Variant
+    Dim out As String
+    
+    out = ""
+    For Each Text In Texts
+        out = out & Text
+    Next
+    
+    ArrayToString = out
+End Function
+
+' "&;[]," -> "&0;&1;&2;&3;&4;"
+Public Function EscapeChar(Brackets As Variant, Data As Variant) As String
+    Dim EscapeBegin As String
+    Dim EscapeEnd As String
+    Dim i As Long
+    Dim j As Long
+    Dim pan As Variant
+    Dim out As String
+    Dim LastPos As Long
+    Dim CurrPos As Long
+    
+    EscapeBegin = Brackets(0)
+    EscapeEnd = Brackets(1)
+    
+    pan = Empty
+    For i = 1 To Len(Data)
+        For j = 0 To UBound(Brackets)
+            If Mid(Data, i, 1) = Brackets(j) Then pan = Array(i, j, pan)
+        Next
+    Next
+    
+    out = ""
+    LastPos = Len(Data)
+    CurrPos = LastPos
+    Do Until IsEmpty(pan)
+        CurrPos = pan(0)
+        out = EscapeBegin & CStr(pan(1)) & EscapeEnd & Mid(Data, CurrPos + 1, LastPos - CurrPos) & out
+        LastPos = CurrPos - 1
+        pan = pan(2)
+    Loop
+    out = Left(Data, LastPos) & out
+    
+    EscapeChar = out
+End Function
+
+' "&0;&1;&2;&3;&4;" -> "&;[],"
+Public Function UnEscapeChar(Brackets As Variant, Data As Variant) As String
+    Dim EscapeBegin As String
+    Dim EscapeEnd As String
+    Dim i As Long
+    Dim out As String
+    
+    EscapeBegin = Brackets(0)
+    EscapeEnd = Brackets(1)
+    
+    out = Data
+    For i = UBound(Brackets) To 0 Step -1
+        out = Replace(out, EscapeBegin & i & EscapeEnd, CStr(Brackets(i)))
+    Next
+    
+    UnEscapeChar = out
+End Function
+
+' Array(1,Array(2,"3"),"[4,5]") -> "[1,[2,3,],&2;4&4;5&3;,]"
+Public Function EncVariant(Data As Variant, _
+        Optional ByVal Brackets As String = "&;[],") As String
+    Dim x As Variant
+    Dim out As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    Dim Delimiter As String
+    Dim Bra As Variant
+    
+    Bra = StringToArray(Brackets, 1, 5)
+    ArrayBegin = Bra(2)
+    ArrayEnd = Bra(3)
+    Delimiter = Bra(4)
+    
+    If IsError(Data) Or IsEmpty(Data) Then
+        ' IsError(Array(1,,2)(1)) = True
+        ' IsEmpty(Array(1,Empty,2)(1)) = True
+        out = ""
+    ElseIf IsArray(Data) Then
+        out = ArrayBegin
+        For Each x In Data
+            out = out & EncVariant(x, Brackets) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        out = EscapeChar(Bra, TypeName(Data))
+    Else
+        out = EscapeChar(Bra, Data)
+    End If
+    
+    EncVariant = out
+End Function
+
+' "[1,[2,3,],&2;4&4;5&3;,]" -> Array(1,Array(2,"3"),"[4,5]")
+Public Function DecVariant(ByVal Text As String, _
+        Optional ByVal Brackets As String = "&;[],") As Variant
+    Dim Evaluated As Variant
+    EvalAfter Evaluated, Text, StringToArray(Brackets)
+    DecVariant = Evaluated(0)
+End Function
+
+Private Function SkipToNextComma(ByRef Text As String, Tags As Variant) As Boolean
+    Dim Comma As String
+    Dim FoundAt As Long
+    
+    Comma = Tags(4)
+    FoundAt = InStr(1, Text, Comma, vbTextCompare)
+    If FoundAt > 0 Then
+        Text = Mid(Text, FoundAt + Len(Comma))
+        SkipToNextComma = True
+    End If
+End Function
+
+Private Function EvalComma(ByRef BeforeTag As String, _
+                ByRef Text As String, Tags As Variant) As Long
+    Dim i As Long
+    Dim At As Long
+    Dim AtFirst As Long
+    Dim out As Long
+    
+    out = -1
+    AtFirst = Len(Text) + 1
+    For i = 2 To UBound(Tags)
+        If Tags(i) = "" Then GoTo Ignore
+        At = InStr(1, Text, CStr(Tags(i)), vbBinaryCompare)
+        If At = 0 Then GoTo Ignore
+        If At >= AtFirst Then GoTo Ignore
+        
+        AtFirst = At
+        out = i
+Ignore:
+    Next
+    
+    BeforeTag = Left(Text, AtFirst - 1)
+    Text = Right(Text, Len(Text) - AtFirst + 1 - Len(Tags(out)))
+    
+    EvalComma = out
+End Function
+
+Private Function EvalBefore(ByRef Evaluated As Variant, Text As String, _
+        Tags As Variant) As Boolean
+    Evaluated = Array(UnEscapeChar(Tags, Text), Evaluated)
+End Function
+
+Private Function EvalAfter(ByRef Evaluated As Variant, ByRef Text As String, _
+        Tags As Variant) As Boolean
+    Dim BeforeTag As String
+    Dim MyEvaluated As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Dim out() As Variant
+    
+    Counter = 0
+    
+    Do Until Text = ""
+        Select Case EvalComma(BeforeTag, Text, Tags)
+        Case 2  'new child
+            ' ignore BeforeTag
+            MyEvaluated = Empty
+            If EvalAfter(MyEvaluated, Text, Tags) Then Evaluated = Array(MyEvaluated, Evaluated)
+            Counter = Counter + 1
+            SkipToNextComma Text, Tags
+        Case 4  'next
+            EvalBefore Evaluated, BeforeTag, Tags
+            Counter = Counter + 1
+        'Case 3  'end
+        Case Else   'end or not found
+            ' ignore BeforeTag and AfterTag
+            Exit Do
+        End Select
+    Loop
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = Evaluated(0)
+            Evaluated = Evaluated(1)
+        Next
+    End If
+    
+    Evaluated = out
+    EvalAfter = Not IsEmpty(Evaluated)
+End Function
+
+' Array(a,b,c,d,e) -> Array(Array(a,b),Array(c,d),Array(e,Empty))
+Public Function FoldArray(x As Variant, Optional ByVal Unit As Long = 1) As Variant
+    Dim Length As Long
+    Dim LenExt As Long
+    Dim LenExtPlus As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    If Not IsArray(x) Then
+        FoldArray = FoldArray(Array(x), Unit)
+        Exit Function
+    End If
+    
+    Length = UBound(x) + 1
+    If Unit < 1 Then Unit = 1
+    If Unit > Length Then Unit = Length
+    
+    LenExt = Int(Length / Unit)
+    LenExtPlus = IIf(Length Mod Unit > 0, 1, 0)
+    
+    ReDim out(0 To LenExt + LenExtPlus - 1)
+    ReDim item(0 To Unit - 1)
+    
+    For j = 0 To LenExt - 1
+        For i = 0 To Unit - 1
+            item(i) = x(i + j * Unit)
+        Next
+        out(j) = item
+    Next
+    If LenExtPlus = 1 Then
+        For i = 0 To (Length Mod Unit) - 1
+            item(i) = x(i + LenExt * Unit)
+        Next
+        For i = (Length Mod Unit) To Unit - 1
+            item(i) = Empty
+        Next
+        out(LenExt) = item
+    End If
+    
+    FoldArray = out
+End Function
+'}}}
+
+

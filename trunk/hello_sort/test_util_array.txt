@@ -1,0 +1,109 @@
+'module
+'  name;testUtilArray
+'{{{
+Option Explicit
+
+Sub test_All()
+    test_ArrayToVariables
+    test_StringToArray
+    test_ArrayToString
+    test_EscapeChar
+    test_UnEscapeChar
+    test_EncVariant
+    test_DecVariant
+    test_FoldArray
+End Sub
+
+Sub test_ArrayToVariables()
+    Dim a As Long
+    Dim b As String
+    Dim c As Long
+    
+    ArraytoVariables Array(1, 2, 3, 4, 5), 0, a, b
+    Debug.Assert a = 1
+    Debug.Assert b = "2"
+    ArraytoVariables Array(1, 2, 3, 4, 5), 3, a, b, c
+    Debug.Assert a = 4
+    Debug.Assert b = "5"
+    Debug.Assert c = 0
+    ArraytoVariables Array(1, 2, 3, 4, 5), -1, a, b, c
+    Debug.Assert a = 4
+    Debug.Assert b = "1"
+    Debug.Assert c = 2
+End Sub
+
+Sub test_StringToArray()
+    Const a = "abcdefg"
+    Dim x As Variant
+    
+    x = StringToArray(a)
+    Debug.Assert UBound(x) = Len(a) - 1
+    Debug.Assert x(0) = "a"
+    Debug.Assert x(1) = "b"
+    Debug.Assert x(5) = "f"
+    Debug.Assert x(6) = "g"
+    
+    x = StringToArray(a, 1, 6)
+    Debug.Assert UBound(x) = 5
+    Debug.Assert x(0) = "a"
+    Debug.Assert x(1) = "b"
+    Debug.Assert x(4) = "e"
+    Debug.Assert x(5) = "fg"
+    
+    x = StringToArray(a, 3, 4)
+    Debug.Assert UBound(x) = 3
+    Debug.Assert x(0) = "abc"
+    Debug.Assert x(1) = "def"
+    Debug.Assert x(2) = "g"
+    Debug.Assert x(3) = ""
+End Sub
+
+Sub test_ArrayToString()
+    Dim a As String
+    
+    a = ArrayToString(Array("a", "bc", "d", "efg"))
+    Debug.Assert a = "abcdefg"
+End Sub
+
+Sub test_EscapeChar()
+    Debug.Assert EscapeChar(StringToArray("&;[],"), "123&;[],456") = "123&0;&1;&2;&3;&4;456"
+End Sub
+
+Sub test_UnEscapeChar()
+    Debug.Assert UnEscapeChar(StringToArray("&;[],"), "123&0;&1;&2;&3;&4;456") = "123&;[],456"
+End Sub
+
+Sub test_EncVariant()
+    Debug.Assert EncVariant(Array(1, Array(2, "3"), "[4,5]")) = "[1,[2,3,],&2;4&4;5&3;,]"
+    Debug.Assert EncVariant(Array(1, Array(2, "3"), "(x,y)"), "<>(),") = "(1,(2,3,),<2>x<4>y<3>,)"
+    Debug.Assert EncVariant(Array(1, , 2)) = "[1,,2,]"
+End Sub
+
+Sub test_DecVariant()
+    Dim x As Variant
+    Dim y As Variant
+    
+    y = Array("[1,[2,3,],&2;4&4;5&3;,]", "[1,,2,]")
+    
+    For Each x In y
+        Debug.Assert EncVariant(DecVariant(x)) = x
+    Next
+    
+    Debug.Assert EncVariant(DecVariant("(1,(2,3,),<2>x<4>y<3>,)", "<>(),"), "<>(),") = "(1,(2,3,),<2>x<4>y<3>,)"
+End Sub
+
+Sub test_FoldArray()
+    Dim x As Variant
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7)
+    Debug.Assert EncVariant(FoldArray(x)) = "[[1,],[2,],[3,],[4,],[5,],[6,],[7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 2)) = "[[1,2,],[3,4,],[5,6,],[7,,],]"
+    Debug.Assert EncVariant(FoldArray(x, 3)) = "[[1,2,3,],[4,5,6,],[7,,,],]"
+    Debug.Assert EncVariant(FoldArray(x, 7)) = "[[1,2,3,4,5,6,7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 8)) = "[[1,2,3,4,5,6,7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 0)) = "[[1,],[2,],[3,],[4,],[5,],[6,],[7,],]"
+    Debug.Assert EncVariant(FoldArray("a", 0)) = "[[a,],]"
+End Sub
+'}}}
+
+

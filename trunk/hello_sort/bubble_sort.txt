@@ -1,0 +1,71 @@
+'module
+'  name;BubbleSort
+'{{{
+Option Explicit
+
+' unfortunately, the Scripting.Dictionary object doesn't support sorting by keys.
+' referrence:
+'   http://support.microsoft.com/kb/246067/en-us
+'   Sorting a Scripting Dictionary Populated with String Data
+
+' according to the above page,
+' we have to sort the key by ourselves, and the page offers a sample code of the bubble sort.
+' let's test it.
+
+' we assume a generalized data structure than the dictionary,
+' Array(Array(Sort Key, Sort Data), Array(Sort Key, Sort Data),,,)
+' the sort function receive this structure and return the sorted one in a same structure.
+
+' Compare receives vbCompareMethod Enum for string sort,
+' and -1 for Numeric sort.
+
+Public Function BSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim V() As Variant
+    Dim w As Variant
+    Dim x As Long
+    Dim y As Long
+    Dim Z As Long
+    
+    If Not IsArray(Data) Then
+        BSort = Data
+        Exit Function
+    ElseIf UBound(Data) <= 0 Then
+        BSort = Data
+        Exit Function
+    End If
+    
+    Z = UBound(Data)
+    ReDim V(0 To Z)
+    
+    x = 0
+    For x = 0 To Z
+        V(x) = Data(x)
+    Next
+    
+    If Compare = -1 Then
+        For x = 0 To Z - 1
+            For y = x To Z
+                If V(x)(0) > V(y)(0) Then
+                    w = V(x)
+                    V(x) = V(y)
+                    V(y) = w
+                End If
+            Next
+        Next
+    Else
+        For x = 0 To Z - 1
+            For y = x To Z
+                If StrComp(V(x)(0), V(y)(0), Compare) > 0 Then
+                    w = V(x)
+                    V(x) = V(y)
+                    V(y) = w
+                End If
+            Next
+        Next
+    End If
+    
+    BSort = V
+End Function
+'}}}
+
+
