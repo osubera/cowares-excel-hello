@@ -1,6 +1,8 @@
 #summary how to improve the speed of writing excel cells in vba
 #labels Phase-Requirements,Phase-Design,Phase-Deploy
 
+<wiki:toc max_depth="3" />
+
 = Introduction =
 
  * how to improve the speed of writing excel cells in vba
@@ -822,7 +824,7 @@ End Function
  * writing to multiple rows at one time is best.
  * the bulk writing is still fast even if we use complex converters to generate a bulk data.
  * easy and effective way is to disable updating the screen and calculating.
- * the best way is 100 times faster than the worst one.
+ * the best way is 100 times faster than the worst one. and note this is a very simple worksheet without any formulas. if we have some formulas, the difference grows larger and more significant.
 
 {{{
 test_measure()
