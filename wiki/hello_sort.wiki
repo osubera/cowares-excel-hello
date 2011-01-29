@@ -13,15 +13,13 @@
 = Details =
 
  * unfortunately, the Scripting.Dictionary object doesn't support sorting by keys.
-    * referrence:
-      [http://support.microsoft.com/kb/246067/en-us Sorting a Scripting Dictionary Populated with String Data]
+    * referrence: [http://support.microsoft.com/kb/246067/en-us Sorting a Scripting Dictionary Populated with String Data]
  * so we have to sort the key by ourselves, and the page offers a sample code of the `bubble sort`. let's test it.
  * we know the `bubble sort` is not practical on thousands of data for its speed, thus we provide the `merge sort` and the `quick sort` to compare performances.
 
 == 説明 ==
  * 残念ながら、 Scripting.Dictionary オブジェクトでは、キーのソートができない。
-    * 参考:
-      [http://support.microsoft.com/kb/246067/ja 文字列データを設定するスクリプト辞書の並べ替え]
+    * 参考: [http://support.microsoft.com/kb/246067/ja 文字列データを設定するスクリプト辞書の並べ替え]
  * だから、キーを自分で並び替えないといけない。上の参考先では、 `バブルソート` のコードが提示されている。試してみよう。
  * `バブルソート` が千件単位のデータだと遅くて使えないのは知っているので、 `マージソート` と `クイックソート` も試して比べてみる。
 
