@@ -1,0 +1,390 @@
+'module
+'  name;UtilDimension
+'{{{
+Option Explicit
+
+' get an array dimension number
+' the default is a limit of dimensions by vb design
+Public Function DimArray(x As Variant, Optional ByVal DimMax As Long = 60) As Long
+    On Error GoTo ErrorOverflow
+    Dim Result As Long
+    Dim i As Long
+    
+    Result = 0
+    If IsArray(x) Then
+        For i = 1 To DimMax
+            If LBound(x, i) < 0 Then Exit For
+            Result = i
+        Next
+    End If
+    
+ErrorOverflow:
+    DimArray = Result
+End Function
+
+' get an array lower bound, upper bound
+' Array(Array(1-low,1-up), Array(2-low,2-up),,,)
+Public Function BoundsArray(x As Variant, Optional ByVal DimMax As Long = 60) As Variant
+    Dim i As Long
+    Dim n As Long
+    Dim out() As Variant
+    
+    n = DimArray(x)
+    If n = 0 Then
+        BoundsArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To n - 1)
+    For i = 1 To n
+        out(i - 1) = Array(LBound(x, i), UBound(x, i))
+    Next
+    
+    BoundsArray = out
+End Function
+
+' serialize a 2-dimensional array into a flat array, by row or by column.
+' xlByRows    (1) : Array(A1,B1,A2,B2)
+' xlByColumns (2) : Array(A1,A2,B1,B2)
+Public Function FlatArray2D(x As Variant, Optional ByVal Direction As Long = 1) As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim a As Long
+    Dim nFlat As Long
+    Dim w(1 To 2) As Long
+    Dim Offset(1 To 2) As Long
+    Dim out() As Variant
+    
+    For i = 1 To 2
+        w(i) = UBound(x, i) - LBound(x, i) + 1
+    Next
+    nFlat = w(1) * w(2)
+    Offset(1) = LBound(x, 1) * w(2) + LBound(x, 2)
+    Offset(2) = LBound(x, 2) * w(1) + LBound(x, 1)
+    ReDim out(0 To nFlat - 1)
+    
+    For i = LBound(x, 1) To UBound(x, 1)
+        For j = LBound(x, 2) To UBound(x, 2)
+            If Direction = 1 Then   ' xlByRows
+                a = i * w(2) + j - Offset(1)
+            Else                    ' xlByColumns
+                a = j * w(1) + i - Offset(2)
+            End If
+            out(a) = x(i, j)
+        Next
+    Next
+    
+    FlatArray2D = out
+End Function
+
+' fold a flat array into a 2-dimensional array
+Public Function FoldArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal Unit As Long = 1, Optional ByVal OptionBase As Long = 1) As Variant
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If Direction = 1 Then
+        nC = Unit
+        nR = Int(n / Unit)
+        If n Mod Unit > 0 Then nR = nR + 1
+    Else
+        nR = Unit
+        nC = Int(n / Unit)
+        If n Mod Unit > 0 Then nC = nC + 1
+    End If
+    
+    ReDim out(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For r = 0 To nR - 1
+        For c = 0 To nC - 1
+            If Direction = 1 Then   ' xlByRows
+                i = r * nC + c + LowerLimit
+            Else                    ' xlByColumns
+                i = c * nR + r + LowerLimit
+            End If
+            If i <= UpperLimit Then
+                out(r + OptionBase, c + OptionBase) = x(i)
+            End If
+        Next
+    Next
+    
+    FoldArray2D = out
+End Function
+
+' serialize a nested array into a flat array
+Public Function FlatArrayNest(x As Variant) As Variant
+    Dim out() As Variant
+    Dim Length As Long
+    
+    Length = -1
+    FlatArrayNestDig x, out, Length
+    If Length <= 0 Then
+        FlatArrayNest = Array()
+    Else
+        FlatArrayNest = out
+    End If
+End Function
+
+Public Function FlatArrayNestDig(x As Variant, ByRef out() As Variant, ByRef Cursor As Long) As Long
+    Dim y As Variant
+    
+    If UBound(x) = -1 Then Exit Function
+    
+    If Cursor = -1 Then
+        ReDim out(0 To UBound(x) - LBound(x))
+        Cursor = 0
+    Else
+        ReDim Preserve out(0 To UBound(out) + UBound(x) - LBound(x))
+    End If
+    
+    For Each y In x
+        If IsArray(y) Then
+            FlatArrayNestDig y, out, Cursor
+        Else
+            out(Cursor) = y
+            Cursor = Cursor + 1
+        End If
+    Next
+End Function
+
+' fold a flat array into a double nested array
+' Array(a,b,c,d,e) -> Array(Array(a,b),Array(c,d),Array(e,Empty))
+Public Function FoldArrayNest(x As Variant, Optional ByVal Unit As Long = 1) As Variant
+    Dim Length As Long
+    Dim LenExt As Long
+    Dim LenExtPlus As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    If Not IsArray(x) Then
+        FoldArrayNest = FoldArrayNest(Array(x), Unit)
+        Exit Function
+    End If
+    
+    Length = UBound(x) + 1
+    If Unit < 1 Then Unit = 1
+    If Unit > Length Then Unit = Length
+    
+    LenExt = Int(Length / Unit)
+    LenExtPlus = IIf(Length Mod Unit > 0, 1, 0)
+    
+    ReDim out(0 To LenExt + LenExtPlus - 1)
+    ReDim item(0 To Unit - 1)
+    
+    For j = 0 To LenExt - 1
+        For i = 0 To Unit - 1
+            item(i) = x(i + j * Unit)
+        Next
+        out(j) = item
+    Next
+    If LenExtPlus = 1 Then
+        For i = 0 To (Length Mod Unit) - 1
+            item(i) = x(i + LenExt * Unit)
+        Next
+        For i = (Length Mod Unit) To Unit - 1
+            item(i) = Empty
+        Next
+        out(LenExt) = item
+    End If
+    
+    FoldArrayNest = out
+End Function
+
+' convert a 2-dimensional array into a nested array
+Public Function ToNestArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal FixedLength As Boolean = False) As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim VarUpper As Long
+    Dim w(1 To 2) As Long
+    Dim Lower(1 To 2) As Long
+    Dim Upper(1 To 2) As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    
+    For i = 1 To 2
+        j = IIf(Direction = 1, i, 3 - i)
+        Lower(j) = LBound(x, i)
+        Upper(j) = UBound(x, i)
+        w(j) = UBound(x, i) - LBound(x, i) + 1
+    Next
+    
+    If FixedLength Then
+        ReDim item(0 To w(2) - 1)
+        VarUpper = Upper(2)
+    End If
+    
+    ReDim out(0 To w(1) - 1)
+    
+    For i = Lower(1) To Upper(1)
+        If Not FixedLength Then
+            VarUpper = Upper(2)
+            Do While VarUpper >= Lower(2)
+                If Direction = 1 Then
+                    If Not IsEmpty(x(i, VarUpper)) Then Exit Do
+                Else
+                    If Not IsEmpty(x(VarUpper, i)) Then Exit Do
+                End If
+                VarUpper = VarUpper - 1
+            Loop
+            If VarUpper < Lower(2) Then
+                out(i - Lower(1)) = Array()
+                GoTo NextItem
+            End If
+            ReDim item(0 To VarUpper - Lower(2))
+        End If
+        
+        For j = Lower(2) To VarUpper
+            If Direction = 1 Then   ' xlByRows
+                item(j - Lower(2)) = x(i, j)
+            Else                    ' xlByColumns
+                item(j - Lower(2)) = x(j, i)
+            End If
+        Next
+        out(i - Lower(1)) = item
+        
+NextItem:
+    Next
+    
+    ToNestArray2D = out
+End Function
+
+' convert a nested array into a 2-dimensional array
+Public Function FromNestArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal Unit As Long = -1, Optional ByVal OptionBase As Long = 1) As Variant
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim j As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If Unit = -1 Then
+        For i = LowerLimit To UpperLimit
+            j = UBound(x(i)) - LBound(x(i)) + 1
+            If Unit < j Then Unit = j
+        Next
+    End If
+    If Unit <= 0 Then Exit Function
+    
+    If Direction = 1 Then
+        nC = Unit
+        nR = n
+    Else
+        nR = Unit
+        nC = n
+    End If
+    
+    ReDim out(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For r = 0 To nR - 1
+        For c = 0 To nC - 1
+            If Direction = 1 Then   ' xlByRows
+                i = r + LowerLimit
+                j = c + LBound(x(i))
+            Else                    ' xlByColumns
+                i = c + LowerLimit
+                j = r + LBound(x(i))
+            End If
+            If j <= UBound(x(i)) Then
+                out(r + OptionBase, c + OptionBase) = x(i)(j)
+            End If
+        Next
+    Next
+    
+    FromNestArray2D = out
+End Function
+
+' convert a nested array into a 2-dimensional array, as bulk rows
+' the result is an array of fixed length 2-dimensional array
+Public Function FromNestRowsArray2D(x As Variant, Optional ByVal BulkRows As Long = 128, _
+        Optional ByVal ColumnSize As Long = -1, Optional ByVal OptimizeLastRows As Boolean = True) As Variant
+    Const OptionBase = 1
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim nB As Long
+    Dim b As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim j As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    Dim bulk() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If ColumnSize = -1 Then ColumnSize = UBound(x(LowerLimit)) - LBound(x(LowerLimit)) + 1
+    If ColumnSize <= 0 Then Exit Function
+    
+    nC = ColumnSize
+    nR = BulkRows
+    nB = Int(n / nR)
+    If n Mod nR > 0 Then nB = nB + 1
+    
+    ReDim out(0 To nB - 1)
+    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For b = 0 To nB - 1
+        If b = nB - 1 Then
+            If n Mod nR > 0 Then
+                If OptimizeLastRows Then
+                    nR = n Mod nR
+                    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+                Else
+                    ' this ReDim is to reset the values, not for changing sizes
+                    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+                    nR = n Mod nR
+                End If
+            End If
+        End If
+        For r = 0 To nR - 1
+            For c = 0 To nC - 1
+                i = r + LowerLimit + b * BulkRows
+                j = c + LBound(x(i))
+                If j <= UBound(x(i)) Then
+                    bulk(r + OptionBase, c + OptionBase) = x(i)(j)
+                Else
+                    bulk(r + OptionBase, c + OptionBase) = Empty
+                End If
+            Next
+        Next
+        out(b) = bulk
+    Next
+    
+    FromNestRowsArray2D = out
+End Function
+'}}}
+
+
