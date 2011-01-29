@@ -1,0 +1,111 @@
+'module
+'  name;MergeSort
+'{{{
+Option Explicit
+
+' in many cases, the merge sort is more practical and faster than the quick sort.
+' because usually,
+' we have a large amount of data sorted already,
+' and a small amount of transaction data unsorted.
+' all we want is a result merged and sorted.
+
+' in this situation, we don't want to perform a full sort on merged result.
+' we prefer to sort partly for the transaction, and merge it.
+
+Public Function MergeWithSort(a As Variant, b As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim i As Long
+    Dim iA As Long
+    Dim iB As Long
+    Dim EndA As Long
+    Dim EndB As Long
+    Dim c() As Variant
+    
+    EndA = UBound(a)
+    EndB = UBound(b)
+    ReDim c(0 To EndA + EndB + 1)
+    iA = 0
+    iB = 0
+    
+    If Compare = -1 Then
+        Do While (iA <= EndA And iB <= EndB)
+            If a(iA)(0) > b(iB)(0) Then
+                c(iA + iB) = b(iB)
+                iB = iB + 1
+            Else
+                c(iA + iB) = a(iA)
+                iA = iA + 1
+            End If
+        Loop
+    Else
+        Do While (iA <= EndA And iB <= EndB)
+            If StrComp(a(iA)(0), b(iB)(0), Compare) > 0 Then
+                c(iA + iB) = b(iB)
+                iB = iB + 1
+            Else
+                c(iA + iB) = a(iA)
+                iA = iA + 1
+            End If
+        Loop
+    End If
+    
+    If iA > EndA Then
+        For i = iB To EndB
+            c(iA + i) = b(i)
+        Next
+    Else
+        For i = iA To EndA
+            c(iB + i) = a(i)
+        Next
+    End If
+    
+    MergeWithSort = c
+End Function
+
+Public Function SplitArrayHalf(x As Variant, ByRef First As Variant, ByRef Second As Variant) As Boolean
+    Dim Len1 As Long
+    Dim Len2 As Long
+    Dim out1() As Variant
+    Dim out2() As Variant
+    Dim i As Long
+    
+    If UBound(x) <= 0 Then
+        ' return false when the input x cannot be divided any more, means only one item
+        First = x
+        Second = Empty
+        SplitArrayHalf = False
+        Exit Function
+    End If
+    
+    Len1 = Int((UBound(x) + 1) / 2)
+    Len2 = UBound(x) + 1 - Len1
+    ReDim out1(0 To Len1 - 1)
+    ReDim out2(0 To Len2 - 1)
+    
+    For i = 0 To Len1 - 1
+        out1(i) = x(i)
+    Next
+    For i = 0 To Len2 - 1
+        out2(i) = x(i + Len1)
+    Next
+    
+    First = out1
+    Second = out2
+    SplitArrayHalf = True
+End Function
+
+Public Function MSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim x As Variant
+    Dim y As Variant
+    Dim out As Variant
+    
+    If SplitArrayHalf(Data, x, y) Then
+        out = MergeWithSort(MSort(x, Compare), MSort(y, Compare), Compare)
+    Else
+        out = x
+    End If
+    
+    MSort = out
+End Function
+'}}}
+
+

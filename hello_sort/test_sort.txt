@@ -1,0 +1,182 @@
+'module
+'  name;testSort
+'{{{
+Option Explicit
+
+Sub test_All()
+    test_BSort
+    test_BSort_Dictionary
+    test_MergeWithSort
+    test_SplitArrayHalf
+    test_MSort
+    test_QSort
+    test_measure
+End Sub
+
+Function SmallData(Optional SortBy As Long = 0) As Variant
+    Dim x As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    x = Array(Array(3, "Delta"), Array(1, "Foxtrot"), _
+            Array(4, "Bravo"), Array(2, "echo"), _
+            Array(16, "Alpha"), Array(5, "Charlie"))
+    ReDim out(0 To UBound(x))
+    For i = 0 To UBound(x)
+        out(i) = Array(x(i)(SortBy), x(i)(0) & "=" & x(i)(1))
+    Next
+    
+    SmallData = out
+End Function
+
+Function LargeData(Optional ByVal Count As Long = 1000) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Count - 1)
+    For i = 0 To Count - 1
+        out(i) = Array(Replace(CStr(Rnd), "0.", "", 1, 1))
+    Next
+    
+    LargeData = out
+End Function
+
+Sub test_measure()
+    Dim AtStart As Single
+    Dim DoneSmall As Single
+    Dim DoneLarge As Single
+    Dim x As Variant
+    Dim xS As Variant
+    Dim xL As Variant
+    
+    xS = SmallData
+    xL = LargeData
+    
+    AtStart = Timer()
+    x = BSort(xS)
+    DoneSmall = Timer()
+    x = BSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Binary Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+    
+    AtStart = Timer()
+    x = MSort(xS)
+    DoneSmall = Timer()
+    x = MSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Merge Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+    
+    AtStart = Timer()
+    x = QSort(xS)
+    DoneSmall = Timer()
+    x = QSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Quick Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+End Sub
+
+Sub test_BSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = BSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    Debug.Print "by key number"
+    For Each x In Sorted
+        Debug.Print x(1)
+    Next
+    
+    Sorted = BSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    Debug.Print "by item string"
+    For Each x In Sorted
+        Debug.Print x(1)
+    Next
+    
+    Sorted = BSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+
+Sub test_BSort_Dictionary()
+    ' reference Scripting.Runtime is only for this test
+    ' bring only keyset will improve performances when the data is complex and large
+    Dim dic As Scripting.Dictionary
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Set dic = New Scripting.Dictionary
+    For Each x In SmallData()
+        dic.Add x(0), x(1)
+    Next
+    
+    Sorted = BSort(FoldArray(dic.Keys), -1)
+    Debug.Print "by dic key"
+    For Each x In Sorted
+        Debug.Print dic(x(0))
+    Next
+    
+    dic.RemoveAll
+    Set dic = Nothing
+End Sub
+
+Sub test_MergeWithSort()
+    Dim a As Variant
+    Dim b As Variant
+    
+    a = Array(Array(1), Array(3), Array(5), Array(7))
+    b = Array(Array(1), Array(2), Array(4), Array(8))
+    
+    Debug.Assert EncVariant(MergeWithSort(a, b, -1)) = "[[1,],[1,],[2,],[3,],[4,],[5,],[7,],[8,],]"
+    Debug.Assert EncVariant(MergeWithSort(a, b, vbTextCompare)) = "[[1,],[1,],[2,],[3,],[4,],[5,],[7,],[8,],]"
+End Sub
+
+Sub test_SplitArrayHalf()
+    Dim x As Variant
+    Dim a As Variant
+    Dim b As Variant
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7, 8)
+    Debug.Assert SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,2,3,4,]"
+    Debug.Assert EncVariant(b) = "[5,6,7,8,]"
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    Debug.Assert SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,2,3,4,]"
+    Debug.Assert EncVariant(b) = "[5,6,7,8,9,]"
+    
+    x = Array(1)
+    Debug.Assert Not SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,]"
+    Debug.Assert IsEmpty(b)
+End Sub
+
+Sub test_MSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = MSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    
+    Sorted = MSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    
+    Sorted = MSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+
+Sub test_QSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = QSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    
+    Sorted = QSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    
+    Sorted = QSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+'}}}
+
+

@@ -1,0 +1,1012 @@
+'workbook
+'  name;hello_sort.xls
+
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+
+'worksheet
+'  name;Sheet1
+
+
+'module
+'  name;UtilArray
+'{{{
+Option Explicit
+
+' a=Data(0) : b=Data(1) : c=Data(2) : ,,,
+Public Sub ArraytoVariables(Data As Variant, ByVal Offset As Long _
+        , Optional ByRef a As Variant _
+        , Optional ByRef b As Variant _
+        , Optional ByRef c As Variant _
+        , Optional ByRef d As Variant _
+        , Optional ByRef e As Variant _
+        , Optional ByRef f As Variant _
+        , Optional ByRef g As Variant _
+        , Optional ByRef h As Variant _
+        , Optional ByRef i As Variant _
+        , Optional ByRef j As Variant _
+        , Optional ByRef k As Variant _
+        , Optional ByRef l As Variant _
+        , Optional ByRef m As Variant _
+        , Optional ByRef n As Variant _
+        , Optional ByRef o As Variant _
+        , Optional ByRef p As Variant _
+        , Optional ByRef q As Variant _
+        , Optional ByRef r As Variant _
+        , Optional ByRef s As Variant _
+        , Optional ByRef t As Variant _
+        , Optional ByRef u As Variant _
+        , Optional ByRef V As Variant _
+        , Optional ByRef w As Variant _
+        , Optional ByRef x As Variant, Optional ByRef y As Variant, Optional ByRef Z As Variant)
+    Dim Arg As Variant
+    
+    If Offset >= LBound(Data) Then
+        If IsMissing(a) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        a = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(b) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        b = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(c) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        c = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(d) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        d = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(e) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        e = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(f) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        f = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(g) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        g = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(h) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        h = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(i) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        i = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(j) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        j = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(k) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        k = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(l) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        l = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(m) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        m = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(n) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        n = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(o) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        o = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(p) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        p = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(q) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        q = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(r) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        r = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(s) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        s = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(t) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        t = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(u) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        u = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(V) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        V = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(w) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        w = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(x) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        x = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(y) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        y = Data(Offset)
+    End If
+    
+    Offset = Offset + 1
+    If Offset >= LBound(Data) Then
+        If IsMissing(Z) Then Exit Sub
+        If UBound(Data) < Offset Then Exit Sub
+        Z = Data(Offset)
+    End If
+End Sub
+
+' "abcd" -> ("a","b","cd")
+Public Function StringToArray(Text As String, Optional ByVal Unit As Long = 1, _
+                            Optional ByVal Size As Long = -1) As String()
+    Dim out() As String
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    If Unit <= 0 Then Unit = 1
+    If Size = -1 Then
+        Size = Length / Unit
+        If Length Mod Unit > 0 Then Size = Size + 1
+    End If
+    
+    ReDim out(0 To Size - 1)
+    For i = 0 To UBound(out) - 1
+        out(i) = Mid(Text, Unit * i + 1, Unit)
+    Next
+    i = UBound(out)
+    out(i) = Mid(Text, Unit * i + 1)
+    
+    StringToArray = out
+End Function
+
+' ("a","b","cd") -> "abcd"
+Public Function ArrayToString(Texts As Variant) As String
+    Dim Text As Variant
+    Dim out As String
+    
+    out = ""
+    For Each Text In Texts
+        out = out & Text
+    Next
+    
+    ArrayToString = out
+End Function
+
+' "&;[]," -> "&0;&1;&2;&3;&4;"
+Public Function EscapeChar(Brackets As Variant, Data As Variant) As String
+    Dim EscapeBegin As String
+    Dim EscapeEnd As String
+    Dim i As Long
+    Dim j As Long
+    Dim pan As Variant
+    Dim out As String
+    Dim LastPos As Long
+    Dim CurrPos As Long
+    
+    EscapeBegin = Brackets(0)
+    EscapeEnd = Brackets(1)
+    
+    pan = Empty
+    For i = 1 To Len(Data)
+        For j = 0 To UBound(Brackets)
+            If Mid(Data, i, 1) = Brackets(j) Then pan = Array(i, j, pan)
+        Next
+    Next
+    
+    out = ""
+    LastPos = Len(Data)
+    CurrPos = LastPos
+    Do Until IsEmpty(pan)
+        CurrPos = pan(0)
+        out = EscapeBegin & CStr(pan(1)) & EscapeEnd & Mid(Data, CurrPos + 1, LastPos - CurrPos) & out
+        LastPos = CurrPos - 1
+        pan = pan(2)
+    Loop
+    out = Left(Data, LastPos) & out
+    
+    EscapeChar = out
+End Function
+
+' "&0;&1;&2;&3;&4;" -> "&;[],"
+Public Function UnEscapeChar(Brackets As Variant, Data As Variant) As String
+    Dim EscapeBegin As String
+    Dim EscapeEnd As String
+    Dim i As Long
+    Dim out As String
+    
+    EscapeBegin = Brackets(0)
+    EscapeEnd = Brackets(1)
+    
+    out = Data
+    For i = UBound(Brackets) To 0 Step -1
+        out = Replace(out, EscapeBegin & i & EscapeEnd, CStr(Brackets(i)))
+    Next
+    
+    UnEscapeChar = out
+End Function
+
+' Array(1,Array(2,"3"),"[4,5]") -> "[1,[2,3,],&2;4&4;5&3;,]"
+Public Function EncVariant(Data As Variant, _
+        Optional ByVal Brackets As String = "&;[],") As String
+    Dim x As Variant
+    Dim out As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    Dim Delimiter As String
+    Dim Bra As Variant
+    
+    Bra = StringToArray(Brackets, 1, 5)
+    ArrayBegin = Bra(2)
+    ArrayEnd = Bra(3)
+    Delimiter = Bra(4)
+    
+    If IsError(Data) Or IsEmpty(Data) Then
+        ' IsError(Array(1,,2)(1)) = True
+        ' IsEmpty(Array(1,Empty,2)(1)) = True
+        out = ""
+    ElseIf IsArray(Data) Then
+        out = ArrayBegin
+        For Each x In Data
+            out = out & EncVariant(x, Brackets) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        out = EscapeChar(Bra, TypeName(Data))
+    Else
+        out = EscapeChar(Bra, Data)
+    End If
+    
+    EncVariant = out
+End Function
+
+' "[1,[2,3,],&2;4&4;5&3;,]" -> Array(1,Array(2,"3"),"[4,5]")
+Public Function DecVariant(ByVal Text As String, _
+        Optional ByVal Brackets As String = "&;[],") As Variant
+    Dim Evaluated As Variant
+    EvalAfter Evaluated, Text, StringToArray(Brackets)
+    DecVariant = Evaluated(0)
+End Function
+
+Private Function SkipToNextComma(ByRef Text As String, Tags As Variant) As Boolean
+    Dim Comma As String
+    Dim FoundAt As Long
+    
+    Comma = Tags(4)
+    FoundAt = InStr(1, Text, Comma, vbTextCompare)
+    If FoundAt > 0 Then
+        Text = Mid(Text, FoundAt + Len(Comma))
+        SkipToNextComma = True
+    End If
+End Function
+
+Private Function EvalComma(ByRef BeforeTag As String, _
+                ByRef Text As String, Tags As Variant) As Long
+    Dim i As Long
+    Dim At As Long
+    Dim AtFirst As Long
+    Dim out As Long
+    
+    out = -1
+    AtFirst = Len(Text) + 1
+    For i = 2 To UBound(Tags)
+        If Tags(i) = "" Then GoTo Ignore
+        At = InStr(1, Text, CStr(Tags(i)), vbBinaryCompare)
+        If At = 0 Then GoTo Ignore
+        If At >= AtFirst Then GoTo Ignore
+        
+        AtFirst = At
+        out = i
+Ignore:
+    Next
+    
+    BeforeTag = Left(Text, AtFirst - 1)
+    Text = Right(Text, Len(Text) - AtFirst + 1 - Len(Tags(out)))
+    
+    EvalComma = out
+End Function
+
+Private Function EvalBefore(ByRef Evaluated As Variant, Text As String, _
+        Tags As Variant) As Boolean
+    Evaluated = Array(UnEscapeChar(Tags, Text), Evaluated)
+End Function
+
+Private Function EvalAfter(ByRef Evaluated As Variant, ByRef Text As String, _
+        Tags As Variant) As Boolean
+    Dim BeforeTag As String
+    Dim MyEvaluated As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Dim out() As Variant
+    
+    Counter = 0
+    
+    Do Until Text = ""
+        Select Case EvalComma(BeforeTag, Text, Tags)
+        Case 2  'new child
+            ' ignore BeforeTag
+            MyEvaluated = Empty
+            If EvalAfter(MyEvaluated, Text, Tags) Then Evaluated = Array(MyEvaluated, Evaluated)
+            Counter = Counter + 1
+            SkipToNextComma Text, Tags
+        Case 4  'next
+            EvalBefore Evaluated, BeforeTag, Tags
+            Counter = Counter + 1
+        'Case 3  'end
+        Case Else   'end or not found
+            ' ignore BeforeTag and AfterTag
+            Exit Do
+        End Select
+    Loop
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = Evaluated(0)
+            Evaluated = Evaluated(1)
+        Next
+    End If
+    
+    Evaluated = out
+    EvalAfter = Not IsEmpty(Evaluated)
+End Function
+
+' Array(a,b,c,d,e) -> Array(Array(a,b),Array(c,d),Array(e,Empty))
+Public Function FoldArray(x As Variant, Optional ByVal Unit As Long = 1) As Variant
+    Dim Length As Long
+    Dim LenExt As Long
+    Dim LenExtPlus As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    If Not IsArray(x) Then
+        FoldArray = FoldArray(Array(x), Unit)
+        Exit Function
+    End If
+    
+    Length = UBound(x) + 1
+    If Unit < 1 Then Unit = 1
+    If Unit > Length Then Unit = Length
+    
+    LenExt = Int(Length / Unit)
+    LenExtPlus = IIf(Length Mod Unit > 0, 1, 0)
+    
+    ReDim out(0 To LenExt + LenExtPlus - 1)
+    ReDim item(0 To Unit - 1)
+    
+    For j = 0 To LenExt - 1
+        For i = 0 To Unit - 1
+            item(i) = x(i + j * Unit)
+        Next
+        out(j) = item
+    Next
+    If LenExtPlus = 1 Then
+        For i = 0 To (Length Mod Unit) - 1
+            item(i) = x(i + LenExt * Unit)
+        Next
+        For i = (Length Mod Unit) To Unit - 1
+            item(i) = Empty
+        Next
+        out(LenExt) = item
+    End If
+    
+    FoldArray = out
+End Function
+'}}}
+
+'module
+'  name;testUtilArray
+'{{{
+Option Explicit
+
+Sub test_All()
+    test_ArrayToVariables
+    test_StringToArray
+    test_ArrayToString
+    test_EscapeChar
+    test_UnEscapeChar
+    test_EncVariant
+    test_DecVariant
+    test_FoldArray
+End Sub
+
+Sub test_ArrayToVariables()
+    Dim a As Long
+    Dim b As String
+    Dim c As Long
+    
+    ArraytoVariables Array(1, 2, 3, 4, 5), 0, a, b
+    Debug.Assert a = 1
+    Debug.Assert b = "2"
+    ArraytoVariables Array(1, 2, 3, 4, 5), 3, a, b, c
+    Debug.Assert a = 4
+    Debug.Assert b = "5"
+    Debug.Assert c = 0
+    ArraytoVariables Array(1, 2, 3, 4, 5), -1, a, b, c
+    Debug.Assert a = 4
+    Debug.Assert b = "1"
+    Debug.Assert c = 2
+End Sub
+
+Sub test_StringToArray()
+    Const a = "abcdefg"
+    Dim x As Variant
+    
+    x = StringToArray(a)
+    Debug.Assert UBound(x) = Len(a) - 1
+    Debug.Assert x(0) = "a"
+    Debug.Assert x(1) = "b"
+    Debug.Assert x(5) = "f"
+    Debug.Assert x(6) = "g"
+    
+    x = StringToArray(a, 1, 6)
+    Debug.Assert UBound(x) = 5
+    Debug.Assert x(0) = "a"
+    Debug.Assert x(1) = "b"
+    Debug.Assert x(4) = "e"
+    Debug.Assert x(5) = "fg"
+    
+    x = StringToArray(a, 3, 4)
+    Debug.Assert UBound(x) = 3
+    Debug.Assert x(0) = "abc"
+    Debug.Assert x(1) = "def"
+    Debug.Assert x(2) = "g"
+    Debug.Assert x(3) = ""
+End Sub
+
+Sub test_ArrayToString()
+    Dim a As String
+    
+    a = ArrayToString(Array("a", "bc", "d", "efg"))
+    Debug.Assert a = "abcdefg"
+End Sub
+
+Sub test_EscapeChar()
+    Debug.Assert EscapeChar(StringToArray("&;[],"), "123&;[],456") = "123&0;&1;&2;&3;&4;456"
+End Sub
+
+Sub test_UnEscapeChar()
+    Debug.Assert UnEscapeChar(StringToArray("&;[],"), "123&0;&1;&2;&3;&4;456") = "123&;[],456"
+End Sub
+
+Sub test_EncVariant()
+    Debug.Assert EncVariant(Array(1, Array(2, "3"), "[4,5]")) = "[1,[2,3,],&2;4&4;5&3;,]"
+    Debug.Assert EncVariant(Array(1, Array(2, "3"), "(x,y)"), "<>(),") = "(1,(2,3,),<2>x<4>y<3>,)"
+    Debug.Assert EncVariant(Array(1, , 2)) = "[1,,2,]"
+End Sub
+
+Sub test_DecVariant()
+    Dim x As Variant
+    Dim y As Variant
+    
+    y = Array("[1,[2,3,],&2;4&4;5&3;,]", "[1,,2,]")
+    
+    For Each x In y
+        Debug.Assert EncVariant(DecVariant(x)) = x
+    Next
+    
+    Debug.Assert EncVariant(DecVariant("(1,(2,3,),<2>x<4>y<3>,)", "<>(),"), "<>(),") = "(1,(2,3,),<2>x<4>y<3>,)"
+End Sub
+
+Sub test_FoldArray()
+    Dim x As Variant
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7)
+    Debug.Assert EncVariant(FoldArray(x)) = "[[1,],[2,],[3,],[4,],[5,],[6,],[7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 2)) = "[[1,2,],[3,4,],[5,6,],[7,,],]"
+    Debug.Assert EncVariant(FoldArray(x, 3)) = "[[1,2,3,],[4,5,6,],[7,,,],]"
+    Debug.Assert EncVariant(FoldArray(x, 7)) = "[[1,2,3,4,5,6,7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 8)) = "[[1,2,3,4,5,6,7,],]"
+    Debug.Assert EncVariant(FoldArray(x, 0)) = "[[1,],[2,],[3,],[4,],[5,],[6,],[7,],]"
+    Debug.Assert EncVariant(FoldArray("a", 0)) = "[[a,],]"
+End Sub
+'}}}
+
+'module
+'  name;MergeSort
+'{{{
+Option Explicit
+
+' in many cases, the merge sort is more practical and faster than the quick sort.
+' because usually,
+' we have a large amount of data sorted already,
+' and a small amount of transaction data unsorted.
+' all we want is a result merged and sorted.
+
+' in this situation, we don't want to perform a full sort on merged result.
+' we prefer to sort partly for the transaction, and merge it.
+
+Public Function MergeWithSort(a As Variant, b As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim i As Long
+    Dim iA As Long
+    Dim iB As Long
+    Dim EndA As Long
+    Dim EndB As Long
+    Dim c() As Variant
+    
+    EndA = UBound(a)
+    EndB = UBound(b)
+    ReDim c(0 To EndA + EndB + 1)
+    iA = 0
+    iB = 0
+    
+    If Compare = -1 Then
+        Do While (iA <= EndA And iB <= EndB)
+            If a(iA)(0) > b(iB)(0) Then
+                c(iA + iB) = b(iB)
+                iB = iB + 1
+            Else
+                c(iA + iB) = a(iA)
+                iA = iA + 1
+            End If
+        Loop
+    Else
+        Do While (iA <= EndA And iB <= EndB)
+            If StrComp(a(iA)(0), b(iB)(0), Compare) > 0 Then
+                c(iA + iB) = b(iB)
+                iB = iB + 1
+            Else
+                c(iA + iB) = a(iA)
+                iA = iA + 1
+            End If
+        Loop
+    End If
+    
+    If iA > EndA Then
+        For i = iB To EndB
+            c(iA + i) = b(i)
+        Next
+    Else
+        For i = iA To EndA
+            c(iB + i) = a(i)
+        Next
+    End If
+    
+    MergeWithSort = c
+End Function
+
+Public Function SplitArrayHalf(x As Variant, ByRef First As Variant, ByRef Second As Variant) As Boolean
+    Dim Len1 As Long
+    Dim Len2 As Long
+    Dim out1() As Variant
+    Dim out2() As Variant
+    Dim i As Long
+    
+    If UBound(x) <= 0 Then
+        ' return false when the input x cannot be divided any more, means only one item
+        First = x
+        Second = Empty
+        SplitArrayHalf = False
+        Exit Function
+    End If
+    
+    Len1 = Int((UBound(x) + 1) / 2)
+    Len2 = UBound(x) + 1 - Len1
+    ReDim out1(0 To Len1 - 1)
+    ReDim out2(0 To Len2 - 1)
+    
+    For i = 0 To Len1 - 1
+        out1(i) = x(i)
+    Next
+    For i = 0 To Len2 - 1
+        out2(i) = x(i + Len1)
+    Next
+    
+    First = out1
+    Second = out2
+    SplitArrayHalf = True
+End Function
+
+Public Function MSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim x As Variant
+    Dim y As Variant
+    Dim out As Variant
+    
+    If SplitArrayHalf(Data, x, y) Then
+        out = MergeWithSort(MSort(x, Compare), MSort(y, Compare), Compare)
+    Else
+        out = x
+    End If
+    
+    MSort = out
+End Function
+'}}}
+
+'module
+'  name;BubbleSort
+'{{{
+Option Explicit
+
+' unfortunately, the Scripting.Dictionary object doesn't support sorting by keys.
+' referrence:
+'   http://support.microsoft.com/kb/246067/en-us
+'   Sorting a Scripting Dictionary Populated with String Data
+
+' according to the above page,
+' we have to sort the key by ourselves, and the page offers a sample code of the bubble sort.
+' let's test it.
+
+' we assume a generalized data structure than the dictionary,
+' Array(Array(Sort Key, Sort Data), Array(Sort Key, Sort Data),,,)
+' the sort function receive this structure and return the sorted one in a same structure.
+
+' Compare receives vbCompareMethod Enum for string sort,
+' and -1 for Numeric sort.
+
+Public Function BSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    Dim V() As Variant
+    Dim w As Variant
+    Dim x As Long
+    Dim y As Long
+    Dim Z As Long
+    
+    If Not IsArray(Data) Then
+        BSort = Data
+        Exit Function
+    ElseIf UBound(Data) <= 0 Then
+        BSort = Data
+        Exit Function
+    End If
+    
+    Z = UBound(Data)
+    ReDim V(0 To Z)
+    
+    x = 0
+    For x = 0 To Z
+        V(x) = Data(x)
+    Next
+    
+    If Compare = -1 Then
+        For x = 0 To Z - 1
+            For y = x To Z
+                If V(x)(0) > V(y)(0) Then
+                    w = V(x)
+                    V(x) = V(y)
+                    V(y) = w
+                End If
+            Next
+        Next
+    Else
+        For x = 0 To Z - 1
+            For y = x To Z
+                If StrComp(V(x)(0), V(y)(0), Compare) > 0 Then
+                    w = V(x)
+                    V(x) = V(y)
+                    V(y) = w
+                End If
+            Next
+        Next
+    End If
+    
+    BSort = V
+End Function
+'}}}
+
+'module
+'  name;testSort
+'{{{
+Option Explicit
+
+Sub test_All()
+    test_BSort
+    test_BSort_Dictionary
+    test_MergeWithSort
+    test_SplitArrayHalf
+    test_MSort
+    test_QSort
+    test_measure
+End Sub
+
+Function SmallData(Optional SortBy As Long = 0) As Variant
+    Dim x As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    x = Array(Array(3, "Delta"), Array(1, "Foxtrot"), _
+            Array(4, "Bravo"), Array(2, "echo"), _
+            Array(16, "Alpha"), Array(5, "Charlie"))
+    ReDim out(0 To UBound(x))
+    For i = 0 To UBound(x)
+        out(i) = Array(x(i)(SortBy), x(i)(0) & "=" & x(i)(1))
+    Next
+    
+    SmallData = out
+End Function
+
+Function LargeData(Optional ByVal Count As Long = 1000) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Count - 1)
+    For i = 0 To Count - 1
+        out(i) = Array(Replace(CStr(Rnd), "0.", "", 1, 1))
+    Next
+    
+    LargeData = out
+End Function
+
+Sub test_measure()
+    Dim AtStart As Single
+    Dim DoneSmall As Single
+    Dim DoneLarge As Single
+    Dim x As Variant
+    Dim xS As Variant
+    Dim xL As Variant
+    
+    xS = SmallData
+    xL = LargeData
+    
+    AtStart = Timer()
+    x = BSort(xS)
+    DoneSmall = Timer()
+    x = BSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Binary Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+    
+    AtStart = Timer()
+    x = MSort(xS)
+    DoneSmall = Timer()
+    x = MSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Merge Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+    
+    AtStart = Timer()
+    x = QSort(xS)
+    DoneSmall = Timer()
+    x = QSort(xL)
+    DoneLarge = Timer()
+    Debug.Print "Quick Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+End Sub
+
+Sub test_BSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = BSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    Debug.Print "by key number"
+    For Each x In Sorted
+        Debug.Print x(1)
+    Next
+    
+    Sorted = BSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    Debug.Print "by item string"
+    For Each x In Sorted
+        Debug.Print x(1)
+    Next
+    
+    Sorted = BSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+
+Sub test_BSort_Dictionary()
+    ' reference Scripting.Runtime is only for this test
+    ' bring only keyset will improve performances when the data is complex and large
+    Dim dic As Scripting.Dictionary
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Set dic = New Scripting.Dictionary
+    For Each x In SmallData()
+        dic.Add x(0), x(1)
+    Next
+    
+    Sorted = BSort(FoldArray(dic.Keys), -1)
+    Debug.Print "by dic key"
+    For Each x In Sorted
+        Debug.Print dic(x(0))
+    Next
+    
+    dic.RemoveAll
+    Set dic = Nothing
+End Sub
+
+Sub test_MergeWithSort()
+    Dim a As Variant
+    Dim b As Variant
+    
+    a = Array(Array(1), Array(3), Array(5), Array(7))
+    b = Array(Array(1), Array(2), Array(4), Array(8))
+    
+    Debug.Assert EncVariant(MergeWithSort(a, b, -1)) = "[[1,],[1,],[2,],[3,],[4,],[5,],[7,],[8,],]"
+    Debug.Assert EncVariant(MergeWithSort(a, b, vbTextCompare)) = "[[1,],[1,],[2,],[3,],[4,],[5,],[7,],[8,],]"
+End Sub
+
+Sub test_SplitArrayHalf()
+    Dim x As Variant
+    Dim a As Variant
+    Dim b As Variant
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7, 8)
+    Debug.Assert SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,2,3,4,]"
+    Debug.Assert EncVariant(b) = "[5,6,7,8,]"
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    Debug.Assert SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,2,3,4,]"
+    Debug.Assert EncVariant(b) = "[5,6,7,8,9,]"
+    
+    x = Array(1)
+    Debug.Assert Not SplitArrayHalf(x, a, b)
+    Debug.Assert EncVariant(a) = "[1,]"
+    Debug.Assert IsEmpty(b)
+End Sub
+
+Sub test_MSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = MSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    
+    Sorted = MSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    
+    Sorted = MSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+
+Sub test_QSort()
+    Dim Sorted As Variant
+    Dim x As Variant
+    
+    Sorted = QSort(SmallData(0), -1)
+    Debug.Assert EncVariant(Sorted) = "[[1,1=Foxtrot,],[2,2=echo,],[3,3=Delta,],[4,4=Bravo,],[5,5=Charlie,],[16,16=Alpha,],]"
+    
+    Sorted = QSort(SmallData(1))
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[echo,2=echo,],[Foxtrot,1=Foxtrot,],]"
+    
+    Sorted = QSort(SmallData(1), vbBinaryCompare)
+    Debug.Assert EncVariant(Sorted) = "[[Alpha,16=Alpha,],[Bravo,4=Bravo,],[Charlie,5=Charlie,],[Delta,3=Delta,],[Foxtrot,1=Foxtrot,],[echo,2=echo,],]"
+End Sub
+'}}}
+
+'module
+'  name;QuickSort
+'{{{
+Option Explicit
+
+Public Function Partition(x As Variant, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Long
+    Dim Pivot As Variant
+    Dim w As Variant
+    
+    Pivot = x(Int((iL + iH) / 2))(0)
+    
+    Do While iL <= iH
+        If Compare = -1 Then
+            Do While x(iL)(0) < Pivot
+                iL = iL + 1
+            Loop
+            Do While x(iH)(0) > Pivot
+                iH = iH - 1
+            Loop
+        Else
+            Do While StrComp(x(iL)(0), Pivot, Compare) < 0
+                iL = iL + 1
+            Loop
+            Do While StrComp(x(iH)(0), Pivot, Compare) > 0
+                iH = iH - 1
+            Loop
+        End If
+        
+        If iL > iH Then Exit Do
+        
+        w = x(iL)
+        x(iL) = x(iH)
+        x(iH) = w
+        iL = iL + 1
+        iH = iH - 1
+    Loop
+    
+    Partition = iL
+End Function
+
+Public Function QuickSort(Data As Variant, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Boolean
+    Dim RightBegin As Long
+    
+    RightBegin = Partition(Data, iL, iH, Compare)
+    If iL < RightBegin - 1 Then QuickSort Data, iL, RightBegin - 1, Compare
+    If iH > RightBegin Then QuickSort Data, RightBegin, iH, Compare
+End Function
+
+Public Function QSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    QuickSort Data, 0, UBound(Data), Compare
+    QSort = Data
+End Function
+'}}}
+
+
+

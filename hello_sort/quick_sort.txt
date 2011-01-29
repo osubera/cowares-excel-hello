@@ -1,0 +1,57 @@
+'module
+'  name;QuickSort
+'{{{
+Option Explicit
+
+Public Function Partition(x As Variant, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Long
+    Dim Pivot As Variant
+    Dim w As Variant
+    
+    Pivot = x(Int((iL + iH) / 2))(0)
+    
+    Do While iL <= iH
+        If Compare = -1 Then
+            Do While x(iL)(0) < Pivot
+                iL = iL + 1
+            Loop
+            Do While x(iH)(0) > Pivot
+                iH = iH - 1
+            Loop
+        Else
+            Do While StrComp(x(iL)(0), Pivot, Compare) < 0
+                iL = iL + 1
+            Loop
+            Do While StrComp(x(iH)(0), Pivot, Compare) > 0
+                iH = iH - 1
+            Loop
+        End If
+        
+        If iL > iH Then Exit Do
+        
+        w = x(iL)
+        x(iL) = x(iH)
+        x(iH) = w
+        iL = iL + 1
+        iH = iH - 1
+    Loop
+    
+    Partition = iL
+End Function
+
+Public Function QuickSort(Data As Variant, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Boolean
+    Dim RightBegin As Long
+    
+    RightBegin = Partition(Data, iL, iH, Compare)
+    If iL < RightBegin - 1 Then QuickSort Data, iL, RightBegin - 1, Compare
+    If iH > RightBegin Then QuickSort Data, RightBegin, iH, Compare
+End Function
+
+Public Function QSort(Data As Variant, Optional Compare As Long = vbTextCompare) As Variant
+    QuickSort Data, 0, UBound(Data), Compare
+    QSort = Data
+End Function
+'}}}
+
+
