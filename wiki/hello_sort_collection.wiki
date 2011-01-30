@@ -1,0 +1,228 @@
+#summary implements sort on collection in vba
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * implements sort on collection in vba
+
+== 概要 ==
+ * VBAで Collection をソートする
+
+= Details =
+
+ * let the quick sort function in [hello_sort} use a Collection Object instead of an array.
+ * it works, but the performance is worse than expected.
+ * see [bad_collection] for the reason.
+
+== 説明 ==
+ * [hello_sort} のクイックソート関数で、配列の代わりに Collection オブジェクト上でのソートをやってみる。
+ * うまく動作するが、速度は思ったより遅い。
+ * [bad_collection] に理由がある。
+
+= Code =
+
+{{{
+'workbook
+'  name;hello_sort_collection.xls
+
+
+'module
+'  name;testSort
+'{{{
+Option Explicit
+
+Sub test_All()
+    test_QSort
+    test_measure
+End Sub
+
+Function SmallData(Optional SortBy As Long = 0) As Collection
+    Dim out As Collection
+    Dim i As Long
+    
+    Set out = New Collection
+    If SortBy = 0 Then
+        out.Add 3
+        out.Add 1
+        out.Add 4
+        out.Add 2
+        out.Add 16
+        out.Add 5
+    Else
+        out.Add "Delta"
+        out.Add "Foxtrot"
+        out.Add "Bravo"
+        out.Add "echo"
+        out.Add "Alpha"
+        out.Add "Charlie"
+    End If
+    
+    Set SmallData = out
+    Set out = Nothing
+End Function
+
+Function LargeData(Optional ByVal Count As Long = 1000) As Collection
+    Dim out As Collection
+    Dim i As Long
+    
+    Set out = New Collection
+    For i = 1 To Count
+        out.Add Replace(CStr(Rnd), "0.", "", 1, 1)
+    Next
+    
+    Set LargeData = out
+    Set out = Nothing
+End Function
+
+Sub test_measure()
+    Dim AtStart As Single
+    Dim DoneSmall As Single
+    Dim DoneLarge As Single
+    Dim xS As Collection
+    Dim xL As Collection
+    
+    Set xS = SmallData
+    Set xL = LargeData
+    
+    AtStart = Timer()
+    QSort xS
+    DoneSmall = Timer()
+    QSort xL
+    DoneLarge = Timer()
+    Debug.Print "Quick Sort", DoneSmall - AtStart, DoneLarge - DoneSmall
+    
+    Set xS = Nothing
+    Set xL = Nothing
+End Sub
+
+Sub test_QSort()
+    Dim x0 As Collection
+    Dim x1 As Collection
+    
+    Set x0 = SmallData(0)
+    Set x1 = SmallData(1)
+    
+    QSort x0, -1
+    Debug.Assert EncVariant(x0) = "[1,2,3,4,5,16,]"
+    
+    QSort x1
+    Debug.Assert EncVariant(x1) = "[Alpha,Bravo,Charlie,Delta,echo,Foxtrot,]"
+    
+    QSort x1, vbBinaryCompare
+    Debug.Assert EncVariant(x1) = "[Alpha,Bravo,Charlie,Delta,Foxtrot,echo,]"
+    
+    Set x0 = Nothing
+    Set x1 = Nothing
+End Sub
+
+Function EncVariant(Data As Variant) As String
+    Dim i As Long
+    Dim x As Variant
+    Dim out As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    Dim Delimiter As String
+    Dim Bra As Variant
+    
+    Bra = Array("[", "]", ",")
+    ArrayBegin = Bra(0)
+    ArrayEnd = Bra(1)
+    Delimiter = Bra(2)
+    
+    If IsError(Data) Or IsEmpty(Data) Then
+        ' IsError(Array(1,,2)(1)) = True
+        ' IsEmpty(Array(1,Empty,2)(1)) = True
+        out = ""
+    ElseIf IsArray(Data) Then
+        out = ArrayBegin
+        For Each x In Data
+            out = out & EncVariant(x) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        If TypeName(Data) = "Collection" Then
+            out = ArrayBegin
+            For i = 1 To Data.Count
+                out = out & EncVariant(Data(i)) & Delimiter
+            Next
+            out = out & ArrayEnd
+        Else
+            out = TypeName(Data)
+        End If
+    Else
+        out = Data
+    End If
+    
+    EncVariant = out
+End Function
+'}}}
+
+'module
+'  name;QuickSort
+'{{{
+Option Explicit
+
+' quick sort on a Collection Object
+
+Public Function Partition(x As Object, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Long
+    Dim Pivot As Variant
+    
+    Pivot = x(Int((iL + iH) / 2))
+    
+    Do While iL <= iH
+        If Compare = -1 Then
+            Do While x(iL) < Pivot
+                iL = iL + 1
+            Loop
+            Do While x(iH) > Pivot
+                iH = iH - 1
+            Loop
+        Else
+            Do While StrComp(x(iL), Pivot, Compare) < 0
+                iL = iL + 1
+            Loop
+            Do While StrComp(x(iH), Pivot, Compare) > 0
+                iH = iH - 1
+            Loop
+        End If
+        
+        If iL < iH Then
+            x.Add x(iL), After:=iH
+            x.Add x(iH), After:=iL
+            x.Remove iL
+            x.Remove iH
+        End If
+        iL = iL + 1
+        iH = iH - 1
+    Loop
+    
+    Partition = iL
+End Function
+
+Public Function QuickSort(Data As Object, ByVal iL As Long, ByVal iH As Long, _
+                Optional Compare As Long = vbTextCompare) As Boolean
+    Dim RightBegin As Long
+    
+    RightBegin = Partition(Data, iL, iH, Compare)
+    If iL < RightBegin - 1 Then QuickSort Data, iL, RightBegin - 1, Compare
+    If iH > RightBegin Then QuickSort Data, RightBegin, iH, Compare
+End Function
+
+Public Function QSort(Data As Object, Optional Compare As Long = vbTextCompare) As Long
+    QuickSort Data, 1, Data.Count, Compare
+End Function
+'}}}
+
+
+
+}}}
+
+= Results =
+
+
+{{{
+Quick Sort     0             1.203125
+}}}
