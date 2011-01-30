@@ -10,10 +10,12 @@
 
 = Details =
 
+ * important: see also [bad_collection] .
  * !ReDim is a standard solution to handle this, but too much use of !ReDim costs.
  * the Collection object can do this.
 
 == 説明 ==
+ * [bad_collection] に重要な追加情報あり。
  * 通常は !ReDim で良いが、頻繁に変えるには !ReDim は重い。
  * Collection object を使うとよい。
 
