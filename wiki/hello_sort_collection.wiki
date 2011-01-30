@@ -12,12 +12,12 @@
 
 = Details =
 
- * let the quick sort function in [hello_sort} use a Collection Object instead of an array.
+ * let the quick sort function in [hello_sort] use a Collection Object instead of an array.
  * it works, but the performance is worse than expected.
  * see [bad_collection] for the reason.
 
 == 説明 ==
- * [hello_sort} のクイックソート関数で、配列の代わりに Collection オブジェクト上でのソートをやってみる。
+ * [hello_sort] のクイックソート関数で、配列の代わりに Collection オブジェクト上でのソートをやってみる。
  * うまく動作するが、速度は思ったより遅い。
  * [bad_collection] に理由がある。
 
