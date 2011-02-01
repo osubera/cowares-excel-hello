@@ -30,6 +30,7 @@
  * ルールは上優先で解釈するので、単価の高い（優先度の高い）順に並べておく。
  * フラグとルールの合致するものが無ければ、単価は 0 円とする。
  * ルールエリアのイメージ（開発前なので、あくまでイメージ）
+    http://2.bp.blogspot.com/_EUW0nrj9XlM/TUeYhzpng0I/AAAAAAAAACU/eCSGSM4YS3A/s1600/shot1.png
 
 
 = Downloads =
