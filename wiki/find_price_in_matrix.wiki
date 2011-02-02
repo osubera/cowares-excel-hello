@@ -29,18 +29,1058 @@
  * フラグごとに単価を決めるルールエリアをワークシートの下方に設ける。 そこに印を入れる方法でルールを表現する。 計算対象行の対応する欄すべてに記入があれば、その単価を使う。
  * ルールは上優先で解釈するので、単価の高い（優先度の高い）順に並べておく。
  * フラグとルールの合致するものが無ければ、単価は 0 円とする。
- * ルールエリアのイメージ（開発前なので、あくまでイメージ）
+ * ルールエリアのイメージ
     http://2.bp.blogspot.com/_EUW0nrj9XlM/TUeYhzpng0I/AAAAAAAAACU/eCSGSM4YS3A/s1600/shot1.png
 
 
 = Downloads =
 
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=find_price_in_matrix downloads / ダウンロード]
 
 = How to use =
 
 == 使い方 ==
+ * ワークシート関数をマクロで定義しているので、マクロを有効にしないと動かない。
+ * `FindPrice` というワークシート関数が追加されているので、それで単価を計算する。
+
+=== ワークシート関数 !FindPrice  / Worksheet Function ===
+ * =!FindPrice(ルールエリア, フラグ, 行データ) のように書く。
+    * このブックでは B列に次のような式が入れてある。 =findprice(ルールエリア,F3,E3:P3)
+    * このブックでは `ルールエリア` の範囲名が定義されている。 =!PriceMatrix!A1:N30
+ * 第１引数：ルールエリア
+    * 第２軸のルールと単価を定義した表の範囲を参照する。
+ * 第２引数：フラグ
+    * 第１軸の値を指定する。
+ * 第３引数：行データ
+    * 第２軸の値の入った範囲を指定する。
+    * ルールエリアの項目と同じものが同じ順で並んでいなければならない。
+ * 戻り値：単価
+    * ルールに合致する単価を返す。合致するルールが無い場合、 0 を返す。
+
+=== ルールエリア / RuleArea ===
+ * `PriceMatrix` ワークシートに、範囲名 `ルールエリア` で定義されている。
+ * シート名は他のものに変えてもよい。
+ * 範囲名はワークシート関数で参照するだけなので、両方を同一のものに変更するなら、別の名称でも構わない。範囲名を使わない、生のアドレスでもよい。
+ * ルールエリアの範囲ごと、切り取りと貼り付けをすれば、どのシートにでも移せる。シートの左上に置く必要もなく、好きな位置に置いてよい。計算データのシートと１枚にまとめてもよい。
+ * ルールの行やカラムを増減した時は、範囲名もそれにあわせて修正する必要がある。（上手に増減すれば、範囲名は追随する）
+
+=== ルールエリアの行 / Rows of !RuleArea ===
+ * 先頭４行は、読むための見出しで、実際のルールは５行目から始まる。
+ * ルールは上から順に評価する。
+ * 各行のルールを評価する際、フラグが一致し、指定項目がすべて埋まっていたら、そのルールを即座に採用する。
+ * したがって、優先度の高い順（条件が厳しい順）にルールを書く必要がある。
+
+=== ルールエリアのカラム / Columns of !RuleArea ===
+ * １桁目が、フラグ。
+ * ２桁目が、単価。
+ * ３桁目以降に、２軸のルールが並ぶ。
+ * ３桁目以降は、 `FindPrice` 関数の第３引数と同じ項目なので、物件データシートの項目をそのまま順に記載したものとなる。
+ * 上の理由により、フラグなどの不要な項目も入っている。
+ * ルール指定方法は、該当項目のセルに `1` を入れる。 このとき、この項目が必須になり、この欄が埋まっているデータのみに、この単価が使われる。実際には `1` 以外でも、何かが入っていれば指定したことになる。
+
+=== 単価の上書き / overwriting the price ===
+ * `Sheet1` ワークシートの `A:B列` には、 `FindPrice` 関数による計算と、それを上書きする見本が載っている。
+ * `B列` は、すべて、 `FindPrice` による計算値になっていて、 `B4` などが、該当ルール無しで 0 になっている。
+ * `A列` は、基本的には `=B4` のような式で、 `B列` と同一の数値になっているが、ここを上書きして `4` などと入れれば、セルが赤色になる。
+ * これは条件書式を使っているので、セルと一緒にコピーされるし、エクセルメニューから変更もできる。
+
+=== 他のブックで使う / work with another Workbook ===
+ * コピーして、このブックを増やして使う方法と、このブックを外部参照して使う方法がある。
+ 
+ # コピーする方法
+    * ブックをコピーして、 `Sheet1` を書き換えればよい。
+    * 計算ルールが毎月違う、という場合、この方法で、新しい計算に対応したブックを作っていくことができる。
+ # 外部参照する方法
+    * =find_price_in_matrix.xls!findprice(find_price_in_matrix.xls!ルールエリア,C4,B4:M4)
+    * このように、エクセルの通常の外部参照と同じ方法で、別のブックから、ワークシート関数とルールエリアを呼び出して使うことができる。
+    * １つのルールで複数のブックを計算したい場合や、計算した数値を値コピーして確定してしまう場合には、この方法で手軽に計算だけ利用できる。
+
 
 = Code =
 
 {{{
+'workbook
+'  name;find_price_in_matrix.xls
+
+'require
+
+'worksheet
+'  name;Sheet1
+
+'cells-formula
+'  address;A1:V18
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;21
+'         ;22
+'         ;23
+'         ;24
+'         ;25
+'         ;26
+'         ;27
+'         ;28
+'         ;29
+'         ;30
+'         ;31
+'         ;32
+'         ;33
+'         ;34
+'         ;35
+'         ;36
+'         ;37
+'         ;確定単価
+'         ;単価計算
+'         ;
+'         ;
+'         ;指定サイトURL
+'         ;フラグ
+'         ;電話
+'         ;住所
+'         ;fax
+'         ;確認
+'         ;記号
+'         ;ポイント
+'         ;1回目確認URL
+'         ;備考
+'         ;名前
+'         ;事務所
+'         ;
+'         ;
+'         ;
+'         ;2回目確認URL
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;1
+'         ;http://www.yahoo.co.jp/
+'         ;3
+'         ;888-888-8888
+'         ;文京区本郷７－３－１
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;2
+'         ;http://www.yahoo.co.jp/
+'         ;3
+'         ;
+'         ;文京区本郷７－３－１
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;3
+'         ;http://www.yahoo.co.jp/
+'         ;9
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;4
+'         ;http://www.yahoo.co.jp/
+'         ;4
+'         ;
+'         ;文京区本郷７－３－１
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;5
+'         ;http://www.yahoo.co.jp/
+'         ;3
+'         ;888-888-8888
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;6
+'         ;http://www.yahoo.co.jp/
+'         ;0
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;7
+'         ;http://www.yahoo.co.jp/
+'         ;0
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;8
+'         ;http://www.yahoo.co.jp/
+'         ;1
+'         ;888-888-8888
+'         ;文京区本郷７－３－１
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;9
+'         ;http://www.yahoo.co.jp/
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;10
+'         ;http://www.yahoo.co.jp/
+'         ;0
+'         ;
+'         ;
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;11
+'         ;http://www.yahoo.co.jp/
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;12
+'         ;http://www.yahoo.co.jp/
+'         ;9
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;13
+'         ;
+'         ;9
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;14
+'         ;http://www.yahoo.co.jp/
+'         ;2
+'         ;
+'         ;
+'         ;777-777-7777
+'         ;
+'         ;
+'         ;
+'         ;http://www.yahoo.co.jp/
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=RC[1]
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;15
+'         ;http://www.yahoo.co.jp/
+'         ;0
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1.5
+'         ;=findprice(ルールエリア,RC[4],RC[3]:RC[14])
+'         ;
+'         ;16
+'         ;http://www.yahoo.co.jp/
+'         ;1
+'         ;
+'         ;文京区本郷７－３－１
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+
+'worksheet
+'  name;PriceMatrix
+
+'cells-formula
+'  address;A1:N30
+'         ;１軸
+'         ;単価
+'         ;２軸ルール
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;0
+'         ;1
+'         ;2
+'         ;3
+'         ;4
+'         ;5
+'         ;6
+'         ;7
+'         ;8
+'         ;9
+'         ;10
+'         ;11
+'         ;フラグ
+'         ;
+'         ;指定サイトURL
+'         ;フラグ
+'         ;電話
+'         ;住所
+'         ;fax
+'         ;確認
+'         ;記号
+'         ;ポイント
+'         ;1回目確認URL
+'         ;備考
+'         ;名前
+'         ;事務所
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;0
+'         ;2
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;0
+'         ;1.5
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;3.5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;3
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;3
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;2.5
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;2
+'         ;3
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;2
+'         ;2.5
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;3
+'         ;5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;3
+'         ;4.5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;3
+'         ;4.5
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;3
+'         ;4
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;9
+'         ;2
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;9
+'         ;1.5
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;4.5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;4.5
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;4
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;3
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;2.5
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;3.5
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;3
+'         ;1
+'         ;
+'         ;1
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;3
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;2.5
+'         ;1
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;2
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;4
+'         ;1.5
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+
+'cells-name
+'  ;=PriceMatrix!R1C1:R30C14
+'  ;ルールエリア
+
+
+
+'module
+'  name;FindPriceInMatrix
+'{{{
+Option Explicit
+
+Public Function FindPrice(RuleArea As Range, ByVal Flag As Long, Rules As Range) As Variant
+    Dim out As Variant
+    Dim Mx As Variant
+    Dim MxRow As Variant
+    Dim D As Variant
+    
+    out = 0
+    
+    SmartArray RuleArea, Rules, Mx, D
+    
+    For Each MxRow In Mx
+        If IsMet1st(MxRow, Flag) Then
+            If IsMet2nd(MxRow, D) Then
+                out = SelectPrice(MxRow)
+                Exit For
+            End If
+        End If
+    Next
+    
+    FindPrice = out
+End Function
+
+Private Function IsMet1st(MxRow As Variant, Flag As Long) As Boolean
+    IsMet1st = (Flag = MxRow(1))
+End Function
+
+Private Function IsMet2nd(MxRow As Variant, Data As Variant) As Boolean
+    Dim i As Long
+    
+    IsMet2nd = False
+    
+    For i = 0 To UBound(MxRow(2))
+        If Not IsEmpty(MxRow(2)(i)) Then
+            If IsEmpty(Data(i)) Then Exit Function
+        End If
+    Next
+    
+    IsMet2nd = True
+End Function
+
+Private Function SelectPrice(MxRow As Variant) As Variant
+    SelectPrice = CDec(MxRow(0))
+End Function
+
+Private Function SmartArray(RuleArea As Range, Data As Range, _
+        ByRef VarRuleArea As Variant, ByRef VarData As Variant) As Long
+    Const MxRstart = 5
+    Const MxCstart = 3
+    Const MxCprice = 2
+    Const MxCflag = 1
+    Dim outA() As Variant
+    Dim outB() As Variant
+    Dim itemA() As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim UpData As Long
+    Dim out As Long
+    
+    ReDim outA(0 To RuleArea.Rows.Count - MxRstart)
+    ReDim itemA(0 To RuleArea.Columns.Count - MxCstart)
+    ReDim outB(0 To UBound(itemA))
+    out = UBound(itemA) + 1
+    
+    For i = 0 To UBound(outA)
+        For j = 0 To UBound(itemA)
+            itemA(j) = RuleArea(i + MxRstart, j + MxCstart)
+        Next
+        outA(i) = Array(RuleArea(i + MxRstart, MxCprice).Value, _
+                        RuleArea(i + MxRstart, MxCflag).Value, _
+                        itemA)
+    Next
+    
+    UpData = Data.Cells.Count - 1
+    For i = 0 To UBound(outB)
+        If i > UpData Then Exit For
+        outB(i) = Data.Cells(i + 1)
+    Next
+    
+    VarRuleArea = outA
+    VarData = outB
+    SmartArray = out
+End Function
+
+
+'=== unit test begin ===
+#If False Then
+
+Sub test_IsMet1st()
+    Debug.Assert IsMet1st(Array(100, 0), 0)
+    Debug.Assert Not IsMet1st(Array(100, 0), 1)
+    Debug.Assert IsMet1st(Array(100, 1), 1)
+    Debug.Assert Not IsMet1st(Array(100, 1), 2)
+End Sub
+
+Sub test_IsMet2nd()
+    Debug.Assert IsMet2nd(Array(0, 0, Array(1, 1)), Array("a", "a"))
+    Debug.Assert IsMet2nd(Array(0, 0, Array(1, Empty, 1)), Array("a", Empty, "a"))
+    Debug.Assert IsMet2nd(Array(0, 0, Array(1, Empty, 1)), Array("a", "a", "a"))
+    Debug.Assert Not IsMet2nd(Array(0, 0, Array(1, Empty, 1)), Array("a", "a", Empty))
+End Sub
+
+Sub test_SelectPrice()
+    Debug.Assert SelectPrice(Array(12.3)) = 12.3
+End Sub
+
+Sub test_SmartArray()
+    Dim x As Range
+    Dim y As Range
+    Dim a As Variant
+    Dim b As Variant
+    Dim c As Long
+    
+    Set x = PriceMatrix.Range("A1:L12")
+    Set y = Sheet1.Range("D3:M3")
+    
+    c = SmartArray(x, y, a, b)
+    
+    Stop
+End Sub
+
+Sub test_FindPrice()
+    Dim x As Range
+    Dim y As Range
+    
+    Set x = PriceMatrix.Range("A1:L12")
+    Set y = Sheet1.Range("D3:M3")
+    
+    Debug.Print FindPrice(x, 0, y)
+    Debug.Print FindPrice(x, 1, y)
+    Debug.Print FindPrice(x, 9, y)
+    Debug.Print TypeName(FindPrice(x, 0, y))
+    
+End Sub
+
+#End If
+'=== unit test end ===
+'}}}
+
+
+
 }}}
