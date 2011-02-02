@@ -12,6 +12,12 @@
 
 = Requirements =
 
+ * select a price using two axis.
+ * the flag (the 1st axis) is a value to select a group of prices.
+ * each flag (each group) has its own rules (the 2nd axis) to select a final price.
+ * because the rules are not finalized, we need to make an exception. in that case, the price overwritten should be explicitly distiguished by a sign.
+ * because the rules are variable, we need a flexible way to apply a new one.
+
 == 要望 ==
  * ２つの軸から単価を決める。
  * フラグ（第１軸）は、おおまかなグループ分けをする。
@@ -21,6 +27,13 @@
 
 = Details =
 
+ * both the 1st and the 2nd axis are placed vertically in columns. we select a final unit price from a price table of vertical matrix.
+ * to overwrite a price calculated, we use 2 cells for a price, to calculate and to be overwritten.
+ * the 1st axis is a value of the flag.
+ * there is a rule area in a worksheet. the rules are defined there by putting some values in it. each value specify that the column is required to meet the rule. selects the price when all of them are satisfied.
+ * an upper rule has a priority than the lower. maybe, the higher price is to be upper.
+ * calculated price is 0 when no rules are met.
+ * we have an image of a rule area below.
 
 == 説明 ==
  * 第１軸と第２軸を共にカラムとして縦方向に持つ、縦型のマトリックス単価表を作り、それを参照して最終単価を決める。
@@ -38,6 +51,9 @@
  * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=find_price_in_matrix downloads / ダウンロード]
 
 = How to use =
+
+ * needs to enable the macro, because a worksheet function is described by vba macro.
+ * `FindPrice` Worksheet Function is available to calculate a unit price.
 
 == 使い方 ==
  * ワークシート関数をマクロで定義しているので、マクロを有効にしないと動かない。
