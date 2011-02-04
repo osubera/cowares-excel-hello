@@ -1,0 +1,22 @@
+'cells-formula
+'  address;A7:A8
+'         ;=SUM(A4:A6)
+'         ;=Sheet2!A1
+
+
+'cells-text
+'  address;A7:A8
+'         ;6
+'         ;2011/2/4 15:31
+
+
+'cells-formula
+'  address;A9
+'         ;=[Book2]Sheet1!$A$1
+
+
+'cells-text
+'  address;A9
+'         ;fix
+
+
