@@ -83,7 +83,7 @@
  <tr><th>finalize_as_value_2k.xls</th><td>Excel 2000 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
  <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
  <tr><th>初めにお読みください.html</th><td>この解説書です。</td></tr>
- <tr><th>std.css, vba2.js, shop.png</th><td>解説書の使うファイルです。</td></tr>
+ <tr><th>std.css, vba2.js, shop.png, shot1.png, test_log.txt</th><td>解説書の使うファイルです。</td></tr>
  </table>
 </li>
 </ol>
@@ -92,16 +92,18 @@
 <h2 onclick="smr1(this)">ご使用の手引き</h2>
 <div class="tree">
 
+<img src="shot1.png" alt="Excel 2000 toolbar" />
+
 <ol>
 <li>このソフトウェアを開きます。</li>
 <li>計算値を確定したいエクセルブックを開きます。</li>
 <li>アドインリボンかツールバーで、操作を行います。
-<ul>
+<ol>
 <li>「値確定」を押すと確定操作を実行します。</li>
 <li>「選択セル」「シート」「ブック」のいずれかを選ぶと、確定操作の対象範囲を指定できます。</li>
 <li>「すべての式」「別シート参照」「外部ブック参照」のいずれかを選ぶと、確定操作の対象を数式の参照先により限定できます。</li>
-<il>「ログ」スイッチがオンの時は、確定操作の記録をメモ帳に出力します。</li>
-</ul>
+<li>「ログ」スイッチがオンの時は、確定操作の記録をメモ帳に出力します。</li>
+</ol>
 </li>
 <li>とりあえず使ってみる。
 <ol>
@@ -112,6 +114,7 @@
 <li>セルA1の日付が確定値になったはずです。</li>
 </ol>
 </li>
+<li><a href="test_log.txt">ログ出力のサンプル</a></li>
 </ol>
 
 </div>
@@ -236,7 +239,7 @@
 
 <div class="copyright"><a href="http://kobobau.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.com</a></div>
 
-<div class="lastupdate">2011.2.2 更新</div>
+<div class="lastupdate">2011.2.4 更新</div>
 
 <script type="text/javascript" src="vba2.js"></script>
 </body>
