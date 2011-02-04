@@ -1,15 +1,17 @@
-/* bau css;  http://kobobau.com/copy.html
+/* std.css;  http://kobobau.com/copy.html
 Copyright (C) 2002-2011 Tomizono */
 
 * { font-size:1em; line-height:160%; }
-body { background-color: #ffff99; }
-h2 { background-color:#663300; color:white; padding:5px; }
-li { background-color:#ffcc99; padding-right:1px; padding-bottom:1px; }
-li li { background-color:#ffff99; }
-table { border:thin solid #ff0033; background-color:white; margin:18px; }
-td { border:thin solid #006699; padding-left:10px; }
-th { background-color:#006699; color:white; white-space:nowrap; }
-.copyright, .productid { background-color:#ff6600; text-align:right; font-weight:bold; border:4px double #ffcc99; }
-
-h2 span{ font-size: 12px; color: red; background-color: yellow; margin-left: 40px; }
+body { background-color: #fff0f8; color:#201028; }
+h2 { background-color:#60a07f; color:white; padding:5px; }
+li { background-color:#f8f4f0; padding-right:1px; padding-bottom:1px; }
+li li { background-color:#fff8f0; }
+table { border:thin solid #60e000; background-color:white; margin:18px; }
+td { border:thin solid #60a0ff; padding-left:10px; }
+th { background-color:#60a0ff; color:white; white-space:nowrap; }
+.copyright, .productid { background-color:#ffa000; text-align:right; font-weight:bold; border:4px double #ffe000; }
+h2 span{ font-size: 12px; color: #ff00a0; background-color: #ffe000; margin-left: 40px; }
 h2 span:active{ border:medium inset; }
+img{border-width:0px 0px thin 0px}
+.shop { float:left; width:50%; }
+.compact { clear:both; } .compact .sectionlist { float:left; } .compact .sectionlistr { float:right; }
