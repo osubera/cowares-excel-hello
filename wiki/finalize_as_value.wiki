@@ -12,18 +12,20 @@
 
 = Details =
 
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png
+
  * removes cell formulas to finalize values in cells.
- * `値確定` button is to execute finalizing.
- * select `選択セル`, `シート` or `ブック` to change the target range of execution.
- * select `すべての式`, `別シート参照` or `外部ブック参照` to change the target by formula references.
- * outputs detail logs when `ログ` button is turned on.
+ # `値確定` button is to execute finalizing.
+ # select `選択セル`, `シート` or `ブック` to change the target range of execution.
+ # select `すべての式`, `別シート参照` or `外部ブック参照` to change the target by formula references.
+ # outputs detail logs when `ログ` button is turned on.
 
 == 説明 ==
  * 数式のセルを値に置き換える。
- * 「値確定」を押すと確定操作を実行。
- * 「選択セル」「シート」「ブック」のいずれかを選ぶと、確定操作の対象範囲を指定できる。
- * 「すべての式」「別シート参照」「外部ブック参照」のいずれかを選ぶと、確定操作の対象を数式の参照先により限定できる。
- * 「ログ」スイッチがオンの時は、確定操作の記録をメモ帳に出力する。
+ # 「値確定」を押すと確定操作を実行。
+ # 「選択セル」「シート」「ブック」のいずれかを選ぶと、確定操作の対象範囲を指定できる。
+ # 「すべての式」「別シート参照」「外部ブック参照」のいずれかを選ぶと、確定操作の対象を数式の参照先により限定できる。
+ # 「ログ」スイッチがオンの時は、確定操作の記録をメモ帳に出力する。
 
 = Downloads =
 
@@ -1659,5 +1661,7 @@ End Sub
 = Snapshots =
 
  * Excel 2000 toolbar
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png
 
  * Excel 2007 ribbon
+http://4.bp.blogspot.com/_EUW0nrj9XlM/TUx3NbDByFI/AAAAAAAAACc/kTA8saX1TmQ/s1600/shot2.png
