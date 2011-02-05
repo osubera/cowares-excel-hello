@@ -1,0 +1,3 @@
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/37kagawa.zip C:\tmp\oogaki37kagawa.zip
+http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/37kagawa.zip C:\tmp\kogaki37kagawa.zip
+http://www.post.japanpost.jp/zipcode/dl/roman/37kagawa_rome.zip C:\tmp\roman37kagawa.zip
