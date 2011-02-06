@@ -17,14 +17,16 @@
  * no preconditions are required for almost Windows, because it's all written by `VBScript` .
  * and free to customize.
  * to download a single file, do `CScript httpget.vbs TARGET_URL SAVE_FILE_NAME`
- * to download multiple files, do `CScript httpgets.vbs &lt; FILE_NAME_OF_URL_AND_SAVE_LIST`
+ * to download multiple files, do `CScript httpgets.vbs < FILE_NAME_OF_URL_AND_SAVE_LIST`
+ * see [hello_http_get] and [hello_charset_adodb_stream]
 
 == 説明 ==
  * 個別ページやファイルをピンポイント指定でダウンロードできる他、URLの一覧をテキストファイルで作っておき、一括して取得することもできる。 
  * `VBScript` だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
  * 好き勝手にカスタマイズできる。
  * 単一ファイルの取得は、 `CScript httpget.vbs ダウンロードするURL名 保存するファイル名`
- * 複数ファイルの取得は、 `CScript httpgets.vbs &lt; ダウンロードするURLとファイル名のリスト`
+ * 複数ファイルの取得は、 `CScript httpgets.vbs < ダウンロードするURLとファイル名のリスト`
+ * [hello_http_get] と [hello_charset_adodb_stream] を参考
 
 = Downloads =
 
