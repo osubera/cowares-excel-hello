@@ -33,8 +33,8 @@ End Sub
 
 Sub HttpGet(Url, FileName)
     Dim tp
-    'Set tp = CreateObject("MSXML2.XMLHTTP")
-    Set tp = CreateObject("MSXML2.XMLHTTP.6.0")
+    Set tp = CreateObject("MSXML2.XMLHTTP")
+    'Set tp = CreateObject("MSXML2.XMLHTTP.6.0")
     
     tp.Open "GET", Url, False
     tp.send
