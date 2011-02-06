@@ -1,0 +1,188 @@
+#summary download web pages in command prompt
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * download web pages in command prompt
+
+== 概要 ==
+ * コマンドラインで、ウェブページをダウンロードする
+
+= Details =
+
+
+ * do a pinpoint downloading to a web page of file. and do a bulk downloading to a list of urls.
+ * no preconditions are required for almost Windows, because it's all written by `VBScript` .
+ * and free to customize.
+ * to download a single file, do `CScript httpget.vbs TARGET_URL SAVE_FILE_NAME`
+ * to download multiple files, do `CScript httpgets.vbs &lt; FILE_NAME_OF_URL_AND_SAVE_LIST`
+
+== 説明 ==
+ * 個別ページやファイルをピンポイント指定でダウンロードできる他、URLの一覧をテキストファイルで作っておき、一括して取得することもできる。 
+ * `VBScript` だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
+ * 好き勝手にカスタマイズできる。
+ * 単一ファイルの取得は、 `CScript httpget.vbs ダウンロードするURL名 保存するファイル名`
+ * 複数ファイルの取得は、 `CScript httpgets.vbs &lt; ダウンロードするURLとファイル名のリスト`
+
+= Downloads =
+
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=http_get downloads / ダウンロード]
+
+= How to use =
+
+ # open a Windows Command Prompt. (cmd.exe)
+ # enter `CScript httpget.vbs http://cowares.nobody.jp/favicon.ico favicon.ico`
+ # you've got a favicon.ico saved in the current directory.
+
+== 使い方 ==
+ # コマンドプロンプトを開く。
+ # `CScript httpget.vbs http://cowares.nobody.jp/favicon.ico favicon.ico`
+ # カレントディレクトリに favicon.ico が保存されるはず。
+
+
+= Code =
+
+=== httpget.vbs ===
+
+{{{
+' httpget
+' download a file from web
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+' usage> CScript httpget.vbs http://cowares.nobody.jp/favicon.ico C:\tmp\favicon.ico
+
+On Error Resume Next
+Set Args = WScript.Arguments
+Main Args(0), Args(1)
+If Err.Number <> 0 Then WScript.Echo Err.Description
+WScript.Quit(Err.Number)
+
+Sub Main(Url, FileName)
+    Dim tp
+    Set tp = CreateObject("MSXML2.XMLHTTP")
+    'Set tp = CreateObject("MSXML2.XMLHTTP.6.0")
+    
+    tp.Open "GET", Url, False
+    tp.send
+    WScript.Echo tp.Status & " " & tp.statusText & " " & Url
+    SaveBinaryFile tp.responseBody, FileName
+    
+    Set tp = Nothing
+End Sub
+
+Function SaveBinaryFile(Data, FileName)
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    Dim Stream
+    
+    Set Stream = CreateObject("ADODB.Stream")
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write Data
+    Stream.SaveToFile FileName, adSaveCreateOverWrite
+    Stream.Close
+    Set Stream = Nothing
+End Function
+}}}
+
+=== httpgets.vbs ===
+
+{{{
+' httpgets
+' download files from web
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+' usage> CScript httpgets.vbs < urls.txt
+
+' urls.txt contains list of url and filename pairs
+' see examples in urls.txt
+
+On Error Resume Next
+Main
+If Err.Number <> 0 Then WScript.Echo Err.Description
+WScript.Quit(Err.Number)
+
+Sub Main()
+    Dim Text, UrlFileName
+    Dim StdIn
+    Set StdIn = WScript.StdIn
+    
+    Do Until StdIn.AtEndOfStream
+        Text = Trim(StdIn.ReadLine)
+        If Left(Text,4) = "http" Then
+            UrlFileName = Split(Text, " ", 2)
+            If Ubound(UrlFileName) = 1 Then
+                HttpGet UrlFileName(0), UrlFileName(1)
+            End If
+        End If
+    Loop
+    
+    Set StdIn = Nothing
+End Sub
+
+Sub HttpGet(Url, FileName)
+    Dim tp
+    Set tp = CreateObject("MSXML2.XMLHTTP")
+    'Set tp = CreateObject("MSXML2.XMLHTTP.6.0")
+    
+    tp.Open "GET", Url, False
+    tp.send
+    WScript.Echo tp.Status & " " & tp.statusText & " " & Url
+    SaveBinaryFile tp.responseBody, FileName
+    
+    Set tp = Nothing
+End Sub
+
+Function SaveBinaryFile(Data, FileName)
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    Dim Stream
+    
+    Set Stream = CreateObject("ADODB.Stream")
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write Data
+    Stream.SaveToFile FileName, adSaveCreateOverWrite
+    Stream.Close
+    Set Stream = Nothing
+End Function
+}}}
+
+=== example.bat ===
+
+{{{
+@ECHO OFF
+
+REM httpget example
+
+SET MSG=Done
+CScript httpget.vbs http://cowares.nobody.jp/favicon.ico C:\tmp\favicon.ico
+IF NOT ERRORLEVEL 0 SET MSG=Error %ERRORLEVEL%
+ECHO %MSG%
+
+SET MSG=Done
+CScript httpget.vbs http://cowares.nobody.jp/favicon.ic C:\tmp\favicon.err
+IF NOT ERRORLEVEL 0 SET MSG=Error %ERRORLEVEL%
+ECHO %MSG%
+
+REM httpgets example
+
+SET MSG=Done
+CScript httpgets.vbs < urls.txt
+IF NOT ERRORLEVEL 0 SET MSG=Error %ERRORLEVEL%
+ECHO %MSG%
+
+}}}
+
+=== urls.txt ===
+
+{{{
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/37kagawa.zip C:\tmp\oogaki37kagawa.zip
+http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/37kagawa.zip C:\tmp\kogaki37kagawa.zip
+http://www.post.japanpost.jp/zipcode/dl/roman/37kagawa_rome.zip C:\tmp\roman37kagawa.zip
+}}}
+
