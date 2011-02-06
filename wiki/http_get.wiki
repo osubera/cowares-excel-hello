@@ -12,6 +12,7 @@
 
 = Details =
 
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TU3_c7YopvI/AAAAAAAAACk/K7ZgW1HjSJQ/s1600/shot1.png
 
  * do a pinpoint downloading to a web page of file. and do a bulk downloading to a list of urls.
  * no preconditions are required for almost Windows, because it's all written by `VBScript` .
