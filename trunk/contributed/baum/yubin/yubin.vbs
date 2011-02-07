@@ -96,6 +96,8 @@ Function DoSearch()
         Else
             out = DoJigyoSearch()
         End If
+    Case Else
+        out = ""
     End Select
     'out = Bag.Joken.Dump
     
@@ -229,6 +231,12 @@ Function FromYubin()
         "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
         "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
         " WHERE yubin BETWEEN '" & Bag.Joken.YubinB & "' AND '" & Bag.Joken.YubinE & "' ORDER BY yubin")
+    If FromYubin <> "" Then Exit Function
+    
+    FromYubin = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE yubin BETWEEN '" & Bag.Joken.YubinB & "' AND '" & Bag.Joken.YubinE & "' ORDER BY yubin")
 End Function
 
 Function FromShi()
@@ -247,13 +255,13 @@ Function FromCho()
     FromCho = ListRecords(Bag.Connect, _
         "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
         "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
-        " WHERE cho.code = " & Code & " AND cho_name LIKE '" & Bag.Joken.Cho & "%' ORDER BY yubin")
+        " WHERE cho.code = " & Code & " AND cho_hira LIKE '" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
     If FromCho <> "" Then Exit Function
     
     FromCho = ListRecords(Bag.Connect, _
         "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
         "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
-        " WHERE cho.code = " & Code & " AND cho_hira LIKE '" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
+        " WHERE cho.code = " & Code & " AND cho_name LIKE '" & Bag.Joken.Cho & "%' ORDER BY yubin")
     If FromCho <> "" Then Exit Function
     
     FromCho = FromShi()
@@ -266,13 +274,13 @@ Function FromJigyo()
     FromJigyo = ListRecords(Bag.Connect, _
         "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
         "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
-        " WHERE cho.code = " & Code & " AND cho_name LIKE '" & Bag.Joken.Cho & "%' ORDER BY yubin")
+        " WHERE cho.code = " & Code & " AND cho_hira LIKE '%" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
     If FromJigyo <> "" Then Exit Function
     
     FromJigyo = ListRecords(Bag.Connect, _
         "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
         "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
-        " WHERE cho.code = " & Code & " AND cho_hira LIKE '" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
+        " WHERE cho.code = " & Code & " AND cho_name LIKE '%" & Bag.Joken.Cho & "%' ORDER BY yubin")
 End Function
 
 Function GetShi()
@@ -340,8 +348,11 @@ Class GlobalResources
         Set Shell = CreateObject("WScript.Shell")
         Set Joken = New SearchConditions
         
-        KenKotei = Shell.Environment("USER")("KENKOTEI")
-        If KenKotei <> ""  Then ShiKotei = Shell.Environment("USER")("SHIKOTEI")
+        'KenKotei = Shell.Environment("USER")("KENKOTEI") ' this doesn't work
+        KenKotei = Shell.ExpandEnvironmentStrings("%KENKOTEI%")
+        If KenKotei = "%KENKOTEI%" Then KenKotei = ""
+        If KenKotei <> ""  Then ShiKotei = Shell.ExpandEnvironmentStrings("%SHIKOTEI%")
+        If ShiKotei = "%SHIKOTEI%" Then ShiKotei = ""
         Title = KenKotei & ShiKotei & " Åú óXï÷î‘çÜåüçı - yubin"
         
         Set Connect = CreateObject("ADODB.Connection")
@@ -357,7 +368,7 @@ Class GlobalResources
     
     Private Function GetMdbName()
         GetMdbName = WScript.ScriptFullName & ".mdb"
-        'GetMdbName = "C:\tmp\db1.mdb"
+        'GetMdbName = "C:\tmp\yubin.vbs.mdb"
     End Function
 
     Private Function GetConnectionString()
@@ -440,6 +451,9 @@ Class SearchConditions
             If i = 7 Then
                 YubinB = Yubin
                 YubinE = Yubin
+            ElseIf i < 3 Then
+                ' avoid searching to many records
+                How = HowNA
             Else
                 YubinB = Yubin & String(7 - i, "0")
                 YubinE = Yubin & String(7 - i, "9")
