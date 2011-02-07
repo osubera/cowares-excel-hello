@@ -1,0 +1,2 @@
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/ken_all.zip C:\tmp\ken_all.zip
+http://www.post.japanpost.jp/zipcode/dl/jigyosyo/zip/jigyosyo.zip C:\tmp\jigyosyo.zip
