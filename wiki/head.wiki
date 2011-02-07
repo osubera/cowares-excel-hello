@@ -14,7 +14,7 @@
 
 http://4.bp.blogspot.com/_EUW0nrj9XlM/TU9PP26huEI/AAAAAAAAACo/N0H0ub56MfA/s1600/shot1.png
 http://4.bp.blogspot.com/_EUW0nrj9XlM/TU9PQplGk3I/AAAAAAAAACs/O8goFb12dI4/s1600/shot2.png
-http://1.bp.blogspot.com/_EUW0nrj9XlM/TU9PRAfugAI/AAAAAAAAACw/GYkcaOlRKIA/s320/shot3.png
+http://1.bp.blogspot.com/_EUW0nrj9XlM/TU9PRAfugAI/AAAAAAAAACw/GYkcaOlRKIA/s1600/shot3.png
 
  * print the first 10 lines of each file. you can specify the number. or specify to print by the characters number.
  * works with a mouse.
