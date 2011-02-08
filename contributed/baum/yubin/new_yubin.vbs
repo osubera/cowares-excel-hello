@@ -15,13 +15,11 @@ Const ColumnsOogaki = 15
 Const ColumnsJigyo = 13
 
 On Error Resume Next
-BeginAt = Timer()
 Set Args = WScript.Arguments
 Set StdErr = New StringStream
 Main Args
 If Err.Number <> 0 Then WScript.Echo Err.Description
 If StdErr.Text <> "" Then WScript.Echo StdErr.Text
-        StdErr.Print CStr(Timer() - BeginAt) & ", done"
 WScript.Quit(Err.Number)
 
 Private Function GetMdbName()
@@ -43,7 +41,6 @@ Sub Main(Files)
     Con.Open GetConnectionString()
     
     For Each File In Files
-        StdErr.Print CStr(Timer() - BeginAt) & ", " & File
         UpdateFromCsv Con, File
     Next
     
@@ -75,13 +72,9 @@ Sub AppendCsvOogaki(Con, FileName)
 End Sub
 
 Sub AppendKenShiCho(Con)
-        StdErr.Print CStr(Timer() - BeginAt) & ", begins make_ken"
     Con.Execute "make_ken"
-        StdErr.Print CStr(Timer() - BeginAt) & ", begins make_shi_yubin"
     Con.Execute "make_shi_yubin"
-        StdErr.Print CStr(Timer() - BeginAt) & ", begins update_shi_yubin"
     Con.Execute "update_shi_yubin"
-        StdErr.Print CStr(Timer() - BeginAt) & ", begins make_cho"
     Con.Execute "make_cho"
 End Sub
 
