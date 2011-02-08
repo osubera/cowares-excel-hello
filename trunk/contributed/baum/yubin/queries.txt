@@ -1,0 +1,99 @@
+'query
+' name;delete_cho
+'{{{
+DELETE *
+FROM cho;
+'}}}
+
+'query
+' name;delete_jigyo
+'{{{
+DELETE *
+FROM jigyo;
+'}}}
+
+'query
+' name;delete_ken
+'{{{
+DELETE *
+FROM ken;
+'}}}
+
+'query
+' name;delete_shi
+'{{{
+DELETE *
+FROM shi;
+'}}}
+
+'query
+' name;delete_zipcode_j
+'{{{
+DELETE *
+FROM zipcode_j;
+'}}}
+
+'query
+' name;delete_zipcode_k
+'{{{
+DELETE *
+FROM zipcode_k;
+'}}}
+
+'query
+' name;ikani_kisaiga_nai
+'{{{
+SELECT [dantai_code] AS code, First([yubin7]) AS yubin
+FROM zipcode_k
+WHERE [cho]="à»â∫Ç…åfç⁄Ç™Ç»Ç¢èÍçá"
+GROUP BY [dantai_code];
+'}}}
+
+'query
+' name;make_cho
+'{{{
+INSERT INTO cho ( yubin, code, cho_name, cho_hira )
+SELECT yubin7 AS yubin, dantai_code AS code, cho AS cho_name, StrConv(cho_kana,36) AS cho_hira
+FROM zipcode_k;
+'}}}
+
+'query
+' name;make_jigyo
+'{{{
+INSERT INTO jigyo ( yubin, code, cho_name, cho_hira )
+SELECT yubin7 AS yubin, dantai_code AS code, jigyo AS cho_name, StrConv(jigyo_kana,36) AS cho_hira
+FROM zipcode_j;
+'}}}
+
+'query
+' name;make_ken
+'{{{
+INSERT INTO ken ( code, ken_name, ken_hira, records )
+SELECT Int(dantai_code/1000) AS code, First(ken) AS ken_name, StrConv(First(ken_kana),36) AS ken_hira, Count(id) AS records
+FROM zipcode_k
+GROUP BY Int(dantai_code/1000);
+'}}}
+
+'query
+' name;make_shi
+'{{{
+SELECT [dantai_code] AS code, First([shi]) AS shi_name, StrConv(First([shi_kana]),36) AS shi_hira, Count([id]) AS records
+FROM zipcode_k
+GROUP BY [dantai_code];
+'}}}
+
+'query
+' name;make_shi_yubin
+'{{{
+INSERT INTO shi ( code, shi_name, shi_hira, records, yubin_misc, ken_code )
+SELECT A.code, A.shi_name, A.shi_hira, A.records, B.yubin AS yubin_misc, Int(A.code/1000) AS ken_code
+FROM make_shi AS A LEFT JOIN ikani_kisaiga_nai AS B ON A.code=B.code;
+'}}}
+
+'query
+' name;update_shi_yubin
+'{{{
+UPDATE shi AS A INNER JOIN zipcode_k AS B ON A.code=B.dantai_code SET A.yubin_misc = B.yubin7
+WHERE A.yubin_misc Is Null AND A.records=1;
+'}}}
+
