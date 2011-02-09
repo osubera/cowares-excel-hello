@@ -43,6 +43,9 @@ http://3.bp.blogspot.com/_EUW0nrj9XlM/TVIC5ZnXZyI/AAAAAAAAAC4/7Ehh2TT0T7U/s1600/
  # `new_yubin.vbs` で初期化。
  # `yubin.vbs` で検索。
 
+== 設計 ==
+ # [yubin_japanpost_zipcode] に設計メモがある。
+ 
 
 = Code =
 
