@@ -12,6 +12,8 @@
 
 = Details =
 
+http://4.bp.blogspot.com/_EUW0nrj9XlM/TVIC2kYvgaI/AAAAAAAAAC0/JTq_mOMXSik/s1600/shot15.png
+http://3.bp.blogspot.com/_EUW0nrj9XlM/TVIC5ZnXZyI/AAAAAAAAAC4/7Ehh2TT0T7U/s1600/shot26.png
 
  * search zipcodes or addresses in Japan.
  * works both as an windows application and a commandl line tool.
