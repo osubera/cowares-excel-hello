@@ -742,6 +742,401 @@ WScript yubin.vbs
 === tables.txt ===
 
 {{{
+'table
+' name;cho
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;yubin
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;cho_name
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_hira
+' type;text
+' type-low;text
+' size;255
+
+'table-keys
+' name;code
+' column;code
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table-keys
+' name;yubin
+' column;yubin
+
+'table
+' name;jigyo
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;yubin
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;cho_name
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_hira
+' type;text
+' type-low;text
+' size;255
+
+'table-keys
+' name;code
+' column;code
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table-keys
+' name;yubin
+' column;yubin
+
+'table
+' name;ken
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;ken_name
+' type;text
+' type-low;text
+' size;8
+
+'table-columns
+' name;ken_hira
+' type;text
+' type-low;text
+' size;8
+
+'table-columns
+' name;records
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;ken_hira
+' unique;
+' column;ken_hira
+
+'table-keys
+' name;ken_name
+' unique;
+' column;ken_name
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;code
+
+'table
+' name;shi
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;shi_name
+' type;text
+' type-low;text
+' size;24
+
+'table-columns
+' name;shi_hira
+' type;text
+' type-low;text
+' size;48
+
+'table-columns
+' name;records
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;yubin_misc
+' type;text
+' type-low;text
+' size;7
+' allow-zero-length;
+
+'table-columns
+' name;ken_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;code
+
+'table-keys
+' name;shi_hira
+' column;shi_hira
+
+'table-keys
+' name;shi_name
+' column;shi_name
+
+'table
+' name;zipcode_j
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;dantai_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;jigyo_kana
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;jigyo
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;ken
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho
+' type;text
+' type-low;text
+' size;255
+' allow-zero-length;
+
+'table-columns
+' name;aza
+' type;text
+' type-low;text
+' size;255
+' allow-zero-length;
+
+'table-columns
+' name;yubin7
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;yubin5
+' type;text
+' type-low;text
+' size;5
+
+'table-columns
+' name;shiten
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shubetu
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;fukusu
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;shusei
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table
+' name;zipcode_k
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;dantai_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;yubin5
+' type;text
+' type-low;text
+' size;5
+
+'table-columns
+' name;yubin7
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;ken_kana
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi_kana
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho_kana
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;ken
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_2zip
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;koaza
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;chome
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;zip_2cho
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;koshin
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;riyu
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
 }}}
 
 === queries.txt ===
