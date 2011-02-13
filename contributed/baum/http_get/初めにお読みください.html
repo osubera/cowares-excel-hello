@@ -87,6 +87,7 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
  <table>
  <tr><th>httpget.vbs</th><td>１つのファイルをダウンロードするツール。</td></tr>
  <tr><th>httpgets.vbs</th><td>複数のファイルを連続ダウンロードするツール。</td></tr>
+ <tr><th>httpgetw.vbs</th><td>マウスで、複数のファイルを連続ダウンロードするツール。</td></tr>
  <tr><th>example.bat</th><td>バッチファイルで自動化するときの見本。</td></tr>
  <tr><th>urls.txt</th><td>バッチファイルが使用するサンプルのウェブページリスト。</td></tr>
  <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
@@ -105,6 +106,10 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
 <ol>
 <li>単一ファイルの取得は、 CScript httpget.vbs ダウンロードするURL名 保存するファイル名</li>
 <li>複数ファイルの取得は、 CScript httpgets.vbs &lt; ダウンロードするURLとファイル名のリスト</li>
+<li>マウスで操作するのは、 httpgetw.vbs のアイコンにファイル名のリストファイルをかぶせる<br/>
+<img src="shot2.png" alt="リストファイルをドロップしてダウンロード" />
+<img src="shot3.png" alt="エラーになったものが表示される" />
+</li>
 <li>とりあえず使ってみる。
 <ol>
 <li>コマンドプロンプトを開きます。</li>
@@ -140,7 +145,7 @@ Sub Main(Url, FileName)
 </pre>
 これを保存してから試す。
 </li>
-<li>httpgets.vbs も、似た個所があるので同じ修正をする。</li>
+<li>httpgets.vbs httpgetw.vbs も、似た個所があるので同じ修正をする。</li>
 </ol>
 </li>
 <li>アクセスが拒否されました。
@@ -149,6 +154,8 @@ Sub Main(Url, FileName)
 <li>インターネットエクスプローラのセキュリティ設定が、該当URLへのアクセスを許可していない場合、このようなメッセージが出る場合があります。</li>
 </ol>
 </li>
+<li>助けを求める前に、セルフチェックで確認しましょう。</li>
+<li><a href="http://xlsm.web.fc2.com/">スクリプトが動かない人のセルフチェッカー</a></li>
 </ul>
 
 </div>
@@ -267,7 +274,7 @@ Sub Main(Url, FileName)
 
 <div class="copyright"><a href="http://kobobau.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.com</a></div>
 
-<div class="lastupdate">2011.2.4 更新</div>
+<div class="lastupdate">2011.2.14 更新</div>
 
 <script type="text/javascript" src="vba2.js"></script>
 </body>
