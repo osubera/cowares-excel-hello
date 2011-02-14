@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<title>初めにお読みください - バイナリダンプコマンド</title>
+<link rel="stylesheet" href="std.css" type="text/css" />
+<link rel="copyright" href="http://kobobau.com/copy.html" />
+</head>
+<body>
+<div class="productid">バイナリダンプコマンド type_bin</div>
+<h1>初めにお読みください</h1>
+
+<h2 onclick="smr1(this)">このソフトにできること</h2>
+<div class="tree">
+
+<p>
+コマンドラインで、バイナリダンプとダンプテキストからのバイナリ生成を行う。
+</p>
+
+<p>
+バイナリファイルを１６進や２進にダンプし、テキストに変換する。
+１６進ダンプテキストからバイナリファイルを生成する。
+２進ダンプを使ってゲージツ的な創作活動もできる。
+VBScript だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
+ライセンスがフリーなので、好き勝手にカスタマイズできる。
+</p>
+
+</div>
+<h2 onclick="smr1(this)">以下に同意した上でご使用ください</h2>
+<div class="tree">
+
+<div>
+<h3>
+1. 保証はありません。 (自律)
+</h3>
+<p>
+既知の欠陥も未知の欠陥も含めたまま公開されています。 
+品質や正確さはご自身で判断してください。 
+使用により生じた損失など、すべての責任はあなたが負います。
+</p>
+</div>
+
+<div>
+<h3>
+2. フリーです。 (自由)
+</h3>
+<p>
+どなたでも目的によらず無料で無期限に使えます。 
+登録や承諾は不要です。 
+商用も可です。
+自由な加工を含む再利用も再配布もできます。
+</p>
+</div>
+
+<div>
+<h3>
+3. 公正であれ。 (公正)
+</h3>
+<p>
+オリジナルが、あなたの作品と無関係に利用できることを明示する。 
+オリジナルの仕事とあなたの仕事を、正直に区別する。 
+オリジナルの著作権とライセンスを尊重する。
+</p>
+</div>
+
+<div>
+<span>
+コ・ウェア・ライセンス（自律、自由、公正）の詳細は <a href="http://cowares.nobody.jp/license/">http://cowares.nobody.jp/license/</a> で公開されています。
+</span>
+</div>
+
+</div>
+<h2 onclick="smr1(this)">動作環境</h2>
+<div class="tree">
+
+<ul>
+<li>Windows 2000 以降すべて。</li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">配布しているファイルについて</h2>
+<div class="tree">
+
+<ol>
+<li>ZIP形式で圧縮しています。 Windows 2000 以前では、この形式を解凍できるソフトウェアが別途必要です。</li>
+<li>圧縮ファイルには以下のファイルが含まれます。
+ <table>
+ <tr><th>typebin.vbs</th><td>バイナリファイルをダンプして標準出力に表示するツール。</td></tr>
+ <tr><th>dechex.vbs</th><td>標準入力を１６進ダンプとして解釈し、バイナリファイルに保存するツール。</td></tr>
+ <tr><th>typebin.bat</th><td>バイナリダンプのバッチの見本。</td></tr>
+ <tr><th>dechex.bat</th><td>バイナリファイルを保存するときのバッチの見本。</td></tr>
+ <tr><th>ge-jitu.bat</th><td>２進ダンプの文字を指定して、アスキーアート遊びをするバッチの見本。</td></tr>
+ <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
+ <tr><th>初めにお読みください.html</th><td>この解説書です。</td></tr>
+ <tr><th>その他</th><td>解説書の使う画像ファイルなど。</td></tr>
+ </table>
+</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き</h2>
+<div class="tree">
+
+<img src="shot2.png" alt="コマンドプロンプトでは、オプションを指定してダンプできる" />
+
+<ol>
+<li>とりあえず使ってみる。
+<ol>
+<li>コマンドプロンプトを開きます。</li>
+<li>CScript //NoLogo typebin.vbs shop.png</li>
+<li>上のとおり入力し、エンターを押すと、 shop.png の先頭128バイトが変換されて画面に表示されます。</li>
+<li>CScript //NoLogo typebin.vbs /c:444 shop.png &gt; shop.txt</li>
+<li>上のとおり入力し、エンターを押すと、 shop.png がすべて変換されて shop.txt に保存されます。メモ帳で確認できます。
+</li>
+<li>CScript //NoLogo dechex.vbs &lt; shop.txt another.png</li>
+<li>上のとおり入力し、エンターを押すと、shop.txt が変換されて another.png に保存されます。</li>
+</ol>
+</li>
+<li>バイナリファイルを生成するときは、 CScript //NoLogo text.vbs 保存するファイル名
+<ol>
+<li>バイナリ保存は、１６進ダンプ専用です。</li>
+<li>改行や漢字などは無視するので、メモ帳で１６進ダンプを編集し、バイナリ生成することができます。</li>
+<li>たとえば、次のテキストから、バイナリ（GIF画像）が生成できます。
+<pre>
+--- ここから ---
+これはＧＩＦ画像です。
+
+47 49 46 38 39 61 30 00 30 00 c2 06 00 60 9f 7f 5f a0 00 5d 9f 
+ff ff 9f 00 5f e2 00 fd e2 00 ff ff ff ff ff ff 21 f9 04 01 0a 00 07 00 2c 00 00 
+00 00 30 00 30 00 00 03 ee 08 ba d1 fe d0 8d 49 ab bd 74 b1 c8 1f fe a0 a6 74 64 00 9e 96 08 94 1d ea 0e 2a cb bd 68 2c 43 f4 a9 ee fc 72 f5 c0 
+a0 f0 27 2c 1a 15 c4 a3 b2 97 5c 3a 35 cd e7 33 5a 14 58 af d8 ac 
+
+適当に改行したり余計なものが入っても再生できます。
+
+ f6 4a 15 6e bf e0 6e 10 4c ce 8a 81 e5 b4 e0 dc 53 97 d9 3c 37 19 5e cd 12 ee 
+78   6d 2e 33 b6 e3 ef 7a 7b 30 7d 58 7f 80 66 82 5e 7e 7f 81 7b 8a 85 86 8d 39 8f 57 86 04 92 34 94 56 96 5a 05 9e 9f 52 1a 5a 9c 59 9f a0 a1 0a 
+a3 91 a5   a6 05 a8 a9 8b 79 ac a6,af,00!aa♪8c b3 a7 a8 b7 b2 58 ad ae b5 22 a4 be ad c1 c2 ab c4 b4 c6 0b c3 57 bf cb cc c8 ce c5 d0 00 cd 56 cf 
+d5 d7 02 d9 a8 11 96 96 bf e0 e3 78 36 0f e4 78 e2 e8 e0 e6 0e eb 04 ea ef 7f ed 0d ef f1 f2 77 f4 01 f6 ad f8 f3 22 df d6 dd c3 57 ad a0 c1 83 
+08 13 2a 5c 08 2d 01 00 3b 
+
+--- ここまで ---
+</pre>
+</li>
+<li>プログラム自身もテキストなので、たとえばメールでバイナリ添付無しに、バイナリファイルと再生ツールをセットにして、単純なプレーンテキストとして送信できることになります。</li>
+</ol></li>
+<li>バイナリファイルをダンプするときは、 CScript //NoLogo typebin.vbs 読みたいファイル名
+<ol>
+<li>バイナリダンプのオプション
+<ul>
+<li>/x ―― バイト単位１６進ダンプを指示（デフォルト）</li>
+<li>/d ―― バイト単位１０進ダンプを指示</li>
+<li>/o ―― ４ビット単位１０進ダンプを指示</li>
+<li>/b ―― １ビット単位２進ダンプを指示</li>
+<li>/c:128 ―― ダンプするバイト数（長さ）を指定（デフォルトは128）</li>
+<li>/w:16 ―― ダンプ出力の改行幅（入力バイト数）を指定（デフォルトは16）</li>
+<li>/s:0 ―― ダンプを開始するバイト位置（先頭が0）を指定（デフォルトは0）</li>
+<li>/bit:Low ―― ２進ダンプのビット順（Low または High）を指定（デフォルトはLow）</li>
+<li>/bit0:0 ―― ２進ダンプで 0 に割り当てる記号を指定（デフォルトは0）</li>
+<li>/bit1:1 ―― ２進ダンプで 1 に割り当てる記号を指定（デフォルトは1）</li>
+</ul>
+</li>
+<li>バイナリダンプは、複数のファイルをマウスでドロップして使うこともできます。<br/>
+<img src="shot1.png" alt="マウスでドロップしたファイルをダンプできる" />
+</li>
+<li>２進ダンプを使えば、適当なバイナリファイルから、アスキーアートのパターン生成ができます。<br/>
+<img src="shot3.png" alt="バイナリで幾何学的なパターンを作る" />
+</li>
+</ol></li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ダウンロードしたプログラムが動かないとき</h2>
+<div class="tree">
+
+<ul>
+<li>助けを求める前に、セルフチェックで確認しましょう。</li>
+<li><a href="http://xlsm.web.fc2.com/">スクリプトが動かない人のセルフチェッカー</a></li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">連絡先</h2>
+<div class="tree">
+
+<p>動作報告、不動作報告、要望などは、<a href="http://cowares.blogspot.com/search/label/baum">ブログ</a>にコメントしてください。</p>
+
+<table>
+<tr><th>作者</th><td>Tomizono (工房ばう)</td></tr>
+<tr><th>メール</th><td><a href="mailto:cowares@gmail.com">cowares@gmail.com</a></td></tr>
+<tr><th>ブログ</th><td><a href="http://cowares.blogspot.com/">http://cowares.blogspot.com</a></td></tr>
+<tr><th>ホームページ</th><td><a href="http://kobobau.com/xls/">http://kobobau.com/xls/</a></td></tr>
+<tr><th>ダウンロード</th><td><a href="http://www.vector.co.jp/vpack/browse/person/an030389.html">http://www.vector.co.jp</a></td></tr>
+<tr><th>オープンソース</th><td><a href="http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=baum">オリジナルソースは cowares-excel-hello プロジェクトが配布しています。</a></td></tr>
+</table>
+
+</div>
+<div class="pr">
+<h2 onclick="smr1(this)">低価格のシステム開発</h2>
+<div class="tree">
+
+<p>エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。</p>
+
+<div class="shop">
+<h3>
+そのマクロ、部下が１時間残業して作ってませんか？
+</h3>
+<div class="cell">
+<h4>
+あなたの部下は時給1,000円以下ですか？
+</h4>
+<ul>
+<li>
+エクセル、アクセスのデータ、マクロが1,000円から発注できます。
+</li>
+<li>
+使用制限の無いオープンで安心なコ・ウェア・ライセンス。
+</li>
+<li>
+コ・ウェアなら、部下に命令するより安上がりです。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="shop">
+<h3>
+業者との会議に10万円以上の人件費が飛んでませんか？
+</h3>
+<div class="cell">
+<h4>
+仕様の決定に過大な時間とコストをかけていませんか？
+</h4>
+<ul>
+<li>
+その費用で、たたき台となるプロトタイプを作れます。
+</li>
+<li>
+初号機に不満が無ければ、そのまま完成品として現場に投入できます。
+</li>
+<li>
+完全オープンなコードなので、続きを別の業者に発注してもよいのです。
+</li>
+<li>
+コ・ウェアなら、大きな失敗を防げます。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="compact">
+
+<ul class="sectionlist">
+<li>導入する利点</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/business.html">事業者で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/enterprise.html">大企業で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/public.html">公益法人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/personal.html">個人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/it.html">IT企業で</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li>発注について</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/service.html">発注から公開まで</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/price.html">料金</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/publish.html">公開（納品）</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/must.html">基本的なルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/may.html">細かいルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/why.html">なぜ無料ソフトを買う？</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/policy.html">プライバシー</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/contract.html">取引上の注意</a></li>
+</ul>
+
+<div class="sectionlistr">
+<a href="http://cowares.nobody.jp/ja/shop/order.html"><img src="shop.png" alt="http://cowares.nobody.jp/ja/shop/order.html" /></a>
+</div>
+
+</div>
+<div class="compact">
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/order.html">すぐに注文する</a></li>
+</ul>
+
+</div>
+
+<div class="compact">
+</div>
+
+</div>
+</div>
+
+<div class="copyright"><a href="http://kobobau.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.com</a></div>
+
+<div class="lastupdate">2011.2.14 更新</div>
+
+<script type="text/javascript" src="vba2.js"></script>
+</body>
+</html>
