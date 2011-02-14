@@ -12,6 +12,8 @@
 
 = Details =
 
+http://4.bp.blogspot.com/-T4UVGaHdipY/TVjYMPBaI5I/AAAAAAAAADI/p-PwKZnF9tc/s1600/shot1.png
+http://2.bp.blogspot.com/-dBM2PNA6PgQ/TVjYMhARxCI/AAAAAAAAADM/ME3TKWn9zw8/s1600/shot2.png
 
  * a command to convert an encoding of text files, for Japanese or other non-US languages.
  * converts an euc-jp text file into a unicode text.
