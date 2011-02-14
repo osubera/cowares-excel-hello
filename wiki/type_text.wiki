@@ -185,3 +185,17 @@ Private Sub SaveTextNoBom(inSt, File, Charset)
     Set outSt = Nothing
 End Sub
 }}}
+
+=== xtype.bat ===
+
+{{{
+@echo off
+cscript //nologo C:\tmp\type.vbs %*
+}}}
+
+=== xtext.bat ===
+
+{{{
+@echo off
+cscript //nologo C:\tmp\text.vbs %*
+}}}
