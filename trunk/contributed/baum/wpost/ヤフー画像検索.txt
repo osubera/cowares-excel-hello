@@ -16,7 +16,7 @@ http://image.search.yahoo.co.jp/search からの画像検索
 !    url  !http://image.search.yahoo.co.jp/search
 
 !data
-!p!ぬこ　肉球
+!p!不思議　生き物
 !ei!UTF-8
 !b!1
 
@@ -28,6 +28,30 @@ http://image.search.yahoo.co.jp/search からの画像検索
 
 !data
 !b!21
+
+!action
+!submit!
+!run!image_search_yahoo_co_jp.vbs
+!gather!mylist
+
+!data
+!b!41
+
+!action
+!submit!
+!run!image_search_yahoo_co_jp.vbs
+!gather!mylist
+
+!data
+!b!61
+
+!action
+!submit!
+!run!image_search_yahoo_co_jp.vbs
+!gather!mylist
+
+!data
+!b!81
 
 !action
 !submit!
