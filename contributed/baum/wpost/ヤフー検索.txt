@@ -29,7 +29,8 @@ yahoo.bat のように、動的に作るとよい。
 !text!
 
 !header
-! Referer !http://www.yahoo.co.jp/
+! Referer  !http://www.yahoo.co.jp/
+!User-Agent!Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)
 
 !request
 !    url  !http://search.yahoo.co.jp/search
@@ -82,16 +83,12 @@ yahoo.bat のように、動的に作るとよい。
 
 スポンサードサーチが出る場合、それも <li> を使う。
 
+◆IE 5 の場合
+◆!User-Agent!Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)
+
 しかし、検索結果は <ol>
 スポンサードは <ul>
 と、住み分けができている。
-
-と思ったら、
-この挙動はブラウザに依存するようだ。
-ブラウザによっては、<ol> でなく <ul> で検索結果を返すこともある。
-
-とりあえず ol みて、無ければ ul ということか。
-
 
 
 検索結果の <li> の中身は、次のとおり。
@@ -119,4 +116,18 @@ http%3A//detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1015912985
 3. <div></div> のテキストが説明部分
 4. もっと単純に、<em>以降を捨てれば、必要なテキストすべて。
 
+
+◆IE8の場合
+◆!User-Agent!Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; SLCC1; .NET CLR 2.0.50727; Media Center PC 5.0; InfoPath.2; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C)
+
+<ol>を使わず、すべて<ul>で返す。
+スポンサードなどは <li> を使い、
+検索結果は <li class="w"> を使う。
+
+<li class="w"> の中身も変わった。
+最初の <a> の外側に <div> が入り、<em>は消えた。
+上記の 3. 4. のルールが使えない。
+
+IE8 用は切り出しルールが大きく違うので、別スクリプト対応が無難。
+ただしそこまでしなくても、 user agent 偽装で動く。
 

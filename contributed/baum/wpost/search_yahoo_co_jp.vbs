@@ -26,7 +26,7 @@ Sub Main(inSt, outSt, Url, outFo)
     End If
     
     Set y = RegOL.Execute(Text)
-    If y.Count = 0 Then Set y = RegUL.Execute(Text)
+    'If y.Count = 0 Then Set y = RegUL.Execute(Text)
     
     For Each ol In y
         Set x =RegLI.Execute(ol.SubMatches(0))
