@@ -3,6 +3,12 @@
 !wpost
 !
 
+!header
+!User-Agent!Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)
+
+IE7 以降だと違うページを返すようだ。
+ここでは IE6 以前の枯れたページを前提とするため偽装する。
+
 !misc
 !temp-folder!C:\tmp\g
 
