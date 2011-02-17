@@ -25,7 +25,9 @@ Sub Main(inSt, outSt, Url, outFo)
         outSt.Write ChrW(&HFEFF)    ' adding unicode bom enables notepad to see the result
     End If
     
-    Set y =RegOL.Execute(Text)
+    Set y = RegOL.Execute(Text)
+    If y.Count = 0 Then Set y = RegUL.Execute(Text)
+    
     For Each ol In y
         Set x =RegLI.Execute(ol.SubMatches(0))
         For Each li In x
@@ -56,6 +58,18 @@ Sub Main(inSt, outSt, Url, outFo)
     Set x = Nothing
     Set y = Nothing
 End Sub
+
+Function RegUL()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<ul>(.*?)</ul>"
+    
+    Set RegUL = R
+End Function
 
 Function RegOL()
     Dim R
