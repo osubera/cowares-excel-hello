@@ -9,7 +9,7 @@
 ' CHARSET is an encoding of the postdata file
 ' see examples for details
 
-'On Error Resume Next
+On Error Resume Next
 Set Bag = New GlobalResources
 Set Args = WScript.Arguments
 Main Args.Named, Args.Unnamed
@@ -832,8 +832,8 @@ Class GlobalResources
         Set Logger = New StringStream
         Set FileSystem = CreateObject("Scripting.FileSystemObject")
         Set Shell = CreateObject("WScript.Shell")
-        'Set Http = CreateObject("MSXML2.XMLHTTP")
-        Set Http = CreateObject("MSXML2.XMLHTTP.6.0")
+        Set Http = CreateObject("MSXML2.XMLHTTP")
+        'Set Http = CreateObject("MSXML2.XMLHTTP.6.0")
         Set Env = CreateObject("Scripting.Dictionary")
         Set Request = CreateObject("Scripting.Dictionary")
         Set Header = CreateObject("Scripting.Dictionary")
