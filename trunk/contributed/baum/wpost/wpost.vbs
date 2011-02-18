@@ -185,6 +185,8 @@ Private Sub DoAction(Key, Value, ByRef BlockVoid, ByRef BlockName)
         RemoveFile Trim(Value)
     Case "clear"
         ClearEnv Trim(Value)
+    Case "verbose"
+        VerboseEnv Trim(Value)
     Case "if-empty"
         BlockVoid = Not VoidIfEmpty(Trim(Value))
     Case "if-not-empty"
@@ -203,6 +205,18 @@ End Sub
 
 Private Sub ClearEnv(Value)
     If Bag.Env.Exists(Value) Then Bag.Env(Value).RemoveAll
+End Sub
+
+Private Sub VerboseEnv(Value)
+    Dim BlockName
+    Bag.Logger.WriteLine "verbose dump begin"
+    For Each BlockName In Bag.Env.Keys
+        Bag.Logger.WriteLine BlockName
+        For Each k In Bag.Env(BlockName)
+            Bag.Logger.WriteLine k & " = " & Bag.Env(BlockName)(k)
+        Next
+    Next
+    Bag.Logger.WriteLine "verbose dump end"
 End Sub
 
 Private Sub GatherOutput(Value)
@@ -273,6 +287,7 @@ Private Function VoidIfEmpty(Value)
         out = False
     End If
     Set fs = Nothing
+    Bag.Logger.WriteLine "empty = " & CStr(out)
     
     VoidIfEmpty = out
 End Function
@@ -286,22 +301,29 @@ Private Sub Submit(Value)
     Const TristateFalse = 0
     Const TristateTrue = -1
     Const ForReading = 1
-    Dim Url, ts
+    Dim Url, ts, inFile, Counter
+    
+    inFile = GetTempPathIn
     
     If Bag.Input.Exists("data") Then
-        SetEnvDataFromFile GetTempPathIn
+        Bag.Logger.WriteLine "reading data from: " & inFile
+        SetEnvDataFromFile inFile
     End If
     
     If Bag.Input.Exists("url-list") Then
-        Set ts = Bag.FileSystem.OpenTextFile(GetTempPathIn, ForReading, False, TristateTrue)
+        Bag.Logger.WriteLine "reading url list from: " & inFile
+        Set ts = Bag.FileSystem.OpenTextFile(inFile, ForReading, False, TristateTrue)
         ' TristateTrue is required to read a text including non-ANSI characters.
+        Counter = 0
         Do Until ts.AtEndOfStream
             Url = ts.ReadLine
             SubmitOne Url
             SetReferer Url
+            Counter = Counter + 1
         Loop
         ts.Close
         Set ts = Nothing
+        Bag.Logger.WriteLine Counter & " urls are processed from: " & inFile
     Else
         Url = Bag.Request("url")
         SubmitOne Url
@@ -328,7 +350,6 @@ Private Sub SubmitOne(Url)
         tp.send EncodePostData
     Else
         GetUrl = EncodeGetData(Url)
-        Bag.Logger.WriteLine GetUrl
         tp.Open Method, GetUrl, False
         SetRequestHeaders tp, Method, Url
         tp.send
@@ -345,16 +366,19 @@ End Sub
 Private Sub SetRequestHeaders(tp, Method, Url)
     Dim h
     
+    If Bag.Input.Exists("referer-self") Then
+        Bag.SetEnv "header", "Referer", Url
+    ElseIf Bag.Input.Exists("referer-clear") Then
+        Bag.SetEnv "header", "Referer", ""
+    End If
+    
     For Each h In Bag.Header.Keys
+        Bag.Logger.WriteLine "SetRequestHeaders: " & h & " = " & Bag.Header(h)
         tp.setRequestHeader h, Bag.Header(h)
     Next
+    
     If Method = "POST" And Not Bag.Header.Exists("Content-Type") Then
         tp.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
-    End If
-    If Bag.Input.Exists("referer-self") Then
-        tp.setRequestHeader "Referer", Url
-    ElseIf Bag.Input.Exists("referer-clear") Then
-        tp.setRequestHeader "Referer", ""
     End If
 End Sub
 
@@ -368,6 +392,7 @@ Private Function EncodePostData()
         out = out & Key & "=" & EncUrlString(Bag.Data(Key), Charset)
     Next
     
+    If out <> "" Then Bag.Logger.WriteLine "DATA: " & out
     EncodePostData = out
 End Function
 
@@ -383,6 +408,7 @@ Private Function EncodeGetData(Url)
         out = Url & "&" & EncodedData
     End If
     
+    Bag.Logger.WriteLine "GET URL: " & out
     EncodeGetData = out
 End Function
 
@@ -487,6 +513,7 @@ Private Sub ReportResponse(tp, Url)
         Bag.Misc("last-url") = Left(Url, At - 1)
     End If
     Bag.Misc("last-saved-file") = FileName
+    Bag.Logger.WriteLine Bag.Misc("last-url") & " " & FileName & vbCrLf
 End Sub
 
 Private Function GetSaveFileName(tp, Url)
