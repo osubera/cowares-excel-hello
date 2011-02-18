@@ -1,4 +1,4 @@
-http://image.search.yahoo.co.jp/search ‚©‚ç‚Ì‰æ‘œŒŸõ
+ï»¿http://image.search.yahoo.co.jp/search ã‹ã‚‰ã®ç”»åƒæ¤œç´¢
 
 !wpost
 !
@@ -16,10 +16,10 @@ http://image.search.yahoo.co.jp/search ‚©‚ç‚Ì‰æ‘œŒŸõ
 !    url  !http://image.search.yahoo.co.jp/search
 
 !data
-!p!•sv‹c@¶‚«•¨
+!p!ä¸æ€è­°ã€€ç”Ÿãç‰©
 !ei!UTF-8
 !b!1
-!b!ŒŸõ
+!b!æ¤œç´¢
 
 !output
 !temp!firstpage
@@ -30,8 +30,8 @@ http://image.search.yahoo.co.jp/search ‚©‚ç‚Ì‰æ‘œŒŸõ
 !remove!mylist
 !gather!mylist
 
-Šo‚¦‚Ä‚¨‚¢‚½Å‰‚Ìƒy[ƒW‚©‚çAŸƒy[ƒW‚É•K—v‚Èƒpƒ‰ƒ[ƒ^‚ğ”²‚­B
-ktot dtot ‚Æ‚¢‚¤‚Ì‚ªAŒŸõŒê‚ÉˆË‘¶‚µ‚Ä•Ï‚í‚é‚æ‚¤‚È‚Ì‚ÅB
+è¦šãˆã¦ãŠã„ãŸæœ€åˆã®ãƒšãƒ¼ã‚¸ã‹ã‚‰ã€æ¬¡ãƒšãƒ¼ã‚¸ã«å¿…è¦ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æŠœãã€‚
+ktot dtot ã¨ã„ã†ã®ãŒã€æ¤œç´¢èªã«ä¾å­˜ã—ã¦å¤‰ã‚ã‚‹ã‚ˆã†ãªã®ã§ã€‚
 
 !input
 !temp!firstpage
@@ -43,7 +43,7 @@ ktot dtot ‚Æ‚¢‚¤‚Ì‚ªAŒŸõŒê‚ÉˆË‘¶‚µ‚Ä•Ï‚í‚é‚æ‚¤‚È‚Ì‚ÅB
 !clear!
 !data!
 
-ÀÛ‚Éƒy[ƒWiŠJnƒf[ƒ^”Ô†j‚ğw’è‚·‚é‚Ì‚Í‚±‚ê‚©‚çB
+å®Ÿéš›ã«ãƒšãƒ¼ã‚¸ï¼ˆé–‹å§‹ãƒ‡ãƒ¼ã‚¿ç•ªå·ï¼‰ã‚’æŒ‡å®šã™ã‚‹ã®ã¯ã“ã‚Œã‹ã‚‰ã€‚
 
 !data
 !b!21
@@ -83,6 +83,7 @@ ktot dtot ‚Æ‚¢‚¤‚Ì‚ªAŒŸõŒê‚ÉˆË‘¶‚µ‚Ä•Ï‚í‚é‚æ‚¤‚È‚Ì‚ÅB
 !input
 !temp!mylist
 !url-list!
+!referer-clear!
 
 !output
 !clear!

@@ -30,7 +30,7 @@ Sub Main(Opts, Files)
     Set Finder = New StreamParser
     Set Finder.Stream = ts
     Charset = Opts("e")
-    If Charset = "" Then Charset = "shift_jis"
+    If Charset = "" Then Charset = "utf-8"
     
     ' bom is harmless for this file format
     'BomIsOnlyForTheFirstOne = 2   ' 2 is for skipping unicode bom, and only for the 1st file

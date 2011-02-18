@@ -1,4 +1,4 @@
-http://login.yahoo.co.jp/ �̃��O�C��
+﻿http://login.yahoo.co.jp/ のログイン
 
 !wpost
 !
@@ -6,7 +6,7 @@ http://login.yahoo.co.jp/ �̃��O�C��
 !misc
 !temp-folder!C:\tmp\y
 
-���O�C�����Ă��邩�ǂ������ׂ�
+ログインしているかどうか調べる
 
 !request
 !    url  !http://id.yahoo.co.jp/index.html
@@ -20,10 +20,10 @@ http://login.yahoo.co.jp/ �̃��O�C��
 !if-not-empty!
 !end!
 
-���O�C�����Ă���΁A�����ŏI���B
+ログインしていれば、ここで終わり。
 
 
-���O�C����ʂɓ���B
+ログイン画面に入る。
 
 !request
 !    url  !https://login.yahoo.co.jp/config/login?.src=www&.done=http%3A%2F%2Fid.yahoo.co.jp%2Findex.html
@@ -32,10 +32,10 @@ http://login.yahoo.co.jp/ �̃��O�C��
 !submit!
 !run!login_yahoo_co_jp.vbs
 
-�Ō�̃X�N���v�g�́A���Ɏg���t�H�[���p�����[�^��؂�o���Ă���B
+最後のスクリプトは、次に使うフォームパラメータを切り出している。
 
 
-���O�C�������s����B
+ログインを実行する。
 
 !request
 !    url  !https://login.yahoo.co.jp/config/login?
@@ -43,19 +43,19 @@ http://login.yahoo.co.jp/ �̃��O�C��
 
 !data
 !.persistent!y
-!login!���ۂɃ��O�C�����郄�t�[�h�c
-!passwd!���Ȃ��̃p�X���[�h
+!login!実際にログインするヤフーＩＤ
+!passwd!あなたのパスワード
 
 !input
 !data!
 
-����Ńt�H�[���p�����[�^�𒼑O�̃t�@�C������ǂݍ��ށB
-hidden �ɂȂ��Ă�����̂�����ŕ₤�B
+これでフォームパラメータを直前のファイルから読み込む。
+hidden になっているものをこれで補う。
 
 !output
 !temp!login
 
-���ƂŎg����������Ȃ��̂Ŗ��O�����Ă����B
+あとで使うかもしれないので名前をつけておく。
 
 !action
 !submit!
@@ -63,13 +63,13 @@ hidden �ɂȂ��Ă�����̂�����ŕ₤�B
 !if-empty!
 !end!
 
-�p�X���[�h�̍Ċm�F��ʂłȂ���΁A���O�C�������Ƃ݂Ȃ��ďI���B
+パスワードの再確認画面でなければ、ログイン成功とみなして終了。
 
-����ȊO�ŃN�b�L�[���g���Ȃ��ݒ�Ƃ��A
-���������p�X���[�h���Ⴄ�G���[�́A�����ł͍l���Ȃ��B
+これ以外でクッキーが使えない設定とか、
+そもそもパスワードが違うエラーは、ここでは考えない。
 
 
-�p�X���[�h�̍Ċm�F�ɑΉ�����B
+パスワードの再確認に対応する。
 
 !request
 !    url  !https://login.yahoo.co.jp/config/login_verify2?
@@ -91,7 +91,7 @@ hidden �ɂȂ��Ă�����̂�����ŕ₤�B
 !if-empty!
 !end!
 
-�p�X���[�h�̍Ċm�F��ʂłȂ���΁A���O�C�������Ƃ݂Ȃ��ďI���B
+パスワードの再確認画面でなければ、ログイン成功とみなして終了。
 
 
 !input
@@ -100,16 +100,16 @@ hidden �ɂȂ��Ă�����̂�����ŕ₤�B
 !action
 !run!probe.vbs
 
-�Ƃ肠�����A�G���[���b�Z�[�W�����o���B
+とりあえず、エラーメッセージだけ出す。
 
 
 !end
 
-�ȏ�B
+以上。
 
 
 
-���O�C������������A���̂悤�ȃ��t���b�V����ʂ��o��B
+ログイン成功したら、次のようなリフレッシュ画面が出る。
 
 <html>
 <head>
@@ -122,6 +122,6 @@ window.location.replace("http://id.yahoo.co.jp/index.html");
 <meta http-equiv="Refresh" content="0; url=http://id.yahoo.co.jp/index.html">
 </head>
 <body>
-<a href="http://id.yahoo.co.jp/index.html">http://id.yahoo.co.jp/index.html</a>�փW�����v���悤�Ƃ��Ă��܂��B
-�����I�Ƀy�[�W���؂�ւ��Ȃ��ꍇ�ɂ́A<a href="http://id.yahoo.co.jp/index.html">������</a>���N���b�N���Ă��������B</body>
+<a href="http://id.yahoo.co.jp/index.html">http://id.yahoo.co.jp/index.html</a>へジャンプしようとしています。
+自動的にページが切り替わらない場合には、<a href="http://id.yahoo.co.jp/index.html">こちら</a>をクリックしてください。</body>
 </html>
