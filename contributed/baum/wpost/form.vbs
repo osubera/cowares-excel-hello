@@ -24,7 +24,7 @@ Sub Main(inSt, outSt, Url)
         outSt.WriteLine Url & vbCrLf
     End If
     For each f in x
-        Text = x(0).Value
+        Text = f.Value
         Text =RegLessTags.Replace(Text, "")
         Text =RegTooManyBlanks.Replace(Text, " ")
         Text =RegTagEachLine.Replace(Text, ">" & vbCrLf & "<")

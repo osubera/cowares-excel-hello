@@ -388,6 +388,7 @@ data のうち、検索ワードは変化しないので、
 !    url !http://www.bing.com/images/search
 
 !data
+!clear!
 !q!ぬこ　肉球
 
 !output
