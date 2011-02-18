@@ -12,6 +12,8 @@
 
 = Details =
 
+http://1.bp.blogspot.com/-dveTxm1HfRc/TV531Lcvc1I/AAAAAAAAADQ/EbGL6ElH1vI/s1600/shot1.png
+http://4.bp.blogspot.com/-qCA10cehsfU/TV531rJsN7I/AAAAAAAAADU/KZqDhRjfl2E/s1600/shot2.png
 
  * execute scenario files written by text formatted, download html and binary files from the web.
  * this is a scenario engine. that requires external analyser scripts.
