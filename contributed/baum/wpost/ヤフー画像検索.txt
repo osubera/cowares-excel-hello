@@ -53,6 +53,9 @@ ktot dtot というのが、検索語に依存して変わるようなので。
 !run!image_search_yahoo_co_jp.vbs
 !gather!mylist
 
+!input
+!clear!
+
 !data
 !b!41
 
