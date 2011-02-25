@@ -18,7 +18,7 @@
 '         ;comment
 '         ;verify input for excel against a reference sheet
 '         ;著作権
-'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
 '         ;ライセンス
 '         ;自律, 自由, 公正, http://cowares.nobody.jp
 '         ;作者
@@ -28,7 +28,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/verify_sheet_input
 '         ;更新
-'         ;40564.3820717593
+'         ;40599.7627083333
 '         ;keyword
 '         ;excel,validation
 '         ;
