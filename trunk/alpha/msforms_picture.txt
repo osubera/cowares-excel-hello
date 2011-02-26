@@ -1,0 +1,499 @@
+フォームSSFのための予備調査など
+画像編
+
+
+* フォームへの画像表示
+
+UserForm が Picture プロパティを持つので、
+全体に貼るだけなら、
+MSForms.Image みたいなコントローラを用意しなくても、
+そのまま貼り付けられる。
+
+* LoadPicture
+
+LoadPicture 関数で、ファイルから読める。
+Me.Picture = LoadPicture("C:\tmp\shot1.bmp")
+
+Win2k + Excel2k だと、
+○ bmp, jpg, gif
+× png
+サポートする画像形式は、おそらく、OS依存。
+ちょっと違うな。
+こいつは、stdole.StdFunctions のメソッドなので、
+stdole コンポーネントのバージョン依存か。
+まあ、os と似たようなレベルか。
+
+２つ目の引数以降で、サイズや色指定ができるが、
+少なくとも、 win2k では何も効かない。
+
+Me.Picture = LoadPicture("C:\tmp\shot1.bmp", 10, 10, VgaColor)
+このようにしても、何の変化も無い。
+
+LoadPicture 関数は、IPictureDisp object を返す。
+実際には stdole.StdPicture かな。
+こいつがサイズを持つので、次のように書ける。
+
+    Dim x As IPictureDisp
+    Set x = LoadPicture("C:\tmp\2.jpeg")
+    Debug.Print x.Width, x.Height
+    Me.Picture = x
+    Set x = Nothing
+
+x.Handle もあり、どうやら、hdc の登場が前提っぽい。
+
+こいつの Width, Height は、画面ハードウェア依存で、
+pixel に直すのに、 / 35.2 とか /26.4 とか、
+ちょい謎の single を持ってこないといけない。
+
+screen の hdc から計算するのだろうが、
+declare がめんどいなら、計測用の既知サイズの画像を
+置いておいて、それを参照に、比率を出すチートも考えられる。
+
+どっちがめんどいかは不明だが。
+
+以前に、モードレスっぽいメッセージを出すときに、
+hdc まわりの計算をしたので、そっちのコードが参考になるはず。
+
+たとえば、次のコードで、
+画像サイズにあわせた表示ができる。比率は固定。
+
+Private Sub UserForm_Click()
+    Dim x As IPictureDisp
+    Dim a, b, c, d
+    Set x = LoadPicture("C:\tmp\2.jpeg")
+    a = Me.Width - Me.InsideWidth
+    b = Me.Height - Me.InsideHeight
+    c = x.Width / 35.19
+    d = x.Height / 35.19
+    Me.Width = a + c
+    Me.Height = b + d
+    Me.Picture = x
+    Set x = Nothing
+End Sub
+
+* クリップボード
+
+MSForms.DataObject のクリップボードで画像が扱えると便利なのだが、
+データの種類を知ることができても、出し入れができるのは、
+テキストだけのようだ。
+
+GetFromClipboard は関数でなく Sub だ。
+これは何も返さない。
+
+GetText 相当の、画像やバイナリを返す関数が
+OLEで公開されてないので、画像をクリップボードから取るのは
+無理なようだ。
+
+おそらく、 fm20.dll 自身は、
+C などから呼ばれる前提で、
+画像データを内部に取り込むルーチンを持っていると思われる。
+ツールバーにアイコン貼ったりしたときに内部で使われてるのか？
+
+クリップボードの画像は global_alloc とかあるので、
+vb 系ではあきらめの境地かな。
+
+チートとしては、
+ActiveSheet.Paste とかで、
+シート上の画像オブジェクトになるので、
+そいつを操作するというのはできそうだ。
+
+* シート上オブジェクトからの流し込み
+
+シート上の、 Shapes や、ペイントブラシOLEなど、
+一般的な操作で張り付く画像を、
+Me.Picture = 
+に直接流し込むのは無理っぽい。
+
+シート側のが、 stdole.StdPicture になってない。
+
+唯一、イメージコントロールをシートに貼り付けてしまえば、
+同種のコントロール間なので、
+
+Me.Picture = Sheet1.OLEObjects(1).Object.Picture
+
+などとして直接投入できる。
+しかし、これは、一般的な画像ペーストで作れないので無意味。
+むしろ、フォーム使わず、シート上にファイル画像の入出力をする手段だな。
+
+
+あと、
+chartobject の export を使って、
+うまく画像部分をファイルにしてから、LoadPicture する、
+という手もあるようだが、未確認。
+
+似たような手段で、
+html として保存、で作られる画像ファイル、というのもあった。
+
+
+* MSForms.Image
+
+Image.Picture に stdole.StdPicture 形式を代入すればよい。
+
+ここを描画した後、 Form.Repaint をしないと、
+実際に画面上に反映されない。
+
+これ以外は、 Form.Picture と同じ動作に見える。
+
+
+* Web Browser Control
+
+実はイメージコントロールより使えそうな気がする。
+ファイルになってれば、 img タグで表示できそうだ。
+つうか、単に navigate すればいいだけか。
+
+2000 で png 扱うなら、これしかないのかな。
+
+とりあえず、 png 表示はすぐできた。
+単純なクリックとかが無いので、（html body とかで実装しない限り）
+別にボタンを必ずつける、みたいなことさえできれば
+問題ないか。
+
+あと、こいつは HWND を提示するので、
+そこからごちょごちょしたければ使えるのかも。
+
+
+
+* 参考コードなど
+
+'require
+'  ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+'  ;{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B} 1 1 Microsoft Internet Controls
+'  ;{2F7FC181-292B-11D2-A795-DFAA798E9148} 1 0 msrtedit 1.0 Type Library
+
+'form
+'  name;BlankForm
+'{{{
+Option Explicit
+
+Private Sub UserForm_Click()
+    Me.Caption = Now()
+End Sub
+
+Private Sub UserForm_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    If MsgBox("Do you fear death?", vbYesNoCancel Or vbCritical, "Davy Johns") = vbNo Then
+        Unload Me
+    Else
+        Me.BackColor = RGB(CLng(Rnd * 256), CLng(Rnd * 256), CLng(Rnd * 256))
+    End If
+End Sub
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub testBlankForm()
+    BlankForm.Show False
+End Sub
+
+Sub testTextForm()
+    With TextForm
+        .Show False
+        '.Top = 80
+        '.Left = 80
+        '.Width = 400
+        '.Height = 300
+    End With
+End Sub
+
+Sub testDynamicControlers()
+    DynamicControlers.Show False
+End Sub
+
+Sub testLoadPictureForm()
+    LoadPictureForm.Show False
+End Sub
+
+Sub testWebForm()
+    WebForm.Show False
+End Sub
+
+Sub testRichTextForm()
+    RichTextForm.Show False
+End Sub
+
+Sub testCellToGazo()
+    If TypeName(Selection) <> "Range" Then Exit Sub
+    
+    Selection.CopyPicture Appearance:=xlScreen, Format:=xlBitmap
+    'Selection.CopyPicture Appearance:=xlScreen, Format:=xlPicture
+    Workbooks.Add
+    ActiveSheet.Paste Destination:=ActiveSheet.Range("A1:F10")
+    'ActiveSheet.Range("A11").Select
+    'ActiveSheet.Paste Destination:=ActiveSheet.Range("A11:F20"), Link:=True
+End Sub
+
+'}}}
+
+'form
+'  name;TextForm
+'{{{
+Option Explicit
+
+Private Sub CtrlData_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = vbKeyF3 Then
+        MsgBox "F3 pressed with " & Shift
+    End If
+
+End Sub
+
+Private Sub CtrlData_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+    If Button = 2 Then  ' right button
+        With CtrlMenuContext
+            .Left = x
+            .Top = Y
+            .Visible = True
+        End With
+    End If
+End Sub
+
+Private Sub CtrlQuit_Click()
+    Unload Me
+End Sub
+
+Private Sub UserForm_Initialize()
+    With CtrlData
+        .Tag = "data"
+        
+        .TabKeyBehavior = True
+        .EnterKeyBehavior = True
+        .MultiLine = True
+        .ScrollBars = fmScrollBarsBoth
+        .WordWrap = False
+        
+        
+        .Font.Size = 14
+        .Font.Italic = True
+        .ForeColor = RGB(&H0, &H33, &H66)
+        .BackColor = RGB(&HFF, &HCC, &HEE)
+    End With
+    
+    With CtrlMenuEdit
+        .Tag = "edit"
+        
+        .AddItem "Edit"
+        .AddItem "Copy"
+        .AddItem "Paste"
+        .ListIndex = 0
+        
+        .Style = fmStyleDropDownList
+        .DropButtonStyle = fmDropButtonStyleEllipsis
+        .SpecialEffect = fmSpecialEffectFlat
+        .BackColor = RGB(&HCC, &HCC, &HCC)
+    End With
+    
+    With CtrlMenuContext
+        .Tag = "rightclick"
+        
+        .AddItem "Copy"
+        .AddItem "Paste"
+        .AddItem "Select All"
+        .AddItem "Cancel"
+        
+        .IntegralHeight = True
+        .SpecialEffect = fmSpecialEffectRaised
+        '.Width = Len("select all") * 10
+        '.ZOrder 1   ' Bottom
+        .Visible = False
+    End With
+    
+    With CtrlQuit
+        .Tag = "quit"
+        .Caption = "終了"
+    End With
+    
+    With Me
+        .StartUpPosition = 0    ' Manual
+        .Top = 80
+        .Left = 80
+        .Width = 400
+        .Height = 300
+
+    End With
+    
+    'UserForm_Resize
+End Sub
+
+Private Sub UserForm_Resize()
+    With CtrlData
+        .Width = Me.InsideWidth
+        .Height = Me.InsideHeight - .Top
+    End With
+    
+End Sub
+'}}}
+
+
+'form
+'  name;DynamicControlers
+'{{{
+Option Explicit
+
+Private Sub UserForm_AddControl(ByVal Control As MSForms.Control)
+    Me.Height = Me.Controls.Count * 40
+End Sub
+
+Private Sub UserForm_Click()
+    AddButton
+End Sub
+
+Private Sub AddButton()
+    Dim x As MSForms.Control
+    Set x = Me.Controls.Add("Forms.CommandButton.1", "MyName", True)
+    x.Top = (Me.Controls.Count - 1) * x.Height
+    x.Caption = "hoge"
+    
+End Sub
+'}}}
+
+
+'form
+'  name;LoadPictureForm
+'{{{
+Option Explicit
+
+Private Sub UserForm_Click()
+    '**OK
+    'Me.Picture = LoadPicture("C:\tmp\shot3.bmp")
+    'Me.Picture = LoadPicture("C:\tmp\shot4.gif")
+    'Me.Picture = LoadPicture("C:\tmp\shot1.jpg")
+    
+    '**NG
+    'Me.Picture = LoadPicture("C:\tmp\shot2.png")
+    ' PNG 形式はサポートしないようだ。2000では。
+    
+    'Me.Picture = LoadPicture("C:\tmp\shot1.jpg", 10, 10, VgaColor)
+    ' 何もかわらない
+    
+    'Dim Clip As Object 'MSForms.DataObject
+    'Set Clip = New MSForms.DataObject
+    'Sheet1.Shapes("テキスト 4").CopyPicture xlScreen, xlBitmap
+    'Me.Paste
+    'Clip.GetFromClipboard
+    ' GetFromClipboard は Sub なので、値を返さない。
+    ' この後、 GetText 相当の、 binary を取れるやつを呼べたらいいのだが。
+    ' FM20.DLL には、けっこう低レベルの関数が入っているっぽいが、OLE公開してるのがテキストだけということか。
+    ' global_alloc とかしないといけないから、結局、vb の範疇を超えちゃうのかな。
+    
+    'Dim x As stdole.StdPicture
+    'Set x = Sheet1.Shapes("図 16")
+    'Set x = Sheet1.ChartObjects(1)
+    'Set x = Sheet1.OLEObjects("オブジェクト 7")
+    ' いずれも、エラー。StdPicture ではない。
+    ' ちなみに、チャートは、Shapes 経由でも取れるがそちらもエラー
+    'Me.Picture = x
+    
+    ' 敢えて、フォーム用 Image Control をシートに貼り付けた場合だけ、
+    'Me.Picture = Sheet1.OLEObjects("オブジェクト 11").Object.Picture
+    ' これが通用する。
+    
+    'SavePicture Sheet1.Shapes("テキスト 4"), "C:\tmp\a1.bmp"
+    ' SavePicture も、 StdPicture 専用なので、これはエラー。
+End Sub
+'}}}
+
+'form
+'  name;ImageForm
+'{{{
+Option Explicit
+
+Private Sub CtrlImage_Click()
+    With CtrlImage
+        .Picture = LoadPicture("C:\tmp\shot1.jpg")
+        
+    End With
+    
+    Me.Repaint
+End Sub
+
+Private Sub UserForm_Initialize()
+    UserForm_Resize
+End Sub
+
+Private Sub UserForm_Resize()
+    With CtrlImage
+        .Width = Me.InsideWidth
+        .Height = Me.InsideHeight
+    End With
+End Sub
+'}}}
+
+'form
+'  name;WebForm
+'{{{
+Option Explicit
+
+Private Sub CommandButton1_Click()
+    With CtrlWeb
+        .Navigate "C:\tmp\shot2.png"
+    End With
+
+End Sub
+
+Private Sub CommandButton2_Click()
+    With CtrlWeb
+        .Navigate "http://kobobau.com/"
+    End With
+
+End Sub
+
+Private Sub CommandButton3_Click()
+    With CtrlWeb
+        '.Navigate "about:blank"
+        ' wait を入れるのが手間なので、初期化で呼んでしまう。
+        ' とりあえず、何かが入って入ればいいはず。
+        .Document.writeln "<html><body><h1>ごきげんよう</h1><span id=""jikoku"" style=""color:pink"">" & Now() & "</span></body></html>"
+        
+    End With
+
+End Sub
+
+Private Sub CommandButton4_Click()
+    With CtrlWeb.Document
+        .getElementById("jikoku").innerText = Now()
+    End With
+End Sub
+
+Private Sub UserForm_Initialize()
+    With CtrlWeb
+        .Height = Me.InsideHeight - Me.Top
+        .Width = Me.InsideWidth
+        
+        .Navigate "about:blank"
+    
+    End With
+End Sub
+'}}}
+
+'form
+'  name;RichTextForm
+'{{{
+Option Explicit
+
+Private Sub CtrlData_Click()
+    Debug.Print CtrlData.TextRTF
+End Sub
+
+Private Sub UserForm_Initialize()
+    With CtrlData
+        '.Font.Name = "ＭＳ Ｐゴシック"
+        .Font.Size = 18
+        .Font.Bold = False
+        '.Font.Charset = 1
+        Debug.Print .Font.Size
+        ' これは反映されない。設計段階で変えないとだめ？
+    End With
+    
+    UserForm_Resize
+End Sub
+
+Private Sub UserForm_Resize()
+    With CtrlData
+        .Height = Me.InsideHeight
+        .Width = Me.InsideWidth
+    End With
+
+End Sub
+'}}}
+
