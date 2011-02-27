@@ -1,0 +1,87 @@
+#summary verify input for excel against a reference sheet
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * verify input for excel against a reference sheet
+ * [verify_sheet_input] with a marker to tell differences by characters of a long text
+
+== 概要 ==
+ * エクセルで別のシートを参照して入力のベリファイを行う
+ * [verify_sheet_input] に、 `文字単位のマーカー` を追加したもの
+
+= Details =
+
+ * this is a system for verifying data entry, a method of double entry until match.
+    * you can do the 1st entry on an arbitrary sheet. it is called as a reference sheet and a one to distribute, maybe.
+    * you must do the 2nd entry on the specific sheet in this system, because it has the vba code.
+ * it does live verifications on the 2nd entry.
+    * the cell color of the 2nd sheet changes to alarm when you enter a different data against the 1st one.
+    * strings after the first defference are colored for a mark.
+    * the alarm disappears when you correct the failure.
+    * will verify not only for entering, but also skipping by tab keys.
+ * a toolbar or ribbon appears after the book opened.
+    * to specify a reference sheet.
+    * marking by characters can be disabled by toolbar button, to get speed.
+
+== 説明 ==
+ * 同一のデータをシートに２回入力することで、入力検証を行う。
+    * １次入力は提出用（参照用）シートに行う。これは任意のブック、シートで構わない。
+    * ２次入力は、検証専用シートに行う。検証用シートがマクロを持っている。
+ * 入力検証は、検証用への入力の都度、自動で行われる。
+    * １次入力と違う文字が入力されたら、検証用シートのセルが警告色になる。
+    * `文字入力の場合、最初に異なる文字以降が別色になり識別できる。`
+    * 正しく入力しなおせば色は元に戻る。
+    * エンターだけでなく、タブキーなどによる移動でも検証する。
+ * 検証用ブックを開くと、操作用のボタンがツールバー（リボン）に追加される。
+    * 参照用シートの設定など
+    * `文字単位のマーカー機能は、速度重視の場合、ツールバーのスイッチでオフにできる。`
+
+= Downloads =
+
+
+= How to use =
+
+ # prepare to verify
+    # a toolbar appears when you open the book. (buttons in the Addin Ribbon for Excel 2007 or later)
+    # activate the 1st entry sheet done, and press the `参照シート設定` button.
+    # this activates the `Veify` sheet and sets the name of the 1st entry sheet as a reference on the button face.
+ # verifying
+    # input data in the `Verify` sheet for the 2nd entry.
+    # the system verify when changing cell values, skipping cell by tab key or mouse, deleting cells and copying.
+    # the cell in the `Verify` sheet turns yellow on validation failure, and turns white when mistakes are corrected.
+    # strings after the first different character are turn red, and turn black when mistakes are corrected.
+ # what the 参照シート設定 button does
+    # for sheets except `Verify`: make the sheet the 1st entry sheet, and jump to the `Verify` sheet.
+    # for `Verify` sheet: reset current settings.
+    # it shows as 参照シート無し when no 1st entry sheets are available.
+    # no verifications run for no reference sheets.
+ # what the 差分 button does
+    # toggles between on and off.
+    # the marker function works when on.
+
+== 使い方 ==
+ # 検証準備
+    # ブックを開くと、ツールバーが出る。（エクセル2007以降ではリボンのアドイン）
+    # １次入力したシートを開いて、 `参照シート設定` ボタンを押す。
+    # `Verify` シートが自動でアクティブになり、ボタンに参照先シート名が表示される。
+ # 検証
+    # `Verify` シートに２次入力を行う。
+    # シートへの入力、タブやマウス等によるスキップ、削除、コピーに反応し、検証を実施。
+    # １次と２次のセル内容が異なる場合、 `Verify` のセルが黄色くなり、正しく入力しなおせば白くなる。
+    # さらに、文字単位で、最初に異なる位置以降が赤字になり、、正しく入力しなおせば黒くなる。
+ # 参照シート設定ボタンの動作
+    * `Verify` 以外のシート：　そのシートを１次入力シートに設定し、 `Verify` にジャンプする。
+    * `Verify` シート：　現在の設定を解除する。
+    * 登録された１次シートが利用できない場合、参照シート無しと表示される。
+    * 参照シートが設定されている時だけ、検証が働く。
+ # 差分ボタンの動作
+    * オン、オフを切り替える動作をする。
+    * オンの時には、文字単位のマーカー機能が働く。
+
+= Code =
+
+{{{
+}}}

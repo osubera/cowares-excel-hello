@@ -1,0 +1,37 @@
+#summary validate cells selected not to contain hankaku characters
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * validate cells selected not to contain hankaku characters
+
+== 概要 ==
+ * エクセルで選択したセルに半角文字が入っていないことを確認する
+
+= Details =
+
+
+== 説明 ==
+ * ブックを開くと、操作用のボタンがツールバー（リボン）に追加される。
+ * 検証したいブックを開き、検証したい行、列、セル範囲などを選択して、 `検証` ボタンを押すと検証を行う。
+ * 検証内容
+    * 半角文字が入っていてはいけない。
+    * 全角英字は、検証の合否とは別途、区別したいので色をつける。
+ * 検証に合格しなかったセルおよび文字に着色する。
+ * 検証結果のサマリーをツールバーに表示する。
+
+= Downloads =
+
+
+= How to use =
+
+
+== 使い方 ==
+
+
+= Code =
+
+{{{
+}}}
