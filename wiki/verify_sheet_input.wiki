@@ -5,10 +5,12 @@
 
 = Introduction =
 
- * verify input for excel against a reference sheet
+ * verify input for excel against a reference sheet.
+ * [verify_sheet_input_char] is also available to see the character position marked.
 
 == 概要 ==
- * エクセルで別のシートを参照して入力のベリファイを行う
+ * エクセルで別のシートを参照して入力のベリファイを行う。
+ * これに差分マーカーを追加した [verify_sheet_input_char] もある。
 
 = Details =
 
