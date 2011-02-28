@@ -41,6 +41,7 @@
 
 = Downloads =
 
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=verify_sheet_input_char downloads / ダウンロード]
 
 = How to use =
 
