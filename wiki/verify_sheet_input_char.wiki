@@ -554,5 +554,7 @@ End Sub
 
 = Snapshots =
 
- * https://lh5.googleusercontent.com/-HDASK5t9IlY/TWtVwxlG6SI/AAAAAAAAADY/mefO-HtpA3g/s1600/shot1.png
- * https://lh4.googleusercontent.com/-5DjjseLBINU/TWtVxgB-8cI/AAAAAAAAADc/x9nlHi1Njag/s1600/shot2.png
+ * Excel 2000
+    https://lh5.googleusercontent.com/-HDASK5t9IlY/TWtVwxlG6SI/AAAAAAAAADY/mefO-HtpA3g/s1600/shot1.png
+ * Excel 2007
+    https://lh4.googleusercontent.com/-5DjjseLBINU/TWtVxgB-8cI/AAAAAAAAADc/x9nlHi1Njag/s1600/shot2.png
