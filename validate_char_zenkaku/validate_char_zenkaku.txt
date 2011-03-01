@@ -101,7 +101,7 @@
 '         ;
 '         ;
 '         ;配布元
-'         ;http://cowares.blogspot.com/search/label/baum
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/validate_char_zenkaku
 '         ;
 '         ;
 '         ;
@@ -114,7 +114,7 @@
 '         ;
 '         ;
 '         ;更新
-'         ;40602.7698842593
+'         ;40603.5242592593
 '         ;
 '         ;
 '         ;
@@ -1247,8 +1247,9 @@ Option Explicit
 
 Public Sub DoValidate(Target As Object, Summary As Object, Helper As ToolBarV2)
     Const HankakuColor = 3
-    Const ZenkakuAlphaColor = 10
+    Const ZenkakuAlphaColor = 3
     Const AlarmCellColor = 6
+    Const ZenkakuCellColor = 37
     Const NormalColor = xlAutomatic
     Const NormalCellColor = xlColorIndexNone
     
@@ -1283,6 +1284,7 @@ Public Sub DoValidate(Target As Object, Summary As Object, Helper As ToolBarV2)
         AceText = ACe.Value
         
         If Rzenan.Test(AceText) Then
+            ACe.Interior.ColorIndex = ZenkakuCellColor
             Set Matched = Rzenan.Execute(AceText)
             For Each AM In Matched
                 ACe.Characters(AM.FirstIndex + 1, AM.Length).Font.ColorIndex = ZenkakuAlphaColor
