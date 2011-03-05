@@ -77,3 +77,65 @@
     * メニューから
       # 挿入(I)
       # 標準モジュール(M)
+
+= how to allow access to a Visual Basic project =
+
+ * a VBA code raises a run time error 1004 on after Excel 2003 of the default settings, when it uses the Microsoft Visual Basic for Application Extensibility 5.3 Library.
+ * most [SSF] tools require the settings bellow.
+ * references: the Microsoft KB [http://support.microsoft.com/kb/813969/en-us 813969] and [http://support.microsoft.com/kb/282830/en-us 282830]
+
+=== Excel 2003 ===
+
+  * select followings at the menu bar
+    # Tools
+    # Macro
+    # Security
+  * in the Security dialog box
+    # select Trusted Sources tab
+    # check the Trust access to Visual Basic Project
+    # click OK to close the dialog box
+
+=== Excel 2007 and later ===
+
+  * do the followings
+    # click the Microsoft Office Button located at the top-left corner.
+    # Excel Options at the bottom
+    # click the Trust Center at the left
+    # click the Trust Center Settings button at the right
+    # click the Macro Settings at the left
+    # check the Trust access to the VBA project object model
+    # click OK to close the Trust Center window
+    # click OK to close the Excel Option window
+  * check the following link to see the details.
+    * [http://translate.google.co.jp/translate?hl=en&sl=ja&tl=en&u=http%3A%2F%2Fxlsm.web.fc2.com%2Foffice2007%2Fvbproject.html Trust access to the VBA project object model]  (translated by Google from Japanese)
+
+== Visual Basic プロジェクトへのアクセスを信頼させるには ==
+
+ * Excel 2003 以降では、標準のままの設定だと Microsoft Visual Basic for Application Extensibility 5.3 Library を使用するコードで、実行時エラー 1004 が出る。
+ * [SSF] 関連のツールは、この設定をしないと動かないものが多い。
+ * 参考: マイクロソフトのナリッジベース [http://support.microsoft.com/kb/813969/ja 813969] と [http://support.microsoft.com/kb/282830/ja 282830]
+
+=== Excel 2003 ===
+
+  * メニューバーで次の操作をする
+    # ツール(T)
+    # マクロ(M)
+    # セキュリティ(S)
+  * セキュリティ ダイアログボックスで次の操作をする
+    # 信頼できる発行元 タブを選ぶ
+    # Visual Basic プロジェクトへのアクセスを信頼する をチェックする
+    # OK をクリックして閉じる
+
+=== Excel 2007 以降 ===
+
+  * 次の操作をする
+    # 左上角の Officeボタンをクリック
+    # Excelのオプション(I) （最下行）
+    # 左側一覧のセキュリティセンター
+    # 右側の セキュリティセンターの設定 ボタンをクリック
+    # 左側一覧のマクロの設定
+    # VBA プロジェクト オブジェクト モデルへのアクセスを信頼する(V) をチェック
+    # OK ボタンを押して、セキュリティセンターウィンドウを閉じる
+    # OK ボタンを押して、Excelのオプションウィンドウを閉じる
+  * より詳しい説明はこちら
+    * [http://xlsm.web.fc2.com/office2007/vbproject.html VBA プロジェクト オブジェクト モデルへのアクセスを信頼する]
