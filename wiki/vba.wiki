@@ -81,7 +81,7 @@
 = how to allow access to a Visual Basic project =
 
  * a VBA code raises a run time error 1004 on after Excel 2003 of the default settings, when it uses the Microsoft Visual Basic for Application Extensibility 5.3 Library.
- * most [SSF] tools require the settings bellow.
+ * most [ssf SSF] tools require the settings bellow.
  * references: the Microsoft KB [http://support.microsoft.com/kb/813969/en-us 813969] and [http://support.microsoft.com/kb/282830/en-us 282830]
 
 === Excel 2003 ===
@@ -112,7 +112,7 @@
 == Visual Basic プロジェクトへのアクセスを信頼させるには ==
 
  * Excel 2003 以降では、標準のままの設定だと Microsoft Visual Basic for Application Extensibility 5.3 Library を使用するコードで、実行時エラー 1004 が出る。
- * [SSF] 関連のツールは、この設定をしないと動かないものが多い。
+ * [ssf SSF] 関連のツールは、この設定をしないと動かないものが多い。
  * 参考: マイクロソフトのナリッジベース [http://support.microsoft.com/kb/813969/ja 813969] と [http://support.microsoft.com/kb/282830/ja 282830]
 
 === Excel 2003 ===
