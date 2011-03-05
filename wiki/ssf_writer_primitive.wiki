@@ -72,7 +72,8 @@
  # open a target excel book and activate.
  # run the macro, "Writer" on the target book.
  # a text file will be written.
- 
+ # [vba#how_to_allow_access_to_a_Visual_Basic_project Trust access to the VBA project object model] is required.
+
 == 使い方 ==
  # エクセルブックにVBAのモジュールを挿入する。
  # そのモジュールに、下記の Code を貼り付ける。
@@ -85,6 +86,7 @@
  # 変換対象のエクセルブックを開いて前面にしておく。
  # 貼り付けたマクロ "Writer" を実行する。
  # テキストファイルが保存される。
+ # [vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B VBA プロジェクト オブジェクト モデルへのアクセスを信頼する] が必要。
 
 = Code =
 

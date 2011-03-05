@@ -25,11 +25,13 @@
  # use an ssf reader tool like [ssf_reader_primitive] to convert a text code below into an excel book.
  # save that book, and close.
  # open the book, and see a toolbar appears.
+ # [vba#how_to_allow_access_to_a_Visual_Basic_project Trust access to the VBA project object model] is required.
 
 == 使い方 ==
  # [ssf_reader_primitive] のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
  # 保存して閉じる。
  # そのブックを開き、ツールバーが現れるのを確認する。
+ # [vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B VBA プロジェクト オブジェクト モデルへのアクセスを信頼する] が必要。
 
 = Interface / 操作 =
 
