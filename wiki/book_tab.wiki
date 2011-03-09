@@ -12,6 +12,9 @@
 
 = Details =
 
+http://lh6.googleusercontent.com/-5dEcXHUXrxs/TXf_P7q3PcI/AAAAAAAAADo/rClZ97PRojQ/s1600/shot1.png
+
+http://lh3.googleusercontent.com/-HWvQPiiXgUk/TXf_QFjPrxI/AAAAAAAAADs/ysjuQvg9g1A/s1600/shot2.png
 
  # a book tab button appears for every workbook opened.
  # click the button to activate the book.
@@ -29,6 +32,7 @@
 
 = How to use / 使い方 =
 
+http://lh6.googleusercontent.com/-cXLdoPNIQUA/TXf_Qi18uAI/AAAAAAAAADw/1_0hBJ_HVh8/s1600/shot6.png
 
 = Code =
 
@@ -1514,5 +1518,10 @@ End Sub
 = Snapshots =
 
  * Excel 2000 toolbar
+http://lh3.googleusercontent.com/-HWvQPiiXgUk/TXf_QFjPrxI/AAAAAAAAADs/ysjuQvg9g1A/s1600/shot2.png
 
  * Excel 2007 ribbon
+http://lh6.googleusercontent.com/-5dEcXHUXrxs/TXf_P7q3PcI/AAAAAAAAADo/rClZ97PRojQ/s1600/shot1.png
+
+ * menu
+http://lh6.googleusercontent.com/-cXLdoPNIQUA/TXf_Qi18uAI/AAAAAAAAADw/1_0hBJ_HVh8/s1600/shot6.png
