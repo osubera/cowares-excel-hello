@@ -1,0 +1,85 @@
+#summary how to make gadgets for blogger
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+= Introduction =
+
+ * how to make gadgets for blogger
+
+== 概要 ==
+ * ブロガー用のガジェットを作る
+ * i Google でもそのまま使えるようだ
+
+= References / 資料 =
+
+ * How to submit a gadget to Blogger / Blogger にガジェットを送信する
+    * http://www.google.com/support/blogger/bin/answer.py?hl=en&answer=150745
+    * http://www.google.com/support/blogger/bin/answer.py?hl=ja&answer=150745
+ * Gadgets for Blogger - Blogger APIs (Labs)
+    * http://code.google.com/apis/blogger/docs/gadgets/gadgets_for_blogger.html
+ * Hello, World
+    * http://code.google.com/apis/gadgets/docs/gs.html#Hello_World
+      {{{
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs title="hello world example" /> 
+  <Content type="html">
+     <![CDATA[ 
+       Hello, world!
+     ]]>
+  </Content> 
+</Module>
+      }}}
+ * Developer Tools and Debugging Tips
+    * http://code.google.com/apis/gadgets/docs/tools.html
+ * Gadget API
+    * http://code.google.com/intl/ja/apis/gadgets/index.html
+  * Submit gadgets into the iGoogle directory
+    * http://www.google.com/ig/submit
+
+= howto add a gadget to a blog / ガジェット追加の方法 =
+
+ # 適当なWebサーバーにガジェットをアップしておく(URLが必要)
+ # デザインタブ
+ # ガジェットを追加
+ # 独自に追加
+ # URLを指定
+ # タイトル、高さを調整してプレビュー
+ # 保存
+ # 使っているスキンが良くできていたらどこでも配置できるが、スキンによっては、たとえばヘッダに配置したら背景画像が切れたりすることもあるようだ。
+ # ガジェットは、読み込み元URLとリンクしているが、キャッシュされている。元URLでの更新は、そのうち反映される。
+    * 開発中は、タイトルに数字を increment していけばキャッシュなのかどうか判別しやすいかも。
+ # 自前の URL を持ってない場合、 Google が提供する環境での開発もできるようだ。
+    * http://code.google.com/apis/gadgets/docs/tools.html
+
+= cache / キャッシュ =
+
+ * キャッシュが提供されているので、外部URLはそこを使って読み込む。
+    * http://code.google.com/apis/gadgets/docs/publish.html
+      {{{
+img.src = gadgets.io.getProxyUrl("http://.....jpg");
+      }}}
+
+= 自分で使う =
+
+ * テストや、自分で使うだけなら、直接URL指定で読み込めば、ブロガーでも iGoogle でも使える。
+
+= publich / 公開する =
+
+ * 公開するには、作者などの項目を追加しないといけない。
+    * http://code.google.com/apis/gadgets/docs/reference.html#Moduleprefs_Ref
+      {{{
+  <ModulePrefs
+      title="東京の停電予定"
+      directory_title="東京電力の計画停電予定"
+      description="東京電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。"
+      author="Tomizono"
+      author_email="cowares+tokyoteiden@gmail.com"
+      screenshot="http://xlsm.web.fc2.com/teiden/tepco-blackout-schedule.png"
+      title_url="http://xlsm.web.fc2.com/teiden/"
+      height="196">
+    <Locale lang="ja" country="jp" />
+  </ModulePrefs>
+      }}}
+    * スクリーンショット用画像は、横幅 280px まで。普通の感覚なら、ガジェット全体が入る。
+ * ここから送信して、ディレクトリにリストしてもらう。
+    * http://www.google.com/ig/submit
