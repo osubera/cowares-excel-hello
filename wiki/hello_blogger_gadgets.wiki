@@ -75,11 +75,13 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
       author="Tomizono"
       author_email="cowares+tokyoteiden@gmail.com"
       screenshot="http://xlsm.web.fc2.com/teiden/tepco-blackout-schedule.png"
+      thumbnail="http://xlsm.web.fc2.com/teiden/tepco-blackout-schedule-s.png"
       title_url="http://xlsm.web.fc2.com/teiden/"
       height="196">
     <Locale lang="ja" country="jp" />
   </ModulePrefs>
       }}}
     * スクリーンショット用画像は、横幅 280px まで。普通の感覚なら、ガジェット全体が入る。
+    * 別途サムネイル画像も指定しないと、一覧のときに画像が出ない。こちらは 120x60px
  * ここから送信して、ディレクトリにリストしてもらう。
     * http://www.google.com/ig/submit
