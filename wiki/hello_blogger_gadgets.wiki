@@ -63,7 +63,7 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
 
  * テストや、自分で使うだけなら、直接URL指定で読み込めば、ブロガーでも iGoogle でも使える。
 
-= publich / 公開する =
+= publish / 公開する =
 
  * 公開するには、作者などの項目を追加しないといけない。
     * http://code.google.com/apis/gadgets/docs/reference.html#Moduleprefs_Ref
