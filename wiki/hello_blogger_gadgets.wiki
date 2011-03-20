@@ -94,7 +94,7 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
     * 次の項目を使うと、ディレクトリリストの作者項目が充実する。
       {{{
       author_link="http://cowares.nobody.jp"
-      author_phto="http://xlsm.web.fc2.com/teiden/i.png"
+      author_photo="http://xlsm.web.fc2.com/teiden/i.png"
       author_location="Chiba, Japan"
       author_affiliation="kobobau"
       author_aboutme=""
