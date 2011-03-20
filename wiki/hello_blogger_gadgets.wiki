@@ -35,6 +35,8 @@
     * http://code.google.com/intl/ja/apis/gadgets/index.html
   * Submit gadgets into the iGoogle directory
     * http://www.google.com/ig/submit
+ * iGoogle Developer Home / アカウント登録すると、自分のガジェットの統計を見れる。 iGoogle 向けのDocもある。
+    * http://code.google.com/intl/en/apis/igoogle/
 
 = howto add a gadget to a blog / ガジェット追加の方法 =
 
@@ -86,6 +88,47 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
  * ここから送信して、ディレクトリにリストしてもらう。
     * http://www.google.com/ig/submit
 
+=== iGoogle publish / iGoogle 用の拡張 ===
+
+ * http://code.google.com/intl/en/apis/igoogle/docs/igoogledevguide.html#profiledata
+    * 次の項目を使うと、ディレクトリリストの作者項目が充実する。
+      {{{
+      author_link="http://cowares.nobody.jp"
+      author_phto="http://xlsm.web.fc2.com/teiden/i.png"
+      author_location="Chiba, Japan"
+      author_affiliation="kobobau"
+      author_aboutme=""
+      author_quote=""
+      }}}
+      * 作者画像は 70x100px portrait だ。
+      * aboutme が自己紹介で、 quote が座右の銘といった感じか。
+      * このあたりまで文字情報が増えてくると、国際化対応の書き方をしないとつらいかな。
+
+= internationalization / 国際化 =
+
+ * http://code.google.com/intl/en/apis/gadgets/docs/i18n.html#Bundles_Gadget
+    * 外部ファイルにせず、インラインでも書けるようだが、いくつかのガジェットに共通のメッセージファイルを外に持つのがスマートな気がする。
+    * Locale で外部ファイルを指定する。 country は気にせず、言語だけというのが流儀のようだ。 ALL_ALL は必須。ここに英語を書けばいい。
+      {{{
+    <Locale messages="http://xlsm.web.fc2.com/teiden/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://xlsm.web.fc2.com/teiden/ja_ALL.xml" />
+      }}}
+    * ALL_ALL.xml の例。
+      {{{
+<messagebundle>
+  <msg name="location">Chiba, Japan</msg>
+  <msg name="aboutme">Open source scriptings, vba solutions. See http://cowares.nobody.jp and http://cowares.blogspot.com for details.</msg>
+  <msg name="quote">Fortitudinous, Free, Fair</msg>
+  <msg name="tohoku_teiden">TOHOKU blackout</msg>
+  <msg name="tohoku_teiden_dir">blackout schedule for TOHOKU</msg>
+  <msg name="tohoku_teiden_desc">Today's schedule of the blackout in a region of Tohoku electoric power co. Shows tomorrow schedule after 7 o'clock pm. These blackouts are caused by the disaster of the earthquake and tsunami on 3.11 2011 in east japan.</msg>
+</messagebundle>
+      }}}
+    * __MSG__ を使って外部リソースを挿入する。
+      {{{
+      title="__MSG_tohoku_teiden__"
+      }}}
+
 = misc =
 
  * キャッシュの扱いが面倒だ。
@@ -94,6 +137,8 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
     * 昨日夕方に、一斉にガジェットギャラリーのサムネールが消えた瞬間があったので、おそらく、日に一度ぐらい、キャッシュの強制更新をしているのかな。
     * 何が今動いているか把握するために、 author_email にバージョン番号を仕込むと良さそうだ。 cowares+tohokuteiden+2@gmail.com のようにして increment していく。
     * もしかしたら、ブロガーの管理画面を使って、URL指定で読み込みなおすことで、キャッシュ更新が少しは早まる場合があるかもしれない。少なくともこれをやっても更新されない状況があったので、確実な方法ではない。確実でない理由はキャッシュサーバーが複数あるからかも。
- * 文字列を言語別の別ファイルに切り出す、国際化が推奨されているようだ。でも、とりあえず自国で動かすだけなら、上のように単一ファイルで始めるのが手っ取り早い。
- * 最初は小さく作れ、という鉄則をグーグルも掲げているし。
+ * 国際化は最初からやった方がいい。そうでないと言語が変わると、そのファイルが無いかのようなメッセージが出る。おそらく、新着にリストされない原因になる。 ~~ 文字列を言語別の別ファイルに切り出す、国際化が推奨されているようだ。でも、とりあえず自国で動かすだけなら、上のように単一ファイルで始めるのが手っ取り早い。 ~~
+ * 小さく作る方法としては、別ファイルにせず、とりあえず ALL_ALL だけインラインで messagebundle を入れる手がある。
+ * 共通化したメッセージファイルを使うなら、そこにメッセージを足すだけなので、２つ目からは最初から分離する方が早いか。
+ * ~~最初は小さく作れ、という鉄則をグーグルも掲げているし。~~
 
