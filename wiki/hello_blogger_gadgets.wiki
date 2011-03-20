@@ -103,6 +103,7 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
       * 作者画像は 70x100px portrait だ。
       * aboutme が自己紹介で、 quote が座右の銘といった感じか。
       * このあたりまで文字情報が増えてくると、国際化対応の書き方をしないとつらいかな。
+      * 作者関連項目 author_* は、自分の登録するガジェットのうち１個だけに入れれば十分らしい。
 
 = internationalization / 国際化 =
 
