@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs
+      title="test__MSG_tokyo_teiden__"
+      directory_title="test__MSG_tokyo_teiden_dir__"
+      description="test__MSG_tokyo_teiden_desc__"
+      author="Tomizono"
+      author_email="cowares+tokyoteiden+test@gmail.com"
+      author_link="http://cowares.nobody.jp"
+      author_photo="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/i.png"
+      author_location="__MSG_location__"
+      author_affiliation="kobobau"
+      author_aboutme="__MSG_aboutme__"
+      author_quote="__MSG_quote__"
+      screenshot="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule.png"
+      thumbnail="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule-s.png"
+      title_url="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/"
+      height="196">
+    <Locale messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ja_ALL.xml" />
+  </ModulePrefs>
+  <Content type="html" view="home,profile,default,canvas">
+    <![CDATA[ 
+      <div id="tepco-blackout-schedule" style="overflow:auto;width:100%;height:196px;margin:0;padding:0;"></div>
+      <script type="text/javascript">
+        // tepco blackout schedules
+        // http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_20110316.gif
+
+        function makeGifUrl(d) {
+          return('http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_' + d + '.gif');
+        }
+
+        function makeImgTag(u) {
+          return('<img src="' + u + '" />');
+        }
+
+        function currentGif() {
+          return(makeGifUrl(getCurrentDate()));
+        }
+
+        function nextGif() {
+          return(makeGifUrl(getNextDate()));
+        }
+
+        function getCurrentDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date,hour+5,0,0,0)));
+        }
+
+        function getNextDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date+1,hour+5,0,0,0)));
+        }
+
+        function convertDate8(d) {
+          var year = d.getFullYear();
+          var month = d.getMonth() + 1;
+          var date = d.getDate();
+          var s = date + '';
+          if (date<10) { s = '0' + s; }
+          s = month + s;
+          if (month<10) { s = '0' + s; }
+          s = year + s;
+          return(s);
+        }
+        
+        // using google blogger gadgets cache
+        function loadImage(url) {
+          var img = document.createElement('img');
+          img.src = gadgets.io.getProxyUrl(url);
+          return(img);
+        }
+        
+        //document.write(makeImgTag(currentGif()));
+        var container = document.getElementById('tepco-blackout-schedule');
+        container.innerHTML = '';
+        container.appendChild(loadImage(currentGif()));
+      </script>
+    ]]>
+  </Content>
+</Module>
