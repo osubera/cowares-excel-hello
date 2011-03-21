@@ -5,4 +5,7 @@
   <msg name="tohoku_teiden">東北の停電予定</msg>
   <msg name="tohoku_teiden_dir">東北電力の計画停電予定</msg>
   <msg name="tohoku_teiden_desc">東北電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。</msg>
+  <msg name="tokyo_teiden">東京の停電予定</msg>
+  <msg name="tokyo_teiden_dir">東京電力の計画停電予定</msg>
+  <msg name="tokyo_teiden_desc">東京電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。</msg>
 </messagebundle>
