@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs
+      title="__MSG_tohoku_teiden__"
+      directory_title="__MSG_tohoku_teiden_dir__"
+      description="__MSG_tohoku_teiden_desc__"
+      author="Tomizono"
+      author_email="cowares+tohokuteiden+3@gmail.com"
+      author_link="http://cowares.nobody.jp"
+      author_photo="http://xlsm.web.fc2.com/teiden/i.png"
+      author_location="__MSG_location__"
+      author_affiliation="kobobau"
+      author_aboutme="__MSG_aboutme__"
+      author_quote="__MSG_quote__"
+      screenshot="http://xlsm.web.fc2.com/teiden/tohoku-epco-blackout-schedule.png"
+      thumbnail="http://xlsm.web.fc2.com/teiden/tohoku-epco-blackout-schedule-s.png"
+      title_url="http://xlsm.web.fc2.com/teiden/"
+      height="152">
+    <Locale messages="http://xlsm.web.fc2.com/teiden/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://xlsm.web.fc2.com/teiden/ja_ALL.xml" />
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[ 
+      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;height:152px;margin:0;padding:0;"></div>
+      <script type="text/javascript">
+        // tepco blackout schedules
+        // http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_tohoku_20110317_2.gif
+
+        function makeGifUrl(d,i) {
+          var rev = '';
+          if (i>0) { rev = '_' + i; }
+          return('http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_tohoku_' + d + rev + '.gif');
+        }
+
+        function makeImgTag(u) {
+          return('<img src="' + u + '" />');
+        }
+
+        function currentGif(i) {
+          return(makeGifUrl(getCurrentDate(),i));
+        }
+
+        function nextGif(i) {
+          return(makeGifUrl(getNextDate(),i));
+        }
+
+        function getCurrentDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date,hour+5,0,0,0)));
+        }
+
+        function getNextDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date+1,hour+5,0,0,0)));
+        }
+
+        function convertDate8(d) {
+          var year = d.getFullYear();
+          var month = d.getMonth() + 1;
+          var date = d.getDate();
+          var s = date + '';
+          if (date<10) { s = '0' + s; }
+          s = month + s;
+          if (month<10) { s = '0' + s; }
+          s = year + s;
+          return(s);
+        }
+        
+        // using google blogger gadgets cache
+        function loadImage(url) {
+          var img = document.createElement('img');
+          img.src = gadgets.io.getProxyUrl(url);
+          return(img);
+        }
+        
+        //document.write(makeImgTag(currentGif(0)));
+        var container = document.getElementById('tohoku-epco-blackout-schedule');
+        container.innerHTML = '';
+        var img;
+        // consider up to revision 3
+        for (var i=3;i>=0;--i) {
+          img = loadImage(currentGif(i));
+          if (img.width>0) { break; }
+        }
+        container.appendChild(img);
+      </script>
+    ]]>
+  </Content>
+</Module>

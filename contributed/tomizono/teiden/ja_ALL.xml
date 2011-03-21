@@ -1,0 +1,8 @@
+<messagebundle>
+  <msg name="location">千葉, 日本</msg>
+  <msg name="aboutme">オープンソース方式で VBA Excel Access を中心にした開発を行っています。詳細は http://cowares.nobody.jp ダウンロードは http://cowares.blogspot.com</msg>
+  <msg name="quote">自律、自由、公正</msg>
+  <msg name="tohoku_teiden">東北の停電予定</msg>
+  <msg name="tohoku_teiden_dir">東北電力の計画停電予定</msg>
+  <msg name="tohoku_teiden_desc">東北電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。</msg>
+</messagebundle>
