@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs
-      title="東京の停電予定"
-      directory_title="東京電力の計画停電予定"
-      description="東京電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。"
+      title="__MSG_tokyo_teiden__"
+      directory_title="__MSG_tokyo_teiden_dir__"
+      description="__MSG_tokyo_teiden_desc__"
       author="Tomizono"
-      author_email="cowares+tokyoteiden@gmail.com"
+      author_email="cowares+tokyoteiden+2@gmail.com"
+      author_link="http://cowares.nobody.jp"
+      author_photo="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/i.png"
+      author_location="__MSG_location__"
+      author_affiliation="kobobau"
+      author_aboutme="__MSG_aboutme__"
+      author_quote="__MSG_quote__"
       screenshot="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule.png"
       thumbnail="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule-s.png"
       title_url="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/"
       height="196">
-    <Locale lang="ja" country="jp" />
+    <Locale messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ja_ALL.xml" />
   </ModulePrefs>
   <Content type="html">
     <![CDATA[ 
