@@ -5,7 +5,7 @@
       directory_title="__MSG_tohoku_teiden_dir__"
       description="__MSG_tohoku_teiden_desc__"
       author="Tomizono"
-      author_email="cowares+tohokuteiden+3@gmail.com"
+      author_email="cowares+tohokuteiden+4@gmail.com"
       author_link="http://cowares.nobody.jp"
       author_photo="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/i.png"
       author_location="__MSG_location__"
@@ -19,7 +19,7 @@
     <Locale messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ALL_ALL.xml" />
     <Locale lang="ja" messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ja_ALL.xml" />
   </ModulePrefs>
-  <Content type="html">
+  <Content type="html" view="home,profile,default,canvas">
     <![CDATA[ 
       <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;height:152px;margin:0;padding:0;"></div>
       <script type="text/javascript">
