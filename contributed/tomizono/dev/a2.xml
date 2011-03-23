@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="xxhello world example" />
+  <Content type="html" view="home,profile,default,canvas">
+    <![CDATA[ 
+      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;height:152px;margin:0;padding:0;"></div>
+      <style type="text/css">
+        table{}
+      </style>
+      <script type="text/javascript">
+        // tohoku epco blackout schedules
+        // http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html
+        
+        function scheduleUrl() {
+          return('http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html');
+        }
+        
+        function getCurrentDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date,hour+5,0,0,0)));
+        }
+
+        function getNextDate() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth();
+          var date = now.getDate();
+          var hour = now.getHours();
+          return(convertDate8(new Date(year,month,date+1,hour+5,0,0,0)));
+        }
+
+        function convertDate8(d) {
+          var year = d.getFullYear();
+          var month = d.getMonth() + 1;
+          var date = d.getDate();
+          var s = date + '';
+          if (date<10) { s = '0' + s; }
+          s = month + s;
+          if (month<10) { s = '0' + s; }
+          s = year + s;
+          return(s);
+        }
+        
+        // using google blogger gadgets cache
+        function request(url) {
+          var params = {};
+          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+          gadgets.io.makeRequest(url, response, params);
+        }
+        
+        function response(obj) {
+          var schedules = reformSchedules(cutSchedules(obj.text));
+          var header = schedules.shift();
+          var scheduleFinder = toHashArray(schedules);
+          var key = 'd' + getCurrentDate();
+          var schedule = scheduleFinder[key];
+          if(schedule==undefined) {schedule = new Array('','','');}
+          var out = htmlTable(header, schedule, 3);
+          var container = document.getElementById('tohoku-epco-blackout-schedule');
+          container.innerHTML = out;
+        };
+        
+        function main(inSt, outSt) {
+          var schedules = reformSchedules(cutSchedules(inSt.ReadAll()));
+          var header = schedules.shift();
+          var scheduleFinder = toHashArray(schedules);
+          //var out = schedules.toString();
+          //var out = header.toString() + '\n';
+          //out = out + scheduleFinder['d20110320'];
+          var schedule = scheduleFinder['d20110330'];
+          if(schedule==undefined) {schedule = new Array('','','');}
+          var out = htmlTable(header, schedule, 3);
+          outSt.Write(out);
+        }
+        
+        function htmlTable(header, schedule, columns) {
+          var out =  '<table><tr><th>' + header.slice(0,columns).join('</th><th>') + '</th></tr><tr><td>' + schedule.slice(0, columns).join('</td><td>') + '</td></tr></table>';
+          return(out);
+        }
+        
+        function toHashArray(lines) {
+          // expect Array[[3月19日,a,b,null]]
+          // generate Hash['d20110319'] = [3月19日,a,b]
+          var out = new Array();
+          var now = new Date();
+          var year = now.getFullYear();
+          var regMD = /(\d+)月(\d+)日/;
+          while(lines.length>0) {
+            var line = lines.shift();
+            if(regMD.exec(line[1]) == null) {continue;}
+            var date8 = RegExp.$2;
+            if(date8.length<2) { date8 = '0' + date8; }
+            date8 = RegExp.$1 + date8;
+            if(date8.length<4) { date8 = '0' + date8; }
+            date8 = 'd' + year + date8;
+            out[date8] = line.slice(1);
+          }
+          return(out);
+        }
+        
+        function reformSchedules(text) {
+          var regSpaces = /(&nbsp;|\s)+/g;
+          var noLineFeeds = text.replace(regSpaces, '');
+          var splitRows = noLineFeeds.split('</TR>').join('\n');
+          var regNoTags = /(<[^<]*>)+/g;
+          var magicWord = '````';
+          var splitColumns = splitRows.replace(regNoTags, magicWord);
+          var schedules = new Array();
+          var lines = splitColumns.split('\n');
+          while(lines.length>0) {
+            var line = lines.shift().split(magicWord);
+            if(line.length>=1) {schedules.push(line);}
+          }
+          return(schedules);
+        }
+        
+        function cutSchedules(text) {
+          var out = text.split('TBODY>')[1];
+          if(out==undefined) { out=''; }
+          return(out);
+        }
+        
+        function loadSchedule() {
+          var cacheUrl = gadgets.io.getProxyUrl(scheduleUrl);
+          request(cacheUrl);
+        }
+        
+        gadgets.util.registerOnLoadHandler(loadSchedule);
+      </script>
+    ]]>
+  </Content>
+</Module>
