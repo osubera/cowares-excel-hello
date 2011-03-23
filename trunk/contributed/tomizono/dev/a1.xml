@@ -16,7 +16,7 @@ function response(obj) {
   //document.write(obj.text);
   //var target = obj.data.getElementsByTags('tbody')[0];
   //document.write(target.innerText);
-  var target = ob.text.split('TBODY');
+  var target = obj.text.split('TBODY');
   document.write(target[1]);
 };
 
