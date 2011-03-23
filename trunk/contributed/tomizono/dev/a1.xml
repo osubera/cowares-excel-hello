@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="xxhello world example" />
+<Content type="html" view="home"><![CDATA[
+<script type="text/javascript">
+function request() {
+   document.write('aa');
+   var params = {};
+   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+   var url = "http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html";
+   //url = "http://xlsm.web.fc2.com/";
+   gadgets.io.makeRequest(url, response, params);
+ };
+function response(obj) {
+   document.write('bb');
+  document.write(obj.text);
+};
+
+//request();
+gadgets.util.registerOnLoadHandler(request);
+document.write('0');
+</script>
+]]></Content>
+</Module>
