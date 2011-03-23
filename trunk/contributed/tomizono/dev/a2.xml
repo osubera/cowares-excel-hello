@@ -62,20 +62,8 @@
           var out = htmlTable(header, schedule, 3);
           var container = document.getElementById('tohoku-epco-blackout-schedule');
           container.innerHTML = out;
+          container.style.height = out.style.height;
         };
-        
-        function main(inSt, outSt) {
-          var schedules = reformSchedules(cutSchedules(inSt.ReadAll()));
-          var header = schedules.shift();
-          var scheduleFinder = toHashArray(schedules);
-          //var out = schedules.toString();
-          //var out = header.toString() + '\n';
-          //out = out + scheduleFinder['d20110320'];
-          var schedule = scheduleFinder['d20110330'];
-          if(schedule==undefined) {schedule = new Array('','','');}
-          var out = htmlTable(header, schedule, 3);
-          outSt.Write(out);
-        }
         
         function htmlTable(header, schedule, columns) {
           var out =  '<table><tr><th>' + header.slice(0,columns).join('</th><th>') + '</th></tr><tr><td>' + schedule.slice(0, columns).join('</td><td>') + '</td></tr></table>';
