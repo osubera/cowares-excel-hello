@@ -5,7 +5,7 @@
       directory_title="__MSG_tohoku_teiden_dir__"
       description="__MSG_tohoku_teiden_desc__"
       author="Tomizono"
-      author_email="cowares+tohokuteiden+4@gmail.com"
+      author_email="cowares+tohokuteiden+5@gmail.com"
       author_link="http://cowares.nobody.jp"
       author_photo="http://xlsm.web.fc2.com/teiden/i.png"
       author_location="__MSG_location__"
@@ -15,35 +15,25 @@
       screenshot="http://xlsm.web.fc2.com/teiden/tohoku-epco-blackout-schedule.png"
       thumbnail="http://xlsm.web.fc2.com/teiden/tohoku-epco-blackout-schedule-s.png"
       title_url="http://xlsm.web.fc2.com/teiden/"
-      height="152">
+      height="64">
     <Locale messages="http://xlsm.web.fc2.com/teiden/ALL_ALL.xml" />
     <Locale lang="ja" messages="http://xlsm.web.fc2.com/teiden/ja_ALL.xml" />
+    <Require feature="dynamic-height" />
   </ModulePrefs>
   <Content type="html" view="home,profile,default,canvas">
     <![CDATA[ 
-      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;height:152px;margin:0;padding:0;"></div>
+      <style type="text/css">
+        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:gray;}
+      </style>
+      <div id="tohoku-epco-blackout-schedule"></div>
       <script type="text/javascript">
-        // tepco blackout schedules
-        // http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_tohoku_20110317_2.gif
-
-        function makeGifUrl(d,i) {
-          var rev = '';
-          if (i>0) { rev = '_' + i; }
-          return('http://i.yimg.jp/images/evt/setsuden/teiden/schedule/teiden_tohoku_' + d + rev + '.gif');
+        // tohoku epco blackout schedules
+        // http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html
+        
+        function scheduleUrl() {
+          return('http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html');
         }
-
-        function makeImgTag(u) {
-          return('<img src="' + u + '" />');
-        }
-
-        function currentGif(i) {
-          return(makeGifUrl(getCurrentDate(),i));
-        }
-
-        function nextGif(i) {
-          return(makeGifUrl(getNextDate(),i));
-        }
-
+        
         function getCurrentDate() {
           var now = new Date();
           var year = now.getFullYear();
@@ -75,22 +65,78 @@
         }
         
         // using google blogger gadgets cache
-        function loadImage(url) {
-          var img = document.createElement('img');
-          img.src = gadgets.io.getProxyUrl(url);
-          return(img);
+        function request(url) {
+          var params = {};
+          params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+          gadgets.io.makeRequest(url, response, params);
         }
         
-        //document.write(makeImgTag(currentGif(0)));
-        var container = document.getElementById('tohoku-epco-blackout-schedule');
-        container.innerHTML = '';
-        var img;
-        // consider up to revision 3
-        for (var i=3;i>=0;--i) {
-          img = loadImage(currentGif(i));
-          if (img.width>0) { break; }
+        function response(obj) {
+          var schedules = reformSchedules(cutSchedules(obj.text));
+          var header = schedules.shift();
+          var scheduleFinder = toHashArray(schedules);
+          var key = 'd' + getCurrentDate();
+          var schedule = scheduleFinder[key];
+          if(schedule==undefined) {schedule = new Array('','','');}
+          var out = htmlTable(header, schedule, 3);
+          var container = document.getElementById('tohoku-epco-blackout-schedule');
+          container.innerHTML = out;
+          gadgets.window.adjustHeight(container.style.height);
+        };
+        
+        function htmlTable(header, schedule, columns) {
+          var out =  '<table><tr><th>' + header.slice(0,columns).join('</th><th>') + '</th></tr><tr><td>' + schedule.slice(0, columns).join('</td><td>') + '</td></tr></table>';
+          return(out);
         }
-        container.appendChild(img);
+        
+        function toHashArray(lines) {
+          // expect Array[[3月19日,a,b,null]]
+          // generate Hash['d20110319'] = [3月19日,a,b]
+          var out = new Array();
+          var now = new Date();
+          var year = now.getFullYear();
+          var regMD = /(\d+)月(\d+)日/;
+          while(lines.length>0) {
+            var line = lines.shift();
+            if(regMD.exec(line[1]) == null) {continue;}
+            var date8 = RegExp.$2;
+            if(date8.length<2) { date8 = '0' + date8; }
+            date8 = RegExp.$1 + date8;
+            if(date8.length<4) { date8 = '0' + date8; }
+            date8 = 'd' + year + date8;
+            out[date8] = line.slice(1);
+          }
+          return(out);
+        }
+        
+        function reformSchedules(text) {
+          var regSpaces = /(&nbsp;|\s)+/g;
+          var noLineFeeds = text.replace(regSpaces, '');
+          var splitRows = noLineFeeds.split('</TR>').join('\n');
+          var regNoTags = /(<[^<]*>)+/g;
+          var magicWord = '````';
+          var splitColumns = splitRows.replace(regNoTags, magicWord);
+          var schedules = new Array();
+          var lines = splitColumns.split('\n');
+          while(lines.length>0) {
+            var line = lines.shift().split(magicWord);
+            if(line.length>=1) {schedules.push(line);}
+          }
+          return(schedules);
+        }
+        
+        function cutSchedules(text) {
+          var out = text.split('TBODY>')[1];
+          if(out==undefined) { out=''; }
+          return(out);
+        }
+        
+        function loadSchedule() {
+          var cacheUrl = gadgets.io.getProxyUrl(scheduleUrl);
+          request(cacheUrl);
+        }
+        
+        gadgets.util.registerOnLoadHandler(loadSchedule);
       </script>
     ]]>
   </Content>
