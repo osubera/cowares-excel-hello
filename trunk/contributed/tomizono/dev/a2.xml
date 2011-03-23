@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-<ModulePrefs title="xxhello world example" />
+<ModulePrefs title="xxhello world example"
+      height="96">
+  </ModulePrefs>
   <Content type="html" view="home,profile,default,canvas">
     <![CDATA[ 
-      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;margin:0;padding:0;"></div>
+      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;height:96px;margin:0;padding:0;"></div>
       <style type="text/css">
         table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:gray;}
       </style>
@@ -62,7 +64,6 @@
           var out = htmlTable(header, schedule, 3);
           var container = document.getElementById('tohoku-epco-blackout-schedule');
           container.innerHTML = out;
-          container.style.height = out.style.height;
         };
         
         function htmlTable(header, schedule, columns) {
