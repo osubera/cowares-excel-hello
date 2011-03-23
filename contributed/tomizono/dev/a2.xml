@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 <ModulePrefs title="xxhello world example"
-      >
+      height="100">
       <Require feature="dynamic-height" />
   </ModulePrefs>
   <Content type="html" view="home,profile,default,canvas">
@@ -66,6 +66,7 @@
           var container = document.getElementById('tohoku-epco-blackout-schedule');
           container.innerHTML = out;
           container.style.height = out.style.height;
+          gadgets.window.adjustHeight(out.style.height);
         };
         
         function htmlTable(header, schedule, columns) {
@@ -118,7 +119,6 @@
         function loadSchedule() {
           var cacheUrl = gadgets.io.getProxyUrl(scheduleUrl);
           request(cacheUrl);
-          gadgets.window.adjustHeight();
         }
         
         gadgets.util.registerOnLoadHandler(loadSchedule);
