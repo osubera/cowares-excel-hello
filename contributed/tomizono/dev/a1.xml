@@ -14,6 +14,8 @@ function request() {
 function response(obj) {
    document.write('bb');
   //document.write(obj.text);
+  var target = obj.data.getElementsByTags('tbody')[0];
+  document.write(target.innerText);
 };
 
 //request();
