@@ -65,7 +65,7 @@
           var out = htmlTable(header, schedule, 3);
           var container = document.getElementById('tohoku-epco-blackout-schedule');
           container.innerHTML = out;
-          //container.style.height = out.style.height;
+          container.style.height = out.style.height;
         };
         
         function htmlTable(header, schedule, columns) {
