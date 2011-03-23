@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 <ModulePrefs title="xxhello world example" />
-<Content type="html" view="home"><![CDATA[
+<Content type="html" view="home,canvas"><![CDATA[
 <script type="text/javascript">
 function request() {
    document.write('aa');
