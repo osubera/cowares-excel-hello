@@ -6,7 +6,7 @@
 function request() {
    document.write('aa');
    var params = {};
-   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.DOM;
+   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
    var url = "http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html";
    //url = "http://xlsm.web.fc2.com/";
    gadgets.io.makeRequest(url, response, params);
@@ -14,8 +14,10 @@ function request() {
 function response(obj) {
    document.write('bb');
   //document.write(obj.text);
-  var target = obj.data.getElementsByTags('tbody')[0];
-  document.write(target.innerText);
+  //var target = obj.data.getElementsByTags('tbody')[0];
+  //document.write(target.innerText);
+  var target = ob.text.split('TBODY');
+  document.write(target[1]);
 };
 
 //request();
