@@ -150,3 +150,7 @@ img.src = gadgets.io.getProxyUrl("http://.....jpg");
     {{{
   <Content type="html" view="home,profile,default,canvas">
     }}}
+ * GGE (Google Gadget Editor) は、 iGoogle 画面に組み込んで、その場でガジェットの作成と preview ができるすぐれものだが、実は制約がある。最新のバージョンに対応してないとかで、 gadgets.io なんかの API が使えない。どちらかというと html の色とか配置とかを工夫する時点で使うと便利なのかな。あと、純粋な javascript の動作チェックとか。
+ * ガジェットの更新は日に３回が上限みたいな文言がどっかにあったので、もしかしたら、同じ名前で submit しなおせば、強制 update されるのかもしれない。これは試してない。
+    * 個別ユーザーが、自分のバージョンを知って、必要なら強制ロードできる仕組みってできないのかな？
+
