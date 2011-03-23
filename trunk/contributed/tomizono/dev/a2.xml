@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 <ModulePrefs title="xxhello world example"
-      height="200">
+      >
       <Require feature="dynamic-height" />
   </ModulePrefs>
   <Content type="html" view="home,profile,default,canvas">
