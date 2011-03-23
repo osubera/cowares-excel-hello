@@ -6,10 +6,10 @@
   </ModulePrefs>
   <Content type="html" view="home,profile,default,canvas">
     <![CDATA[ 
-      <div id="tohoku-epco-blackout-schedule" style="overflow:auto;width:100%;margin:0;padding:0;"></div>
       <style type="text/css">
         table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:gray;}
       </style>
+      <div id="tohoku-epco-blackout-schedule"></div>
       <script type="text/javascript">
         // tohoku epco blackout schedules
         // http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html
