@@ -32,7 +32,7 @@
             var color = prefs.getString('color');
             container.innerHTML = '<em>__MODULE_ID__</em>' + getViewName() + gadgets.views.ViewType.CANVAS;
             container.style.color = color;
-            if(getViewName() eq gadgets.views.ViewType.CANVAS) {
+            if(getViewName() == gadgets.views.ViewType.CANVAS) {
               var newSpan = document.createElement('span');
               newSpan.innerText = 'canvas view';
               container.appendChild(newSpan);
