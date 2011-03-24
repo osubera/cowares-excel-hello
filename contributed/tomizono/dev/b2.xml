@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
   <ModulePrefs title="xxx hello">
+    <Require feature="minimessage" />
   </ModulePrefs>
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
   <UserPref name="version" datatype="hidden" default_value="1" />
@@ -9,20 +10,28 @@
       <style type="text/css">
         em{background-color:yellow;}
       </style>
-      <div id="xxx">
+      <div id="__MODULE_ID__">
         
       </div>
       <script type="text/javascript">
         // Copyright (c) 2011 自律、自由、公正 cowares.nobody.jp
         (function(){
-          var main = function(){
-            (function(){
-              var container = document.getElementById('xxx');
-              var prefs = new _IG_Prefs();
-              var color = prefs.getString('color');
-              container.innerHTML = '<em>ok</em>';
-              container.style.color = color;
-            })();
+          function getViewName() {
+            return(gadgets.views.getCurrentView().getName());
+          }
+          
+          function main() {
+            var container = document.getElementById('xxx');
+            var prefs = new _IG_Prefs();
+            var color = prefs.getString('color');
+            container.innerHTML = '<em>ok</em>';
+            container.style.color = color;
+            if(getViewName()=='canvas') {
+              var newSpan = document.createElement('span');
+              newSpan.innerText = 'canvas view';
+              container.appendChild(newSpan);
+              //var msg = new gadgets.MiniMessage(
+            }
           };
           gadgets.util.registerOnLoadHandler(main);
         })();
