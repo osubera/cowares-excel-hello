@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="xxx hello">
+  <ModulePrefs title="__MSG_title__">
+    <Locale>
+      <msg name="id">xxx_hello</msg>
+    </Locale>
+    <Locale>
+      <msg name="title">xxx hello</msg>
+    </Locale>
+    <Locale lang="ja">
+      <msg name="title">xxx こんにちわ</msg>
+    </Locale>
   </ModulePrefs>
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
   <UserPref name="version" datatype="hidden" default_value="1" />
@@ -9,7 +18,7 @@
       <style type="text/css">
         em{background-color:yellow;}
       </style>
-      <div id="__MODULE_ID__">
+      <div id="__MSG_id____MODULE_ID__">
         
       </div>
       <script type="text/javascript">
@@ -20,7 +29,7 @@
           }
           
           function main() {
-            var container = document.getElementById('__MODULE_ID__');
+            var container = document.getElementById('__MSG_id____MODULE_ID__');
             var prefs = new _IG_Prefs();
             var color = prefs.getString('color');
             container.innerHTML = '<em>ok</em>';
