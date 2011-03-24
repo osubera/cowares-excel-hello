@@ -46,6 +46,7 @@
           var tab1Id = tabs.addTab('tab one');
           var tab2Id = tabs.addTab('tab two');
           if(tabs.getSelectedTab()==undefined) {tabs.setSelectedTab(0);}
+          tabs.alignTabs('left');
           var tab1 = document.getElementById(tab1Id);
           gadgets.util.registerOnLoadHandler(main);
         })();
