@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="xxx hello">
+  </ModulePrefs>
+  <UserPref name="color" display_name="Color" default_value="#ff0000" />
+  <UserPref name="version" datatype="hidden" default_value="1" />
+  <Content type="html" view="home,profile,default,canvas">
+    <![CDATA[
+      <style type="text/css">
+        em{font-color:red;}
+      </style>
+      <div id="xxx">
+        
+      </div>
+      <script type="text/javascript">
+        function main() {
+          var container = document.getElementById('xxx');
+          container.innerHtml = '<em>ok</em>';
+        }
+        gadgets.util.registerOnLoadHandler(main);
+      </script>
+    ]]>
+  </Content>
+</Module>
