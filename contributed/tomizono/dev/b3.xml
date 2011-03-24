@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="__UP_title__">
+  <ModulePrefs title="__MSG_title__">
     <Locale>
       <msg name="title">xxx helloooo</msg>
-      <msg name="id">xxx_hello</msg>
     </Locale>
     <Locale lang="ja">
       <msg name="title">xxx こんにちわ</msg>
     </Locale>
   </ModulePrefs>
-  <UserPref name="title" display_name="__MSG_title__" datatype="string" default_value="__MSG_title__" />
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
   <UserPref name="version" datatype="hidden" default_value="1" />
   <Content type="html" view="home,profile,default,canvas,preview">
@@ -17,18 +15,18 @@
       <style type="text/css">
         em{background-color:yellow;}
       </style>
-      <div id="xxxx__MODULE_ID__">
+      <div id="kontena__MODULE_ID__">
         
       </div>
       <script type="text/javascript">
         // Copyright (c) 2011 自律、自由、公正 cowares.nobody.jp
         (function(){
           function getViewName() {
-            //return(gadgets.views.getCurrentView().getName());
+            return(gadgets.views.getCurrentView().getName());
           }
           
           function main() {
-            var container = document.getElementById('xxxx__MODULE_ID__');
+            var container = document.getElementById('kontena__MODULE_ID__');
             var prefs = new _IG_Prefs();
             var color = prefs.getString('color');
             container.innerHTML = '<em>__MODULE_ID__</em>';
