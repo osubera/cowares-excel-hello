@@ -30,7 +30,7 @@
             var container = document.getElementById('kontena__MODULE_ID__');
             var prefs = new _IG_Prefs();
             var color = prefs.getString('color');
-            container.innerHTML = '<em>__MODULE_ID__</em>';
+            container.innerHTML = '<em>__MODULE_ID__</em>' + getViewName();
             container.style.color = color;
             if(getViewName()=='canvas') {
               var newSpan = document.createElement('span');
