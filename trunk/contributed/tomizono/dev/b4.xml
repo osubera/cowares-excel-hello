@@ -12,7 +12,7 @@
     <Require feature="setprefs" />
   </ModulePrefs>
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
-  <UserPref name="selectedTab" datatype="hidden" />
+  <UserPref name="selectedTab" datatype="hidden" default_value="0" />
   <UserPref name="version" datatype="hidden" default_value="1" />
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[
