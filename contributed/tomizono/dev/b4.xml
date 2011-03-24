@@ -12,7 +12,7 @@
     <Require feature="setprefs" />
   </ModulePrefs>
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
-  <UserPref name="selectedTab" datatype="hidden" default_value="0" />
+  <UserPref name="selectedTab" datatype="string" />
   <UserPref name="version" datatype="hidden" default_value="1" />
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[
@@ -46,6 +46,7 @@
           var tabs = new gadgets.TabSet(__MODULE_ID__, 'hoge');
           var tab1Id = tabs.addTab('tab one');
           var tab2Id = tabs.addTab('tab two');
+          //tabs.setSelectedTab(0);
           var tab1 = document.getElementById(tab1Id);
           gadgets.util.registerOnLoadHandler(main);
         })();
