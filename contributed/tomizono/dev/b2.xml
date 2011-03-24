@@ -7,7 +7,7 @@
   <Content type="html" view="home,profile,default,canvas">
     <![CDATA[
       <style type="text/css">
-        em{color:red;background-color:yellow;}
+        em{background-color:yellow;}
       </style>
       <div id="xxx">
         
@@ -18,7 +18,10 @@
           var main = function(){
             (function(){
               var container = document.getElementById('xxx');
+              var prefs = new _IG_Prefs();
+              var color = prefs.getString('color');
               container.innerHTML = '<em>ok</em>';
+              container.style.color = color;
             })();
           };
           gadgets.util.registerOnLoadHandler(main);
