@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="xxx hello">
+  </ModulePrefs>
+  <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
+  <UserPref name="version" datatype="hidden" default_value="1" />
+  <Content type="html" view="home,profile,default,canvas">
+    <![CDATA[
+      <style type="text/css">
+        em{color:red;background-color:yellow;}
+      </style>
+      <div id="xxx">
+        
+      </div>
+      <script type="text/javascript">
+        // Copyright (c) 2011 自律、自由、公正 cowares.nobody.jp
+        (function(){
+          var main = function(){
+            (function(){
+              var container = document.getElementById('xxx');
+              container.innerHTML = '<em>ok</em>';
+            })();
+          };
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
