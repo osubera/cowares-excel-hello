@@ -37,7 +37,7 @@
               var newSpan = document.createElement('span');
               newSpan.innerHTML = 'canvas view';
               container.appendChild(newSpan);
-              msg.createDismissibleMessage('<span>Welcome</span> to the canvas view!');
+              msg.createDismissibleMessage('<span style="font-size:16px;color:blue;">Welcome</span> to the canvas view!');
             }
           };
           
