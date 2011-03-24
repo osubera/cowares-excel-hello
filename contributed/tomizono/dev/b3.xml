@@ -8,6 +8,7 @@
       <msg name="title">xxx こんにちわ</msg>
     </Locale>
     <Require feature="views" />
+    <Require feature="minimessage" />
   </ModulePrefs>
   <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
   <UserPref name="version" datatype="hidden" default_value="1" />
@@ -36,9 +37,11 @@
               var newSpan = document.createElement('span');
               newSpan.innerHTML = 'canvas view';
               container.appendChild(newSpan);
-              //var msg = new gadgets.MiniMessage(
+              msg.createDismissibleMessage('Welcome to the canvas view!');
             }
           };
+          
+          var msg = new gadgets.MiniMessage(__MODULE_ID__);
           gadgets.util.registerOnLoadHandler(main);
         })();
       </script>
