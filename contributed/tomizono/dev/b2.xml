@@ -18,7 +18,7 @@
       <style type="text/css">
         em{background-color:yellow;}
       </style>
-      <div id="__MSG_id____MODULE_ID__">
+      <div id="container__MSG_id____MODULE_ID__">
         
       </div>
       <script type="text/javascript">
@@ -29,7 +29,7 @@
           }
           
           function main() {
-            var container = document.getElementById('__MSG_id____MODULE_ID__');
+            var container = document.getElementById('container__MSG_id____MODULE_ID__');
             var prefs = new _IG_Prefs();
             var color = prefs.getString('color');
             container.innerHTML = '<em>ok</em>';
