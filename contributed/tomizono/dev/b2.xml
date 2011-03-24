@@ -15,9 +15,9 @@
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[
       <style type="text/css">
-        em{color:__UP_color__;background-color:yellow;}
+        em{background-color:yellow;}
       </style>
-      <div id="container__MSG_id____MODULE_ID__">
+      <div id="xxxx__MODULE_ID__">
         
       </div>
       <script type="text/javascript">
@@ -28,10 +28,10 @@
           }
           
           function main() {
-            var container = document.getElementById('container__MSG_id____MODULE_ID__');
+            var container = document.getElementById('xxxx__MODULE_ID__');
             var prefs = new _IG_Prefs();
             var color = prefs.getString('color');
-            container.innerHTML = '<em>__UP_color__</em>';
+            container.innerHTML = '<em>__MODULE_ID__</em>';
             container.style.color = color;
             if(getViewName()=='canvas') {
               var newSpan = document.createElement('span');
