@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="__MSG_title__">
+    <Locale>
+      <msg name="title">xxx helloooo</msg>
+    </Locale>
+    <Locale lang="ja">
+      <msg name="title">xxx こんにちわ</msg>
+    </Locale>
+    <Require feature="views" />
+    <Require feature="tabs" />
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
+  <UserPref name="selectedTab" datatype="hidden" />
+  <UserPref name="version" datatype="hidden" default_value="1" />
+  <Content type="html" view="home,profile,default,canvas,preview">
+    <![CDATA[
+      <style type="text/css">
+        em{background-color:yellow;}
+      </style>
+      <div id="kontena__MODULE_ID__">
+        
+      </div>
+      <script type="text/javascript">
+        // Copyright (c) 2011 自律、自由、公正 cowares.nobody.jp
+        (function(){
+          function getViewName() {
+            return(gadgets.views.getCurrentView().getName());
+          }
+          
+          function main() {
+            //var container = document.getElementById('kontena__MODULE_ID__');
+            var container = tab1;
+            var prefs = new _IG_Prefs();
+            var color = prefs.getString('color');
+            container.innerHTML = '<em>__MODULE_ID__</em>' + getViewName() + gadgets.views.ViewType.CANVAS;
+            container.style.color = color;
+            if(getViewName() == gadgets.views.ViewType.CANVAS) {
+              var newSpan = document.createElement('span');
+              newSpan.innerHTML = 'canvas view';
+              container.appendChild(newSpan);
+            }
+          };
+          
+          var tabs = new gadgets.TabSet(__MODULE_ID__, 'hoge');
+          var tab1Id = tabs.addTab('tab one');
+          var tab2Id = tabs.addTab('tab two');
+          var tab1 = document.getElementById(tab1Id);
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
