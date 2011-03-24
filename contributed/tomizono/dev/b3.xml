@@ -34,7 +34,7 @@
             container.style.color = color;
             if(getViewName() == gadgets.views.ViewType.CANVAS) {
               var newSpan = document.createElement('span');
-              newSpan.innerTEXT = 'canvas view';
+              newSpan.innerHTML = 'canvas view';
               container.appendChild(newSpan);
               //var msg = new gadgets.MiniMessage(
             }
