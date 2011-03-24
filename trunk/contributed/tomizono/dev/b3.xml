@@ -16,6 +16,7 @@
     <![CDATA[
       <style type="text/css">
         em{background-color:yellow;}
+        .koge{font-size:16px;color:blue;}
       </style>
       <div id="kontena__MODULE_ID__">
         
@@ -37,7 +38,7 @@
               var newSpan = document.createElement('span');
               newSpan.innerHTML = 'canvas view';
               container.appendChild(newSpan);
-              msg.createDismissibleMessage('<span style="font-size:16px;color:blue;" id="hoge" class="kama">Welcome</span> to the canvas view!');
+              msg.createDismissibleMessage('<span id="hoge" class="koge">Welcome</span> to the canvas view!');
             }
           };
           
