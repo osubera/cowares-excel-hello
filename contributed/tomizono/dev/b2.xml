@@ -16,7 +16,7 @@
         // Copyright (c) 2011 自律、自由、公正 cowares.nobody.jp
         (function(){
           function getViewName() {
-            return(gadgets.views.getCurrentView().getName());
+            //return(gadgets.views.getCurrentView().getName());
           }
           
           function main() {
