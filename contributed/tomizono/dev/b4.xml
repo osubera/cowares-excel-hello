@@ -45,7 +45,7 @@
           var tabs = new gadgets.TabSet(__MODULE_ID__, 'hoge');
           var tab1Id = tabs.addTab('tab one');
           var tab2Id = tabs.addTab('tab two');
-          tabs.setSelectedTab(0);
+          if(tabs.getSelectedTab()==undefined) {tabs.setSelectedTab(0);}
           var tab1 = document.getElementById(tab1Id);
           gadgets.util.registerOnLoadHandler(main);
         })();
