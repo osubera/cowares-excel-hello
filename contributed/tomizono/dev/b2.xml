@@ -2,10 +2,8 @@
 <Module>
   <ModulePrefs title="__MSG_title__">
     <Locale>
+      <msg name="title">xxx helloooo</msg>
       <msg name="id">xxx_hello</msg>
-    </Locale>
-    <Locale>
-      <msg name="title">xxx hello</msg>
     </Locale>
     <Locale lang="ja">
       <msg name="title">xxx こんにちわ</msg>
