@@ -85,21 +85,21 @@
             var container = document.getElementById('kontena__MODULE_ID__');
             container.innerHTML = '';
             if(isCanvasView()) {
-              makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays);
+              makeLargeHtml(container, scheduleFinder, offsetHour, numberDays);
             } else {
-              makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays);
+              makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
             }
             gadgets.window.adjustHeight(container.style.height);
           };
           
-          function makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays) {
+          function makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays) {
             var key = 'd' + getDate(0, offsetHour);
             var schedule = scheduleFinder[key];
             var img = loadImage(schedule);
             container.appendChild(img);
           }
           
-          function makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays) {
+          function makeLargeHtml(container, scheduleFinder, offsetHour, numberDays) {
             for(var i=0;i<numberDays;++i) {
               var key = 'd' + getDate(i, offsetHour);
               var schedule = scheduleFinder[key];
