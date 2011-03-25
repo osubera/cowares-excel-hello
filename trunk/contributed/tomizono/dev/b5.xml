@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="__MSG_title__">
+  <ModulePrefs title="__MSG_title__" scrolling="true">
     <Locale>
       <msg name="title">xxx helloooo</msg>
     </Locale>
@@ -32,7 +32,7 @@
           
           function two_tab(tabId) {
             var container = document.getElementById(tabId);
-            container.innerHTML = '<em>another tab tells you the version=__UP_version__</em>' + tabId;
+            container.innerHTML = '<em>another tab tells you the version=__UP_version__</em><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>' + tabId;
           }
           
           function main() {
