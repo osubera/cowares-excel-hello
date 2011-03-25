@@ -38,11 +38,11 @@
           function main() {
             var tabs = new gadgets.TabSet(__MODULE_ID__, undefined, document.getElementById('tab_kontena__MODULE_ID__'));
             tabs.alignTabs('left');
-            tabs.addTab('タブ1'), {
+            tabs.addTab('タブ1', {
               callback: one_tab,
               tooltip: 'welcome to tab one, enjoy'
             });
-            tabs.addTab('たぶ2'), {
+            tabs.addTab('たぶ2', {
               callback: two_tab,
               tooltip: 'タブ2へようこそ'
             });
