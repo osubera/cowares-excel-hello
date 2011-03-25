@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs
+      title="__MSG_tokyo_teiden__"
+      directory_title="__MSG_tokyo_teiden_dir__"
+      description="__MSG_tokyo_teiden_desc__"
+      author="Tomizono"
+      author_email="cowares+tokyoteiden+4@gmail.com"
+      author_link="http://cowares.nobody.jp"
+      author_photo="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/i.png"
+      author_location="__MSG_location__"
+      author_affiliation="kobobau"
+      author_aboutme="__MSG_aboutme__"
+      author_quote="__MSG_quote__"
+      screenshot="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule.png"
+      thumbnail="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/tepco-blackout-schedule-s.png"
+      title_url="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/"
+      height="196">
+    <Locale messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ja_ALL.xml" />
+    <Require feature="views" />
+    <Require feature="dynamic-height" />
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="days" display_name="__MSG_ui_days__" datatype="string" default_value="2" />
+  <UserPref name="hour" display_name="__MSG_ui_hour__" datatype="string" default_value="5" />
+  <Content type="html" view="home,profile,default,canvas,preview">
+    <![CDATA[ 
+      <style type="text/css">
+      </style>
+      <div id="kontena__MODULE_ID__">
+      </div>
+      <script type="text/javascript">
+        // tepco blackout schedules
+        // http://setsuden.yahoo.co.jp/schedule.html
+        // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
+        
+        (function(){
+          function scheduleUrl() {
+            return('http://setsuden.yahoo.co.jp/schedule.html');
+          }
+          
+          function getDate(offsetDay, offsetHour) {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth();
+            var date = now.getDate();
+            var hour = now.getHours();
+            return(convertDate8(new Date(year,month,date+offsetDay,hour+offsetHour,0,0,0)));
+          }
+          
+          function convertDate8(d) {
+            var year = d.getFullYear();
+            var month = d.getMonth() + 1;
+            var date = d.getDate();
+            var s = date + '';
+            if (date<10) { s = '0' + s; }
+            s = month + s;
+            if (month<10) { s = '0' + s; }
+            s = year + s;
+            return(s);
+          }
+          
+          function isCanvasView() {
+            return(gadgets.views.getCurrentView().getName() == gadgets.views.ViewType.CANVAS);
+          }
+          
+          function loadImage(url) {
+            var img = document.createElement('img');
+            img.src = gadgets.io.getProxyUrl(url);
+            return(img);
+          }
+          
+          function request(url) {
+            var params = {};
+            params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
+            gadgets.io.makeRequest(url, response, params);
+          }
+          
+          function response(obj) {
+            var scheduleFinder = cutImageTags(obj.text);
+            var prefs = new _IG_Prefs();
+            var offsetHour = prefs.getInt('hour');
+            var numberDays = prefs.getInt('days');
+            var container = document.getElementById('kontena__MODULE_ID__');
+            container.innerHTML = '';
+            if(isCanvasView()) {
+              makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays);
+            } else {
+              makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays);
+            }
+            gadgets.window.adjustHeight(container.style.height);
+          };
+          
+          function makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays) {
+            var key = 'd' + getDate(0, offsetHour);
+            var schedule = scheduleFinder[key];
+            var img = loadImage(schedule);
+            container.appendChild(img);
+          }
+          
+          function makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays) {
+            for(var i=0;i<numberDays;++i) {
+              var key = 'd' + getDate(i, offsetHour);
+              var schedule = scheduleFinder[key];
+              var img = loadImage(schedule);
+              container.appendChild(img);
+            }
+          }
+          
+          function cutSchedules(text) {
+            var tbodies = text.split('TBODY>');
+            var out = '';
+            for(var i=1;i<tbodies.length;i+=2) {
+              out += tbodies[i];
+            }
+            return(out);
+          }
+          
+          function cutImageTags(text) {
+            var regImgTag = /<img [^>]*teiden[^>]*>/g;
+            var regImgSrc = /src="([^"]+)"/;
+            var regImgKey = /\d{8}/;
+            var img = text.match(regImgTag);
+            var out = new Array();
+            if(img!=null) {
+              for(var i=0;i<img.length;++i) {
+                var src = img[i].match(regImgSrc);
+                if(src==null) {continue;}
+                var key = src[1].match(regImgKey);
+                if(key==null) {continue;}
+                key = 'd' + key;
+                out[key] = src[1];
+              }
+            }
+            return(out);
+          }
+          
+          function main() {
+            var cacheUrl = gadgets.io.getProxyUrl(scheduleUrl);
+            request(cacheUrl);
+          }
+        
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
