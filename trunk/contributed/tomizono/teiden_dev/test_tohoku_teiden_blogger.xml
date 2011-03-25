@@ -22,11 +22,12 @@
     <Require feature="setprefs" />
   </ModulePrefs>
   <UserPref name="days" display_name="Number of Days" datatype="string" default_value="1" />
+  <UserPref name="hour" display_name="Offset Hour" datatype="string" default_value="5" />
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[ 
       <!-- Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp -->
       <style type="text/css">
-        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:#c00;}
+        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:#ccc;}
       </style>
       <div id="kontena__MODULE_ID__">
       </div>
@@ -70,8 +71,9 @@
             var schedules = reformSchedules(cutSchedules(obj.text));
             var header = schedules.shift();
             var scheduleFinder = toHashArray(schedules);
+            var offsetHour = prefs.getInt('hour');
             
-            var key = 'd' + getDate(0,7);
+            var key = 'd' + getDate(0,offsetHour);
             
             var schedule = scheduleFinder[key];
             if(schedule==undefined) {schedule = new Array('','','');}
