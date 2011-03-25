@@ -26,7 +26,7 @@
     <![CDATA[ 
       <!-- Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp -->
       <style type="text/css">
-        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:gray;}
+        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:#ccc;}
       </style>
       <div id="kontena__MODULE_ID__">
       </div>
