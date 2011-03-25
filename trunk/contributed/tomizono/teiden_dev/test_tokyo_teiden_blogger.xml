@@ -100,6 +100,7 @@
             var minHeight = 150;
             var key = 'd' + getDate(0, offsetHour);
             var schedule = scheduleFinder[key];
+            if(schedule==undefined) {return(0);}
             var img = loadImage(schedule);
             container.appendChild(img);
             return(Math.max(minHeight, img.height));
@@ -111,6 +112,7 @@
             for(var i=0;i<numberDays;++i) {
               var key = 'd' + getDate(i, offsetHour);
               var schedule = scheduleFinder[key];
+              if(schedule==undefined) {continue;}
               var img = loadImage(schedule);
               container.appendChild(img);
               img.style.margin = 6;
