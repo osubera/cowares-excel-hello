@@ -18,6 +18,7 @@
       height="64">
     <Locale messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ALL_ALL.xml" />
     <Locale lang="ja" messages="http://cowares-excel-hello.googlecode.com/svn/trunk/contributed/tomizono/teiden_dev/ja_ALL.xml" />
+    <Require feature="views" />
     <Require feature="dynamic-height" />
     <Require feature="setprefs" />
   </ModulePrefs>
@@ -61,6 +62,10 @@
             return(s);
           }
           
+          function isCanvasView() {
+            return(gadgets.views.getCurrentView().getName() == gadgets.views.ViewType.CANVAS);
+          }
+          
           function request(url) {
             var params = {};
             params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
@@ -76,7 +81,11 @@
             var numberDays = prefs.getInt('days');
             var container = document.getElementById('kontena__MODULE_ID__');
             var out = '';
-            out = makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays);
+            if(isCanvasView()) {
+              out = makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays);
+            } else {
+              out = makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays);
+            }
             container.innerHTML = out;
             gadgets.window.adjustHeight(container.style.height);
           };
@@ -89,6 +98,19 @@
               var schedule = scheduleFinder[key];
               out += htmlTableBody(schedule, columns);
             }
+            out += htmlTableFoot(header, columns);
+            return(out);
+          }
+          
+          function makeLargeHtml(container, header, scheduleFinder, offsetHour, numberDays) {
+            var columns = 3;
+            var out = htmlTableHead(header, columns);
+            var i = 0;
+            do {
+              var key = 'd' + getDate(i++, offsetHour);
+              var schedule = scheduleFinder[key];
+              out += htmlTableBody(schedule, columns);
+            } while(schedule != undefined);
             out += htmlTableFoot(header, columns);
             return(out);
           }
