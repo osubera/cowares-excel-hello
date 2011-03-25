@@ -87,6 +87,7 @@
             var schedule = scheduleFinder[key];
             if(schedule==undefined) {schedule = new Array('','','');}
             var out = htmlTable(header, schedule, 3);
+            return(out);
           }
           
           function htmlTable(header, schedule, columns) {
