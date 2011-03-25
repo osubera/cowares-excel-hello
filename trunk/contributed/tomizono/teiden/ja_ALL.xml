@@ -8,4 +8,7 @@
   <msg name="tokyo_teiden">東京の停電予定</msg>
   <msg name="tokyo_teiden_dir">東京電力の計画停電予定</msg>
   <msg name="tokyo_teiden_desc">東京電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。</msg>
+  <msg name="ui_fontsize">文字サイズ [13px]</msg>
+  <msg name="ui_days">表示する日数 [1]</msg>
+  <msg name="ui_hour">何時間前から翌日を表示 [5]</msg>
 </messagebundle>
