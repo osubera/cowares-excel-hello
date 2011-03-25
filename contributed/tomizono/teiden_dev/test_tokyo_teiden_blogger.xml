@@ -88,7 +88,7 @@
             var height = 0;
             if(isCanvasView()) {
               height = makeLargeHtml(container, scheduleFinder, offsetHour, numberDays);
-              container.style.height = 'auto';
+              container.style.height = '100%';
             } else {
               height = makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
               container.style.height = height + 26; // 26px for scroll bar
