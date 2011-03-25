@@ -40,11 +40,11 @@
             tabs.alignTabs('left');
             tabs.addTab('タブ1'), {
               callback: one_tab,
-              tooltip: 'welcome to tab one, enjoy';
+              tooltip: 'welcome to tab one, enjoy'
             });
             tabs.addTab('たぶ2'), {
               callback: two_tab,
-              tooltip: 'タブ2へようこそ';
+              tooltip: 'タブ2へようこそ'
             });
           };
           
