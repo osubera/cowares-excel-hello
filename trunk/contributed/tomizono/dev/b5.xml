@@ -36,7 +36,7 @@
           }
           
           function main() {
-            var tabs = new gadgets.TabSet(__MODULE_ID__, , document.getElementById('tab_kontena__MODULE_ID__'));
+            var tabs = new gadgets.TabSet(__MODULE_ID__, undefined, document.getElementById('tab_kontena__MODULE_ID__'));
             tabs.alignTabs('left');
             tabs.addTab('タブ1'), {
               callback: one_tab,
