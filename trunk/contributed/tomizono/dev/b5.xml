@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="__MSG_title__">
+    <Locale>
+      <msg name="title">xxx helloooo</msg>
+    </Locale>
+    <Locale lang="ja">
+      <msg name="title">xxx こんにちわ</msg>
+    </Locale>
+    <Require feature="tabs" />
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="color" display_name="Color" datatype="string" default_value="#ff0000" />
+  <UserPref name="version" datatype="hidden" default_value="1" />
+  <Content type="html" view="home,profile,default,canvas,preview">
+    <![CDATA[
+      <style type="text/css">
+        em{background-color:yellow;}
+        .tablib_selected{background-color:green;}
+      </style>
+      <div id="kontena__MODULE_ID__">
+        <!-- Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp -->
+        <div id="tab_kontena__MODULE_ID__"></div>
+        <div>common contents</div>
+      </div>
+      <script type="text/javascript">
+        (function(){
+          function one_tab(tabId) {
+            var container = document.getElementById(tabId);
+            container.innerHTML = '<em>new tab</em>' + tabId;
+          }
+          
+          function two_tab(tabId) {
+            var container = document.getElementById(tabId);
+            container.innerHTML = '<em>another tab tells you the version=__UP_version__</em>' + tabId;
+          }
+          
+          function main() {
+            var tabs = new gadgets.TabSet(__MODULE_ID__, , document.getElementById('tab_kontena__MODULE_ID__'));
+            tabs.alignTabs('left');
+            tabs.addTab('タブ1'), {
+              callback: one_tab,
+              tooltip: 'welcome to tab one, enjoy';
+            });
+            tabs.addTab('たぶ2'), {
+              callback: two_tab,
+              tooltip: 'タブ2へようこそ';
+            });
+          };
+          
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
