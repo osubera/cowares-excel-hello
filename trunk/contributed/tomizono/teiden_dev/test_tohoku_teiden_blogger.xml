@@ -22,19 +22,20 @@
     <Require feature="dynamic-height" />
     <Require feature="setprefs" />
   </ModulePrefs>
+  <UserPref name="fontsize" display_name="Font Size" datatype="string" default_value="13px" />
   <UserPref name="days" display_name="Number of Days" datatype="string" default_value="1" />
   <UserPref name="hour" display_name="Offset Hour" datatype="string" default_value="5" />
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[ 
-      <!-- Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp -->
       <style type="text/css">
-        table{font-size:13px;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:#ccc;}
+        table{font-size:__UP_fontsize__;} th,td{border-width:0px 1px 0px 0px;border-style:dotted;border-color:#ccc;}
       </style>
       <div id="kontena__MODULE_ID__">
       </div>
       <script type="text/javascript">
         // tohoku epco blackout schedules
         // http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html
+        // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
         
         (function(){
           function scheduleUrl() {
