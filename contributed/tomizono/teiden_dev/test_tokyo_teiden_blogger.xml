@@ -92,7 +92,7 @@
             } else {
               height = makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
               if(height>0) {
-                container.style.height = height + 46; // 46px for scroll bar
+                container.style.height = height + 26; // 26px for scroll bar
                 gadgets.window.adjustHeight(container.style.height);
               }
             }
@@ -113,8 +113,8 @@
               var schedule = scheduleFinder[key];
               var img = loadImage(schedule);
               container.appendChild(img);
-              img.style.margin = 4;
-              height += 8;
+              img.style.margin = 6;
+              height += 12;
               height += img.height;
             }
             return(height);
