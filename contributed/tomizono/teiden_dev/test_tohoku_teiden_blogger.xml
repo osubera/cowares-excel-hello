@@ -82,17 +82,29 @@
           };
           
           function makeDefaultHtml(container, header, scheduleFinder, offsetHour, numberDays) {
-            var key = 'd' + getDate(0,offsetHour);
-            
-            var schedule = scheduleFinder[key];
-            if(schedule==undefined) {schedule = new Array('','','');}
-            var out = htmlTable(header, schedule, 3);
+            var columns = 3;
+            var out = htmlTableHead(header, columns);
+            for(var i=0;i<numberDays;++i) {
+              var key = 'd' + getDate(i, offsetHour);
+              var schedule = scheduleFinder[key];
+              out += htmlTableBody(schedule, columns);
+            }
+            out += htmlTableFoot(header, columns);
             return(out);
           }
           
-          function htmlTable(header, schedule, columns) {
-            var out =  '<table><tr><th>' + header.slice(0,columns).join('</th><th>') + '</th></tr><tr><td>' + schedule.slice(0, columns).join('</td><td>') + '</td></tr></table>';
+          function htmlTableBody(schedule, columns) {
+            if(schedule==undefined) {schedule = new Array(columns);}
+            var out = '<tr><td>' + schedule.slice(0, columns).join('</td><td>') + '</td></tr>';
             return(out);
+          }
+          
+          function htmlTableHead(header, columns) {
+            return('<table><tr><th>' + header.slice(0,columns).join('</th><th>') + '</th></tr>');
+          }
+          
+          function htmlTableFoot(header, columns) {
+            return('</table>');
           }
           
           function toHashArray(lines) {
