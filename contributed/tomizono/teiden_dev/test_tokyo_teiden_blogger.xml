@@ -113,6 +113,8 @@
               var schedule = scheduleFinder[key];
               var img = loadImage(schedule);
               container.appendChild(img);
+              img.style.margin = 4;
+              height += 8;
               height += img.height;
             }
             return(height);
