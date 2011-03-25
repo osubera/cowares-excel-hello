@@ -91,22 +91,22 @@
               container.style.height = 'auto';
             } else {
               height = makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
-              if(height>0) {
-                container.style.height = height + 26; // 26px for scroll bar
-                gadgets.window.adjustHeight(container.style.height);
-              }
+              container.style.height = height + 26; // 26px for scroll bar
+              gadgets.window.adjustHeight(container.style.height);
             }
           };
           
           function makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays) {
+            var minHeight = 150;
             var key = 'd' + getDate(0, offsetHour);
             var schedule = scheduleFinder[key];
             var img = loadImage(schedule);
             container.appendChild(img);
-            return(img.height);
+            return(Math.max(minHeight, img.height));
           }
           
           function makeLargeHtml(container, scheduleFinder, offsetHour, numberDays) {
+            var minHeight = 150;
             var height = 0;
             for(var i=0;i<numberDays;++i) {
               var key = 'd' + getDate(i, offsetHour);
@@ -114,8 +114,7 @@
               var img = loadImage(schedule);
               container.appendChild(img);
               img.style.margin = 6;
-              height += 12;
-              height += img.height;
+              height += (6*2 + Math.max(minHeight, img.height));
             }
             return(height);
           }
