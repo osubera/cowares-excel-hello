@@ -22,9 +22,9 @@
     <Require feature="dynamic-height" />
     <Require feature="setprefs" />
   </ModulePrefs>
-  <UserPref name="fontsize" display_name="Font Size" datatype="string" default_value="13px" />
-  <UserPref name="days" display_name="Number of Days" datatype="string" default_value="1" />
-  <UserPref name="hour" display_name="Offset Hour" datatype="string" default_value="5" />
+  <UserPref name="fontsize" display_name="__MSG_ui_fontsize__" datatype="string" default_value="13px" />
+  <UserPref name="days" display_name="__MSG_ui_days__" datatype="string" default_value="1" />
+  <UserPref name="hour" display_name="__MSG_ui_hour__" datatype="string" default_value="5" />
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[ 
       <style type="text/css">
@@ -136,7 +136,7 @@
             var out = new Array();
             var now = new Date();
             var year = now.getFullYear();
-            var regMD = /[\s　]*(\d+)月[\s　]*(\d+)日/;
+            var regMD = /(\d+)月[\s　]*(\d+)日/;
             while(lines.length>0) {
               var line = lines.shift();
               if(regMD.exec(line[1]) == null) {continue;}
