@@ -71,6 +71,7 @@
             var schedules = reformSchedules(cutSchedules(obj.text));
             var header = schedules.shift();
             var scheduleFinder = toHashArray(schedules);
+            var prefs = new _IG_Prefs();
             var offsetHour = prefs.getInt('hour');
             
             var key = 'd' + getDate(0,offsetHour);
