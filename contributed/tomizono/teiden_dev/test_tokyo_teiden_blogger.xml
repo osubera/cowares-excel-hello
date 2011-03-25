@@ -27,6 +27,7 @@
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[ 
       <style type="text/css">
+        #kontena__MODULE_ID__ {overflow:auto;width:100%;height:196px;margin:0;padding:0;}
       </style>
       <div id="kontena__MODULE_ID__">
       </div>
@@ -84,12 +85,16 @@
             var numberDays = prefs.getInt('days');
             var container = document.getElementById('kontena__MODULE_ID__');
             container.innerHTML = '';
+            var height = 0;
             if(isCanvasView()) {
-              makeLargeHtml(container, scheduleFinder, offsetHour, numberDays);
+              height = makeLargeHtml(container, scheduleFinder, offsetHour, numberDays);
             } else {
-              makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
+              height = makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
             }
-            gadgets.window.adjustHeight(container.style.height);
+            if(height>0) {
+              container.style.height = height + 46; // 46px for scroll bar
+              gadgets.window.adjustHeight(container.style.height);
+            }
           };
           
           function makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays) {
@@ -97,15 +102,19 @@
             var schedule = scheduleFinder[key];
             var img = loadImage(schedule);
             container.appendChild(img);
+            return(img.height);
           }
           
           function makeLargeHtml(container, scheduleFinder, offsetHour, numberDays) {
+            var height = 0;
             for(var i=0;i<numberDays;++i) {
               var key = 'd' + getDate(i, offsetHour);
               var schedule = scheduleFinder[key];
               var img = loadImage(schedule);
               container.appendChild(img);
+              if(height<img.height) {height=img.height;}
             }
+            return(height);
           }
           
           function cutSchedules(text) {
