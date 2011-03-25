@@ -88,12 +88,13 @@
             var height = 0;
             if(isCanvasView()) {
               height = makeLargeHtml(container, scheduleFinder, offsetHour, numberDays);
+              container.style.height = 'auto';
             } else {
               height = makeDefaultHtml(container, scheduleFinder, offsetHour, numberDays);
-            }
-            if(height>0) {
-              container.style.height = height + 46; // 46px for scroll bar
-              gadgets.window.adjustHeight(container.style.height);
+              if(height>0) {
+                container.style.height = height + 46; // 46px for scroll bar
+                gadgets.window.adjustHeight(container.style.height);
+              }
             }
           };
           
@@ -112,7 +113,7 @@
               var schedule = scheduleFinder[key];
               var img = loadImage(schedule);
               container.appendChild(img);
-              if(height<img.height) {height=img.height;}
+              height += img.height;
             }
             return(height);
           }
