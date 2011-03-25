@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-<ModulePrefs title="xxhello world example" />
+<ModulePrefs title="xxhello world example" scrolling="true" />
 <Content type="html" view="home,canvas"><![CDATA[
 <script type="text/javascript">
 function request() {
@@ -9,15 +9,16 @@ function request() {
    params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
    var url = "http://www.tohoku-epco.co.jp.cache.yimg.jp/information/1182377_821.html";
    //url = "http://xlsm.web.fc2.com/";
+   url = "http://setsuden.yahoo.co.jp/schedule.html";
    gadgets.io.makeRequest(url, response, params);
  };
 function response(obj) {
    document.write('bb');
-  //document.write(obj.text);
+  document.write(obj.text);
   //var target = obj.data.getElementsByTags('tbody')[0];
   //document.write(target.innerText);
-  var target = obj.text.split('TBODY');
-  document.write(target[1]);
+  //var target = obj.text.split('TBODY');
+  //document.write(target[1]);
 };
 
 //request();
