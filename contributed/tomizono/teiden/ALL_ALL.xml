@@ -8,4 +8,7 @@
   <msg name="tokyo_teiden">TOKYO blackout</msg>
   <msg name="tokyo_teiden_dir">blackout schedule for TOKYO</msg>
   <msg name="tokyo_teiden_desc">Today's schedule of the blackout in a region of Tokyo electoric power co. Shows tomorrow schedule after 7 o'clock pm. These blackouts are caused by the disaster of the earthquake and tsunami on 3.11 2011 in east japan.</msg>
+  <msg name="ui_fontsize">Font Size [13px]</msg>
+  <msg name="ui_days">Number of Days [1]</msg>
+  <msg name="ui_hour">Offset Hour [5]</msg>
 </messagebundle>
