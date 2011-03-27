@@ -17,7 +17,7 @@
         textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
-        <form><textarea></textarea></form>
+        <form><submit/><textarea></textarea></form>
       </div>
       <script type="text/javascript">
         // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
@@ -28,7 +28,6 @@
           
           function saveText() {
             prefs.set('q', textarea.innerHTML);
-            alert('hoge');
           }
           
           function main() {
