@@ -30,13 +30,9 @@
             prefs.set('q', textarea.innerHTML);
           }
           
-          function textChanged() {
-            saveText();
-          }
-          
           function main() {
             loadText();
-            textarea.onchange = textChanged;
+            textarea.onchange = function(){saveText();}();
           };
           
           var prefs = new gadgets.Prefs(__MODULE_ID__);
