@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="__MSG_title__" scrolling="true">
+    <Locale>
+      <msg name="title">xxx helloooo</msg>
+    </Locale>
+    <Locale lang="ja">
+      <msg name="title">xxx こんにちわ</msg>
+    </Locale>
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="q" display_name="Clip" datatype="string" default_value="scratch and keep" />
+  <Content type="html" view="home,profile,default,canvas,preview">
+    <![CDATA[
+      <style type="text/css">
+        textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
+      </style>
+      <div id="kontena__MODULE_ID__">
+        <form><textarea></textarea></form>
+      </div>
+      <script type="text/javascript">
+        // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
+        (function(){
+          function loadText() {
+            textarea.innerHTML = prefs.getString('q');
+          }
+          
+          function saveText() {
+            prefs.set('q', textarea.innerHTML);
+          }
+          
+          function textChanged() {
+            saveText();
+          }
+          
+          function main() {
+            loadText();
+            textarea.onChange = textChanged;
+          };
+          
+          var prefs = new gadgets.Prefs(__MODULE_ID__);
+          var textarea = document.getElementById('kontena__MODULE_ID__').getElementByTagName('textarea')[0];
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
