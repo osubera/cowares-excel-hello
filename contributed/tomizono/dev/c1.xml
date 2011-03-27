@@ -13,6 +13,7 @@
   <Content type="html" view="home,profile,default,canvas,preview">
     <![CDATA[
       <style type="text/css">
+        #kontena__MODULE_ID__{margin:0;padding:0;}
         textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
@@ -39,7 +40,7 @@
           };
           
           var prefs = new gadgets.Prefs(__MODULE_ID__);
-          var textarea = document.getElementById('kontena__MODULE_ID__').getElementByTagName('textarea')[0];
+          var textarea = document.getElementById('kontena__MODULE_ID__').getElementsByTagName('textarea')[0];
           gadgets.util.registerOnLoadHandler(main);
         })();
       </script>
