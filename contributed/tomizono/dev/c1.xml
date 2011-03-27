@@ -14,7 +14,7 @@
     <![CDATA[
       <style type="text/css">
         #kontena__MODULE_ID__{margin:0;padding:0;}
-        textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
+        atextarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
         <form><submit/><textarea></textarea></form>
