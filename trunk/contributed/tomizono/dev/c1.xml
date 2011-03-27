@@ -28,6 +28,7 @@
           
           function saveText() {
             prefs.set('q', textarea.innerHTML);
+            alert('hoge');
           }
           
           function main() {
