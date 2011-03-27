@@ -32,11 +32,11 @@
           
           function main() {
             loadText();
-            textarea.onchange = function(){saveText();}();
           };
           
           var prefs = new gadgets.Prefs(__MODULE_ID__);
           var textarea = document.getElementById('kontena__MODULE_ID__').getElementsByTagName('textarea')[0];
+          textarea.onchange = function(){saveText();}();
           gadgets.util.registerOnLoadHandler(main);
         })();
       </script>
