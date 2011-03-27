@@ -23,11 +23,11 @@
         // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
         (function(){
           function loadText() {
-            textarea.text = prefs.getString('q');
+            textarea.value = prefs.getString('q');
           }
           
           function saveText() {
-            prefs.set('q', textarea.text);
+            prefs.set('q', textarea.value);
           }
           
           function main() {
