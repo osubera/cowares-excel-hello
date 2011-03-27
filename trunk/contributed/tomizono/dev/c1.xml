@@ -23,12 +23,11 @@
         // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
         (function(){
           function loadText() {
-            textarea.innerHTML = prefs.getString('q');
+            textarea.text = prefs.getString('q');
           }
           
           function saveText() {
-            //prefs.set('q', textarea.innerHTML);
-            prefs.set('q', 'hoge');
+            prefs.set('q', textarea.text);
           }
           
           function main() {
