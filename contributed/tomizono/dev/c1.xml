@@ -17,7 +17,7 @@
         atextarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
-        <form><input type="button" onClick="saveText()" /><textarea></textarea></form>
+        <form><input type="button" /><textarea></textarea></form>
       </div>
       <script type="text/javascript">
         // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
@@ -27,7 +27,7 @@
           }
           
           function saveText() {
-            prefs.set('q', textarea.innerHTML());
+            prefs.set('q', textarea.innerHTML);
           }
           
           function main() {
