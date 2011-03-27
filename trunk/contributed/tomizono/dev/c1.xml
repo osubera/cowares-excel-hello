@@ -27,7 +27,8 @@
           }
           
           function saveText() {
-            prefs.set('q', textarea.innerHTML);
+            //prefs.set('q', textarea.innerHTML);
+            prefs.set('q', 'hoge');
           }
           
           function main() {
