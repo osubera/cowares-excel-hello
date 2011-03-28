@@ -30,7 +30,10 @@
           urlbox.onchange = requesturl;
           
           function requesturl() {
-            request(urlbox.value);
+            var params = {};
+            params[gadgets.io.ProxyUrlRequestParameters.REFRESH_INTERVAL] = 600;
+            var cacheUrl = gadgets.io.getProxyUrl(urlbox.value, params);
+            request(cacheUrl);
           }
           
           function request(url) {
