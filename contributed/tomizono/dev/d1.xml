@@ -35,7 +35,8 @@
           function request(url) {
             var params = {};
             params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
-            gadgets.io.makeRequest(url, response, params);
+            try { gadgets.io.makeRequest(url, response, params); }
+            catch(e) { textarea.value = e.description + '\nError ' + e.number;
           }
           
           function response(obj) {
