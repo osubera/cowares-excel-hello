@@ -31,7 +31,8 @@
           
           function requesturl() {
             var params = {};
-            params[gadgets.io.ProxyUrlRequestParameters.REFRESH_INTERVAL] = 600;
+            //params[gadgets.io.ProxyUrlRequestParameters.REFRESH_INTERVAL] = 600;
+            params['REFRESH_INTERVAL'] = 600;
             //var cacheUrl = gadgets.io.getProxyUrl(urlbox.value, params);
             var cacheUrl = urlbox.value;
             request(cacheUrl);
