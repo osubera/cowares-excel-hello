@@ -1,0 +1,83 @@
+form ショートカットのメモ
+
+ボタン類のみ、
+Accelerator というプロパティがあって、
+"G" などと設定すれば、
+Alt-G にショートカットが割り当てられる。
+こいつは、フォーカスによらず、
+フォーム内グローバルに使える。
+
+メニューでやるような、
+キャプションへの &G 表記は通用しない。
+これを書いたからといって、
+ショートカットにならないし、アンダーバーへの表記変換も無い。
+
+イベントが透過的でないため、
+親フォームでフォームグローバルなショートカットを定義することができない。
+そのときフォーカスがあるコントロールに、
+イベントが取られてしまうため。
+
+これをコードで回避するには、
+
+Private Sub Common_shortcut(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Debug.Print KeyCode
+    If Shift = 4 And KeyCode = vbKeyH Then CommandButton1_Click
+End Sub
+
+のような、グローバルショートカット処理ルーチンを作って、
+すべてのコントロールとフォームに、
+
+Private Sub CommandButton1_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Common_shortcut KeyCode, Shift
+End Sub
+
+のような処理を入れてやるとよい。
+
+先の、 Accelerator と、この共通処理ルーチン方式には
+一箇所違いがある。
+
+Acdelerator は、
+1. フォーカスを移す。
+2. クリック等のイベントを発する。
+
+という処理を行うため、フォーカスが移動する。
+
+これに対して、共通処理ルーチンは、
+直接、処理ルーチンを発行するので、
+フォーカスが移らず、イベントも発行されない。
+そのまま処理だけが実行される。
+
+シフトキーの値 Shift に関して、
+
+fmShiftMask 1 Shift キーが押されました。 
+fmCtrlMask 2 Ctrl キーが押されました。 
+fmAltMask 4 Alt キーが押されました。 
+
+みたいな解説がヘルプにはあるが、
+うちの環境では
+fmAltMask が未定義だ、みたいなエラーになる。
+
+msforms の参照状況に依存するのか？
+
+いずれにせよ、定義されてない前提で考えた方が無難だ。
+
+KeyCode も、ヘルプで見つからないが、
+vbKeyA, vbKeyB,,, のような定数が使える。
+
+ちなみに、
+vbKeyG = 71
+vbKeyH = 72
+
+
+
+textbox.SelStart は 0 から始まり、負を指定するとエラーになる。
+大きすぎる値はエラーにならず、end に飛ぶ。
+これはカーソルが移るだけでなく、自動スクロールする。
+また、フォーカスされてなくても使えるようだ。
+
+
+textbox では、
+Ctrl-C,X,V,A,Z などのショートカットがそのまま使える。
+Ctrl-Z の Undo は動作がいまいち不明確なので使わない方が良さそう。
+
+
