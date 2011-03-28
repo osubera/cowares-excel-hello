@@ -44,7 +44,7 @@
             params[gadgets.io.RequestParameters.HEADERS] = {
               "User-Agent" : "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" ,
               "Accept-Language" : "ja-jp"
-            }
+            };
             try { gadgets.io.makeRequest(url, response, params); }
             catch(e) { textarea.value = e.description + '\nError ' + e.number; }
           }
