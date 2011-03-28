@@ -8,8 +8,8 @@
     <![CDATA[
       <style type="text/css">
         #kontena__MODULE_ID__{margin:0;padding:0;}
-        #url__MODULE_ID__{width:90%;}
-        textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
+        #url__MODULE_ID__{width:80%;}
+        textarea{background-color:yellow;width:100%;height:80%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
         <form>
@@ -37,12 +37,12 @@
             var params = {};
             params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.TEXT;
             try { gadgets.io.makeRequest(url, response, params); }
-            catch(e) { textarea.value = e.description + '\nError ' + e.number;
+            catch(e) { textarea.value = e.description + '\nError ' + e.number; }
           }
           
           function response(obj) {
             try {textarea.value = obj.text; }
-            catch(e) { textarea.value = e.description + '\nError ' + e.number;
+            catch(e) { textarea.value = e.description + '\nErrorr ' + e.number; }
           };
           
           function main() {
