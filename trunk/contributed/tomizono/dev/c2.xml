@@ -39,6 +39,7 @@
           };
           
           var changeda = function(){saveText();};
+          var textarea = document.getElementById('kontena__MODULE_ID__').getElementsByTagName('textarea')[0];
           textarea.onchange = changeda;
           
           gadgets.util.registerOnLoadHandler(main);
