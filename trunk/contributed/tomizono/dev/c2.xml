@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="__MSG_title__" scrolling="true">
+    <Locale>
+      <msg name="title">xxx helloooo</msg>
+    </Locale>
+    <Locale lang="ja">
+      <msg name="title">xxx こんにちわ</msg>
+    </Locale>
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="q" display_name="Clip" datatype="string" default_value="scratch and keep" />
+  <Content type="html" view="home,profile,default,canvas,preview">
+    <![CDATA[
+      <style type="text/css">
+        #kontena__MODULE_ID__{margin:0;padding:0;}
+        atextarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
+      </style>
+      <div id="kontena__MODULE_ID__">
+        <form><input type="button" /><textarea name="aa"></textarea></form>
+      </div>
+      <script type="text/javascript">
+        // Copyright (c) 2011 Fortitudinous, Free, Fair cowares.nobody.jp
+        (function(){
+          function loadText() {
+            var prefs = new gadgets.Prefs(__MODULE_ID__);
+            var textarea = document.getElementById('kontena__MODULE_ID__').getElementsByTagName('textarea')[0];
+            textarea.value = prefs.getString('q');
+          }
+          
+          function saveText() {
+            var prefs = new gadgets.Prefs(__MODULE_ID__);
+            var textarea = document.getElementById('kontena__MODULE_ID__').getElementsByTagName('textarea')[0];
+            prefs.set('q', textarea.value);
+          }
+          
+          function main() {
+            loadText();
+          };
+          
+          var changeda = function(){saveText();};
+          textarea.onchange = changeda;
+          
+          gadgets.util.registerOnLoadHandler(main);
+        })();
+      </script>
+    ]]>
+  </Content>
+</Module>
