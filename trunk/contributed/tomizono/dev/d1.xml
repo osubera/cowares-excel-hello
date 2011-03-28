@@ -8,7 +8,8 @@
     <![CDATA[
       <style type="text/css">
         #kontena__MODULE_ID__{margin:0;padding:0;}
-        atextarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
+        #url__MODULE_ID__{width:90%;}
+        textarea{background-color:yellow;width:100%;height:100%;overflow:auto;}
       </style>
       <div id="kontena__MODULE_ID__">
         <form>
@@ -40,7 +41,8 @@
           }
           
           function response(obj) {
-            textarea.value = obj.text;
+            try {textarea.value = obj.text; }
+            catch(e) { textarea.value = e.description + '\nError ' + e.number;
           };
           
           function main() {
