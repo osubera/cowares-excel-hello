@@ -119,10 +119,10 @@
     http://3.bp.blogspot.com/-YlJiwRP5b0c/TZfrkxoq4mI/AAAAAAAAAEM/P1aabjFuJy4/s1600/shot2.png
 
 * エクセル本体と並べると、このようにシートと連携している。
-    http://2.bp.blogspot.com/-_Fh5CI9X3FA/TZfrlz0hNvI/AAAAAAAAAEU/nvWM3q3V4mU/s1600/shot4.png
+    http://2.bp.blogspot.com/-_Fh5CI9X3FA/TZfrlz0hNvI/AAAAAAAAAEU/nvWM3q3V4mU/s800/shot4.png
 
 * 編集だけのときは、フォーム全体を広く使う。
-    http://3.bp.blogspot.com/-woINKXEhoUc/TZfrmXU4tsI/AAAAAAAAAEY/JjT3_RlIdhU/s1600/shot5.png
+    http://3.bp.blogspot.com/-woINKXEhoUc/TZfrmXU4tsI/AAAAAAAAAEY/JjT3_RlIdhU/s800/shot5.png
 
 
 = Code =
