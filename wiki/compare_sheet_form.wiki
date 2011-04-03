@@ -106,6 +106,24 @@
 
 = Snapshots =
 
+ * エクセル2007 ではリボンのアドインタブにボタンを表示する。
+    http://4.bp.blogspot.com/-qWcfzFYPLQ8/TZfrm4n318I/AAAAAAAAAEc/Lzc-ZnyFet0/s1600/shot6.png
+
+* エクセル2000 ではツールバーを表示する。
+    http://4.bp.blogspot.com/-ZWRa3yS9hkE/TZfrksvJYoI/AAAAAAAAAEI/28brFTHPglU/s1600/shot1.png
+
+* ツールバーの比較結果から、不一致セルにジャンプする。
+    http://3.bp.blogspot.com/-ciZj2nVkjrI/TZfrlYZJniI/AAAAAAAAAEQ/VrwSWRDbi-k/s1600/shot3.png
+
+* フォームで比較しながら編集する。
+    http://3.bp.blogspot.com/-YlJiwRP5b0c/TZfrkxoq4mI/AAAAAAAAAEM/P1aabjFuJy4/s1600/shot2.png
+
+* エクセル本体と並べると、このようにシートと連携している。
+    http://2.bp.blogspot.com/-_Fh5CI9X3FA/TZfrlz0hNvI/AAAAAAAAAEU/nvWM3q3V4mU/s1600/shot4.png
+
+* 編集だけのときは、フォーム全体を広く使う。
+    http://3.bp.blogspot.com/-woINKXEhoUc/TZfrmXU4tsI/AAAAAAAAAEY/JjT3_RlIdhU/s1600/shot5.png
+
 
 = Code =
 
