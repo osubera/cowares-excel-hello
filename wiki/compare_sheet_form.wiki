@@ -3,6 +3,8 @@
 
 <wiki:toc max_depth="3" />
 
+<style type="text/css">img{overflow:auto;}</style>
+
 = Introduction =
 
  * compare two sheets of excel workbook with a verifiable form
