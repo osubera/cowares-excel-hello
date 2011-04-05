@@ -113,7 +113,7 @@
 '         ;
 '         ;
 '         ;çXêV
-'         ;40567.5833333333
+'         ;40638.7083333333
 '         ;
 '         ;
 '         ;
@@ -211,7 +211,7 @@
 '         ;2
 '         ;
 '         ;
-'         ;BaumMain.OnButtonToggle
+'         ;VBAProject.BaumMain.OnButtonToggle
 '         ;
 '         ;
 '         ;
@@ -1359,7 +1359,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(Me.CodeName)
+    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
