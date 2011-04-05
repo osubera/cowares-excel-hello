@@ -1013,7 +1013,7 @@ End Sub
 '         ;
 '         ;
 '         ;著作権
-'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
 '         ;
 '         ;
 '         ;
@@ -1078,7 +1078,7 @@ End Sub
 '         ;
 '         ;
 '         ;更新
-'         ;40567.5833333333
+'         ;40638.4166666667
 '         ;
 '         ;
 '         ;
@@ -2527,7 +2527,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(Me.CodeName)
+    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
@@ -2590,4 +2590,38 @@ End Sub
 
 }}}
 
+
+=== patch for Excel ( issue 16 on 2011/4/5 ) ===
+
+{{{
+--- tool_bar_v2_excel.txt	(revision 521)
++++ tool_bar_v2_excel.txt	(revision 522)
+@@ -48,7 +48,7 @@
+ '         ;
+ '         ;
+ '         ;著作権
+-'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
++'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+ '         ;
+ '         ;
+ '         ;
+@@ -113,7 +113,7 @@
+ '         ;
+ '         ;
+ '         ;更新
+-'         ;40567.5833333333
++'         ;40638.4166666667
+ '         ;
+ '         ;
+ '         ;
+@@ -1562,7 +1562,7 @@
+ End Property
+ 
+ Public Property Get ButtonParent() As Variant
+-    ButtonParent = Array(Me.CodeName)
++    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
+ End Property
+ 
+ ' above simple property codes are supported by the following range helpers
+}}}
 
