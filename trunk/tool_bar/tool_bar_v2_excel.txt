@@ -48,7 +48,7 @@
 '         ;
 '         ;
 '         ;íòçÏå†
-'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
 '         ;
 '         ;
 '         ;
@@ -113,7 +113,7 @@
 '         ;
 '         ;
 '         ;çXêV
-'         ;40567.5833333333
+'         ;40638.4166666667
 '         ;
 '         ;
 '         ;
@@ -1562,7 +1562,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(Me.CodeName)
+    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
