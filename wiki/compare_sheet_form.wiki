@@ -113,11 +113,15 @@
  # ショートカットを F3 から F2 へ。
  # フォームリサイズを可能に。
  # 切替ボタンを追加。
+ * http://3.bp.blogspot.com/-AkAqjhoeTBI/TZwERxNH0xI/AAAAAAAAAEk/t23Wulw5VUQ/s1600/shot8.png
 
 
 = Snapshots =
 
+
+
  * エクセル2007 ではリボンのアドインタブにボタンを表示する。
+    http://1.bp.blogspot.com/-_m2YlWm2PMs/TZwERSpgECI/AAAAAAAAAEg/soCwZvB8bHk/s1600/shot7.png
     http://4.bp.blogspot.com/-qWcfzFYPLQ8/TZfrm4n318I/AAAAAAAAAEc/Lzc-ZnyFet0/s1600/shot6.png
 
 * エクセル2000 ではツールバーを表示する。
@@ -127,6 +131,7 @@
     http://3.bp.blogspot.com/-ciZj2nVkjrI/TZfrlYZJniI/AAAAAAAAAEQ/VrwSWRDbi-k/s1600/shot3.png
 
 * フォームで比較しながら編集する。
+    http://3.bp.blogspot.com/-AkAqjhoeTBI/TZwERxNH0xI/AAAAAAAAAEk/t23Wulw5VUQ/s1600/shot8.png
     http://3.bp.blogspot.com/-YlJiwRP5b0c/TZfrkxoq4mI/AAAAAAAAAEM/P1aabjFuJy4/s1600/shot2.png
 
 * エクセル本体と並べると、このようにシートと連携している。
