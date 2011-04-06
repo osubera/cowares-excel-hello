@@ -180,6 +180,16 @@ Private Const WS_EX_DLGMODALFRAME = &H1&
 WS_EX_APPWINDOW Or WS_EX_OVERLAPPEDWINDOW
 
 
+どうやら
+UserForm.Show
+の都度、
+WS_EX_APPWINDOW 属性は消去されるようだ。
+おそらく裏で ShowDialog が走っているからだろう。
+
+これだと Show の都度、
+タスクバーからアイコンが消えることになり、
+逆に面倒だし混乱を招きそうだな。
+
 
 
 
