@@ -113,7 +113,7 @@
 '         ;
 '         ;
 '         ;çXêV
-'         ;40638.4166666667
+'         ;40639.8333333333
 '         ;
 '         ;
 '         ;
@@ -211,7 +211,7 @@
 '         ;2
 '         ;
 '         ;
-'         ;testAddin3.OnButtonToggle
+'         ;VBAProject.testAddin3.OnButtonToggle
 '         ;
 '         ;
 '         ;
@@ -1498,6 +1498,11 @@ Private Helper As ToolBarV2
 'Public Helper As ToolBarV2
 ' we cannot have a public variable in Excel Worksheet
 
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "VBAProject"
+End Function
+
 Friend Function GetHelper() As ToolBarV2
     Set GetHelper = Helper
 End Function
@@ -1562,7 +1567,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
