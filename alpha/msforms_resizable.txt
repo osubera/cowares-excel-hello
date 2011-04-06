@@ -1,0 +1,267 @@
+Form サイズ変更とか
+
+Windows 2000 x Excel 2000 以上で。
+
+Excel の UserForm は、次の style で生成されている。
+
+Windows Styles: 94c80080
+
+Private Const WS_POPUPWINDOW = (WS_POPUP Or WS_BORDER Or WS_SYSMENU)
+  Private Const WS_POPUP = &H80000000
+  Private Const WS_BORDER = &H800000
+  Private Const WS_SYSMENU = &H80000
+Private Const WS_VISIBLE = &H10000000
+Private Const WS_CLIPSIBLINGS = &H4000000
+Private Const WS_DLGFRAME = &H400000
+Private Const WS_OVERLAPPED = &H0&
+&H80&
+
+Windows Extended Styles: 00000101
+
+Private Const WS_EX_LEFT = &H0&
+Private Const WS_EX_LTRREADING = &H0&
+Private Const WS_EX_RIGHTSCROLLBAR = &H0&
+Private Const WS_EX_DLGMODALFRAME = &H1&
+Private Const WS_EX_WINDOWEDGE = &H100&
+
+
+&H80& は、謎のスタイルだが、
+これが Excel には必要らしい。
+
+いわゆるダイアログだ。
+modal modeless を切り替えて出しているだけだ。
+
+Parent はエクセルのメインウィンドウ XLMAIN だ。
+
+子ウィンドウなので、エクセルのメインウィンドウより下に下がることは無い。
+
+
+マウスによるサイズ変更。
+
+Private Const WS_THICKFRAME = &H40000  ' WS_SIZEBOX と同じ意味
+
+この属性を追加すると可能になる。
+これは見た目まで変えないので、
+ダイアログのボーダースタイルのままで、
+マウスのドラッグが可能になる。
+
+
+最小化、最大化とシステムメニュー
+
+Private Const WS_SYSMENU = &H80000
+Private Const WS_CAPTION = &HC00000      '  WS_BORDER Or WS_DLGFRAME
+Private Const WS_MAXIMIZEBOX = &H10000
+Private Const WS_MINIMIZEBOX = &H20000
+
+これら４つはセットで使うことが推奨されている。
+たとえば MINIMIZEBOX を指定しないことはできるが、
+最小化ボタンが押せないだけで、ボタンは表示される。
+
+WS_SYSMENU, WS_CAPTION は、標準のダイアログで既に指定されているので、
+実際には、 WS_MAXMIZEBOX, WS_MINIMIZEBOX を追加するとボタンが出る。
+
+最大化は普通の感覚で使える。
+最小化は、Excel MDI の最小化動作、つまり、
+左下の方にタイトルバーが縮むような最小化となる。
+今の Excel は MDI の皮を捨てているので、デスクトップの左下に縮む。
+
+また、指定にかかわらず、
+ダイアログフレームのままでは、
+システムメニューは表示されないままだ。
+これを出すには、アイコンを持つタイトルバーが必要。
+
+ただし、元のダイアログからそうだが、
+Alt + Space のショートカットは有効。
+
+
+サイズ変更のイベント
+
+Private Sub UserForm_Resize()
+
+End Sub
+
+Private Sub UserForm_Layout()
+
+End Sub
+
+これらが、サイズ変更の検出に使える。
+フォーム生成時、マウスによるサイズ変更、最小化、最大化の
+いずれでも、両方が fire される。
+
+Resize, Layout の順。
+
+特に生成時に Resize は複数回発生することがあり、
+サイズ変更によるコントロール調整などは、
+Layout でやるのが無難だ。
+
+最小幅などを決めて、それより小さくなるのを禁止するなら、
+イベントプロシジャで、Width, Height を上書きしてやるとよい。
+
+最大化の制限
+最大化属性を持っているときは
+Width, Height の変更ができない。
+これは検出できない(API使えば別だが)ので、
+入れてみてエラーなら無視、が無難。
+つまり、エラートラップしておく。
+
+最小化
+最小化属性のときは、外側のサイズ Width, Height だけが
+アイコンサイズに縮小し、
+InnerWidth, InnerHeight は元のまま残っている。
+
+Height < InnerHeight とかで検出して対応するのが良い。
+
+
+タスクバーへの表示
+
+vbModeless なフォームを出して、
+裏側のエクセル操作を許可したとき、
+かつ、
+Application.ShowWindowsInTaskbar = True
+の設定で、タスクバーにマルチウィンドウ展開する場合、
+タスクバーでは複雑な挙動になる。
+
+実際、Vista(7) + Excel 2007 では、
+これに関わる不具合が発生している。
+
+不具合を取り除いても、
+UI として複雑なことに変わりは無い。
+
+他のブックに切り替えたとき、
+それの子フォームがアクティブになるのか、
+ブックがアクティブになるのか、
+ユーザーに予測することも、
+ユーザーが指定することもできないからだ。
+
+タスクバーにフォーム自身を表示してやることで、
+少しは交通整理ができる。
+
+
+
+タスクバーに表示するには、次の属性を、
+Extended Style に追加する。
+
+Private Const WS_EX_APPWINDOW = &H40000
+
+ただし、
+即座に表示されるわけではない。
+タスクバーに、何らかの通知をしないといけない。
+その方法がわからないが、
+親ウィンドウの最小化、リストア、が今のところ有効な方法だ。
+フォームだけを最小化しても、タスクバーは変わらない。
+
+    RememberWindowState = Application.WindowState
+    Application.WindowState = xlMinimized
+    Application.WindowState = RememberWindowState  ' xlNormal
+
+
+
+通常フォームのボーダーにする。
+
+いかにもリサイズできそうにするには、
+次の属性を追加する。
+
+Private Const WS_EX_OVERLAPPEDWINDOW = &H300
+  Private Const WS_EX_WINDOWEDGE = &H100
+  Private Const WS_EX_CLIENTEDGE = &H200
+
+
+標準のアイコンを持つフォーム
+
+システムメニューを有効にし、通常のフォームと同じ外観のフォームにするには、
+ダイアログ属性を取り除く必要がある。
+
+Private Const WS_EX_DLGMODALFRAME = &H1&
+
+こいつを XOR する。
+
+あるいは、いっそ、必要なものだけを最初から指定する。
+
+WS_EX_APPWINDOW Or WS_EX_OVERLAPPEDWINDOW
+
+
+
+
+
+hWnd 取得
+
+フォームのClass名は、 ThunderDFrame
+Excel 97, 95 では、 ThunderXFrame だったらしい。
+Application.Version < 9 で、 97,95 を判定できる。
+
+
+hWnd 取得に、通常なら、クラス名とキャプションを使って探すが、
+Windows 2000 以上では、 OLE Object を hWnd に変換してくれる
+便利 api が使える。
+
+Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+Private Declare Function WindowFromObject Lib "oleacc" Alias "WindowFromAccessibleObject" (ByVal pacc As Object, phwnd As Long) As Long
+
+Public Function GetHWndOfUserForm(form As UserForm) As Long
+    Dim hWnd As Long
+    Dim ClassName As String
+    
+    ClassName = IIf(Application.Version < 9, "ThunderXFrame", "ThunderDFrame")
+    ' Version 9 is Excel 2000
+    
+    hWnd = FindWindow(ClassName, form.Caption)
+    GetHWndOfUserForm = hWnd
+End Function
+
+Public Function GetHWndOfUserForm2k(form As UserForm) As Long
+    ' Windows 2000 and later can use a new WindowFromObject API
+    Dim hWnd As Long
+    
+    WindowFromObject form, hWnd
+    
+    GetHWndOfUserForm2k = hWnd
+End Function
+
+
+
+
+ウィンドウスタイルの変更
+
+Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function DrawMenuBar Lib "user32" (ByVal hWnd As Long) As Long
+
+Private Const GWL_STYLE = (-16)
+Private Const GWL_EXSTYLE = (-20)
+
+
+Private Sub MakeWindowResizable(hWnd As Long)
+    Dim CurrentStyle As Long
+    
+    CurrentStyle = GetWindowLong(hWnd, GWL_STYLE)
+    SetWindowLong hWnd, GWL_STYLE, CurrentStyle Or WS_MAXIMIZEBOX Or WS_MINIMIZEBOX Or WS_SYSMENU Or WS_CAPTION Or WS_THICKFRAME
+End Sub
+
+Private Sub MakeWindowPlaceInTaskBar(hWnd As Long)
+    'Dim CurrentStyle As Long
+    '
+    'CurrentStyle = GetWindowLong(hWnd, GWL_EXSTYLE)
+    'SetWindowLong hWnd, GWL_EXSTYLE, CurrentStyle Or WS_EX_APPWINDOW Or WS_EX_OVERLAPPEDWINDOW Xor WS_EX_DLGMODALFRAME
+    SetWindowLong hWnd, GWL_EXSTYLE, WS_EX_APPWINDOW Or WS_EX_OVERLAPPEDWINDOW
+End Sub
+
+Public Sub LetUserFormResizable(form As UserForm)
+    Dim hWnd As Long
+    Dim CurrentState As Long
+    
+    hWnd = GetHWndOfUserForm(form)
+    If hWnd = 0 Then Exit Sub
+    
+    MakeWindowResizable hWnd
+    MakeWindowPlaceInTaskBar hWnd
+    DrawMenuBar hWnd
+    ' DrawMenuBar is required to be called after SetWindowLong.
+    
+    CurrentState = Application.WindowState
+    Application.WindowState = xlMinimized
+    Application.WindowState = CurrentState  ' xlNormal
+End Sub
+
+
+
+
