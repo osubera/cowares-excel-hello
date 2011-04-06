@@ -77,10 +77,13 @@
 
 <ol>
 <li>ZIP形式で圧縮しています。 Windows 2000 以前では、この形式を解凍できるソフトウェアが別途必要です。</li>
+<li>通常のブックとアドインが含まれますが、動作は同じです。どちらか一方、好みの形式を使ってください。</li>
 <li>圧縮ファイルには以下のファイルが含まれます。
  <table>
  <tr><th>book_tab.xlsm</th><td>Excel 2007 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
  <tr><th>took_tab_2k.xls</th><td>Excel 2000 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
+ <tr><th>book_tab.xlam</th><td>Excel 2007 形式のソフトウェア本体です。アドインとして使います。</td></tr>
+ <tr><th>took_tab_2k.xla</th><td>Excel 2000 形式のソフトウェア本体です。アドインとして使います。</td></tr>
  <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
  <tr><th>初めにお読みください.html</th><td>この解説書です。</td></tr>
  <tr><th>その他</th><td>解説書の使う画像ファイルなど。</td></tr>
@@ -126,10 +129,21 @@
 <li>同期がずれた場合は、 ❤ メニューの同期で手動反映させてください。</li>
 <li>タブ同期には、即時同期と遅延同期が混在しています。遅延タイミングが気に入らない場合、コード中のパラメータを変えてチューニングしてください。</li>
 <li>タブ同期に、グローバルな Application.OnWindow リソースを使用します。それを使う他の VBA コードと混在させた場合、双方が異常を起こします。</li>
+<li>タイマー同期は、操作が無くても一定時間ごとにブック一覧を再作成します。タイマーは60秒に設定されており、シート上の D列 で変更できます。</li>
 </ol>
 </li>
 <li>❤ メニュー<br/>
 <img src="shot6.png" alt="同期 保存済みを閉じる アクティブ以外破棄 タイトル優先 タイトル入力 book_tabについて" />
+<table>
+ <tr><th>同期</th><td>ブック一覧を再確認する。</td></tr>
+ <tr><th>タイマー同期</th><td>時々、ブック一覧を勝手に再確認する。</td></tr>
+ <tr><th>保存済みを閉じる</th><td>未保存を除き、ブックを閉じる。</td></tr>
+ <tr><th>アクティブ以外破棄</th><td>アクティブブックを除き、未保存の情報を破棄して閉じる。</td></tr>
+ <tr><th>タイトル優先</th><td>最初にタブを開いたとき、ファイル名でなくタイトルを表示する。</td></tr>
+ <tr><th>タイトル入力</th><td>タイトルが無いブックにタイトルを入れるよう促す。</td></tr>
+ <tr><th>タスクバー表示</th><td>ウィンドウをタスクバーに表示する。</td></tr>
+ <tr><th>book_tab について</th><td>このシートを表示する。</td></tr>
+</table>
 </li>
 <li>表示対象、対象外
 <ol>
@@ -264,7 +278,7 @@
 
 <div class="copyright"><a href="http://kobobau.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.com</a></div>
 
-<div class="lastupdate">2011.3.9 更新</div>
+<div class="lastupdate">2011.4.6 更新</div>
 
 <script type="text/javascript" src="vba2.js"></script>
 </body>
