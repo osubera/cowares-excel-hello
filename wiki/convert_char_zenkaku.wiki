@@ -44,6 +44,7 @@
     # アドインの設定画面で、「全角半角変換」にチェックを入れて、有効化する。
       * 一覧に表示されない場合、参照ボタンで読み込む。
       * 有効化しておけば、エクセル起動だけでアドインが自動で読み込まれる。
+      * http://1.bp.blogspot.com/-IKIU0wRY5j4/TZ_QpcEGJTI/AAAAAAAAAEw/__X7C-dGPTw/s1600/shot3.png
     # アンインストール
       * 上記の逆手順、アドインの無効化、アドインファイルの削除、を行う。
       * 追加修正のバージョンをインストールするとき、同じファイル名で上書きするのでなければ、先に古いバージョンをアンインストールしないといけない。
@@ -68,6 +69,15 @@
 
 
 = Snapshots =
+
+ * エクセル2007 ではリボンのアドインタブにボタンを表示する。
+    http://2.bp.blogspot.com/-CesX5NTgjOs/TZ_QofQspzI/AAAAAAAAAEo/cEl4tcQA4Zc/s1600/shot1.png
+
+ * セル数式の扱いを指定する。
+    http://2.bp.blogspot.com/-n63FTS-IhQU/TZ_Qo9CZCcI/AAAAAAAAAEs/eTQXfGHlPCo/s1600/shot2.png
+
+ * アドインの設定画面で有効にする。
+    http://1.bp.blogspot.com/-IKIU0wRY5j4/TZ_QpcEGJTI/AAAAAAAAAEw/__X7C-dGPTw/s1600/shot3.png
 
 
 
