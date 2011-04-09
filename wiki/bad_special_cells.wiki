@@ -3,10 +3,10 @@
 
 = Introduction =
 
- * bad vba: Cells.SpecialCells ignores a sigle cell searching
+ * bad vba: `Cells.SpecialCells` ignores a sigle cell searching
 
 == 概要 ==
- * 失敗マクロ: VBAの Cells.SpecialCells はセル１個だけを検索できない
+ * 失敗マクロ: VBAの `Cells.SpecialCells` はセル１個だけを検索できない
 
 = Details =
 
@@ -21,7 +21,7 @@
  * 検索対象として、１つだけのセル、 `Sheet1.Range("C2")` など、を指定すると、セルからの検索でなく `Sheet1.Cells` 全体を検索対象に切り替える。
  * この動作はバグでなく仕様で、全バージョンで共通に見られる。
  * 自動的なおせっかいを回避して、単一セルからの検索を指定したい場合、 `Sheet1.Range("C2,C2")` のように、同一セルの２重エリアで、あたかもセル数が２のように見せかけるという抜け道が使える。
- * いずれにせよ、動的に作られたセル範囲に対して SpecialCells で絞り込む場合、セル１個だけを特別扱いしなければ、間違った動作になる。
+ * いずれにせよ、動的に作られたセル範囲に対して `SpecialCells` で絞り込む場合、セル１個だけを特別扱いしなければ、間違った動作になる。
 
 = Bad Code =
 
