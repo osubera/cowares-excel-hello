@@ -15,9 +15,9 @@
  * a new propery `Cells.CountLarge` is added. and it returns a 64bit signed integer.
  * because there're no such variable types declared in the VBA, this property is not useful to calculate. it may raise an error on implicit data type conversion.
  * using a Variant variable with explicit `CDec` conversion is a simple solution.
- * converting into a Double is another way, when calculations of approximate values are important than precise values.
- * `Cells.CountLarge` is late-binding. it reises run time error, not at the compile time in excel 2000. so we can switch dynamically using the `Application.Version`.
- * when the required value is not the cell counts itself, for example a true-or-false value against a threshold value, it is better code to read a minimum information with an error catcher.
+ * converting into a Double is an another way, when calculations of approximate values are important than precise values.
+ * `Cells.CountLarge` uses late-binding. it raises a run time error, not at compile time in excel 2000. so we can switch dynamically by the `Application.Version`.
+ * when the required value is not a cell counts number itself but a true-or-false value against a threshold value, it is better to try and catch the error to judge by a simple code.
  * when running an excel 2007 in a legacy compatible mode, there're no errors because the total amount of cells is also shrinked as legacy.
 
 == 説明 ==
