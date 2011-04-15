@@ -5,6 +5,61 @@ Option Explicit
 
 Const MyKey = "workbook"
 
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchBook Value, Env
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub CellsNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-name"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim ThePreviousValue As String
+    Dim CellsName As Names
+    
+    Counter = 0
+    Set CellsName = Env.Current("workbook").Names
+    
+    Env.LogWrite LocalKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case ""
+            Counter = Counter + 1
+            If Counter Mod 2 = 1 Then
+                ThePreviousValue = Value
+            Else
+                CellsName.Add Name:=Value, RefersToR1C1:=ThePreviousValue
+            End If
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim Names As String
     
@@ -54,6 +109,24 @@ Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalRes
     CellsNameWriteTo Target, Stream, Env
     ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
     SsfBlockModules.WriteTo Target.VBProject, Stream, Env
+End Sub
+
+Private Sub SwitchBook(Names As String, Env As GlobalResources)
+    ' currently, we just open a new book
+    ' not name it, nor search an existing book
+    Dim Book As Workbook
+    Dim BookName As String
+    Dim ProjectName As String
+    
+    Set Book = Application.Workbooks.Add
+    Set Env.Current("workbook") = Book
+    Env.LogWrite "new workbook " & Names
+    
+    SsfUtils.DivideName Names, BookName, ProjectName, "VBAProject"
+    If (ProjectName <> "") And (ProjectName <> "VBAProject") And SsfBlockModules.CanTouchVBProject() Then
+        Book.VBProject.Name = ProjectName
+        Env.LogWrite "vbproject " & ProjectName
+    End If
 End Sub
 
 '}}}

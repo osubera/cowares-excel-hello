@@ -33,10 +33,17 @@ Public Sub ReadSsf(Stream)
 End Sub
 
 Public Sub ParseSsf(Finder)
-    If Not BeginTheMagic(Finder) Then Exit Sub
-    EvalAfter Finder
-    EndTheMagic
+    Do
+        If Not BeginTheMagic(Finder) Then Exit Sub
+        EvalAfter Finder
+        EndTheMagic
+    Loop While RequireTheMagic And Not Finder.AtEndOfStream
 End Sub
+
+Private Function RequireTheMagic() As Boolean
+    On Error Resume Next
+    RequireTheMagic = CBool(Env.GetEnv("ssf", "enable-magic-word", "FALSE"))
+End Function
 
 Private Sub DoFlush()
     Dim BlockName
@@ -58,7 +65,7 @@ Private Function BeginTheMagic(Finder)
     
     BeginTheMagic = True
     
-    If Not CBool(Env.GetEnv("ssf", "enable-magic-word", "FALSE")) Then Exit Function
+    If Not RequireTheMagic Then Exit Function
     MagicBegin = Env.GetEnv("ssf", "magic-begin", "")
     If MagicBegin = "" Then Exit Function
     

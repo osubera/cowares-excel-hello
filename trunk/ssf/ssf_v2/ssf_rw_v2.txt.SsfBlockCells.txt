@@ -3,6 +3,76 @@
 '{{{
 Option Explicit
 
+Public Sub CellsFormulaReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-formula"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim CrLf As String
+    
+    Counter = 0
+    Set Ws = Env.Current("worksheet")
+    Set Ra = Ws.Cells
+    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
+    
+    Env.LogWrite LocalKey & " into " & Ws.Name
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "address"
+            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).FormulaR1C1 = SsfUtils.LineFeedToLf(Value, CrLf)
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-numberformat"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    
+    Counter = 0
+    Set Ws = Env.Current("worksheet")
+    Set Ra = Ws.Cells
+    
+    Env.LogWrite LocalKey & " into " & Ws.Name
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "address"
+            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).NumberFormat = Value
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     CellsFormulaWriteTo Target, Stream, Env
     CellsNumberFormatWriteTo Target, Stream, Env
@@ -12,6 +82,10 @@ Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, B
     Const LocalKey = "cells-formula"
     
     Dim Ce As Range
+    Dim CrLf As String
+    Dim Data As String
+    
+    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
     
     Env.LogWrite LocalKey
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
@@ -19,7 +93,12 @@ Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, B
     Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
     ' simple list, each cell in each line
     For Each Ce In Target
-        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.FormulaR1C1)
+        Data = Ce.FormulaR1C1
+        If InStr(Data, vbLf) = 0 Then
+            Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
+        Else
+            Stream.WriteLine SsfWriter.MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Data, CrLf))
+        End If
     Next
     
     Stream.WriteLine SsfWriter.SsfBlockEnd
