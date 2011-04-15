@@ -1,4 +1,4 @@
-'ssf-begin
+ï»¿'ssf-begin
 
 'workbook
 '   name;validate_char_zenkaku.xls/F3ValidateCharZenkaku
@@ -11,7 +11,7 @@
 
 'cells-formula
 '  address;A1:M16
-'         ;–¼Ì
+'         ;åç§°
 '         ;validate_char_zenkaku
 '         ;
 '         ;
@@ -24,8 +24,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒRƒƒ“ƒg
-'         ;‘I‘ğ‚µ‚½ƒZƒ‹‚É”¼Šp•¶š‚ª“ü‚Á‚Ä‚¢‚È‚¢‚±‚Æ‚ğŠm”F‚·‚é
+'         ;ã‚³ãƒ¡ãƒ³ãƒˆ
+'         ;é¸æŠã—ãŸã‚»ãƒ«ã«åŠè§’æ–‡å­—ãŒå…¥ã£ã¦ã„ãªã„ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 '         ;
 '         ;
 '         ;
@@ -50,7 +50,7 @@
 '         ;
 '         ;
 '         ;
-'         ;’˜ìŒ 
+'         ;è‘—ä½œæ¨©
 '         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
 '         ;
 '         ;
@@ -63,8 +63,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ‰ƒCƒZƒ“ƒX
-'         ;©—¥, ©—R, Œö³, http://cowares.nobody.jp
+'         ;ãƒ©ã‚¤ã‚»ãƒ³ã‚¹
+'         ;è‡ªå¾‹, è‡ªç”±, å…¬æ­£, http://cowares.nobody.jp
 '         ;
 '         ;
 '         ;
@@ -76,7 +76,7 @@
 '         ;
 '         ;
 '         ;
-'         ;ìÒ
+'         ;ä½œè€…
 '         ;Tomizono - kobobau.com
 '         ;
 '         ;
@@ -89,7 +89,7 @@
 '         ;
 '         ;
 '         ;
-'         ;‰”Å
+'         ;åˆç‰ˆ
 '         ;2011
 '         ;
 '         ;
@@ -102,7 +102,7 @@
 '         ;
 '         ;
 '         ;
-'         ;”z•zŒ³
+'         ;é…å¸ƒå…ƒ
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/validate_char_zenkaku
 '         ;
 '         ;
@@ -115,7 +115,7 @@
 '         ;
 '         ;
 '         ;
-'         ;XV
+'         ;æ›´æ–°
 '         ;40646.7083333333
 '         ;
 '         ;
@@ -167,8 +167,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ{ƒ^ƒ“‚Ì•\¦
-'         ;ƒ{ƒ^ƒ“‚Ì‹@”\
+'         ;ãƒœã‚¿ãƒ³ã®è¡¨ç¤º
+'         ;ãƒœã‚¿ãƒ³ã®æ©Ÿèƒ½
 '         ;Tag
 '         ;Parameter
 '         ;ControlType
@@ -193,8 +193,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ŒŸØ
-'         ;‘I‘ğ‚µ‚½ƒZƒ‹‚ğŒŸØ‚·‚é
+'         ;æ¤œè¨¼
+'         ;é¸æŠã—ãŸã‚»ãƒ«ã‚’æ¤œè¨¼ã™ã‚‹
 '         ;validate
 '         ;
 '         ;1
@@ -206,8 +206,8 @@
 '         ;
 '         ;
 '         ;
-'         ;Œ‹‰Ê
-'         ;ŒŸØŒ‹‰Ê‚ÌƒTƒ}ƒŠ[
+'         ;çµæœ
+'         ;æ¤œè¨¼çµæœã®ã‚µãƒãƒªãƒ¼
 '         ;summary
 '         ;
 '         ;3
@@ -1154,7 +1154,7 @@ End Function
 Public Sub BarMain(Optional oWho As Object = Nothing)
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "ƒc[ƒ‹ƒo[‚ğC•œ‚µ‚Ü‚µ‚½B‚à‚¤ˆê“x‘€ì‚µ‚Ä‚­‚¾‚³‚¢B", vbExclamation, BaumMain.Name
+        MsgBox "ãƒ„ãƒ¼ãƒ«ãƒãƒ¼ã‚’ä¿®å¾©ã—ã¾ã—ãŸã€‚ã‚‚ã†ä¸€åº¦æ“ä½œã—ã¦ãã ã•ã„ã€‚", vbExclamation, BaumMain.Name
     Else
         Helper.BarMain Me
     End If
@@ -1331,7 +1331,7 @@ Private Sub GenerateSummary(Pan As Variant, Summary As Object, Helper As ToolBar
     
     If IsEmpty(Pan) Then
         ' validated as good!
-        Helper.ListAddHistory Summary, "›"
+        Helper.ListAddHistory Summary, "â—‹"
         Exit Sub
     End If
     
@@ -1357,8 +1357,8 @@ Private Function RegHankaku() As RegExp
     R.Global = True
     R.IgnoreCase = False
     R.MultiLine = True
-    'R.Pattern = "[!-~¡-ß]+"    ' excludes ascii space(x20)
-    R.Pattern = "[ -~¡-ß]+"     ' includes ascii space(x20)
+    'R.Pattern = "[!-~ï½¡-ï¾Ÿ]+"    ' excludes ascii space(x20)
+    R.Pattern = "[ -~ï½¡-ï¾Ÿ]+"     ' includes ascii space(x20)
     Set RegHankaku = R
 End Function
 
@@ -1368,7 +1368,7 @@ Private Function RegZenkakuAlphaNum() As RegExp
     R.Global = True
     R.IgnoreCase = False
     R.MultiLine = True
-    R.Pattern = "[I-`]+"
+    R.Pattern = "[ï¼-ï½ï¿¥]+"
     Set RegZenkakuAlphaNum = R
 End Function
 
