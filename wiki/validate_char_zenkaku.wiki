@@ -86,14 +86,16 @@
 = Code =
 
 {{{
+'ssf-begin
+
 'workbook
-'  name;validate_char_zenkaku.xls
+'   name;validate_char_zenkaku.xls/F3ValidateCharZenkaku
 
 'require
-'  ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
+'       ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
 
 'worksheet
-'  name;validate_char_zenkaku/BaumMain
+'   name;validate_char_zenkaku/BaumMain
 
 'cells-formula
 '  address;A1:M16
@@ -202,7 +204,7 @@
 '         ;
 '         ;
 '         ;更新
-'         ;40603.5242592593
+'         ;40646.7083333333
 '         ;
 '         ;
 '         ;
@@ -518,31 +520,31 @@
 '         ;General
 
 'cells-name
-'  ;=validate_char_zenkaku!R15C1
-'  ;validate_char_zenkaku!_ButtonCaption
-'  ;=validate_char_zenkaku!R3C2
-'  ;validate_char_zenkaku!_Comment
-'  ;=validate_char_zenkaku!R6C2
-'  ;validate_char_zenkaku!_Contributor
-'  ;=validate_char_zenkaku!R4C2
-'  ;validate_char_zenkaku!_Copyright
-'  ;=validate_char_zenkaku!R5C2
-'  ;validate_char_zenkaku!_License
-'  ;=validate_char_zenkaku!R2C2
-'  ;validate_char_zenkaku!_LocalComment
-'  ;=validate_char_zenkaku!R1C2
-'  ;validate_char_zenkaku!_PublicName
-'  ;=validate_char_zenkaku!R7C2
-'  ;validate_char_zenkaku!_Since
-'  ;=validate_char_zenkaku!R10C2
-'  ;validate_char_zenkaku!_Tag
-'  ;=validate_char_zenkaku!R9C2
-'  ;validate_char_zenkaku!_Timestamp
-'  ;=validate_char_zenkaku!R8C2
-'  ;validate_char_zenkaku!_Url
+'       ;=validate_char_zenkaku!R15C1
+'       ;validate_char_zenkaku!_ButtonCaption
+'       ;=validate_char_zenkaku!R3C2
+'       ;validate_char_zenkaku!_Comment
+'       ;=validate_char_zenkaku!R6C2
+'       ;validate_char_zenkaku!_Contributor
+'       ;=validate_char_zenkaku!R4C2
+'       ;validate_char_zenkaku!_Copyright
+'       ;=validate_char_zenkaku!R5C2
+'       ;validate_char_zenkaku!_License
+'       ;=validate_char_zenkaku!R2C2
+'       ;validate_char_zenkaku!_LocalComment
+'       ;=validate_char_zenkaku!R1C2
+'       ;validate_char_zenkaku!_PublicName
+'       ;=validate_char_zenkaku!R7C2
+'       ;validate_char_zenkaku!_Since
+'       ;=validate_char_zenkaku!R10C2
+'       ;validate_char_zenkaku!_Tag
+'       ;=validate_char_zenkaku!R9C2
+'       ;validate_char_zenkaku!_Timestamp
+'       ;=validate_char_zenkaku!R8C2
+'       ;validate_char_zenkaku!_Url
 
 'class
-'  name;ToolBarV2
+'   name;ToolBarV2
 '{{{
 Option Explicit
 
@@ -1205,10 +1207,11 @@ End Function
 
 
 '=== helper functions end ===
+
 '}}}
 
 'code
-'  name;BaumMain
+'   name;BaumMain
 '{{{
 Option Explicit
 
@@ -1222,6 +1225,11 @@ Option Explicit
 Private Helper As ToolBarV2
 'Public Helper As ToolBarV2
 ' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3ValidateCharZenkaku"
+End Function
 
 Friend Function GetHelper() As ToolBarV2
     Set GetHelper = Helper
@@ -1264,7 +1272,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(Me.CodeName)
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
@@ -1326,10 +1334,11 @@ End Sub
 
 
 '=== constructor / destructor end ===
+
 '}}}
 
 'module
-'  name;ValidateCharZenkaku
+'   name;ValidateCharZenkaku
 '{{{
 Option Explicit
 
@@ -1447,7 +1456,7 @@ Private Function RegZenkakuAlphaNum() As RegExp
     R.Global = True
     R.IgnoreCase = False
     R.MultiLine = True
-    R.Pattern = "[！-～]+"
+    R.Pattern = "[！-～￥]+"
     Set RegZenkakuAlphaNum = R
 End Function
 
@@ -1460,10 +1469,11 @@ Private Function RegSpaces() As RegExp
     R.Pattern = " +"
     Set RegSpaces = R
 End Function
+
 '}}}
 
 'code
-'  name;ThisWorkbook
+'   name;ThisWorkbook
 '{{{
 Option Explicit
 
@@ -1474,7 +1484,9 @@ End Sub
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
     BaumMain.BarTerminate
 End Sub
+
 '}}}
 
+'ssf-end
 
 }}}
