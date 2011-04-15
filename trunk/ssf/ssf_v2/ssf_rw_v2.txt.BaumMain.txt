@@ -88,6 +88,9 @@ End Sub
 Public Sub Menu_module(oAC As Object)
 End Sub
 
+Public Sub Menu_verbose(oAC As Object)
+End Sub
+
 Public Sub Menu_about(oAC As Object)
     If ThisWorkbook.IsAddin Then
         Dim Wb As Workbook

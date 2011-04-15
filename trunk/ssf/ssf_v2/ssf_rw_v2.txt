@@ -12,7 +12,7 @@
 '   name;ssf_rw_v2/BaumMain
 
 'cells-formula
-'  address;A1:O26
+'  address;A1:O27
 '         ;名称
 '         ;ssf_rw_v2
 '         ;
@@ -134,7 +134,7 @@
 '         ;
 '         ;
 '         ;更新
-'         ;40648.2916666667
+'         ;40648.4166666667
 '         ;
 '         ;
 '         ;
@@ -343,21 +343,6 @@
 '         ;iso-2022-jp
 '         ;unicode
 '         ;ascii
-'         ;混在
-'         ;SSF宣言行より前の情報を取り込まない。
-'         ;enable_magicword
-'         ;
-'         ;1
-'         ;2
-'         ;
-'         ;1
-'         ;F3SsfRwV2.BaumMain.OnButtonToggle
-'         ;
-'         ;
-'         ;
-'         ;
-'         ;
-'         ;
 '         ;対象
 '         ;SSF書き出しの対象を指定する。
 '         ;target
@@ -365,7 +350,7 @@
 '         ;3
 '         ;
 '         ;
-'         ;
+'         ;1
 '         ;
 '         ;ブック
 '         ;シート
@@ -388,6 +373,36 @@
 '         ;
 '         ;
 '         ;
+'         ;混在
+'         ;SSF宣言行より前の情報を取り込まない。
+'         ;enable_magicword
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;
+'         ;F3SsfRwV2.BaumMain.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ログ
+'         ;メモ帳にログを出力する。
+'         ;verbose
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;F3SsfRwV2.BaumMain.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
 '         ;=R1C2 & " について"
 '         ;このシートを表示する。
 '         ;about
@@ -405,7 +420,7 @@
 '         ;
 
 'cells-numberformat
-'  address;A1:O26
+'  address;A1:O27
 '         ;General
 '         ;General
 '         ;General
@@ -528,6 +543,21 @@
 '         ;General
 '         ;General
 '         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
 '         ;General
 '         ;General
 '         ;General

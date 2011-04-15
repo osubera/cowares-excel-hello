@@ -132,7 +132,8 @@ End Function
 
 ' get a ProcessID from hWnd
 Public Function GetWindowProcessId(hWnd As Long) As Long
-    Dim ProcID As Long, ThreadID As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
     ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
     GetWindowProcessId = ProcID
 End Function
