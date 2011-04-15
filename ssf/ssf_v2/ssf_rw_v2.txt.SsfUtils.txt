@@ -26,9 +26,14 @@ Public Function CreateDefaultEnv() As GlobalResources
     'Env.SetEnv "ssf", "enable-module", "false"
     'Env.SetEnv "ssf", "enable-module", "every"
     
+    Env.SetEnv "ssf", "copy-of", "COPY_ooop_"
+    Env.SetEnv "ssf", "safe-module", "false"
+    'Env.SetEnv "ssf", "safe-module", "true"
+    
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
     Set Env.Current("worksheet") = ActiveSheet
+    Set Env.Current("module") = Nothing
     
     Set CreateDefaultEnv = Env
 End Function
@@ -139,6 +144,33 @@ Public Function ExtractKeyValue(KeyValue As Variant, ByRef Key As String, ByRef 
     Key = KeyValue(0)
     Value = KeyValue(1)
     ExtractKeyValue = Key
+End Function
+
+Public Function DivideName(Line As Variant, ByRef Name As String, ByRef CodeName As String, _
+        Optional ByVal DefaultCodeName As String = "") As String
+    Dim x As Variant
+    x = DivideLine(Line, "/", 2)
+    Name = x(0)
+    If DefaultCodeName = "" Then DefaultCodeName = Name
+    CodeName = IIf(x(1) = "", DefaultCodeName, x(1))
+    DivideName = Name
+End Function
+
+Public Function DivideLine(Line As Variant, Delimiter As String, Number As Long) As Variant
+    Dim x As Variant
+    Dim y() As Variant
+    Dim i As Long
+    
+    x = Split(Line, Delimiter, Number)
+    If UBound(x) = Number - 1 Then
+        DivideLine = x
+    Else
+        ReDim y(0 To Number - 1)
+        For i = 0 To UBound(x)
+            y(i) = x(i)
+        Next
+        DivideLine = y
+    End If
 End Function
 
 '}}}

@@ -5,6 +5,20 @@ Option Explicit
 
 Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
+    Case "cells-formula"
+        SsfBlockCells.CellsFormulaReadFrom Block, Env
+    Case "cells-name"
+        SsfBlockWorkbook.CellsNameReadFrom Block, Env
+    Case "cells-numberformat"
+        SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "module", "class", "code"
+        SsfBlockModules.ReadFrom Block, Env, BlockName
+    Case "require"
+        SsfBlockModules.ProjectRequiresReadFrom Block, Env
+    Case "workbook"
+        SsfBlockWorkbook.ReadFrom Block, Env
+    Case "worksheet"
+        SsfBlockWorksheet.ReadFrom Block, Env
     Case "columns-width"
         SsfBlockColumnsWidth.ReadFrom Block, Env
     End Select

@@ -3,6 +3,71 @@
 '{{{
 Option Explicit
 
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources, _
+        Optional ByVal BlockName As String = "module")
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Source As String
+    
+    If Not ShallDumpModule(Env.Current("workbook"), Env) Then Exit Sub
+    
+    Env.LogWrite BlockName
+    Source = ""
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchModule Value, Env, BlockName
+        Case ""
+            Source = Source & Value
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite BlockName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+    
+    If Source <> "" And Not Env.Current("module") Is Nothing Then
+        With Env.Current("module").CodeModule
+            .DeleteLines 1, .CountOfLines
+            .InsertLines 1, Source
+        End With
+    End If
+End Sub
+
+Public Sub ProjectRequiresReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "require"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Project As VBProject
+    Dim GuidMajorMinorDescription As Variant
+    
+    If Not ShallDumpModule(Env.Current("workbook"), Env) Then Exit Sub
+    
+    Env.LogWrite LocalKey
+    Set Project = Env.Current("workbook").VBProject
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case ""
+            GuidMajorMinorDescription = DivideLine(Value, " ", 4)
+            Env.LogWrite GuidMajorMinorDescription(3)
+            Project.References.AddFromGuid GuidMajorMinorDescription(0), GuidMajorMinorDescription(1), GuidMajorMinorDescription(2)
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim Module As VBComponent
     Dim BookModule As VBComponent
@@ -134,6 +199,8 @@ Public Function IsLockedProject(Target As Object) As Boolean
         Set P = Target
     Case "Workbook"
         Set P = Target.VBProject
+    Case "Worksheet"
+        Set P = Target.Parent.VBProject
     Case Else
         IsLockedProject = True
         Exit Function
@@ -143,7 +210,7 @@ Public Function IsLockedProject(Target As Object) As Boolean
     Set P = Nothing
 End Function
 
-Public Function ShallDumpModule(Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModule(ByVal Target As Object, Env As GlobalResources) As Boolean
     On Error Resume Next
     Dim out As Variant
     
@@ -162,7 +229,7 @@ Public Function ShallDumpModule(Target As Object, Env As GlobalResources) As Boo
     ShallDumpModule = out
 End Function
 
-Public Function ShallDumpModuleEach(Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModuleEach(ByVal Target As Object, Env As GlobalResources) As Boolean
     Dim out As Boolean
     
     out = (LCase(Env.GetEnv("ssf", "enable-module", "true")) = "every")
@@ -200,6 +267,27 @@ Public Function VbaModuleTypeToSsfBlockName(Target As Object) As String
     VbaModuleTypeToSsfBlockName = ModuleType
 End Function
 
+Public Function SsfBlockNameToVbaModuleType(BlockName As String) As Long
+    Dim out As Long
+    
+    Select Case BlockName
+    Case "activex"
+        out = vbext_ct_ActiveXDesigner  ' not defined in ssf
+    Case "form"
+        out = vbext_ct_MSForm           ' not for Excel 2000 form?
+    Case "code"
+        out = vbext_ct_Document
+    Case "class"
+        out = vbext_ct_ClassModule
+    Case "module"
+        out = vbext_ct_StdModule
+    Case Else
+        out = vbext_ct_StdModule        ' default is module
+    End Select
+    
+    SsfBlockNameToVbaModuleType = out
+End Function
+
 Public Function VbaModuleCodeName(Target As Object) As String
     If TypeName(Target) = "CodeModule" Then
         VbaModuleCodeName = Target.Parent.Name
@@ -207,6 +295,72 @@ Public Function VbaModuleCodeName(Target As Object) As String
         VbaModuleCodeName = Target.Name
     End If
 End Function
+
+Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As String)
+    ' 1. add a new component unless names are given
+    ' 2. search existing component for the given name
+    ' 3. make a copy if "safe-module" is "true"
+    ' 4. add a new component if above 2nd fails
+    ' 5. do not add sheets and thisworkbook
+    
+    Dim Project As VBProject
+    Dim Comp As VBComponent
+    Dim NewName As String
+    Dim NewType As vbext_ComponentType
+    Dim ComponentType As vbext_ComponentType
+    Dim ModuleFound As Boolean
+    
+    ComponentType = SsfBlockNameToVbaModuleType(BlockName)
+    Env.LogWrite "component type " & ComponentType
+    
+    Set Project = Env.Current("workbook").VBProject
+    ModuleFound = False
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If Name = "" Then GoTo AddNew
+    
+    ' rule#2 search
+    Set Comp = Project.VBComponents(Name)
+    ModuleFound = True
+    Env.LogWrite Name & " found"
+    If Comp.Type <> ComponentType Then GoTo AddNew
+    
+    ' rule#3 safe
+    If CBool(Env.GetEnv("ssf", "safe-module", "false")) Then GoTo AddNew
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number <> 0 Then
+        Env.LogWrite Name & " " & Err.Number & " " & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    ' rule#5 add modules instead of documents
+    NewName = Env.GetEnv("ssf", "copy-of", "COPY_ooop_") & Name
+    Select Case BlockName
+    Case "module", "class"
+        NewType = ComponentType
+        If Not ModuleFound Then NewName = Name
+    Case Else
+        NewType = SsfBlockNameToVbaModuleType("module")
+    End Select
+    
+    Set Comp = Project.VBComponents.Add(NewType)
+    If NewName <> "" Then Comp.Name = NewName
+    If Comp Is Nothing Then
+        Env.LogWrite "failed to switch " & Name & " " & Err.Number & " " & Err.Description
+        Exit Sub
+    End If
+    Env.LogWrite "add " & NewName & " type " & VbaModuleTypeToSsfBlockName(Comp)
+    
+Done:
+    Set Env.Current("module") = Comp
+End Sub
 
 '}}}
 

@@ -5,6 +5,27 @@ Option Explicit
 
 Const MyKey = "worksheet"
 
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchWorksheet Value, Env
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim Names As String
     
@@ -31,6 +52,62 @@ Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalRes
             SsfBlockCells.WriteTo Target.UsedRange, Stream, Env
         End If
     End If
+End Sub
+
+Private Sub SwitchWorksheet(Names As String, Env As GlobalResources)
+    ' 1. add a new sheet unless names are given
+    ' 2. search existing sheet by the given name, not by codename
+    ' 3. add a new sheet if above 2nd fails
+    ' 4. modify the codename when it is different from the given codename
+    ' 5. an existing code sheet will be overwritten if above 4th fails
+    ' 6. fail safe
+    
+    Dim Name As String
+    Dim CodeName As String
+    Dim Book As Workbook
+    Dim Ws As Worksheet
+    Dim Comp As VBComponent
+    
+    Env.LogWrite "worksheet " & Names
+    
+    Set Book = Env.Current("workbook")
+    Set Ws = Nothing
+    
+    On Error Resume Next
+    
+    ' rule#1 no names
+    If SsfUtils.DivideName(Names, Name, CodeName) <> "" Then
+        ' rule#2 search
+        Set Ws = Book.Worksheets(Name)
+        If Err.Number = 0 Then Env.LogWrite Name & " exists. recycles"
+    End If
+    If Err.Number <> 0 Then Env.LogWrite Names & " " & Err.Number & " " & Err.Description
+    Err.Clear
+    
+    ' rule#1 #3 add
+    If Ws Is Nothing Then Set Ws = Book.Worksheets.Add
+    If Ws.Name <> Name Then Ws.Name = Name
+    
+    ' rule#4 rename
+    If Ws.CodeName <> CodeName Then
+        If SsfBlockModules.CanReallyTouchVBProject(Ws) Then
+            Book.VBProject.VBComponents(Ws.CodeName).Name = CodeName
+            If Err.Number <> 0 Then
+                ' rule#5 alarm
+                Env.LogWrite CodeName & " conflicts with existing codename"
+                Env.LogWrite Names & " " & Err.Number & " " & Err.Description
+                Err.Clear
+            End If
+        End If
+    End If
+    
+    ' rule #6 safe
+    If Ws Is Nothing Then
+        Env.LogWrite "failed to switch " & Names & " " & Err.Number & " " & Err.Description
+        Exit Sub
+    End If
+    
+    Set Env.Current("worksheet") = Ws
 End Sub
 
 '}}}
