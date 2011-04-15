@@ -1,0 +1,90 @@
+﻿'module
+'   name;SsfWriter
+'{{{
+Option Explicit
+
+Private Env As GlobalResources
+
+Public Function InitializeEnv()
+    Set Env = SsfUtils.CreateDefaultEnv
+    Set InitializeEnv = Env
+End Function
+
+Public Sub TerminateEnv()
+    Set Env = Nothing
+End Sub
+
+Public Sub WriteSsf(Stream)
+    If Env Is Nothing Then InitializeEnv
+    
+    With Stream
+        If .OpenWrite Then
+            .WriteLine SsfBegin
+            SsfAction.WriteTo Stream, Env
+            .WriteLine SsfEnd
+            .CloseWrite
+        End If
+    End With
+    
+    TerminateEnv
+End Sub
+
+Private Function LineBegin()
+    LineBegin = Env.GetEnv("ssf", "line-begin", "'")
+End Function
+
+Private Function LineEnd()
+    LineEnd = Env.GetEnv("ssf", "line-end", vbCrLf)
+End Function
+
+Private Function EscapeBegin()
+    EscapeBegin = LineBegin & Env.GetEnv("ssf", "escape-begin", "{{{")
+End Function
+
+Private Function EscapeEnd()
+    EscapeEnd = LineBegin & Env.GetEnv("ssf", "escape-end", "}}}")
+End Function
+
+Private Function EscapeNotBegin()
+    EscapeNotBegin = LineBegin & "#" & Env.GetEnv("ssf", "escape-begin", "{{{")
+End Function
+
+Private Function EscapeNotEnd()
+    EscapeNotEnd = LineBegin & "#" & Env.GetEnv("ssf", "escape-end", "}}}")
+End Function
+
+Private Function ValueDelimiter()
+    ValueDelimiter = Env.GetEnv("ssf", "value-delimiter", ";")
+End Function
+
+Private Function SsfBegin()
+    SsfBegin = LineBegin & Env.GetEnv("ssf", "magic-begin", "ssf-begin") & LineEnd
+End Function
+
+Private Function SsfEnd()
+    SsfEnd = LineBegin & Env.GetEnv("ssf", "magic-end", "ssf-end") & LineEnd
+End Function
+
+Public Function SsfBlockBegin(SsfKey)
+    SsfBlockBegin = LineBegin & SsfUtils.InsertSpaces(7&) & SsfKey
+End Function
+
+Public Function SsfBlockEnd()
+    ' just returns a blank, expects the Stream.WriteLine is used
+    'SsfBlockEnd = LineEnd
+    SsfBlockEnd = ""
+End Function
+
+Public Function MakeSsfLine(Key, Value) As String
+    MakeSsfLine = LineBegin & SsfUtils.InsertSpaces(Key) & ValueDelimiter & Value
+End Function
+
+Public Function MakeSsfLineEscaped(ByVal Value)
+    ' must disable escaping signs in the value itself
+    Value = Replace(Value, LineEnd & EscapeBegin & LineEnd, LineEnd & EscapeNotBegin & LineEnd)
+    Value = Replace(Value, LineEnd & EscapeEnd & LineEnd, LineEnd & EscapeNotEnd & LineEnd)
+    MakeSsfLineEscaped = EscapeBegin & LineEnd & Value & LineEnd & EscapeEnd
+End Function
+
+'}}}
+

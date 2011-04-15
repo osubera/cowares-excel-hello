@@ -1,0 +1,53 @@
+﻿'class
+'   name;StreamParser
+'{{{
+Option Explicit
+
+Public Text
+Public Stream
+
+Public Property Get EOS()
+    EOS = Stream.EOS
+End Property
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = EOS And (Text = "")
+End Property
+
+Public Function MoreText()
+    If EOS Then Exit Function
+    
+    Const BuffSize = 8192
+    Dim out
+    out = Stream.ReadText(BuffSize)
+    Text = Text & out
+    MoreText = out
+End Function
+
+Public Function FindString(StartAt, Search, CompareMethod)
+    Dim out, more, at, Require
+    
+    Require = StartAt + Len(Search) - 1
+    Do While Len(Text) < Require
+        more = MoreText
+        If more = "" Then Exit Do
+    Loop
+    
+    out = InStr(StartAt, Text, Search, CompareMethod)
+    Do While out = 0
+        at = Len(Text) - Len(Search) + 2
+        more = MoreText
+        If more = "" Then Exit Do
+        
+        out = InStr(at, Text, Search, CompareMethod)
+    Loop
+    
+    FindString = out
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+End Sub
+
+'}}}
+

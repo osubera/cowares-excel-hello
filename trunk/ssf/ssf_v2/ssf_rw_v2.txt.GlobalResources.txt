@@ -1,0 +1,111 @@
+﻿'class
+'   name;GlobalResources
+'{{{
+Option Explicit
+
+Public Env, Log, Ssf, Current, Block
+Private Logger
+
+Public Sub LogWrite(Text)
+    Logger.WriteLine Text
+    'Debug.Print Text
+End Sub
+
+Public Function LogRead()
+    LogRead = Logger.Text
+End Function
+
+Public Function PopEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            PopEnv = Env(BlockName)(Key)
+            Env(BlockName).Remove Key
+        Else
+            PopEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Function GetEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            GetEnv = Env(BlockName)(Key)
+        Else
+            GetEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Sub SetEnv(BlockName, Key, Value)
+    If Env.Exists(BlockName) Then
+        If Key = "clear" Then
+            Env(BlockName).RemoveAll
+        Else
+            Env(BlockName)(Key) = Value
+        End If
+    Else
+        'LogWrite "SetEnv: Unknown Block: " & BlockName & ", " & Key & ", " & Value
+    End If
+    'LogWrite "SetEnv: " & BlockName & ", " & Key & ", " & Value
+End Sub
+
+Public Function GetArray(BlockName)
+    Dim Key, Count, out()
+    
+    GetArray = Array()
+    
+    If Env.Exists(BlockName) Then
+        Count = Env(BlockName).Count
+        If Count > 0 Then
+            ReDim out(Count - 1)
+            For Key = 1 To Count
+                out(Key - 1) = Env(BlockName)(Key)
+                Env(BlockName).Remove Key
+            Next
+            GetArray = out
+        End If
+    End If
+End Function
+
+Public Sub AddArray(BlockName, Value)
+    Dim Key
+    
+    If Env.Exists(BlockName) Then
+        Key = Env(BlockName).Count + 1
+        Env(BlockName)(Key) = Value
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Dim x
+    Const TextCompare = 1
+    
+    Set Logger = New StringStream
+    Set Env = CreateObject("Scripting.Dictionary")
+    Set Log = CreateObject("Scripting.Dictionary")
+    Set Ssf = CreateObject("Scripting.Dictionary")
+    Set Current = CreateObject("Scripting.Dictionary")
+    Set Block = CreateObject("Scripting.Dictionary")
+    
+    Set Env("log") = Log
+    Set Env("ssf") = Ssf
+    Set Env("current") = Current
+    Set Env("block") = Block
+    
+    For Each x In Env.Items
+        x.CompareMode = TextCompare
+    Next
+End Sub
+
+Private Sub Class_Terminate()
+    Env.RemoveAll
+    Set Block = Nothing
+    Set Current = Nothing
+    Set Ssf = Nothing
+    Set Log = Nothing
+    Set Env = Nothing
+    Set Logger = Nothing
+End Sub
+
+'}}}
+

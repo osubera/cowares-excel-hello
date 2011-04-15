@@ -1,0 +1,58 @@
+﻿'module
+'   name;SsfUtilsExcel
+'{{{
+Option Explicit
+
+Private BookTool As SsfUtilsExcelBook
+
+Public Function OpenBookTool() As SsfUtilsExcelBook
+    If BookTool Is Nothing Then Set BookTool = New SsfUtilsExcelBook
+    Set OpenBookTool = BookTool
+End Function
+
+Public Function CloseBookTool() As Object
+    If Not BookTool Is Nothing Then Set BookTool = Nothing
+    Set CloseBookTool = Nothing
+End Function
+
+Public Function ExcelAddressToRange(Ws As Worksheet, ByVal A1orR1C1 As String, _
+        Optional FailSafe As Object = Nothing) As Range
+    Dim TryR1C1 As String
+    
+    On Error Resume Next
+    Set ExcelAddressToRange = Ws.Range(A1orR1C1)
+    If Err.Number = 0 Then Exit Function
+    Err.Clear
+    
+    TryR1C1 = OpenBookTool.R1C1ToA1(A1orR1C1)
+    If TryR1C1 <> A1orR1C1 Then
+        Set ExcelAddressToRange = Ws.Range(TryR1C1)
+        If Err.Number = 0 Then Exit Function
+        Err.Clear
+    End If
+    
+    Set ExcelAddressToRange = FailSafe
+End Function
+
+Public Function ExcelRangeToAddress(Ra As Range) As String
+    ExcelRangeToAddress = Ra.Address(False, False, xlA1, False)
+End Function
+
+Public Function ExcelCalculateColumnWidth(ByVal Size As Double, Optional ByVal Unit As String = "zero") As Double
+    Const DefaultSize = 8.38    ' StandardWidth
+    
+    Dim out As Double
+    out = DefaultSize
+    
+    If Size > 0 Then
+        Select Case LCase(Unit)
+        Case "zero"
+            out = Size
+        End Select
+    End If
+    
+    ExcelCalculateColumnWidth = out
+End Function
+
+'}}}
+

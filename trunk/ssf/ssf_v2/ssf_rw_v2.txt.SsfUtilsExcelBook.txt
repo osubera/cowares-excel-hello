@@ -1,0 +1,82 @@
+﻿'class
+'   name;SsfUtilsExcelBook
+'{{{
+Option Explicit
+
+Public TestBook As Workbook
+Public TestSheet As Worksheet
+Public TestCell As Range
+Public Logger As Object
+
+Private PushedWindow As Window
+
+Private Sub Class_Initialize()
+    PushActiveWindow
+    
+    Set TestBook = Application.Workbooks.Add
+    TestBook.Windows(1).Visible = False
+    Set TestSheet = TestBook.Worksheets(1)
+    Set TestCell = TestSheet.Range("A1")
+    
+    PopActiveWindow
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    PushActiveWindow
+    
+    TestBook.Close False
+    Set TestBook = Nothing
+    Set TestSheet = Nothing
+    Set TestCell = Nothing
+    
+    PopActiveWindow
+End Sub
+
+Private Sub MyLogger(Text As String)
+    If Logger Is Nothing Then
+        Debug.Print Text
+    Else
+        Logger.WriteText Text
+    End If
+End Sub
+
+Public Sub PushActiveWindow()
+    Set PushedWindow = ActiveWindow
+End Sub
+
+Public Sub PopActiveWindow()
+    If PushedWindow Is Nothing Then Exit Sub
+    PushedWindow.Activate
+End Sub
+
+Public Function IsValidAddress(ByVal Address As String) As Boolean
+    On Error Resume Next
+    Dim Dummy As Long
+    Dummy = TestSheet.Range(Address).Row
+    IsValidAddress = (Err.Number = 0)
+End Function
+
+Public Function R1C1ToA1(ByVal R1C1 As String) As String
+    On Error Resume Next
+    
+    Dim A1 As String
+    A1 = R1C1   ' on failed
+    
+    With TestCell
+        .FormulaR1C1 = "=COUNTBLANK(" & R1C1 & ")"
+        If Err.Number <> 0 Then
+            MyLogger "ExcelAddressR1C1ToA1: Error " & Err.Number & " " & Err.Description & ": " & R1C1
+        ElseIf IsError(.Value) Then
+            MyLogger "ExcelAddressR1C1ToA1: Error : invalid address " & R1C1
+        Else
+            A1 = .DirectPrecedents.Address(False, False, xlA1, False)
+        End If
+        .Clear
+    End With
+    
+    R1C1ToA1 = A1
+End Function
+
+'}}}
+

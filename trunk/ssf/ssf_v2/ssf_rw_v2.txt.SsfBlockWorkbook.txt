@@ -1,0 +1,60 @@
+﻿'module
+'   name;SsfBlockWorkbook
+'{{{
+Option Explicit
+
+Const MyKey = "workbook"
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Names As String
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    Names = Target.Name
+    If SsfBlockModules.CanTouchVBProject Then
+        Names = Names & "/" & Target.VBProject.Name
+    End If
+    Env.LogWrite Names
+    Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+    ChildrenWriteTo Target, Stream, Env
+End Sub
+
+Public Sub CellsNameWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-name"
+    
+    Dim CellNames As Names
+    Dim CellName As Name
+    
+    Set CellNames = Target.Names
+    If CellNames.Count = 0 Then Exit Sub
+    
+    ' simple list, 2 lines for a single (address, name) pair
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    For Each CellName In CellNames
+        Stream.WriteLine SsfWriter.MakeSsfLine("", CellName.RefersToR1C1)
+        Stream.WriteLine SsfWriter.MakeSsfLine("", CellName.Name)
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
+    Dim Ws As Worksheet
+    
+    SsfBlockModules.ProjectRequiresWriteTo Target.VBProject, Stream, Env
+    For Each Ws In Target.Worksheets
+        SsfBlockWorksheet.WriteTo Ws, Stream, Env
+    Next
+    CellsNameWriteTo Target, Stream, Env
+    ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
+    SsfBlockModules.WriteTo Target.VBProject, Stream, Env
+End Sub
+
+'}}}
+
