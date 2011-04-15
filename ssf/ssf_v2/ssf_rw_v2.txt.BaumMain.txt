@@ -30,7 +30,7 @@ End Function
 Public Sub BarMain(Optional oWho As Object = Nothing)
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
     Else
         Helper.BarMain Me
     End If
@@ -39,7 +39,7 @@ End Sub
 Public Sub OnButtonToggle()
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
     Else
         Helper.OnButtonToggle
     End If
