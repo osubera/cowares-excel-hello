@@ -76,7 +76,7 @@ Private Sub CommonReader(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     SsfReader.ReadSsf Stream
     
-    Debug.Print Env.LogRead
+    ShowLog Env
     Set Env = Nothing
 End Sub
 
@@ -88,11 +88,33 @@ Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     SsfWriter.WriteSsf Stream
     
-    Debug.Print Env.LogRead
+    ShowLog Env
     Set Env = Nothing
 End Sub
 
+Private Sub ShowLog(Env As GlobalResources)
+    On Error GoTo NOP
+    Dim Stream As StringStreamNotepad
+    
+    Debug.Print Env.LogRead
+    
+    If CBool(Env.GetEnv("ssf", "verbose", "false")) Then
+        Set Stream = New StringStreamNotepad
+        With Stream
+            .NameNotepad = "Log " & Time()
+            If .OpenWrite Then
+                .WriteText Env.LogRead
+                .CloseWrite
+            End If
+        End With
+        Set Stream = Nothing
+    End If
+    Exit Sub
+NOP:
+End Sub
+
 Private Sub SetTarget(oAC As Object, Helper As ToolBarV2, Env As GlobalResources)
+    Env.SetEnv "ssf", "verbose", CStr(Helper.GetControlState("verbose"))
     Env.SetEnv "ssf", "enable-magic-word", CStr(Helper.GetControlState("enable_magicword"))
     
     Select Case Helper.GetButton("target").ListIndex

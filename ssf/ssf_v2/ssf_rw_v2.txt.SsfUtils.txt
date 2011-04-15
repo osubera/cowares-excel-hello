@@ -18,6 +18,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "escape-end", "}}}"
     Env.SetEnv "ssf", "value-delimiter", ";"
     
+    Env.SetEnv "ssf", "verbose", "false"
+    'Env.SetEnv "ssf", "verbose", "true"
     Env.SetEnv "ssf", "enable-magic-word", "false"
     'Env.SetEnv "ssf", "enable-magic-word", "true"
     Env.SetEnv "ssf", "enable-module", "true"
