@@ -196,7 +196,7 @@ Private Function Dequeue(Size)
 End Function
 
 Private Function IsEmpty()
-    IsEmpty = (Text = "")
+    IsEmpty = ((Text = "") And FileStream.EOS)
 End Function
 
 '}}}
