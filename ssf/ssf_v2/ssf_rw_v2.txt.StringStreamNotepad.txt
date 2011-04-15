@@ -1,0 +1,115 @@
+﻿'class
+'   name;StringStreamNotepad
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public hWndNotepad As Long
+Public NameNotepad As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    If hWndNotepad = 0 Then Exit Sub
+    WriteNotepad hWndNotepad, Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue ReadNotepad(hWndNotepad)
+    OpenRead = (hWndNotepad <> 0)
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    hWndNotepad = OpenNotepad(1, NameNotepad)
+    OpenWrite = (hWndNotepad <> 0)
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = New StringStreamNotepad
+    With OpenSpawn
+        .LineFeed = LineFeed
+        .NameNotepad = SpawnName
+        If Not .OpenWrite Then Set OpenSpawn = Nothing
+    End With
+End Function
+
+Public Function CloseSpawn()
+    CloseWrite
+    If ReadNotepadLength(hWndNotepad) = 0 Then CloseNotepad (hWndNotepad)
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    hWndNotepad = 0
+    NameNotepad = ""
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+

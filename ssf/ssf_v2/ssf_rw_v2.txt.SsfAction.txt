@@ -1,0 +1,32 @@
+﻿'module
+'   name;SsfAction
+'{{{
+Option Explicit
+
+Public Sub ReadFrom(BlockName, Block, Env)
+    Select Case BlockName
+    Case "columns-width"
+        SsfBlockColumnsWidth.ReadFrom Block, Env
+    End Select
+End Sub
+
+Public Sub WriteTo(Stream, Env)
+    Dim Target As Object
+    
+    Set Target = Env.Current("target")
+    Select Case TypeName(Target)
+    Case "Workbook"
+        SsfBlockWorkbook.WriteTo Target, Stream, Env
+    Case "Worksheet"
+        SsfBlockWorksheet.WriteTo Target, Stream, Env
+    Case "Range"
+        SsfBlockCells.WriteTo Target, Stream, Env
+    Case "VBProject"
+        SsfBlockModules.WriteTo Target, Stream, Env
+    Case Else
+        Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
+    End Select
+End Sub
+
+'}}}
+

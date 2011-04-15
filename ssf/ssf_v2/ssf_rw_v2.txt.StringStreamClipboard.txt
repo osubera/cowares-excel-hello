@@ -1,0 +1,125 @@
+﻿'class
+'   name;StringStreamClipboard
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    CopyToClipboard Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue CopyFromClipboard
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+' get text from clipboard
+Private Function CopyFromClipboard() As String
+    Const CFText As Long = 1
+    Dim Data As String
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.GetFromClipboard
+    If Clip.GetFormat(CFText) Then
+        Data = Clip.GetText()
+    Else
+        Data = ""
+    End If
+    CopyFromClipboard = Data
+End Function
+ 
+' put text into clipboard
+Private Sub CopyToClipboard(Data As String)
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Data
+    Clip.PutInClipboard
+End Sub
+
+'}}}
+

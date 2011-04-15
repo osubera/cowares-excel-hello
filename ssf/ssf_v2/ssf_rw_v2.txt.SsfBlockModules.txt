@@ -1,0 +1,212 @@
+﻿'module
+'   name;SsfBlockModules
+'{{{
+Option Explicit
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Module As VBComponent
+    Dim BookModule As VBComponent
+    
+    If Not ShallDumpModule(Target, Env) Then Exit Sub
+    
+    If ShallDumpModuleEach(Target, Env) Then
+        WriteToEach Target, Stream, Env
+    Else
+        ' let ThisWorkbook go to the last
+        For Each Module In Target.VBComponents
+            If Module.Name = "ThisWorkbook" Then
+                Set BookModule = Module
+            Else
+                VbaCodeModuleWriteTo Module.CodeModule, Stream, Env
+            End If
+        Next
+        If Not BookModule Is Nothing Then
+            VbaCodeModuleWriteTo BookModule.CodeModule, Stream, Env
+        End If
+    End If
+End Sub
+
+Public Sub WriteToEach(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Module As VBComponent
+    Dim Spawned As Object
+    
+    For Each Module In Target.VBComponents
+        Set Spawned = Stream.OpenSpawn(Module.Name)
+        If Not Spawned Is Nothing Then
+            VbaCodeModuleWriteTo Module.CodeModule, Spawned, Env
+            Set Spawned = Spawned.CloseSpawn
+        End If
+    Next
+End Sub
+
+Public Sub VbaCodeModuleWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim LocalKey As String
+    Dim Names As String
+    Dim NumberOfLines As Long
+    Dim Source As String
+    
+    LocalKey = VbaModuleTypeToSsfBlockName(Target)
+    Names = VbaModuleCodeName(Target)
+    NumberOfLines = Target.CountOfLines
+    
+    If NumberOfLines > Target.CountOfDeclarationLines Then
+        ' avoid to print a blank code, that contains "Option Explicit" only
+        Env.LogWrite LocalKey
+        Env.LogWrite Names & " " & CStr(NumberOfLines)
+        Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+        Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+        
+        Source = Target.Lines(1, NumberOfLines)
+        ' need at least one linefeed on the end, and prefer just 1
+        Source = Chop(Source, vbCrLf) & vbCrLf
+        ' vba sources use vbCrLf
+        Source = LineFeedFromCrLf(Source, Env.GetEnv("ssf", "line-end", vbCrLf))
+        
+        Stream.WriteLine SsfWriter.MakeSsfLineEscaped(Source)
+        Stream.WriteLine SsfWriter.SsfBlockEnd
+    End If
+End Sub
+
+Public Sub ProjectRequiresWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "require"
+    
+    Dim NumberOfReferences As Long
+    Dim i As Long
+    
+    If Not CanReallyTouchVBProject(Target) Then Exit Sub
+    
+    NumberOfReferences = Target.References.Count
+    If NumberOfReferences = 0 Then Exit Sub
+    ' it doesn't work, because we have at least 4 references.
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    For i = 1 To NumberOfReferences
+        ' avoid to print 4 standard references
+        ' VBA (builtin), Excel (builtin), stdole and Office
+        With Target
+            If Not .References(i).BuiltIn Then
+                If LCase(.References(i).Name) <> "stdole" _
+                        And LCase(.References(i).Name) <> "office" Then
+                    ' machine needs Guid, Major and Minor.  human needs Description
+                    Stream.WriteLine SsfWriter.MakeSsfLine("", _
+                        .References(i).GUID & " " & _
+                        .References(i).Major & " " & _
+                        .References(i).Minor & " " & _
+                        .References(i).Description)
+                End If
+            End If
+        End With
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Public Function CanTouchVBProject() As Boolean
+    ' it doesn't check protection of each book.
+    ' it's purpose is to check the excel setting to trust vba accessing the vbprojet object.
+    On Error GoTo NoTouches
+    
+    Dim Dummy As Long
+    Dummy = ThisWorkbook.VBProject.Protection
+    CanTouchVBProject = True
+    Exit Function
+    
+NoTouches:
+    CanTouchVBProject = False
+End Function
+
+Public Function CanReallyTouchVBProject(Target As Object) As Boolean
+    Dim out As Boolean
+    
+    out = CanTouchVBProject
+    If out Then out = Not IsLockedProject(Target)
+    
+    CanReallyTouchVBProject = out
+End Function
+
+Public Function IsLockedProject(Target As Object) As Boolean
+    Dim P As VBProject
+    
+    Select Case TypeName(Target)
+    Case "VBProject"
+        Set P = Target
+    Case "Workbook"
+        Set P = Target.VBProject
+    Case Else
+        IsLockedProject = True
+        Exit Function
+    End Select
+    
+    IsLockedProject = (P.Protection = vbext_pp_locked)
+    Set P = Nothing
+End Function
+
+Public Function ShallDumpModule(Target As Object, Env As GlobalResources) As Boolean
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = Env.GetEnv("ssf", "enable-module", "true")
+    out = CBool(out)
+    If Err.Number <> 0 Then ' every or others
+        out = True
+        Err.Clear
+    End If
+    
+    If out Then
+        out = CanReallyTouchVBProject(Target)
+        If Not out Then Env.LogWrite "ShallDumpModule: module disabled by protection"
+    End If
+    
+    ShallDumpModule = out
+End Function
+
+Public Function ShallDumpModuleEach(Target As Object, Env As GlobalResources) As Boolean
+    Dim out As Boolean
+    
+    out = (LCase(Env.GetEnv("ssf", "enable-module", "true")) = "every")
+    If out Then out = CanReallyTouchVBProject(Target)
+    
+    ShallDumpModuleEach = out
+End Function
+
+Public Function VbaModuleTypeToSsfBlockName(Target As Object) As String
+    Dim ModuleType As String
+    Dim TargetModule As Object
+    
+    If TypeName(Target) = "CodeModule" Then
+        Set TargetModule = Target.Parent
+    Else
+        Set TargetModule = Target
+    End If
+    
+    Select Case TargetModule.Type
+    Case vbext_ct_StdModule
+        ModuleType = "module"   ' Module
+    Case vbext_ct_ClassModule
+        ModuleType = "class"    ' Class
+    Case vbext_ct_MSForm
+        ModuleType = "form"     ' not for Excel 2000
+    Case vbext_ct_ActiveXDesigner
+        ModuleType = "activex"
+    Case vbext_ct_Document
+        ModuleType = "code"     ' Excel Objects
+    Case Else
+        ModuleType = "unknown-type-" & TargetModule.Type
+    End Select
+    
+    Set TargetModule = Nothing
+    VbaModuleTypeToSsfBlockName = ModuleType
+End Function
+
+Public Function VbaModuleCodeName(Target As Object) As String
+    If TypeName(Target) = "CodeModule" Then
+        VbaModuleCodeName = Target.Parent.Name
+    Else
+        VbaModuleCodeName = Target.Name
+    End If
+End Function
+
+'}}}
+

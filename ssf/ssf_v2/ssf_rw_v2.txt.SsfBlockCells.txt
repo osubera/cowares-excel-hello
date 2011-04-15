@@ -1,0 +1,54 @@
+﻿'module
+'   name;SsfBlockCells
+'{{{
+Option Explicit
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    CellsFormulaWriteTo Target, Stream, Env
+    CellsNumberFormatWriteTo Target, Stream, Env
+End Sub
+
+Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-formula"
+    
+    Dim Ce As Range
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
+    ' simple list, each cell in each line
+    For Each Ce In Target
+        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.FormulaR1C1)
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-numberformat"
+    
+    Dim Ce As Range
+    Dim AllFormats As Variant
+    
+    AllFormats = Target.NumberFormat
+    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
+    If Not IsNull(AllFormats) Then
+        ' avoid this block when everything is "General"
+        If AllFormats = "General" Then Exit Sub
+    End If
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
+    ' simple list, each cell in each line
+    For Each Ce In Target
+        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.NumberFormat)
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+'}}}
+

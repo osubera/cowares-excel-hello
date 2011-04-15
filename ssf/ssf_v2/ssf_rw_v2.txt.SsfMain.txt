@@ -1,0 +1,131 @@
+﻿'module
+'   name;SsfMain
+'{{{
+Option Explicit
+
+Public Sub NotepadReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamNotepad
+    Dim hWnd As Long
+    
+    hWnd = GetWndFromButton(Helper.GetButton("hwnd"))
+    If hWnd = 0 Then Exit Sub
+    
+    Set Stream = New StringStreamNotepad
+    Stream.hWndNotepad = hWnd
+    
+    CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub NotepadWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamNotepad
+    Set Stream = New StringStreamNotepad
+    
+    CommonWriter oAC, Helper, Stream
+    SetWndToButton Helper.GetButton("hwnd"), Stream.hWndNotepad
+    Set Stream = Nothing
+End Sub
+
+Public Sub ClipboardReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamClipboard
+    Set Stream = New StringStreamClipboard
+    
+    CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub ClipboardWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamClipboard
+    Set Stream = New StringStreamClipboard
+    
+    CommonWriter oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub FileReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamFile
+    Set Stream = New StringStreamFile
+    Stream.Charset = Helper.GetControlText("charset")
+    Stream.FileName = SsfUtils.GetFileName("open")
+    
+    If Stream.FileName <> "" Then CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub FileWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamFile
+    Set Stream = New StringStreamFile
+    Stream.Charset = Helper.GetControlText("charset")
+    Stream.FileName = SsfUtils.GetFileName("save")
+    
+    If Stream.FileName <> "" Then CommonWriter oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub ConnectNotepad(oAC As Object, Helper As ToolBarV2)
+    Dim hWnd As Long
+    hWnd = Val(oAC.Parameter)
+    If Not DoNotepad.ShowNotepad(hWnd) Then SetWndToButton oAC, 0
+End Sub
+
+Private Sub CommonReader(oAC As Object, Helper As ToolBarV2, Stream As Object)
+    Dim Env As GlobalResources
+    
+    Set Env = SsfReader.InitializeEnv
+    SetTarget oAC, Helper, Env
+    
+    SsfReader.ReadSsf Stream
+    
+    Debug.Print Env.LogRead
+    Set Env = Nothing
+End Sub
+
+Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
+    Dim Env As GlobalResources
+    
+    Set Env = SsfWriter.InitializeEnv
+    SetTarget oAC, Helper, Env
+    
+    SsfWriter.WriteSsf Stream
+    
+    Debug.Print Env.LogRead
+    Set Env = Nothing
+End Sub
+
+Private Sub SetTarget(oAC As Object, Helper As ToolBarV2, Env As GlobalResources)
+    Env.SetEnv "ssf", "enable-magic-word", CStr(Helper.GetControlState("enable_magicword"))
+    
+    Select Case Helper.GetButton("target").ListIndex
+    Case 1  ' Workbook
+        Set Env.Current("target") = ActiveWorkbook
+    Case 2  ' Worksheet
+        Set Env.Current("target") = ActiveSheet
+    Case 3  ' Select Range
+        Set Env.Current("target") = Selection
+    Case 4  ' Modules
+        Set Env.Current("target") = ActiveWorkbook.VBProject
+    End Select
+    
+    Select Case Helper.GetButton("module").ListIndex
+    Case 1  ' with Modules
+        Env.SetEnv "ssf", "enable-module", "true"
+    Case 2  ' without Modules
+        Env.SetEnv "ssf", "enable-module", "false"
+    Case 3  ' every Module
+        Env.SetEnv "ssf", "enable-module", "every"
+    End Select
+End Sub
+
+Private Function GetWndFromButton(oAC As Object) As Long
+    Dim hWnd As Long
+    hWnd = CLng(oAC.Parameter)
+    GetWndFromButton = hWnd
+End Function
+
+Private Sub SetWndToButton(oAC As Object, hWnd As Long)
+    oAC.Caption = CStr(DoNotepad.GetWindowProcessId(hWnd))  ' ProcessID for human
+    oAC.Parameter = CStr(hWnd)                              ' hWnd for me
+End Sub
+
+'}}}
+

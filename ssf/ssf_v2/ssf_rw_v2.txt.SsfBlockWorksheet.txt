@@ -1,0 +1,37 @@
+﻿'module
+'   name;SsfBlockWorksheet
+'{{{
+Option Explicit
+
+Const MyKey = "worksheet"
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Names As String
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    Names = Target.Name
+    ' avoid to print the default codename
+    If Target.Name <> Target.CodeName Then
+        Names = Names & "/" & Target.CodeName
+    End If
+    Env.LogWrite Names
+    Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+    ChildrenWriteTo Target, Stream, Env
+End Sub
+
+Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
+    ' go into cells when this sheet is not protected and has cell values
+    If Not Target.ProtectContents Then
+        If (TypeName(Target.UsedRange.Value) <> "Empty") Then
+            SsfBlockCells.WriteTo Target.UsedRange, Stream, Env
+        End If
+    End If
+End Sub
+
+'}}}
+

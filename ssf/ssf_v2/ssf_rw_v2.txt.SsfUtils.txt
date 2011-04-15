@@ -1,0 +1,143 @@
+﻿'module
+'   name;SsfUtils
+'{{{
+Option Explicit
+
+Public Function CreateDefaultEnv() As GlobalResources
+    Dim Env As GlobalResources
+    
+    Set Env = New GlobalResources
+    
+    Env.SetEnv "ssf", "encoding", "utf-8"
+    
+    Env.SetEnv "ssf", "magic-begin", "ssf-begin"
+    Env.SetEnv "ssf", "magic-end", "ssf-end"
+    Env.SetEnv "ssf", "line-begin", "'"
+    Env.SetEnv "ssf", "line-end", vbCrLf
+    Env.SetEnv "ssf", "escape-begin", "{{{"
+    Env.SetEnv "ssf", "escape-end", "}}}"
+    Env.SetEnv "ssf", "value-delimiter", ";"
+    
+    Env.SetEnv "ssf", "enable-magic-word", "false"
+    'Env.SetEnv "ssf", "enable-magic-word", "true"
+    Env.SetEnv "ssf", "enable-module", "true"
+    'Env.SetEnv "ssf", "enable-module", "false"
+    'Env.SetEnv "ssf", "enable-module", "every"
+    
+    Set Env.Current("target") = ActiveWorkbook
+    Set Env.Current("workbook") = ActiveWorkbook
+    Set Env.Current("worksheet") = ActiveSheet
+    
+    Set CreateDefaultEnv = Env
+End Function
+
+Public Function GetFileName(Style As String) As String
+    GetFileName = GetFileNameDialog(Style)
+End Function
+
+Public Function GetFileNameDialog(Optional Style As String = "open") As Variant
+    Const FileFilter = "ssf text (*.txt;*.ssf),*.txt;*.ssf,all (*.*),*.*"
+    Const OpenTitle = "Read from SSF text file"
+    Const SaveTitle = "Write to SSF text file"
+    
+    Dim InitName As String
+    Dim Result As Variant
+    Dim out As Variant
+    
+    Select Case Style
+    Case "open"
+        Result = Application.GetOpenFilename(FileFilter:=FileFilter, Title:=OpenTitle)
+    Case "save"
+        InitName = FileNameCandidate(ActiveWorkbook)
+        Result = Application.GetSaveAsFilename(InitialFilename:=InitName, FileFilter:=FileFilter, Title:=SaveTitle)
+    Case "fixed"
+        Result = "C:\tmp\ssf.txt"
+    End Select
+    
+    If IsArray(Result) Then
+        out = Result
+    ElseIf TypeName(Result) = "Boolean" Then
+        out = Empty
+    Else
+        out = CStr(Result)
+    End If
+    
+    GetFileNameDialog = out
+End Function
+
+Public Function FileNameCandidate(Target As Object) As String
+    Const SsfExt = ".txt"
+    Dim out As String
+    Dim dot As Long
+    
+    Select Case TypeName(Target)
+    Case "Workbook"
+        out = Target.Name
+        dot = InStrRev(out, ".")
+        If dot > 1 Then out = Left(out, dot - 1)
+        out = out & SsfExt
+    Case Else
+        out = TypeName(Target) & SsfExt
+    End Select
+    
+    FileNameCandidate = out
+End Function
+
+Public Function InsertSpaces(Name As Variant) As String
+    Static RememberLength As Long
+    Dim Length As Long
+    
+    If TypeName(Name) = "Long" Then
+        InsertSpaces = ""
+        RememberLength = Name
+    Else
+        Length = Len(CStr(Name))
+        If RememberLength <= Length Then RememberLength = Length + 2
+        InsertSpaces = Space(RememberLength - Length) & Name
+    End If
+End Function
+
+Public Function Chop(ByVal Text As String, ByVal LineFeed As String) As String
+    Dim LineFeedLength
+    
+    LineFeedLength = Len(LineFeed)
+    
+    Do While Right(Text, LineFeedLength) = LineFeed
+        Text = Left(Text, Len(Text) - LineFeedLength)
+    Loop
+    
+    Chop = Text
+End Function
+
+Public Function LineFeedToLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbLf
+    If LineFeed <> Lf Then Text = Replace(Text, LineFeed, Lf)
+    LineFeedToLf = Text
+End Function
+
+Public Function LineFeedFromLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbLf
+    If LineFeed <> Lf Then Text = Replace(Text, Lf, LineFeed)
+    LineFeedFromLf = Text
+End Function
+
+Public Function LineFeedToCrLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbCrLf
+    If LineFeed <> Lf Then Text = Replace(Text, LineFeed, Lf)
+    LineFeedToCrLf = Text
+End Function
+
+Public Function LineFeedFromCrLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbCrLf
+    If LineFeed <> Lf Then Text = Replace(Text, Lf, LineFeed)
+    LineFeedFromCrLf = Text
+End Function
+
+Public Function ExtractKeyValue(KeyValue As Variant, ByRef Key As String, ByRef Value As String) As String
+    Key = KeyValue(0)
+    Value = KeyValue(1)
+    ExtractKeyValue = Key
+End Function
+
+'}}}
+

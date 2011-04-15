@@ -1,0 +1,181 @@
+﻿'module
+'   name;SsfReader
+'{{{
+Option Explicit
+
+Private Env As GlobalResources
+
+Public Function InitializeEnv()
+    Set Env = SsfUtils.CreateDefaultEnv
+    Set InitializeEnv = Env
+End Function
+
+Public Sub TerminateEnv()
+    Set Env = Nothing
+End Sub
+
+Public Sub ReadSsf(Stream)
+    Dim Finder
+    
+    If Env Is Nothing Then InitializeEnv
+    
+    Set Finder = New StreamParser
+    Set Finder.Stream = Stream
+    With Stream
+        If .OpenRead Then
+            ParseSsf Finder
+            .CloseRead
+        End If
+    End With
+    
+    Set Finder = Nothing
+    TerminateEnv
+End Sub
+
+Public Sub ParseSsf(Finder)
+    If Not BeginTheMagic(Finder) Then Exit Sub
+    EvalAfter Finder
+    EndTheMagic
+End Sub
+
+Private Sub DoFlush()
+    Dim BlockName
+    
+    BlockName = Env.PopEnv("current", "last-blockname", "")
+    If BlockName <> "" Then
+        SsfAction.ReadFrom BlockName, Env.GetArray("block"), Env
+    End If
+End Sub
+
+Private Sub EndTheMagic()
+    DoFlush
+End Sub
+
+Private Function BeginTheMagic(Finder)
+    Dim i, EndBegins, at
+    Dim Bch, Ech
+    Dim MagicBegin
+    
+    BeginTheMagic = True
+    
+    If Not CBool(Env.GetEnv("ssf", "enable-magic-word", "FALSE")) Then Exit Function
+    MagicBegin = Env.GetEnv("ssf", "magic-begin", "")
+    If MagicBegin = "" Then Exit Function
+    
+    BeginTheMagic = False
+    
+    at = Finder.FindString(1, MagicBegin, vbBinaryCompare)
+    If at <= 1 Then Exit Function
+    
+    Finder.Text = Mid(Finder.Text, at - 1)
+    
+    Bch = Left(Finder.Text, 1)
+    EndBegins = Len(MagicBegin) + 2
+    i = Finder.FindString(EndBegins, Bch, vbBinaryCompare)
+    If i <= EndBegins Then Exit Function
+    
+    Ech = Mid(Finder.Text, EndBegins, i - EndBegins)
+    Env.SetEnv "ssf", "line-begin", Bch
+    Env.SetEnv "ssf", "line-end", Ech
+    
+    BeginTheMagic = True
+End Function
+
+Private Sub SetSpecialChars(ByRef Bch, ByRef Ech, ByRef EscapeBegin, ByRef MagicEnd, ByRef Delimiter)
+    EscapeBegin = Env.GetEnv("ssf", "escape-begin", "{{{")
+    MagicEnd = Env.GetEnv("ssf", "magic-end", "ssf-end")
+    Delimiter = Env.GetEnv("ssf", "value-delimiter", ";")
+    Bch = Env.GetEnv("ssf", "line-begin", "'")
+    EscapeOff Bch, Ech
+End Sub
+
+Private Sub EscapeOn(ByRef Bch, ByRef Ech)
+    Ech = Ech & Bch & Env.GetEnv("ssf", "escape-end", "}}}") & Ech
+End Sub
+
+Private Sub EscapeOff(ByRef Bch, ByRef Ech)
+    Ech = Env.GetEnv("ssf", "line-end", vbCrLf)
+End Sub
+
+Private Sub EvalAfter(Finder)
+    Dim Bch, Ech
+    Dim EscapeBegin, MagicEnd, Delimiter
+    Dim BlockName, Key, Value, BeforeTag
+    Dim BlockVoid
+    Dim EchNextBlock
+    
+    SetSpecialChars Bch, Ech, EscapeBegin, MagicEnd, Delimiter
+    
+    BlockName = ""
+    EchNextBlock = Ech & Bch
+    Do Until Finder.AtEndOfStream
+        EvalComma BeforeTag, Finder, Bch, Ech
+        EvalEscape BeforeTag, Finder, Bch, Ech, EscapeBegin, Delimiter
+        EvalBefore BeforeTag, Bch, Delimiter, BlockName, Key, Value, BlockVoid
+        
+        If BlockName = "" Then
+            Finder.Text = Ech & Finder.Text
+            EvalComma BeforeTag, Finder, Bch, EchNextBlock
+            If Finder.Text <> "" Then Finder.Text = Bch & Finder.Text
+        ElseIf BlockName = MagicEnd Then
+            Exit Do
+        End If
+    Loop
+End Sub
+
+Private Sub EvalComma(ByRef BeforeTag, Finder, Bch, Ech)
+    Dim at
+    
+    at = Finder.FindString(1, Ech, vbBinaryCompare)
+    If at = 0 Then
+        BeforeTag = Finder.Text
+        Finder.Text = ""
+    Else
+        BeforeTag = Left(Finder.Text, at - 1)
+        Finder.Text = Right(Finder.Text, Len(Finder.Text) - at + 1 - Len(Ech))
+    End If
+End Sub
+
+Private Sub EvalEscape(ByRef BeforeTag, Finder, Bch, Ech, EscapeBegin, Delimiter)
+    Dim MyBeforeTag
+    
+    If BeforeTag <> Bch & EscapeBegin Then Exit Sub
+    
+    EscapeOn Bch, Ech
+    EvalComma MyBeforeTag, Finder, Bch, Ech
+    BeforeTag = Bch & Delimiter & MyBeforeTag
+    EscapeOff Bch, Ech
+End Sub
+
+Private Sub EvalBefore(BeforeTag, Bch, Delimiter, ByRef BlockName, ByRef Key, ByRef Value, ByRef BlockVoid)
+    Dim KeyValue
+    
+    If BeforeTag = "" Then
+        BlockName = ""
+    ElseIf Left(BeforeTag, 1) <> Bch Then
+        BlockName = ""
+    ElseIf BlockName = "" Then
+        DoFlush
+        BlockName = Mid(BeforeTag, 2)
+        Key = ""
+        Value = ""
+        BlockVoid = False
+        Env.SetEnv "current", "last-blockname", BlockName
+    ElseIf Not BlockVoid Then
+        KeyValue = Split(BeforeTag, Delimiter, 2, vbBinaryCompare)
+        Key = Trim(Replace(Mid(KeyValue(0), 2), vbTab, ""))
+        If UBound(KeyValue) = 1 Then
+            Value = KeyValue(1)
+        Else
+            Value = ""
+        End If
+        If Key = "void" Then
+            BlockVoid = True
+        Else
+            Env.AddArray "block", Array(Key, Value)
+        End If
+    End If
+End Sub
+
+'}}}
+

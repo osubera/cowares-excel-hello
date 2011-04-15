@@ -1,0 +1,203 @@
+﻿'class
+'   name;StringStreamFile
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public FileName As String
+Public Charset As String
+
+Private FileStream As Object
+Private CanRead As Boolean
+Private CanWrite As Boolean
+Private SpawnCount As Long
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+    If Not CanRead Then Exit Sub
+    
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanRead = False
+End Sub
+
+Public Sub FlushWrite()
+    If Not CanWrite Then Exit Sub
+    
+    FileStream.WriteText Dequeue(-1)
+    SaveToFile
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanWrite = False
+End Sub
+
+Private Sub SaveToFile()
+    Const adSaveCreateOverWrite = 2
+    If FileName = "" Then Exit Sub
+    
+    FileStream.SaveToFile FileName, adSaveCreateOverWrite
+End Sub
+
+Public Function OpenRead()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    If FileName = "" Then Exit Function
+    
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .LoadFromFile FileName
+        .Type = adTypeText
+        .Charset = Charset
+    End With
+    
+    CanRead = True
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeText
+        .Charset = Charset
+    End With
+    
+    CanWrite = True
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Const SsfExt = ".txt"
+    
+    If CanWrite Then
+        Set OpenSpawn = New StringStreamFile
+        SpawnCount = SpawnCount + 1
+        With OpenSpawn
+            .LineFeed = LineFeed
+            .Charset = Charset
+            If SpawnName = "" Then
+                .FileName = FileName & "." & CStr(SpawnCount) & SsfExt
+            Else
+                .FileName = FileName & "." & SpawnName & SsfExt
+            End If
+            .OpenWrite
+        End With
+    Else
+        Set OpenSpawn = Nothing
+    End If
+End Function
+
+Public Function CloseSpawn()
+    If CanWrite Then CloseWrite
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    FileName = ""
+    Charset = "utf-8"
+    CanRead = False
+    CanWrite = False
+    SpawnCount = 0
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    
+    If Not FileStream Is Nothing Then
+        FileStream.Close
+        Set FileStream = Nothing
+    End If
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    If CanWrite Then
+        FileStream.WriteText Dequeue(-1) & Data
+    Else
+        Text = Text & Data
+    End If
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        If CanRead Then
+            If Len(Text) < Size Then
+                Text = Text & FileStream.ReadText(Size)
+            End If
+        End If
+        
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+        
+        If CanRead Then
+            Dequeue = Dequeue & FileStream.ReadText(-1)
+        End If
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+
