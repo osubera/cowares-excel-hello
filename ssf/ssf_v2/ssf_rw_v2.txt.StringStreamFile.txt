@@ -81,9 +81,9 @@ Public Function OpenRead()
     
     With FileStream
         .Open
-        .LoadFromFile FileName
         .Type = adTypeText
         .Charset = Charset
+        .LoadFromFile FileName
     End With
     
     CanRead = True
