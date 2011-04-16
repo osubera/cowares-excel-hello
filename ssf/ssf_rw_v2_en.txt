@@ -1,5 +1,5 @@
 'ssf-begin
-'  ;
+';
 
 'workbook
 '   name;ssf_rw_v2.xls/F3SsfRwV2
@@ -135,7 +135,7 @@
 '         ;
 '         ;
 '         ;Timestamp
-'         ;40649.7916666667
+'         ;40649.8333333333
 '         ;
 '         ;
 '         ;
@@ -1488,7 +1488,7 @@ End Sub
 Public Sub WriteSsfBegin(Stream)
     With Stream
         .WriteLine SsfBegin
-        .WriteLine MakeSsfLine("", "")
+        .WriteLine LineBegin & ValueDelimiter
         .WriteLine SsfBlockEnd
     End With
 End Sub
@@ -3700,10 +3700,18 @@ Private Sub SwitchWorksheet(Names As String, Env As GlobalResources)
     If SsfUtils.DivideName(Names, Name, CodeName) <> "" Then
         ' rule#2 search
         Set Ws = Book.Worksheets(Name)
-        If Err.Number = 0 Then Env.LogWrite Name & " exists. recycles"
+        Select Case Err.Number
+        Case 0
+            Env.LogWrite Name & " exists. recycles"
+        Case 9
+            Env.LogWrite Name & " is not found."
+            Err.Clear
+        End Select
     End If
-    If Err.Number <> 0 Then Env.LogWrite Names & " " & Err.Number & " " & Err.Description
-    Err.Clear
+    If Err.Number <> 0 Then
+        Env.LogWrite Names & " " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
     
     ' rule#1 #3 add
     If Ws Is Nothing Then Set Ws = Book.Worksheets.Add
@@ -4203,10 +4211,15 @@ Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As St
     
     ' rule#4 add
 AddNew:
-    If Err.Number <> 0 Then
+    Select Case Err.Number
+    Case 0
+        GoTo AddNew2
+    Case 9
+        Env.LogWrite Name & " is not found."
+    Case Else
         Env.LogWrite Name & " " & Err.Number & " " & Err.Description
-        Resume AddNew2
-    End If
+    End Select
+    Resume AddNew2
 AddNew2:
     On Error Resume Next
     
