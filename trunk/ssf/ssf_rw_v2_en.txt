@@ -134,7 +134,7 @@
 '         ;
 '         ;
 '         ;Timestamp
-'         ;40648.75
+'         ;40649.5833333333
 '         ;
 '         ;
 '         ;
@@ -2211,9 +2211,9 @@ Public Function OpenRead()
     
     With FileStream
         .Open
-        .LoadFromFile FileName
         .Type = adTypeText
         .Charset = Charset
+        .LoadFromFile FileName
     End With
     
     CanRead = True
