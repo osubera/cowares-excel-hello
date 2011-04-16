@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfMain
 '{{{
 Option Explicit
@@ -150,4 +153,6 @@ Private Sub SetWndToButton(oAC As Object, hWnd As Long)
 End Sub
 
 '}}}
+
+'ssf-end
 

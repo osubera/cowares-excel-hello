@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;StringStreamNotepad
 '{{{
 Option Explicit
@@ -112,4 +115,6 @@ Private Function IsEmpty()
 End Function
 
 '}}}
+
+'ssf-end
 

@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfAction
 '{{{
 Option Explicit
@@ -43,4 +46,6 @@ Public Sub WriteTo(Stream, Env)
 End Sub
 
 '}}}
+
+'ssf-end
 

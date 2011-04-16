@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfBlockColumnsWidth
 '{{{
 Option Explicit
@@ -101,4 +104,6 @@ Private Sub WorksheetBlock(Ws As Worksheet, Stream As Object, Env As GlobalResou
 End Sub
 
 '}}}
+
+'ssf-end
 

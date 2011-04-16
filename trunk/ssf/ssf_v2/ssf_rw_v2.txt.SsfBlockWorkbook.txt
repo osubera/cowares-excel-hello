@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfBlockWorkbook
 '{{{
 Option Explicit
@@ -130,4 +133,6 @@ Private Sub SwitchBook(Names As String, Env As GlobalResources)
 End Sub
 
 '}}}
+
+'ssf-end
 

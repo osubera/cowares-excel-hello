@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;SsfUtilsExcelBook
 '{{{
 Option Explicit
@@ -79,4 +82,6 @@ Public Function R1C1ToA1(ByVal R1C1 As String) As String
 End Function
 
 '}}}
+
+'ssf-end
 

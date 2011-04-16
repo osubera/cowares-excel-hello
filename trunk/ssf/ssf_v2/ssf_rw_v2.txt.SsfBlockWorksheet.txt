@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfBlockWorksheet
 '{{{
 Option Explicit
@@ -111,4 +114,6 @@ Private Sub SwitchWorksheet(Names As String, Env As GlobalResources)
 End Sub
 
 '}}}
+
+'ssf-end
 

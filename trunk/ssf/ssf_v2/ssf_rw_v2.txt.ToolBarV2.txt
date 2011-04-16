@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;ToolBarV2
 '{{{
 Option Explicit
@@ -664,4 +667,6 @@ End Function
 '=== helper functions end ===
 
 '}}}
+
+'ssf-end
 

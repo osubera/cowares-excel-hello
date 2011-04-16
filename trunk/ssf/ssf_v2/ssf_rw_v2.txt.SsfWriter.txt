@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfWriter
 '{{{
 Option Explicit
@@ -19,14 +22,29 @@ Public Sub WriteSsf(Stream)
     
     With Stream
         If .OpenWrite Then
-            .WriteLine SsfBegin
+            WriteSsfBegin Stream
             SsfAction.WriteTo Stream, Env
-            .WriteLine SsfEnd
+            WriteSsfEnd Stream
             .CloseWrite
         End If
     End With
     
     TerminateEnv
+End Sub
+
+Public Sub WriteSsfBegin(Stream)
+    With Stream
+        .WriteLine SsfBegin
+        .WriteLine MakeSsfLine("", "")
+        .WriteLine SsfBlockEnd
+    End With
+End Sub
+
+Public Sub WriteSsfEnd(Stream)
+    With Stream
+        .WriteLine SsfEnd
+        .WriteLine SsfBlockEnd
+    End With
 End Sub
 
 Private Function LineBegin()
@@ -58,11 +76,11 @@ Private Function ValueDelimiter()
 End Function
 
 Private Function SsfBegin()
-    SsfBegin = LineBegin & Env.GetEnv("ssf", "magic-begin", "ssf-begin") & LineEnd
+    SsfBegin = LineBegin & Env.GetEnv("ssf", "magic-begin", "ssf-begin")
 End Function
 
 Private Function SsfEnd()
-    SsfEnd = LineBegin & Env.GetEnv("ssf", "magic-end", "ssf-end") & LineEnd
+    SsfEnd = LineBegin & Env.GetEnv("ssf", "magic-end", "ssf-end")
 End Function
 
 Public Function SsfBlockBegin(SsfKey)
@@ -87,4 +105,6 @@ Public Function MakeSsfLineEscaped(ByVal Value)
 End Function
 
 '}}}
+
+'ssf-end
 

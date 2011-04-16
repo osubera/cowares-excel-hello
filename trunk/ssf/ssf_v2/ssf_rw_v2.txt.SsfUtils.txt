@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfUtils
 '{{{
 Option Explicit
@@ -174,4 +177,6 @@ Public Function DivideLine(Line As Variant, Delimiter As String, Number As Long)
 End Function
 
 '}}}
+
+'ssf-end
 

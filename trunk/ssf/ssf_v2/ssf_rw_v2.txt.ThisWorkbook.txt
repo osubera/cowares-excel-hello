@@ -1,4 +1,7 @@
-﻿'code
+﻿'ssf-begin
+'       ;
+
+'code
 '   name;ThisWorkbook
 '{{{
 Option Explicit
@@ -12,4 +15,6 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
 End Sub
 
 '}}}
+
+'ssf-end
 

@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfUtilsExcel
 '{{{
 Option Explicit
@@ -55,4 +58,6 @@ Public Function ExcelCalculateColumnWidth(ByVal Size As Double, Optional ByVal U
 End Function
 
 '}}}
+
+'ssf-end
 
