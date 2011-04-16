@@ -1,5 +1,5 @@
 ﻿'ssf-begin
-'       ;
+';
 
 'module
 '   name;SsfWriter
@@ -35,7 +35,7 @@ End Sub
 Public Sub WriteSsfBegin(Stream)
     With Stream
         .WriteLine SsfBegin
-        .WriteLine MakeSsfLine("", "")
+        .WriteLine LineBegin & ValueDelimiter
         .WriteLine SsfBlockEnd
     End With
 End Sub

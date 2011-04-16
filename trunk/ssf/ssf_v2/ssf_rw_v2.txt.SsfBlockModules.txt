@@ -1,5 +1,5 @@
 ﻿'ssf-begin
-'       ;
+';
 
 'module
 '   name;SsfBlockModules
@@ -338,10 +338,15 @@ Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As St
     
     ' rule#4 add
 AddNew:
-    If Err.Number <> 0 Then
+    Select Case Err.Number
+    Case 0
+        GoTo AddNew2
+    Case 9
+        Env.LogWrite Name & " is not found."
+    Case Else
         Env.LogWrite Name & " " & Err.Number & " " & Err.Description
-        Resume AddNew2
-    End If
+    End Select
+    Resume AddNew2
 AddNew2:
     On Error Resume Next
     
