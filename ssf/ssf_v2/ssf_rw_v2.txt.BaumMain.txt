@@ -1,4 +1,7 @@
-﻿'code
+﻿'ssf-begin
+'       ;
+
+'code
 '   name;BaumMain
 '{{{
 Option Explicit
@@ -176,4 +179,6 @@ End Sub
 '=== constructor / destructor end ===
 
 '}}}
+
+'ssf-end
 

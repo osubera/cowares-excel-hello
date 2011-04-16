@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfReader
 '{{{
 Option Explicit
@@ -185,4 +188,6 @@ Private Sub EvalBefore(BeforeTag, Bch, Delimiter, ByRef BlockName, ByRef Key, By
 End Sub
 
 '}}}
+
+'ssf-end
 

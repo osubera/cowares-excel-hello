@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;StringStreamClipboard
 '{{{
 Option Explicit
@@ -122,4 +125,6 @@ Private Sub CopyToClipboard(Data As String)
 End Sub
 
 '}}}
+
+'ssf-end
 

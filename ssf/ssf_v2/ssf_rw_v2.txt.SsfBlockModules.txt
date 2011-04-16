@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfBlockModules
 '{{{
 Option Explicit
@@ -98,7 +101,9 @@ Public Sub WriteToEach(ByVal Target As Object, ByVal Stream As Object, ByVal Env
     For Each Module In Target.VBComponents
         Set Spawned = Stream.OpenSpawn(Module.Name)
         If Not Spawned Is Nothing Then
+            SsfWriter.WriteSsfBegin Spawned
             VbaCodeModuleWriteTo Module.CodeModule, Spawned, Env
+            SsfWriter.WriteSsfEnd Spawned
             Set Spawned = Spawned.CloseSpawn
         End If
     Next
@@ -363,4 +368,6 @@ Done:
 End Sub
 
 '}}}
+
+'ssf-end
 

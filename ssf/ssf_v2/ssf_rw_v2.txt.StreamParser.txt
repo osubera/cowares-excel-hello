@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;StreamParser
 '{{{
 Option Explicit
@@ -50,4 +53,6 @@ Private Sub Class_Initialize()
 End Sub
 
 '}}}
+
+'ssf-end
 

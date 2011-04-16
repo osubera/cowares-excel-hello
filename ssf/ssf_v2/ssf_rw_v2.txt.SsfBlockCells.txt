@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;SsfBlockCells
 '{{{
 Option Explicit
@@ -130,4 +133,6 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
 End Sub
 
 '}}}
+
+'ssf-end
 

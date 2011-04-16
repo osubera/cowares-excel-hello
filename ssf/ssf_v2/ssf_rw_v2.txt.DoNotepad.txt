@@ -1,4 +1,7 @@
-﻿'module
+﻿'ssf-begin
+'       ;
+
+'module
 '   name;DoNotepad
 '{{{
 Option Explicit
@@ -165,4 +168,6 @@ Public Function ShowNotepad(hWnd As Long) As Boolean
 End Function
 
 '}}}
+
+'ssf-end
 

@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;StringStreamFile
 '{{{
 Option Explicit
@@ -200,4 +203,6 @@ Private Function IsEmpty()
 End Function
 
 '}}}
+
+'ssf-end
 

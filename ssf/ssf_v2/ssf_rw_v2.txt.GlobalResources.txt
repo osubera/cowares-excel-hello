@@ -1,4 +1,7 @@
-﻿'class
+﻿'ssf-begin
+'       ;
+
+'class
 '   name;GlobalResources
 '{{{
 Option Explicit
@@ -108,4 +111,6 @@ Private Sub Class_Terminate()
 End Sub
 
 '}}}
+
+'ssf-end
 
