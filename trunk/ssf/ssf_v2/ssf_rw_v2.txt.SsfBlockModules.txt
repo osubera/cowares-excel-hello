@@ -81,7 +81,7 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
         WriteToEach Target, Stream, Env
     Else
         ' let ThisWorkbook go to the last
-        For Each Module In Target.VBComponents
+        For Each Module In Target.VBProject.VBComponents
             If Module.Name = "ThisWorkbook" Then
                 Set BookModule = Module
             Else
@@ -98,7 +98,7 @@ Public Sub WriteToEach(ByVal Target As Object, ByVal Stream As Object, ByVal Env
     Dim Module As VBComponent
     Dim Spawned As Object
     
-    For Each Module In Target.VBComponents
+    For Each Module In Target.VBProject.VBComponents
         Set Spawned = Stream.OpenSpawn(Module.Name)
         If Not Spawned Is Nothing Then
             SsfWriter.WriteSsfBegin Spawned
@@ -145,7 +145,7 @@ Public Sub ProjectRequiresWriteTo(ByVal Target As Object, ByVal Stream As Object
     
     If Not CanReallyTouchVBProject(Target) Then Exit Sub
     
-    NumberOfReferences = Target.References.Count
+    NumberOfReferences = Target.VBProject.References.Count
     If NumberOfReferences = 0 Then Exit Sub
     ' it doesn't work, because we have at least 4 references.
     
@@ -155,7 +155,7 @@ Public Sub ProjectRequiresWriteTo(ByVal Target As Object, ByVal Stream As Object
     For i = 1 To NumberOfReferences
         ' avoid to print 4 standard references
         ' VBA (builtin), Excel (builtin), stdole and Office
-        With Target
+        With Target.VBProject
             If Not .References(i).BuiltIn Then
                 If LCase(.References(i).Name) <> "stdole" _
                         And LCase(.References(i).Name) <> "office" Then
