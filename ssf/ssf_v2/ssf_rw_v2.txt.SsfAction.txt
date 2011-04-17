@@ -39,7 +39,7 @@ Public Sub WriteTo(Stream, Env)
     Case "Range"
         SsfBlockCells.WriteTo Target, Stream, Env
     Case "VBProject"
-        SsfBlockModules.WriteTo Target, Stream, Env
+        SsfBlockModules.WriteTo Target.Parent, Stream, Env
     Case Else
         Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
     End Select

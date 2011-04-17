@@ -105,13 +105,13 @@ End Sub
 Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
     Dim Ws As Worksheet
     
-    SsfBlockModules.ProjectRequiresWriteTo Target.VBProject, Stream, Env
+    SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
     For Each Ws In Target.Worksheets
         SsfBlockWorksheet.WriteTo Ws, Stream, Env
     Next
     CellsNameWriteTo Target, Stream, Env
     ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
-    SsfBlockModules.WriteTo Target.VBProject, Stream, Env
+    SsfBlockModules.WriteTo Target, Stream, Env
 End Sub
 
 Private Sub SwitchBook(Names As String, Env As GlobalResources)
