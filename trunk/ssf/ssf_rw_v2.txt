@@ -31,7 +31,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40652.25
+'         ;40652.2916666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -125,7 +125,8 @@
 '         ;シート
 '         ;選択セル
 '         ;モジュール
-'     skip;2
+'         ;コード
+'     skip;1
 '         ;モジュール
 '         ;VBAコードの扱いを指定する。
 '         ;module
@@ -869,6 +870,10 @@ Public Sub WriteTo(Stream, Env)
         SsfBlockCells.WriteTo Target, Stream, Env
     Case "VBProject"
         SsfBlockModules.WriteTo Target, Stream, Env
+    Case "CodeModule"
+        If SsfBlockModules.ShallDumpModule(Target, Env) Then
+            SsfBlockModules.VbaCodeModuleWriteTo Target.VBProject.VBE.ActiveCodePane.CodeModule, Stream, Env
+        End If
     Case Else
         Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
     End Select
@@ -3403,7 +3408,7 @@ Public Function IsLockedProject(Target As Object) As Boolean
     Set P = Nothing
 End Function
 
-Public Function ShallDumpModule(ByVal Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModule(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
     On Error Resume Next
     Dim out As Variant
     
@@ -3422,7 +3427,7 @@ Public Function ShallDumpModule(ByVal Target As Object, Env As GlobalResources) 
     ShallDumpModule = out
 End Function
 
-Public Function ShallDumpModuleEach(ByVal Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModuleEach(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
     Dim out As Boolean
     
     out = (LCase(Env.GetEnv("ssf", "enable-module", "true")) = "every")
