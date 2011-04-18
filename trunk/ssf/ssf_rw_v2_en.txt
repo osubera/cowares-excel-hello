@@ -125,7 +125,7 @@
 '         ;Sheet
 '         ;Cells
 '         ;Modules
-'         ;コード
+'         ;Code
 '     skip;1
 '         ;Module
 '         ;How VBA codes are converted
