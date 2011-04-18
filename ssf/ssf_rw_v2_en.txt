@@ -31,7 +31,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40651.9166666667
+'         ;40652.25
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -860,7 +860,7 @@ Public Sub WriteTo(Stream, Env)
     Dim Target As Object
     
     Set Target = Env.Current("target")
-    Select Case TypeName(Target)
+    Select Case Env.Current("target-type")
     Case "Workbook"
         SsfBlockWorkbook.WriteTo Target, Stream, Env
     Case "Worksheet"
@@ -868,7 +868,7 @@ Public Sub WriteTo(Stream, Env)
     Case "Range"
         SsfBlockCells.WriteTo Target, Stream, Env
     Case "VBProject"
-        SsfBlockModules.WriteTo Target.Parent, Stream, Env
+        SsfBlockModules.WriteTo Target, Stream, Env
     Case Else
         Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
     End Select
@@ -2001,19 +2001,15 @@ Private Sub SetTarget(oAC As Object, Helper As ToolBarV2, Env As GlobalResources
     Env.SetEnv "ssf", "verbose", CStr(Helper.GetControlState("verbose"))
     Env.SetEnv "ssf", "enable-magic-word", CStr(Helper.GetControlState("enable_magicword"))
     
-    Select Case Helper.GetButton("target").ListIndex
-    Case 1  ' Workbook
+    Env.SetEnv "current", "target-type", Choose(Helper.GetButton("target").ListIndex, _
+            "Workbook", "Worksheet", "Range", "VBProject", "CodeModule")
+    Select Case Env.Current("target-type")
+    Case "Workbook", "VBProject", "CodeModule"
         Set Env.Current("target") = ActiveWorkbook
-    Case 2  ' Worksheet
+    Case "Worksheet"
         Set Env.Current("target") = ActiveSheet
-    Case 3  ' Select Range
+    Case "Range"
         Set Env.Current("target") = Selection
-    Case 4  ' Modules
-        If SsfBlockModules.CanTouchVBProject Then
-            Set Env.Current("target") = ActiveWorkbook.VBProject
-        Else
-            Set Env.Current("target") = Nothing
-        End If
     End Select
     
     Select Case Helper.GetButton("module").ListIndex
@@ -2028,7 +2024,7 @@ Private Sub SetTarget(oAC As Object, Helper As ToolBarV2, Env As GlobalResources
     ' Log
     Env.LogWrite oAC.Tag & " " & oAC.Caption
     If InStr(oAC.Tag, "file") > 0 Then Env.LogWrite Env.Ssf("encoding")
-    Env.LogWrite "TARGET: " & TypeName(Env.Current("target"))
+    Env.LogWrite "TARGET: " & Env.Current("target-type") & " " & TypeName(Env.Current("target"))
     Env.LogWrite "MODULE: " & Env.Ssf("enable-module")
     Env.LogWrite "MAGIC : " & Env.Ssf("enable-magic-word")
 End Sub
