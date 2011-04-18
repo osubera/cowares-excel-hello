@@ -93,7 +93,7 @@ Public Function SsfBlockEnd()
     SsfBlockEnd = ""
 End Function
 
-Public Function MakeSsfLine(Key, Value) As String
+Public Function MakeSsfLine(Key, Value)
     MakeSsfLine = LineBegin & SsfUtils.InsertSpaces(Key) & ValueDelimiter & Value
 End Function
 
@@ -102,6 +102,14 @@ Public Function MakeSsfLineEscaped(ByVal Value)
     Value = Replace(Value, LineEnd & EscapeBegin & LineEnd, LineEnd & EscapeNotBegin & LineEnd)
     Value = Replace(Value, LineEnd & EscapeEnd & LineEnd, LineEnd & EscapeNotEnd & LineEnd)
     MakeSsfLineEscaped = EscapeBegin & LineEnd & Value & LineEnd & EscapeEnd
+End Function
+
+Public Function MakeSsfLineCellData(Value)
+    If InStr(Value, LineEnd) = 0 Then
+        MakeSsfLineCellData = MakeSsfLine("", Value)
+    Else
+        MakeSsfLineCellData = MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Value, LineEnd))
+    End If
 End Function
 
 '}}}

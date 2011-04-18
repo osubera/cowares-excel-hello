@@ -7,6 +7,8 @@
 Option Explicit
 
 Public Env, Log, Ssf, Current, Block
+Public CellStream
+
 Private Logger
 
 Public Sub LogWrite(Text)
@@ -98,10 +100,14 @@ Private Sub Class_Initialize()
     For Each x In Env.Items
         x.CompareMode = TextCompare
     Next
+    
+    Set CellStream = New SsfCellStream
+    Set CellStream.Env = Me
 End Sub
 
 Private Sub Class_Terminate()
     Env.RemoveAll
+    Set CellStream = Nothing
     Set Block = Nothing
     Set Current = Nothing
     Set Ssf = Nothing

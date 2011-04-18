@@ -8,72 +8,16 @@ Option Explicit
 
 Public Sub CellsFormulaReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
+    Const LocalProperty = "FormulaR1C1"
     
-    Dim KeyValue As Variant
-    Dim Key As String
-    Dim Value As String
-    Dim Counter As Long
-    Dim Ws As Worksheet
-    Dim Ra As Range
-    Dim CrLf As String
-    
-    Counter = 0
-    Set Ws = Env.Current("worksheet")
-    Set Ra = Ws.Cells
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
-    
-    Env.LogWrite LocalKey & " into " & Ws.Name
-    
-    On Error Resume Next
-    
-    For Each KeyValue In Block
-        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
-        Case "address"
-            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
-            Counter = 0
-        Case ""
-            Counter = Counter + 1
-            Ra(Counter).FormulaR1C1 = SsfUtils.LineFeedToLf(Value, CrLf)
-        End Select
-        If Err.Number <> 0 Then
-            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
-            Err.Clear
-        End If
-    Next
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
 Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
     
-    Dim KeyValue As Variant
-    Dim Key As String
-    Dim Value As String
-    Dim Counter As Long
-    Dim Ws As Worksheet
-    Dim Ra As Range
-    
-    Counter = 0
-    Set Ws = Env.Current("worksheet")
-    Set Ra = Ws.Cells
-    
-    Env.LogWrite LocalKey & " into " & Ws.Name
-    
-    On Error Resume Next
-    
-    For Each KeyValue In Block
-        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
-        Case "address"
-            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
-            Counter = 0
-        Case ""
-            Counter = Counter + 1
-            Ra(Counter).NumberFormat = Value
-        End Select
-        If Err.Number <> 0 Then
-            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
-            Err.Clear
-        End If
-    Next
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -83,51 +27,59 @@ End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
+    Const LocalProperty = "FormulaR1C1"
+    Const EmptyValue = Empty
     
-    Dim Ce As Range
-    Dim CrLf As String
-    Dim Data As String
-    
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
-    
-    Env.LogWrite LocalKey
-    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
-    
-    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
-    ' simple list, each cell in each line
-    For Each Ce In Target
-        Data = Ce.FormulaR1C1
-        If InStr(Data, vbLf) = 0 Then
-            Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
-        Else
-            Stream.WriteLine SsfWriter.MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Data, CrLf))
-        End If
-    Next
-    
-    Stream.WriteLine SsfWriter.SsfBlockEnd
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
 End Sub
 
 Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
+    Const EmptyValue = "General"
     
-    Dim Ce As Range
     Dim AllFormats As Variant
     
     AllFormats = Target.NumberFormat
     ' we get a format string when all ranges are filled by a same format, otherwise get a Null
     If Not IsNull(AllFormats) Then
         ' avoid this block when everything is "General"
-        If AllFormats = "General" Then Exit Sub
+        If AllFormats = EmptyValue Then Exit Sub
     End If
     
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String)
+    ' parse cells-* block using ReadSsfCells
+    Dim CrLf As String
+    Dim Ws As Worksheet
+    
+    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
+    Set Ws = Env.Current("worksheet")
+    
+    Env.LogWrite LocalKey
+    
+    With Env.CellStream
+        .PropertyName = LocalProperty
+        .SetWorksheet Ws
+        .ReadSsfCells Block, CrLf
+    End With
+End Sub
+
+Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String, EmptyValue As Variant)
+    ' generate cells-* block using WriteSsfBlocks
     Env.LogWrite LocalKey
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
     
-    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
-    ' simple list, each cell in each line
-    For Each Ce In Target
-        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.NumberFormat)
-    Next
+    With Env.CellStream
+        .PropertyName = LocalProperty
+        .SetRange Target
+        .ReadTargetCell EmptyValue
+        .WriteSsfBlocks Stream
+    End With
     
     Stream.WriteLine SsfWriter.SsfBlockEnd
 End Sub
