@@ -135,7 +135,7 @@
 '         ;
 '         ;
 '         ;Timestamp
-'         ;40650.4583333333
+'         ;40651.9166666667
 '         ;
 '         ;
 '         ;
@@ -852,6 +852,185 @@
 '       ;=ssf_rw_v2!R8C2
 '       ;ssf_rw_v2!_Url
 
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3SsfRwV2"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
+    Else
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
+    Else
+        Helper.OnButtonToggle
+    End If
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_write_clipboard(oAC As Object)
+    SsfMain.ClipboardWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_clipboard(oAC As Object)
+    SsfMain.ClipboardReader oAC, Helper
+End Sub
+
+Public Sub Menu_write_notepad(oAC As Object)
+    SsfMain.NotepadWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_notepad(oAC As Object)
+    SsfMain.NotepadReader oAC, Helper
+End Sub
+
+Public Sub Menu_hWnd(oAC As Object)
+    SsfMain.ConnectNotepad oAC, Helper
+End Sub
+
+Public Sub Menu_write_file(oAC As Object)
+    SsfMain.FileWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_file(oAC As Object)
+    SsfMain.FileReader oAC, Helper
+End Sub
+
+Public Sub Menu_Charset(oAC As Object)
+End Sub
+
+Public Sub Menu_enable_magicword(oAC As Object)
+End Sub
+
+Public Sub Menu_target(oAC As Object)
+End Sub
+
+Public Sub Menu_module(oAC As Object)
+End Sub
+
+Public Sub Menu_verbose(oAC As Object)
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    If ThisWorkbook.IsAddin Then
+        Dim Wb As Workbook
+        Set Wb = Workbooks.Add
+        Me.Copy Before:=Wb.Sheets(1)
+        Wb.Saved = True
+        Set Wb = Nothing
+    Else
+        Me.Activate
+    End If
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
 'module
 '   name;SsfReader
 '{{{
@@ -1199,6 +1378,8 @@ End Function
 Option Explicit
 
 Public Env, Log, Ssf, Current, Block
+Public CellStream
+
 Private Logger
 
 Public Sub LogWrite(Text)
@@ -1290,10 +1471,14 @@ Private Sub Class_Initialize()
     For Each x In Env.Items
         x.CompareMode = TextCompare
     Next
+    
+    Set CellStream = New SsfCellStream
+    Set CellStream.Env = Me
 End Sub
 
 Private Sub Class_Terminate()
     Env.RemoveAll
+    Set CellStream = Nothing
     Set Block = Nothing
     Set Current = Nothing
     Set Ssf = Nothing
@@ -1546,7 +1731,7 @@ Public Function SsfBlockEnd()
     SsfBlockEnd = ""
 End Function
 
-Public Function MakeSsfLine(Key, Value) As String
+Public Function MakeSsfLine(Key, Value)
     MakeSsfLine = LineBegin & SsfUtils.InsertSpaces(Key) & ValueDelimiter & Value
 End Function
 
@@ -1555,6 +1740,14 @@ Public Function MakeSsfLineEscaped(ByVal Value)
     Value = Replace(Value, LineEnd & EscapeBegin & LineEnd, LineEnd & EscapeNotBegin & LineEnd)
     Value = Replace(Value, LineEnd & EscapeEnd & LineEnd, LineEnd & EscapeNotEnd & LineEnd)
     MakeSsfLineEscaped = EscapeBegin & LineEnd & Value & LineEnd & EscapeEnd
+End Function
+
+Public Function MakeSsfLineCellData(Value)
+    If InStr(Value, LineEnd) = 0 Then
+        MakeSsfLineCellData = MakeSsfLine("", Value)
+    Else
+        MakeSsfLineCellData = MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Value, LineEnd))
+    End If
 End Function
 
 '}}}
@@ -2509,185 +2702,6 @@ Private Sub SetWndToButton(oAC As Object, hWnd As Long)
     oAC.Caption = CStr(DoNotepad.GetWindowProcessId(hWnd))  ' ProcessID for human
     oAC.Parameter = CStr(hWnd)                              ' hWnd for me
 End Sub
-
-'}}}
-
-'code
-'   name;BaumMain
-'{{{
-Option Explicit
-
-' BaumMain addin for ToolBarV2
-
-' using a excel worksheet as a property holder
-
-' we do not support popup on excel sheet at this moment
-' no ideas how to describe it wisely on 2 dimensional sheet
-
-Private Helper As ToolBarV2
-'Public Helper As ToolBarV2
-' we cannot have a public variable in Excel Worksheet
-
-Friend Function VBProjectName() As String
-    ' VBProject.Name can't be accessed for the default settings.
-    VBProjectName = "F3SsfRwV2"
-End Function
-
-Friend Function GetHelper() As ToolBarV2
-    Set GetHelper = Helper
-End Function
-
-'=== default main procedures begin ===
-
-
-' this will called by pressing a button
-Public Sub BarMain(Optional oWho As Object = Nothing)
-    If Helper Is Nothing Then
-        BarInitialize
-        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
-    Else
-        Helper.BarMain Me
-    End If
-End Sub
-
-Public Sub OnButtonToggle()
-    If Helper Is Nothing Then
-        BarInitialize
-        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
-    Else
-        Helper.OnButtonToggle
-    End If
-End Sub
-
-' followings need to be public, because they are called from outside by the Helper
-' we also can copy the Helper.BarMain code here, and let the followings be private.
-
-Public Sub Menu_write_clipboard(oAC As Object)
-    SsfMain.ClipboardWriter oAC, Helper
-End Sub
-
-Public Sub Menu_read_clipboard(oAC As Object)
-    SsfMain.ClipboardReader oAC, Helper
-End Sub
-
-Public Sub Menu_write_notepad(oAC As Object)
-    SsfMain.NotepadWriter oAC, Helper
-End Sub
-
-Public Sub Menu_read_notepad(oAC As Object)
-    SsfMain.NotepadReader oAC, Helper
-End Sub
-
-Public Sub Menu_hWnd(oAC As Object)
-    SsfMain.ConnectNotepad oAC, Helper
-End Sub
-
-Public Sub Menu_write_file(oAC As Object)
-    SsfMain.FileWriter oAC, Helper
-End Sub
-
-Public Sub Menu_read_file(oAC As Object)
-    SsfMain.FileReader oAC, Helper
-End Sub
-
-Public Sub Menu_Charset(oAC As Object)
-End Sub
-
-Public Sub Menu_enable_magicword(oAC As Object)
-End Sub
-
-Public Sub Menu_target(oAC As Object)
-End Sub
-
-Public Sub Menu_module(oAC As Object)
-End Sub
-
-Public Sub Menu_verbose(oAC As Object)
-End Sub
-
-Public Sub Menu_about(oAC As Object)
-    If ThisWorkbook.IsAddin Then
-        Dim Wb As Workbook
-        Set Wb = Workbooks.Add
-        Me.Copy Before:=Wb.Sheets(1)
-        Wb.Saved = True
-        Set Wb = Nothing
-    Else
-        Me.Activate
-    End If
-End Sub
-
-
-'=== default main procedures end ===
-'=== button data begin ===
-
-Public Property Get ButtonData() As Variant
-    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
-End Property
-
-Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
-End Property
-
-' above simple property codes are supported by the following range helpers
-
-Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
-    Dim out As Range
-    Dim StartAt As Range
-    
-    Set StartAt = Me.Range(Address)
-    If IsEmpty(StartAt.Offset(1, 0).Value) Then
-        Set out = StartAt
-    Else
-        Set out = Me.Range(StartAt, StartAt.End(xlDown))
-    End If
-    
-    Set GetButtonRow = out.EntireRow
-End Function
-
-Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
-    Dim StartAt As Range
-    Set StartAt = Me.Range(Address)
-    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
-End Function
-
-Private Function ConvertRangeToArray(Ra As Range) As Variant
-    Dim out() As Variant
-    Dim i As Long
-    
-    ReDim out(0 To Ra.Rows.Count - 1)
-    For i = 0 To UBound(out)
-        out(i) = Ra.Rows(i + 1).Value
-    Next
-    
-    ConvertRangeToArray = out
-End Function
-
-
-'=== button data end ===
-'=== constructor / destructor begin ===
-
-
-Private Function BarName() As String
-    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
-End Function
-
-Public Sub BarInitialize()
-    Dim vMe As Variant
-    Set vMe = Me
-    Set Helper = New ToolBarV2
-    Helper.SetName BarName
-    Helper.NewBar vMe
-End Sub
-
-Public Sub BarTerminate()
-    On Error Resume Next
-    Helper.DelBar
-    Set Helper = Nothing
-End Sub
-
-
-'=== constructor / destructor end ===
 
 '}}}
 
@@ -3760,72 +3774,16 @@ Option Explicit
 
 Public Sub CellsFormulaReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
+    Const LocalProperty = "FormulaR1C1"
     
-    Dim KeyValue As Variant
-    Dim Key As String
-    Dim Value As String
-    Dim Counter As Long
-    Dim Ws As Worksheet
-    Dim Ra As Range
-    Dim CrLf As String
-    
-    Counter = 0
-    Set Ws = Env.Current("worksheet")
-    Set Ra = Ws.Cells
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
-    
-    Env.LogWrite LocalKey & " into " & Ws.Name
-    
-    On Error Resume Next
-    
-    For Each KeyValue In Block
-        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
-        Case "address"
-            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
-            Counter = 0
-        Case ""
-            Counter = Counter + 1
-            Ra(Counter).FormulaR1C1 = SsfUtils.LineFeedToLf(Value, CrLf)
-        End Select
-        If Err.Number <> 0 Then
-            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
-            Err.Clear
-        End If
-    Next
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
 Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
     
-    Dim KeyValue As Variant
-    Dim Key As String
-    Dim Value As String
-    Dim Counter As Long
-    Dim Ws As Worksheet
-    Dim Ra As Range
-    
-    Counter = 0
-    Set Ws = Env.Current("worksheet")
-    Set Ra = Ws.Cells
-    
-    Env.LogWrite LocalKey & " into " & Ws.Name
-    
-    On Error Resume Next
-    
-    For Each KeyValue In Block
-        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
-        Case "address"
-            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
-            Counter = 0
-        Case ""
-            Counter = Counter + 1
-            Ra(Counter).NumberFormat = Value
-        End Select
-        If Err.Number <> 0 Then
-            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
-            Err.Clear
-        End If
-    Next
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -3835,51 +3793,59 @@ End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
+    Const LocalProperty = "FormulaR1C1"
+    Const EmptyValue = Empty
     
-    Dim Ce As Range
-    Dim CrLf As String
-    Dim Data As String
-    
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
-    
-    Env.LogWrite LocalKey
-    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
-    
-    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
-    ' simple list, each cell in each line
-    For Each Ce In Target
-        Data = Ce.FormulaR1C1
-        If InStr(Data, vbLf) = 0 Then
-            Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
-        Else
-            Stream.WriteLine SsfWriter.MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Data, CrLf))
-        End If
-    Next
-    
-    Stream.WriteLine SsfWriter.SsfBlockEnd
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
 End Sub
 
 Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
+    Const EmptyValue = "General"
     
-    Dim Ce As Range
     Dim AllFormats As Variant
     
     AllFormats = Target.NumberFormat
     ' we get a format string when all ranges are filled by a same format, otherwise get a Null
     If Not IsNull(AllFormats) Then
         ' avoid this block when everything is "General"
-        If AllFormats = "General" Then Exit Sub
+        If AllFormats = EmptyValue Then Exit Sub
     End If
     
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String)
+    ' parse cells-* block using ReadSsfCells
+    Dim CrLf As String
+    Dim Ws As Worksheet
+    
+    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
+    Set Ws = Env.Current("worksheet")
+    
+    Env.LogWrite LocalKey
+    
+    With Env.CellStream
+        .PropertyName = LocalProperty
+        .SetWorksheet Ws
+        .ReadSsfCells Block, CrLf
+    End With
+End Sub
+
+Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String, EmptyValue As Variant)
+    ' generate cells-* block using WriteSsfBlocks
     Env.LogWrite LocalKey
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
     
-    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
-    ' simple list, each cell in each line
-    For Each Ce In Target
-        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.NumberFormat)
-    Next
+    With Env.CellStream
+        .PropertyName = LocalProperty
+        .SetRange Target
+        .ReadTargetCell EmptyValue
+        .WriteSsfBlocks Stream
+    End With
     
     Stream.WriteLine SsfWriter.SsfBlockEnd
 End Sub
@@ -4256,6 +4222,530 @@ AddNew2:
 Done:
     Set Env.Current("module") = Comp
 End Sub
+
+'}}}
+
+'class
+'   name;SsfCellStream
+'{{{
+Option Explicit
+
+'=== properties begin ===
+
+
+Private TargetRange As Range
+Private TargetSheet As Worksheet
+Private CellCounter As Long
+
+Public Env As GlobalResources
+Public PropertyName As String
+Public Queue As Collection
+
+Public Property Get Worksheet() As Worksheet
+    Set Worksheet = TargetSheet
+End Property
+
+Public Property Get Range() As Range
+    Set Range = TargetRange
+End Property
+
+Public Sub SetWorksheet(Ws As Worksheet)
+    Set TargetSheet = Ws
+    If Ws Is Nothing Then
+        Set TargetRange = Nothing
+        CellCounter = 0
+        ClearQueue
+    Else
+        Set TargetRange = Ws.Cells
+    End If
+End Sub
+
+Public Sub SetRange(Ra As Range)
+    Set TargetRange = Ra
+    If Ra Is Nothing Then
+        Set TargetSheet = Nothing
+        CellCounter = 0
+        ClearQueue
+    Else
+        If Not TargetSheet Is Ra.Worksheet Then Set TargetSheet = Ra.Worksheet
+    End If
+End Sub
+
+Public Function IsNotReady() As Boolean
+    IsNotReady = IsEmptyQueue Or (TargetRange Is Nothing) Or (PropertyName = "")
+End Function
+
+
+'=== properties end ===
+'=== spawn begin ===
+
+
+Public Function Spawn() As SsfCellStream
+    Set Spawn = New SsfCellStream
+    With Spawn
+        Set .Env = Env
+        .PropertyName = PropertyName
+    End With
+End Function
+
+Public Function SpawnAreas() As Collection
+    Dim out As Collection
+    Dim Spawned As SsfCellStream
+    Dim R As Long
+    Dim C As Long
+    Dim Columns As Long
+    Dim Data As Variant
+    Dim AllEmpty As Boolean
+    Dim TopLeftCell As Range
+    
+    If IsNotReady Then Exit Function
+    
+    Set out = New Collection
+    Columns = TargetRange.Columns.Count
+    
+    ' add 1 empty row as a terminator
+    For C = 1 To Columns
+        Enqueue Empty
+    Next
+    
+    Set Spawned = Spawn
+    Set TopLeftCell = TargetRange.Cells(1)
+    R = 0
+    Do Until IsEmptyQueue
+        AllEmpty = True
+        For C = 1 To Columns
+            Data = Dequeue
+            Spawned.WriteText Data
+            If Not IsEmpty(Data) Then AllEmpty = False
+        Next
+        If AllEmpty Then
+            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Offset(R, Columns - 1))
+            Spawned.MinimizeRange
+            out.Add Spawned
+            Set Spawned = Spawn
+            Set TopLeftCell = TopLeftCell.Offset(R + 1, 0)
+            R = 0
+        Else
+            R = R + 1
+        End If
+    Loop
+    Set Spawned = Nothing
+    
+    Set SpawnAreas = out
+End Function
+
+
+'=== spawn end ===
+'=== cell reader / writer begin ===
+
+
+Public Sub ReadTargetCell(Optional ByVal EmptyValue As Variant = Empty)
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Select Case LCase(PropertyName)
+    Case "formula-or-value"
+    Case "value", "value2", "text", "formula", "formular1c1"
+        Data = CallByName(TargetRange, PropertyName, VbGet)
+        EnqueueMatrix Data, EmptyValue
+    Case Else
+        EnqueueRangeProperty EmptyValue
+    End Select
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "ReadTargetCell: Error " & Err.Number & " " & Err.Description
+End Sub
+
+Public Sub WriteTargetCell()
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Select Case LCase(PropertyName)
+    Case "value", "value2", "text", "formula", "formular1c1"
+        Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
+        CallByName TargetRange, PropertyName, VbLet, Data
+    Case Else
+        DequeueRangeProperty
+    End Select
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteTargetCell: Error " & Err.Number & " " & Err.Description
+End Sub
+
+Public Sub WriteText(Data As Variant)
+    Enqueue Data
+End Sub
+
+
+'=== cell reader / writer end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim RepeatCounter As Long
+    Dim i As Long
+    
+    RepeatCounter = 0
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "address"
+            If Not IsNotReady Then WriteTargetCell
+            Set TargetRange = SsfUtilsExcel.ExcelAddressToRange(TargetSheet, Value, TargetSheet.Cells)
+        Case "skip"
+            For i = 1 To CLng(Val(Value))
+                Enqueue Empty
+            Next
+        Case "repeat"
+            RepeatCounter = CLng(Val(Value))
+        Case ""
+            Value = SsfUtils.LineFeedToLf(Value, LineFeed)
+            If RepeatCounter > 0 Then
+                Do While RepeatCounter > 0
+                    RepeatCounter = RepeatCounter - 1
+                    Enqueue Value
+                Loop
+            Else
+                Enqueue Value
+            End If
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+    If Not IsNotReady Then WriteTargetCell
+End Sub
+
+
+'=== ssf reader end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfSimple(Stream As Object)
+    ' compatible with the primitive
+    If IsNotReady Then Exit Sub
+    
+    WriteLineAddress Stream, TargetRange
+    ' simple list, each cell in each line
+    Do Until IsEmptyQueue
+        Stream.WriteLine SsfWriter.MakeSsfLineCellData(Dequeue)
+    Loop
+End Sub
+
+Public Sub WriteSsfSkip(Stream As Object)
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    
+    If IsNotReady Then Exit Sub
+    
+    WriteLineAddress Stream, TargetRange
+    ' simple list with skip and repeat
+    Counter = 0
+    LastData = Empty
+    Do Until IsEmptyQueue
+        Data = Dequeue
+        If Data = LastData Then
+            Counter = Counter + 1
+        Else
+            WriteLineSkipOrRepeat Stream, Counter, LastData
+            LastData = Data
+            Counter = 1
+        End If
+    Loop
+    If Counter > 0 And Not IsEmpty(LastData) Then
+        WriteLineRepeat Stream, Counter, LastData
+    End If
+End Sub
+
+Public Sub WriteSsfBlocks(Stream As Object)
+    Dim Block As SsfCellStream
+    Dim Blocks As Collection
+    
+    If IsNotReady Then Exit Sub
+    
+    ' spawn child blocks divided by empty rows
+    Set Blocks = SpawnAreas()
+    Do While Blocks.Count > 0
+        Set Block = Blocks(1)
+        With Block
+            .WriteSsfSkip Stream
+            .SetRange Nothing
+        End With
+        Set Block = Nothing
+        Blocks.Remove 1
+    Loop
+End Sub
+
+
+'=== ssf writer end ===
+'=== ssf writer helper begin ===
+
+
+Private Sub WriteLineAddress(Stream As Object, Target As Range)
+    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
+End Sub
+
+Private Sub WriteLineSkipOrRepeat(Stream As Object, Count As Long, Data As Variant)
+    If IsEmpty(Data) Then
+        WriteLineSkip Stream, Count
+    Else
+        WriteLineRepeat Stream, Count, Data
+    End If
+End Sub
+
+Private Sub WriteLineSkip(Stream As Object, Count As Long)
+    If Count > 0 Then Stream.WriteLine SsfWriter.MakeSsfLine("skip", Count)
+End Sub
+
+Private Sub WriteLineRepeat(Stream As Object, Count As Long, Data As Variant)
+    If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+    Stream.WriteLine SsfWriter.MakeSsfLineCellData(Data)
+End Sub
+
+
+'=== ssf writer helper end ===
+'=== queue begin ===
+
+Private Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = (Queue.Count = 0)
+End Function
+
+Private Sub ClearQueue()
+    Do While Queue.Count > 0
+        Queue.Remove 1
+    Loop
+End Sub
+
+Private Sub Enqueue(Data As Variant)
+    Queue.Add Data
+End Sub
+
+Private Function Dequeue() As Variant
+    Dequeue = Queue(1)
+    Queue.Remove (1)
+End Function
+
+Private Sub EnqueueArray(Data As Variant)
+    Dim x As Variant
+    For Each x In Data
+        Enqueue x
+    Next
+End Sub
+
+Private Sub EnqueueRangeProperty(Optional ByVal EmptyValue As Variant = Empty)
+    Dim R As Long
+    Dim C As Long
+    Dim Data As Variant
+    
+    On Error Resume Next
+    
+    With TargetRange
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                Data = CallByName(.Cells(R, C), PropertyName, VbGet)
+                If Err.Number <> 0 Then
+                    Env.LogWrite "EnqueueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
+                    Data = Empty
+                End If
+                If Data = EmptyValue Then
+                    Enqueue Empty
+                Else
+                    Enqueue Data
+                End If
+            Next
+        Next
+    End With
+End Sub
+
+Private Sub DequeueRangeProperty()
+    Dim R As Long
+    Dim C As Long
+    Dim Data As Variant
+    
+    'Env.LogWrite "DequeueRangeProperty: " & TargetRange.Address(False, False, xlA1, False)
+    With TargetRange
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                Data = Dequeue
+                If Not IsEmpty(Data) Then
+                    CallByName .Cells(R, C), PropertyName, VbLet, Data
+                    If Err.Number <> 0 Then
+                        Env.LogWrite "DequeueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
+                    End If
+                End If
+            Next
+        Next
+    End With
+End Sub
+
+Private Sub EnqueueMatrix(Data As Variant, Optional ByVal EmptyValue As Variant = Empty)
+    Dim R As Long
+    Dim C As Long
+    
+    For R = LBound(Data, 1) To UBound(Data, 1)
+        For C = LBound(Data, 2) To UBound(Data, 2)
+            If Data(R, C) = EmptyValue Then
+                Enqueue Empty
+            Else
+                Enqueue Data(R, C)
+            End If
+        Next
+    Next
+End Sub
+
+Private Function DequeueMatrix(Optional ByVal Columns As Long = 1, _
+        Optional ByVal Rows As Long = 1, _
+        Optional ByVal DefaultValue As Variant = Empty) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    
+    If Columns <= 0 Or Rows <= 0 Then
+        DequeueMatrix = Empty
+        Exit Function
+    End If
+    
+    ReDim out(1 To Rows, 1 To Columns)
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If IsEmptyQueue Then GoTo EmptyQueue
+            out(R, C) = Dequeue
+        Next
+    Next
+    
+EmptyQueue:
+    Do While R <= Rows
+        Do While C <= Columns
+            out(R, C) = DefaultValue
+            C = C + 1
+        Loop
+        R = R + 1
+    Loop
+    
+    DequeueMatrix = out
+End Function
+
+Private Function CheatQueue2D(Row As Long, Column As Long, ColumnSize As Long) As Variant
+    CheatQueue2D = Queue((Row - 1) * ColumnSize + Column)
+End Function
+
+
+'=== queue end ===
+'=== cell utility begin ===
+
+
+Public Sub MinimizeRange()
+    Dim RealCounts As Variant
+    Dim MaxCount As Long
+    Dim C As Long
+    Dim R As Long
+    Dim RowBegin As Long
+    Dim RowEnd As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewRow As Range
+    Dim NewColumn As Range
+    
+    RealCounts = RealColumnsCount()
+    RowBegin = 0
+    RowEnd = 0
+    MaxCount = 0
+    For R = 1 To UBound(RealCounts)
+        If RealCounts(R) > 0 Then
+            If MaxCount < RealCounts(R) Then MaxCount = RealCounts(R)
+            If RowBegin = 0 Then RowBegin = R
+            RowEnd = R
+        End If
+    Next
+    
+    If MaxCount = 0 Or RowEnd = 0 Then
+        SetRange Nothing
+        Exit Sub
+    End If
+    
+    Rows = TargetRange.Rows.Count
+    Columns = TargetRange.Columns.Count
+    
+    Set NewRow = TargetRange.EntireRow
+    If RowBegin > 1 Or RowEnd < Rows Then
+        Set NewRow = NewRow.Rows(RowBegin & ":" & RowEnd)
+        For R = RowEnd + 1 To Rows
+            For C = 1 To Columns
+                Queue.Remove RowEnd * Columns + 1
+            Next
+        Next
+        For R = 1 To RowBegin - 1
+            For C = 1 To Columns
+                Queue.Remove 1
+            Next
+        Next
+    End If
+    
+    Set NewColumn = TargetRange.EntireColumn
+    If MaxCount < Columns Then
+        Set NewColumn = TargetSheet.Range(NewColumn.Columns(1), NewColumn.Columns(MaxCount))
+        For R = RowEnd - RowBegin + 1 To 1 Step -1
+            For C = Columns To MaxCount + 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+        Next
+    End If
+    
+    Set TargetRange = Application.Intersect(NewRow, NewColumn)
+End Sub
+
+Private Function RealColumnsCount() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = TargetRange.Rows.Count
+    Columns = TargetRange.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = Columns To 1 Step -1
+            If Not IsEmpty(CheatQueue2D(R, C, Columns)) Then Exit For
+        Next
+        out(R) = C
+        'Debug.Print R, C
+    Next
+    
+    RealColumnsCount = out
+End Function
+
+
+'=== cell utility end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    Set Queue = New Collection
+End Sub
+
+Private Sub Class_Terminate()
+    Set Env = Nothing
+    SetRange Nothing
+    Set Queue = Nothing
+End Sub
+
+'=== calss events end ===
 
 '}}}
 
