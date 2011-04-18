@@ -31,7 +31,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40652.2916666667
+'         ;40652.3333333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -2770,6 +2770,23 @@ Public Function ExcelCalculateColumnWidth(ByVal Size As Double, Optional ByVal U
     ExcelCalculateColumnWidth = out
 End Function
 
+' this function is required to avoid overflow errors on excel 2007 Cells.Count
+Public Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+        ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
 '}}}
 
 'class
@@ -3689,8 +3706,12 @@ Public Sub ReadTargetCell(Optional ByVal EmptyValue As Variant = Empty)
     Select Case LCase(PropertyName)
     Case "formula-or-value"
     Case "value", "value2", "text", "formula", "formular1c1"
-        Data = CallByName(TargetRange, PropertyName, VbGet)
-        EnqueueMatrix Data, EmptyValue
+        If SsfUtilsExcel.IsASingleCell(TargetRange) Then
+            EnqueueRangeProperty EmptyValue
+        Else
+            Data = CallByName(TargetRange, PropertyName, VbGet)
+            EnqueueMatrix Data, EmptyValue
+        End If
     Case Else
         EnqueueRangeProperty EmptyValue
     End Select
