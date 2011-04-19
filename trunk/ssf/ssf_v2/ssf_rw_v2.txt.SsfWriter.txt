@@ -105,7 +105,7 @@ Public Function MakeSsfLineEscaped(ByVal Value)
 End Function
 
 Public Function MakeSsfLineCellData(Value)
-    If InStr(Value, LineEnd) = 0 Then
+    If InStr(Value, vbLf) = 0 Then
         MakeSsfLineCellData = MakeSsfLine("", Value)
     Else
         MakeSsfLineCellData = MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Value, LineEnd))

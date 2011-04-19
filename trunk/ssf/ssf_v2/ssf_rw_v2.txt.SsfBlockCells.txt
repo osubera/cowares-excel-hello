@@ -27,7 +27,7 @@ End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
-    Const LocalProperty = "FormulaR1C1"
+    Const LocalProperty = "Formula-Or-Value"
     Const EmptyValue = Empty
     
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue

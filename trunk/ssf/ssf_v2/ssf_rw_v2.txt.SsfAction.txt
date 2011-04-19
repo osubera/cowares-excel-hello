@@ -31,7 +31,7 @@ Public Sub WriteTo(Stream, Env)
     Dim Target As Object
     
     Set Target = Env.Current("target")
-    Select Case TypeName(Target)
+    Select Case Env.Current("target-type")
     Case "Workbook"
         SsfBlockWorkbook.WriteTo Target, Stream, Env
     Case "Worksheet"
@@ -39,7 +39,11 @@ Public Sub WriteTo(Stream, Env)
     Case "Range"
         SsfBlockCells.WriteTo Target, Stream, Env
     Case "VBProject"
-        SsfBlockModules.WriteTo Target.Parent, Stream, Env
+        SsfBlockModules.WriteTo Target, Stream, Env
+    Case "CodeModule"
+        If SsfBlockModules.ShallDumpModule(Target, Env) Then
+            SsfBlockModules.VbaCodeModuleWriteTo Target.VBProject.VBE.ActiveCodePane.CodeModule, Stream, Env
+        End If
     Case Else
         Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
     End Select
