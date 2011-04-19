@@ -31,7 +31,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40652.4166666667
+'         ;40652.5833333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1088,7 +1088,7 @@ Public Function MakeSsfLineEscaped(ByVal Value)
 End Function
 
 Public Function MakeSsfLineCellData(Value)
-    If InStr(Value, LineEnd) = 0 Then
+    If InStr(Value, vbLf) = 0 Then
         MakeSsfLineCellData = MakeSsfLine("", Value)
     Else
         MakeSsfLineCellData = MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Value, LineEnd))
@@ -2351,7 +2351,7 @@ Public Function ButtonItems(Data As Variant) As Variant
     Dim pan As Variant
     Dim i As Long
     
-    On Error GoTo Done
+    On Error GoTo DONE
     pan = Empty
     i = 9
     
@@ -2360,7 +2360,7 @@ Public Function ButtonItems(Data As Variant) As Variant
         i = i + 1
     Loop
     
-Done:
+DONE:
     ButtonItems = pan
 End Function
 
@@ -3151,7 +3151,7 @@ End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
-    Const LocalProperty = "FormulaR1C1"
+    Const LocalProperty = "Formula-Or-Value"
     Const EmptyValue = Empty
     
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
@@ -3543,7 +3543,7 @@ Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As St
     ' rule#3 safe
     If CBool(Env.GetEnv("ssf", "safe-module", "false")) Then GoTo AddNew
     
-    GoTo Done
+    GoTo DONE
     
     ' rule#4 add
 AddNew:
@@ -3577,7 +3577,7 @@ AddNew2:
     End If
     Env.LogWrite "add " & NewName & " type " & VbaModuleTypeToSsfBlockName(Comp)
     
-Done:
+DONE:
     Set Env.Current("module") = Comp
 End Sub
 
@@ -3698,19 +3698,13 @@ End Function
 
 
 Public Sub ReadTargetCell(Optional ByVal EmptyValue As Variant = Empty)
-    Dim Data As Variant
-    
     On Error GoTo HasError
     
     Select Case LCase(PropertyName)
     Case "formula-or-value"
+        EnqueueRangeFormulaValue EmptyValue
     Case "value", "value2", "text", "formula", "formular1c1"
-        If SsfUtilsExcel.IsASingleCell(TargetRange) Then
-            EnqueueRangeProperty EmptyValue
-        Else
-            Data = CallByName(TargetRange, PropertyName, VbGet)
-            EnqueueMatrix Data, EmptyValue
-        End If
+        EnqueueRangeValueFamily EmptyValue
     Case Else
         EnqueueRangeProperty EmptyValue
     End Select
@@ -3721,14 +3715,11 @@ HasError:
 End Sub
 
 Public Sub WriteTargetCell()
-    Dim Data As Variant
-    
     On Error GoTo HasError
     
     Select Case LCase(PropertyName)
     Case "value", "value2", "text", "formula", "formular1c1"
-        Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-        CallByName TargetRange, PropertyName, VbLet, Data
+        DequeueRangeValueFamily
     Case Else
         DequeueRangeProperty
     End Select
@@ -4004,8 +3995,100 @@ Private Function CheatQueue2D(Row As Long, Column As Long, ColumnSize As Long) A
     CheatQueue2D = Queue((Row - 1) * ColumnSize + Column)
 End Function
 
+Private Sub UpdateQueue2D(Data As Variant, Row As Long, Column As Long, ColumnSize As Long)
+    Dim Position As Long
+    
+    Position = (Row - 1) * ColumnSize + Column
+    Queue.Add Data, After:=Position
+    Queue.Remove Position
+End Sub
+
+Private Sub UpdateQueueByCellProperty(Ra As Range, MyProperty As String)
+    Dim Row As Long
+    Dim Column As Long
+    Dim ColumnSize As Long
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Row = Ra.Row - TargetRange.Cells(1).Row + 1
+    Column = Ra.Column - TargetRange.Cells(1).Column + 1
+    ColumnSize = TargetRange.Columns.Count
+    Data = CallByName(Ra, MyProperty, VbGet)
+    UpdateQueue2D Data, Row, Column, ColumnSize
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "UpdateQueueByCellProperty: Error " & Err.Number & " " & Err.Description & "(" & Row & "," & Column & ")"
+End Sub
+
 
 '=== queue end ===
+'=== extended queue begin ===
+
+
+Private Function TryEnqueueRangeValueFamily(NewProperty As String, _
+        Optional ByVal EmptyValue As Variant = Empty) As Boolean
+    Dim RememberProperty As String
+    
+    RememberProperty = PropertyName
+    PropertyName = NewProperty
+    
+    On Error Resume Next
+    EnqueueRangeValueFamily EmptyValue
+    TryEnqueueRangeValueFamily = (Err.Number = 0)
+    Err.Clear
+    
+    PropertyName = RememberProperty
+End Function
+
+Private Sub EnqueueRangeValueFamily(Optional ByVal EmptyValue As Variant = Empty)
+    Dim Data As Variant
+    
+    If SsfUtilsExcel.IsASingleCell(TargetRange) Then
+        EnqueueRangeProperty EmptyValue
+    Else
+        Data = CallByName(TargetRange, PropertyName, VbGet)
+        EnqueueMatrix Data, EmptyValue
+    End If
+End Sub
+
+Private Sub DequeueRangeValueFamily()
+    Dim Data As Variant
+    
+    Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
+    CallByName TargetRange, PropertyName, VbLet, Data
+End Sub
+
+Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
+    Dim CheckMixed As Variant
+    Dim FormulaCells As Range
+    Dim FormulaCell As Range
+    
+    CheckMixed = TargetRange.HasFormula
+    If IsNull(CheckMixed) Then
+        ' contains Formulas and Constants
+        If TryEnqueueRangeValueFamily("FormulaR1C1", EmptyValue) Then GoTo DONE
+        If Not TryEnqueueRangeValueFamily("Value", EmptyValue) Then
+            Env.LogWrite "EnqueueRangeFormulaValue: Error at " & TargetRange.Address(False, False, xlA1, False)
+            GoTo DONE
+        End If
+        Set FormulaCells = TargetRange.SpecialCells(xlCellTypeFormulas)
+        For Each FormulaCell In FormulaCells
+            UpdateQueueByCellProperty FormulaCell, "FormulaR1C1"
+        Next
+    ElseIf CBool(CheckMixed) Then
+        ' contains only Formula(s)
+        TryEnqueueRangeValueFamily "FormulaR1C1", EmptyValue
+    Else
+        ' contains only Constant(s)
+        TryEnqueueRangeValueFamily "Value", EmptyValue
+    End If
+DONE:
+End Sub
+
+
+'=== extended queue end ===
 '=== cell utility begin ===
 
 
