@@ -306,7 +306,7 @@ Public Function ButtonItems(Data As Variant) As Variant
     Dim pan As Variant
     Dim i As Long
     
-    On Error GoTo Done
+    On Error GoTo DONE
     pan = Empty
     i = 9
     
@@ -315,7 +315,7 @@ Public Function ButtonItems(Data As Variant) As Variant
         i = i + 1
     Loop
     
-Done:
+DONE:
     ButtonItems = pan
 End Function
 

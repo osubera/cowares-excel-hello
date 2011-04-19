@@ -215,7 +215,7 @@ Public Function IsLockedProject(Target As Object) As Boolean
     Set P = Nothing
 End Function
 
-Public Function ShallDumpModule(ByVal Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModule(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
     On Error Resume Next
     Dim out As Variant
     
@@ -234,7 +234,7 @@ Public Function ShallDumpModule(ByVal Target As Object, Env As GlobalResources) 
     ShallDumpModule = out
 End Function
 
-Public Function ShallDumpModuleEach(ByVal Target As Object, Env As GlobalResources) As Boolean
+Public Function ShallDumpModuleEach(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
     Dim out As Boolean
     
     out = (LCase(Env.GetEnv("ssf", "enable-module", "true")) = "every")
@@ -334,7 +334,7 @@ Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As St
     ' rule#3 safe
     If CBool(Env.GetEnv("ssf", "safe-module", "false")) Then GoTo AddNew
     
-    GoTo Done
+    GoTo DONE
     
     ' rule#4 add
 AddNew:
@@ -368,7 +368,7 @@ AddNew2:
     End If
     Env.LogWrite "add " & NewName & " type " & VbaModuleTypeToSsfBlockName(Comp)
     
-Done:
+DONE:
     Set Env.Current("module") = Comp
 End Sub
 

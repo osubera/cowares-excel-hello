@@ -116,15 +116,13 @@ End Function
 
 
 Public Sub ReadTargetCell(Optional ByVal EmptyValue As Variant = Empty)
-    Dim Data As Variant
-    
     On Error GoTo HasError
     
     Select Case LCase(PropertyName)
     Case "formula-or-value"
+        EnqueueRangeFormulaValue EmptyValue
     Case "value", "value2", "text", "formula", "formular1c1"
-        Data = CallByName(TargetRange, PropertyName, VbGet)
-        EnqueueMatrix Data, EmptyValue
+        EnqueueRangeValueFamily EmptyValue
     Case Else
         EnqueueRangeProperty EmptyValue
     End Select
@@ -135,14 +133,11 @@ HasError:
 End Sub
 
 Public Sub WriteTargetCell()
-    Dim Data As Variant
-    
     On Error GoTo HasError
     
     Select Case LCase(PropertyName)
     Case "value", "value2", "text", "formula", "formular1c1"
-        Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-        CallByName TargetRange, PropertyName, VbLet, Data
+        DequeueRangeValueFamily
     Case Else
         DequeueRangeProperty
     End Select
@@ -418,39 +413,132 @@ Private Function CheatQueue2D(Row As Long, Column As Long, ColumnSize As Long) A
     CheatQueue2D = Queue((Row - 1) * ColumnSize + Column)
 End Function
 
+Private Sub UpdateQueue2D(Data As Variant, Row As Long, Column As Long, ColumnSize As Long)
+    Dim Position As Long
+    
+    Position = (Row - 1) * ColumnSize + Column
+    Queue.Add Data, After:=Position
+    Queue.Remove Position
+End Sub
+
+Private Sub UpdateQueueByCellProperty(Ra As Range, MyProperty As String)
+    Dim Row As Long
+    Dim Column As Long
+    Dim ColumnSize As Long
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Row = Ra.Row - TargetRange.Cells(1).Row + 1
+    Column = Ra.Column - TargetRange.Cells(1).Column + 1
+    ColumnSize = TargetRange.Columns.Count
+    Data = CallByName(Ra, MyProperty, VbGet)
+    UpdateQueue2D Data, Row, Column, ColumnSize
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "UpdateQueueByCellProperty: Error " & Err.Number & " " & Err.Description & "(" & Row & "," & Column & ")"
+End Sub
+
 
 '=== queue end ===
+'=== extended queue begin ===
+
+
+Private Function TryEnqueueRangeValueFamily(NewProperty As String, _
+        Optional ByVal EmptyValue As Variant = Empty) As Boolean
+    Dim RememberProperty As String
+    
+    RememberProperty = PropertyName
+    PropertyName = NewProperty
+    
+    On Error Resume Next
+    EnqueueRangeValueFamily EmptyValue
+    TryEnqueueRangeValueFamily = (Err.Number = 0)
+    Err.Clear
+    
+    PropertyName = RememberProperty
+End Function
+
+Private Sub EnqueueRangeValueFamily(Optional ByVal EmptyValue As Variant = Empty)
+    Dim Data As Variant
+    
+    If SsfUtilsExcel.IsASingleCell(TargetRange) Then
+        EnqueueRangeProperty EmptyValue
+    Else
+        Data = CallByName(TargetRange, PropertyName, VbGet)
+        EnqueueMatrix Data, EmptyValue
+    End If
+End Sub
+
+Private Sub DequeueRangeValueFamily()
+    Dim Data As Variant
+    
+    Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
+    CallByName TargetRange, PropertyName, VbLet, Data
+End Sub
+
+Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
+    Dim CheckMixed As Variant
+    Dim FormulaCells As Range
+    Dim FormulaCell As Range
+    
+    CheckMixed = TargetRange.HasFormula
+    If IsNull(CheckMixed) Then
+        ' contains Formulas and Constants
+        If TryEnqueueRangeValueFamily("FormulaR1C1", EmptyValue) Then GoTo DONE
+        If Not TryEnqueueRangeValueFamily("Value", EmptyValue) Then
+            Env.LogWrite "EnqueueRangeFormulaValue: Error at " & TargetRange.Address(False, False, xlA1, False)
+            GoTo DONE
+        End If
+        Set FormulaCells = TargetRange.SpecialCells(xlCellTypeFormulas)
+        For Each FormulaCell In FormulaCells
+            UpdateQueueByCellProperty FormulaCell, "FormulaR1C1"
+        Next
+    ElseIf CBool(CheckMixed) Then
+        ' contains only Formula(s)
+        TryEnqueueRangeValueFamily "FormulaR1C1", EmptyValue
+    Else
+        ' contains only Constant(s)
+        TryEnqueueRangeValueFamily "Value", EmptyValue
+    End If
+DONE:
+End Sub
+
+
+'=== extended queue end ===
 '=== cell utility begin ===
 
 
 Public Sub MinimizeRange()
-    Dim RealCounts As Variant
-    Dim MaxCount As Long
-    Dim C As Long
     Dim R As Long
+    Dim C As Long
     Dim RowBegin As Long
     Dim RowEnd As Long
-    Dim Rows As Long
-    Dim Columns As Long
+    Dim ColumnBegin As Long
+    Dim ColumnEnd As Long
     Dim NewRow As Range
     Dim NewColumn As Range
     
-    RealCounts = RealColumnsCount()
-    RowBegin = 0
-    RowEnd = 0
-    MaxCount = 0
-    For R = 1 To UBound(RealCounts)
-        If RealCounts(R) > 0 Then
-            If MaxCount < RealCounts(R) Then MaxCount = RealCounts(R)
-            If RowBegin = 0 Then RowBegin = R
-            RowEnd = R
-        End If
-    Next
+    ColumnEnd = CalculateMaxColumnAndRow(RowBegin, RowEnd)
+    ColumnBegin = CalculateMinColumn()
     
-    If MaxCount = 0 Or RowEnd = 0 Then
+    If ColumnEnd = 0 Or RowEnd = 0 Then
         SetRange Nothing
         Exit Sub
     End If
+    
+    Set NewRow = CropUnusedRows(RowBegin, RowEnd)
+    Set NewColumn = CropUnusedColumns(RowBegin, RowEnd, ColumnBegin, ColumnEnd)
+    Set TargetRange = Application.Intersect(NewRow, NewColumn)
+End Sub
+
+Private Function CropUnusedRows(RowBegin As Long, RowEnd As Long) As Range
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewRow As Range
     
     Rows = TargetRange.Rows.Count
     Columns = TargetRange.Columns.Count
@@ -458,6 +546,7 @@ Public Sub MinimizeRange()
     Set NewRow = TargetRange.EntireRow
     If RowBegin > 1 Or RowEnd < Rows Then
         Set NewRow = NewRow.Rows(RowBegin & ":" & RowEnd)
+        ' remove unused data from queue
         For R = RowEnd + 1 To Rows
             For C = 1 To Columns
                 Queue.Remove RowEnd * Columns + 1
@@ -470,20 +559,75 @@ Public Sub MinimizeRange()
         Next
     End If
     
+    Set CropUnusedRows = NewRow
+End Function
+
+Private Function CropUnusedColumns(RowBegin As Long, RowEnd As Long, ColumnBegin As Long, ColumnEnd As Long) As Range
+    ' expect this is called after CropUnusedRows
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewColumn As Range
+    
+    Rows = TargetRange.Rows.Count
+    Columns = TargetRange.Columns.Count
+    
     Set NewColumn = TargetRange.EntireColumn
-    If MaxCount < Columns Then
-        Set NewColumn = TargetSheet.Range(NewColumn.Columns(1), NewColumn.Columns(MaxCount))
+    If ColumnBegin > 1 Or ColumnEnd < Columns Then
+        Set NewColumn = TargetSheet.Range(NewColumn.Columns(ColumnBegin), NewColumn.Columns(ColumnEnd))
         For R = RowEnd - RowBegin + 1 To 1 Step -1
-            For C = Columns To MaxCount + 1 Step -1
+            For C = Columns To ColumnEnd + 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+            For C = ColumnBegin - 1 To 1 Step -1
                 Queue.Remove (R - 1) * Columns + C
             Next
         Next
     End If
     
-    Set TargetRange = Application.Intersect(NewRow, NewColumn)
-End Sub
+    Set CropUnusedColumns = NewColumn
+End Function
 
-Private Function RealColumnsCount() As Variant
+Private Function CalculateMaxColumnAndRow(ByRef RowBegin As Long, ByRef RowEnd As Long) As Long
+    Dim RealMaximums As Variant
+    Dim MaxCount As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMaximums = RealMaxColumns()
+    RowBegin = 0
+    RowEnd = 0
+    MaxCount = 0
+    For R = 1 To UBound(RealMaximums)
+        If RealMaximums(R) > 0 Then
+            If MaxCount < RealMaximums(R) Then MaxCount = RealMaximums(R)
+            If RowBegin = 0 Then RowBegin = R
+            RowEnd = R
+        End If
+    Next
+    
+    CalculateMaxColumnAndRow = MaxCount
+End Function
+
+Private Function CalculateMinColumn() As Long
+    Dim RealMinimums As Variant
+    Dim MinColumn As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMinimums = RealMinColumns()
+    MinColumn = TargetRange.Columns.Count + 1
+    For R = 1 To UBound(RealMinimums)
+        If RealMinimums(R) > 0 Then
+            If MinColumn > RealMinimums(R) Then MinColumn = RealMinimums(R)
+        End If
+    Next
+    
+    CalculateMinColumn = MinColumn
+End Function
+
+Private Function RealMaxColumns() As Variant
     Dim R As Long
     Dim C As Long
     Dim Rows As Long
@@ -503,7 +647,31 @@ Private Function RealColumnsCount() As Variant
         'Debug.Print R, C
     Next
     
-    RealColumnsCount = out
+    RealMaxColumns = out
+End Function
+
+Private Function RealMinColumns() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = TargetRange.Rows.Count
+    Columns = TargetRange.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If Not IsEmpty(CheatQueue2D(R, C, Columns)) Then Exit For
+        Next
+        If C > Columns Then C = 0
+        out(R) = C
+        'Debug.Print R, C
+    Next
+    
+    RealMinColumns = out
 End Function
 
 
