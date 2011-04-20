@@ -8,6 +8,8 @@ Option Explicit
 
 Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
+    Case "book-identity"
+        SsfBlockIdentity.ReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-name"

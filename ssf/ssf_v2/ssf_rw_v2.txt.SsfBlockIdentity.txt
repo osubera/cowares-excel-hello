@@ -1,0 +1,113 @@
+﻿'ssf-begin
+';
+
+'module
+'   name;SsfBlockIdentity
+'{{{
+Option Explicit
+
+Const MyKey = "book-identity"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Wb As Workbook
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    Set Wb = Env.Current("workbook")
+    If Wb Is Nothing Then Exit Sub
+    
+    For Each KeyValue In Block
+        If SsfUtils.ExtractKeyValue(KeyValue, Key, Value) <> "" Then
+            SetDocumentProperty Wb, Key, Value
+        End If
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Key As Variant
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    For Each Key In Array("title", "description")
+        SsfLineWriteTo Target, Stream, Env, Key
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub SsfLineWriteTo(Target As Object, Stream As Object, Env As GlobalResources, ByVal Key As String)
+    Dim Value As String
+    
+    Value = GetDocumentProperty(Target, Key)
+    Env.LogWrite Key & ": " & Value
+    If Value <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine(Key, Value)
+End Sub
+
+Private Sub SetDocumentProperty(Wb As Workbook, Key As String, Value As String)
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Wb.VBProject.Description = Value
+    End Select
+    
+    If Err.Number <> 0 Then Err.Clear
+    Wb.BuiltinDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Wb.CustomDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Err.Clear
+End Sub
+
+Private Function GetDocumentProperty(Wb As Workbook, Key As String) As String
+    Dim Value As String
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    Value = ""
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Value = Wb.VBProject.Description
+    End Select
+    
+    Value = Wb.CustomDocumentProperties(PropertyName)
+    Value = Wb.BuiltinDocumentProperties(PropertyName)
+    
+    GetDocumentProperty = Value
+    If Err.Number <> 0 Then Err.Clear
+End Function
+
+Private Function KeyToPropertyName(ByVal Key As String) As String
+    Select Case Key
+    Case "description"
+        Key = "comments"
+    Case "contributor"
+        Key = "author"
+    Case "tag"
+        Key = "keywords"
+    Case "timestamp"
+        Key = "creation-date"
+    End Select
+    
+    KeyToPropertyName = StrConv(Replace(Key, "-", " "), vbProperCase)
+End Function
+
+'}}}
+
+'ssf-end
+

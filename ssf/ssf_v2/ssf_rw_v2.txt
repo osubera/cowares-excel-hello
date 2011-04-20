@@ -4,6 +4,10 @@
 'workbook
 '   name;ssf_rw_v2.xls/F3SsfRwV2
 
+'book-identity
+'  title;SSF Reader / Writer
+'  description;to convert between SSF texts and Excel Books
+
 'require
 '       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
@@ -31,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40652.5833333333
+'         ;40653.4166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
