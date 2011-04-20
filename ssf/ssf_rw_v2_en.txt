@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40653.6666666667
+'         ;40653.8333333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -159,7 +159,8 @@
 '     skip;1
 '         ;1
 '         ;F3SsfRwV2.BaumMain.OnButtonToggle
-'     skip;6
+'         ;1
+'     skip;5
 '         ;?
 '         ;Show this sheet
 '         ;about
@@ -2827,6 +2828,32 @@ Public Function IsEmptyCellProperty(Target As Range, ByVal PropertyName As Strin
     IsEmptyCellProperty = out
 End Function
 
+Public Function TranslateCellValues(Data As Variant, FilterClass As Object, FilterName As String) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = CallByName(FilterClass, FilterName, VbMethod, Data(R, C))
+            Next
+        Next
+        TranslateCellValues = out
+    Else
+        TranslateCellValues = CallByName(FilterClass, FilterName, VbMethod, Data)
+    End If
+End Function
+
 '}}}
 
 'class
@@ -4497,58 +4524,14 @@ End Function
 Option Explicit
 
 Public Function FromCell(Data As Variant) As Variant
-    Dim out() As Variant
-    Dim R As Long
-    Dim C As Long
-    Dim R1 As Long
-    Dim R2 As Long
-    Dim C1 As Long
-    Dim C2 As Long
-    
-    If IsArray(Data) Then
-        R1 = LBound(Data, 1)
-        R2 = UBound(Data, 1)
-        C1 = LBound(Data, 2)
-        C2 = UBound(Data, 2)
-        ReDim out(R1 To R2, C1 To C2)
-        For R = R1 To R2
-            For C = C1 To C2
-                out(R, C) = FromSingleCell(Data(R, C))
-            Next
-        Next
-        FromCell = out
-    Else
-        FromCell = FromSingleCell(Data)
-    End If
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function
 
 Public Function ToCell(Data As Variant) As Variant
-    Dim out() As Variant
-    Dim R As Long
-    Dim C As Long
-    Dim R1 As Long
-    Dim R2 As Long
-    Dim C1 As Long
-    Dim C2 As Long
-    
-    If IsArray(Data) Then
-        R1 = LBound(Data, 1)
-        R2 = UBound(Data, 1)
-        C1 = LBound(Data, 2)
-        C2 = UBound(Data, 2)
-        ReDim out(R1 To R2, C1 To C2)
-        For R = R1 To R2
-            For C = C1 To C2
-                out(R, C) = ToSingleCell(Data(R, C))
-            Next
-        Next
-        ToCell = out
-    Else
-        ToCell = ToSingleCell(Data)
-    End If
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
 End Function
 
-Private Function FromSingleCell(Data As Variant) As Variant
+Public Function FromSingleCell(Data As Variant) As Variant
     Select Case Data
     Case XlHAlign.xlHAlignCenter
         FromSingleCell = "center"
@@ -4571,7 +4554,7 @@ Private Function FromSingleCell(Data As Variant) As Variant
     End Select
 End Function
 
-Private Function ToSingleCell(Data As Variant) As Variant
+Public Function ToSingleCell(Data As Variant) As Variant
     Select Case LCase(Data)
     Case "center", "c"
         ToSingleCell = XlHAlign.xlHAlignCenter
