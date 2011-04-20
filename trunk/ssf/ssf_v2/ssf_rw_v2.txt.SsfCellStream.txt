@@ -320,16 +320,10 @@ Private Sub EnqueueRangeProperty(Optional ByVal EmptyValue As Variant = Empty)
     Dim C As Long
     Dim Data As Variant
     
-    On Error Resume Next
-    
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
-                Data = CallByName(.Cells(R, C), PropertyName, VbGet)
-                If Err.Number <> 0 Then
-                    Env.LogWrite "EnqueueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
-                    Data = Empty
-                End If
+                Data = GetCellsProperty(.Cells(R, C), PropertyName)
                 If Data = EmptyValue Then
                     Enqueue Empty
                 Else
@@ -351,10 +345,7 @@ Private Sub DequeueRangeProperty()
             For C = 1 To .Columns.Count
                 Data = Dequeue
                 If Not IsEmpty(Data) Then
-                    CallByName .Cells(R, C), PropertyName, VbLet, Data
-                    If Err.Number <> 0 Then
-                        Env.LogWrite "DequeueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
-                    End If
+                    SetCellsProperty Data, .Cells(R, C), PropertyName
                 End If
             Next
         Next
@@ -432,7 +423,7 @@ Private Sub UpdateQueueByCellProperty(Ra As Range, MyProperty As String)
     Row = Ra.Row - TargetRange.Cells(1).Row + 1
     Column = Ra.Column - TargetRange.Cells(1).Column + 1
     ColumnSize = TargetRange.Columns.Count
-    Data = CallByName(Ra, MyProperty, VbGet)
+    Data = GetCellsProperty(Ra, MyProperty)
     UpdateQueue2D Data, Row, Column, ColumnSize
     Exit Sub
     
@@ -466,7 +457,7 @@ Private Sub EnqueueRangeValueFamily(Optional ByVal EmptyValue As Variant = Empty
     If SsfUtilsExcel.IsASingleCell(TargetRange) Then
         EnqueueRangeProperty EmptyValue
     Else
-        Data = CallByName(TargetRange, PropertyName, VbGet)
+        Data = GetCellsProperty(TargetRange, PropertyName)
         EnqueueMatrix Data, EmptyValue
     End If
 End Sub
@@ -475,7 +466,7 @@ Private Sub DequeueRangeValueFamily()
     Dim Data As Variant
     
     Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-    CallByName TargetRange, PropertyName, VbLet, Data
+    SetCellsProperty Data, TargetRange, PropertyName
 End Sub
 
 Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
@@ -672,6 +663,62 @@ Private Function RealMinColumns() As Variant
     Next
     
     RealMinColumns = out
+End Function
+
+Private Function GetCellsProperty(Ra As Object, Optional ByVal Key As String = "") As Variant
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = TranslateDotProperties(Ra, Key)
+    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "GetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    GetCellsProperty = Empty
+End Function
+
+Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal Key As String = "") As Boolean
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = TranslateDotProperties(Ra, Key)
+    CallByName Ra, Key, VbLet, Data
+    
+    SetCellsProperty = True
+    Exit Function
+    
+HasError:
+    Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    SetCellsProperty = False
+End Function
+
+Private Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
 End Function
 
 
