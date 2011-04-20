@@ -21,8 +21,12 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
 End Sub
 
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
-    CellsFormulaWriteTo Target, Stream, Env
-    CellsNumberFormatWriteTo Target, Stream, Env
+    Dim AnArea As Range
+    
+    For Each AnArea In Target.Areas
+        CellsFormulaWriteTo AnArea, Stream, Env
+        CellsNumberFormatWriteTo AnArea, Stream, Env
+    Next
 End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)

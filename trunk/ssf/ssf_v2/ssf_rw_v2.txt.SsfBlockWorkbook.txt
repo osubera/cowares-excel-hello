@@ -105,6 +105,7 @@ End Sub
 Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
     Dim Ws As Worksheet
     
+    SsfBlockIdentity.WriteTo Target, Stream, Env
     SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
     For Each Ws In Target.Worksheets
         SsfBlockWorksheet.WriteTo Ws, Stream, Env
