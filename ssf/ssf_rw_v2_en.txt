@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40653.5833333333
+'         ;40653.6666666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -845,6 +845,8 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockIdentity.ReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
+    Case "cells-h-align"
+        SsfBlockCells.CellsHAlignReadFrom Block, Env
     Case "cells-name"
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
@@ -2792,6 +2794,39 @@ MayFailOnExcel2007:
     End If
 End Function
 
+Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
+End Function
+
+Public Function IsEmptyCellProperty(Target As Range, ByVal PropertyName As String, _
+        Optional EmptyValue As Variant = Empty) As Boolean
+    Dim Receiver As Object
+    Dim AllValues As Variant
+    Dim out As Boolean
+    
+    Set Receiver = TranslateDotProperties(Target, PropertyName)
+    AllValues = CallByName(Receiver, PropertyName, VbGet)
+    
+    If IsNull(AllValues) Then
+        out = False
+    Else
+        out = (AllValues = EmptyValue)
+    End If
+    
+    IsEmptyCellProperty = out
+End Function
+
 '}}}
 
 'class
@@ -3151,12 +3186,22 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
+Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
         CellsFormulaWriteTo AnArea, Stream, Env
         CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsHAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -3173,16 +3218,19 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
     Const LocalProperty = "NumberFormat"
     Const EmptyValue = "General"
     
-    Dim AllFormats As Variant
-    
-    AllFormats = Target.NumberFormat
-    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
-    If Not IsNull(AllFormats) Then
-        ' avoid this block when everything is "General"
-        If AllFormats = EmptyValue Then Exit Sub
-    End If
-    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    Const EmptyValue = XlHAlign.xlHAlignGeneral
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
@@ -3609,6 +3657,7 @@ Private CellCounter As Long
 Public Env As GlobalResources
 Public PropertyName As String
 Public Queue As Collection
+Public Translator As Object
 
 Public Property Get Worksheet() As Worksheet
     Set Worksheet = TargetSheet
@@ -4268,8 +4317,8 @@ Private Function GetCellsProperty(Ra As Object, Optional ByVal Key As String = "
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
-    Set Receiver = TranslateDotProperties(Ra, Key)
-    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    GetCellsProperty = TranslateFromCell(CallByName(Receiver, Key, VbGet))
     
     Exit Function
     
@@ -4288,8 +4337,8 @@ Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal 
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
-    Set Receiver = TranslateDotProperties(Ra, Key)
-    CallByName Ra, Key, VbLet, Data
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    CallByName Ra, Key, VbLet, TranslateToCell(Data)
     
     SetCellsProperty = True
     Exit Function
@@ -4299,19 +4348,20 @@ HasError:
     SetCellsProperty = False
 End Function
 
-Private Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
-    Dim Receiver As Object
-    Dim DotProperties As Variant
-    
-    Set Receiver = Origin
-    Do
-        DotProperties = Split(Key, ".", 2)
-        If UBound(DotProperties) = 0 Then Exit Do
-        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
-        Key = DotProperties(1)
-    Loop
-    
-    Set TranslateDotProperties = Receiver
+Private Function TranslateFromCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateFromCell = Data
+    Else
+        TranslateFromCell = Translator.FromCell(Data)
+    End If
+End Function
+
+Private Function TranslateToCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateToCell = Data
+    Else
+        TranslateToCell = Translator.ToCell(Data)
+    End If
 End Function
 
 
@@ -4437,6 +4487,111 @@ Private Function KeyToPropertyName(ByVal Key As String) As String
     End Select
     
     KeyToPropertyName = StrConv(Replace(Key, "-", " "), vbProperCase)
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellHAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = FromSingleCell(Data(R, C))
+            Next
+        Next
+        FromCell = out
+    Else
+        FromCell = FromSingleCell(Data)
+    End If
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = ToSingleCell(Data(R, C))
+            Next
+        Next
+        ToCell = out
+    Else
+        ToCell = ToSingleCell(Data)
+    End If
+End Function
+
+Private Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlHAlign.xlHAlignCenter
+        FromSingleCell = "center"
+    Case XlHAlign.xlHAlignCenterAcrossSelection
+        FromSingleCell = "center-across-selection"
+    Case XlHAlign.xlHAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlHAlign.xlHAlignFill
+        FromSingleCell = "fill"
+    Case XlHAlign.xlHAlignGeneral
+        FromSingleCell = Empty
+    Case XlHAlign.xlHAlignJustify
+        FromSingleCell = "justify"
+    Case XlHAlign.xlHAlignLeft
+        FromSingleCell = "left"
+    Case XlHAlign.xlHAlignRight
+        FromSingleCell = "right"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Private Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "center", "c"
+        ToSingleCell = XlHAlign.xlHAlignCenter
+    Case "center-across-selection"
+        ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
+    Case "distributed"
+        ToSingleCell = XlHAlign.xlHAlignDistributed
+    Case "fill"
+        ToSingleCell = XlHAlign.xlHAlignFill
+    Case "", "general"
+        ToSingleCell = XlHAlign.xlHAlignGeneral
+    Case "justify"
+        ToSingleCell = XlHAlign.xlHAlignJustify
+    Case "left", "l"
+        ToSingleCell = XlHAlign.xlHAlignLeft
+    Case "right", "r"
+        ToSingleCell = XlHAlign.xlHAlignRight
+    Case Else
+        ToSingleCell = Data
+    End Select
 End Function
 
 '}}}
