@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40653.5416666667
+'         ;40653.5833333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -4258,16 +4258,19 @@ Private Function RealMinColumns() As Variant
     RealMinColumns = out
 End Function
 
-Private Function GetCellsProperty(Ra As Range, Optional ByVal Key As String = "") As Variant
+Private Function GetCellsProperty(Ra As Object, Optional ByVal Key As String = "") As Variant
     On Error GoTo HasError
     
     Dim Summary As String
+    Dim Receiver As Object
     
     If Key = "" Then Key = PropertyName
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
-    GetCellsProperty = CallByName(Ra, Key, VbGet)
+    Set Receiver = TranslateDotProperties(Ra, Key)
+    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    
     Exit Function
     
 HasError:
@@ -4275,22 +4278,40 @@ HasError:
     GetCellsProperty = Empty
 End Function
 
-Private Function SetCellsProperty(Data As Variant, Ra As Range, Optional ByVal Key As String = "") As Boolean
+Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal Key As String = "") As Boolean
     On Error GoTo HasError
     
     Dim Summary As String
+    Dim Receiver As Object
     
     If Key = "" Then Key = PropertyName
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
+    Set Receiver = TranslateDotProperties(Ra, Key)
     CallByName Ra, Key, VbLet, Data
+    
     SetCellsProperty = True
     Exit Function
     
 HasError:
     Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
     SetCellsProperty = False
+End Function
+
+Private Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
 End Function
 
 
