@@ -4,6 +4,10 @@
 'workbook
 '   name;ssf_rw_v2.xls/F3SsfRwV2
 
+'book-identity
+'  title;SSF Reader / Writer
+'  description;to convert between SSF texts and Excel Books
+
 'require
 '       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
@@ -31,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40652.5833333333
+'         ;40653.9166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -155,7 +159,8 @@
 '     skip;1
 '         ;1
 '         ;F3SsfRwV2.BaumMain.OnButtonToggle
-'     skip;6
+'         ;1
+'     skip;5
 '         ;?
 '         ;このシートを表示する。
 '         ;about
@@ -837,8 +842,14 @@ Option Explicit
 
 Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
+    Case "book-identity"
+        SsfBlockIdentity.ReadFrom Block, Env
+    Case "cells-font-bold"
+        SsfBlockCells.CellsFontBoldReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
+    Case "cells-h-align"
+        SsfBlockCells.CellsHAlignReadFrom Block, Env
     Case "cells-name"
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
@@ -2786,6 +2797,65 @@ MayFailOnExcel2007:
     End If
 End Function
 
+Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
+End Function
+
+Public Function IsEmptyCellProperty(Target As Range, ByVal PropertyName As String, _
+        Optional EmptyValue As Variant = Empty) As Boolean
+    Dim Receiver As Object
+    Dim AllValues As Variant
+    Dim out As Boolean
+    
+    Set Receiver = TranslateDotProperties(Target, PropertyName)
+    AllValues = CallByName(Receiver, PropertyName, VbGet)
+    
+    If IsNull(AllValues) Then
+        out = False
+    Else
+        out = (AllValues = EmptyValue)
+    End If
+    
+    IsEmptyCellProperty = out
+End Function
+
+Public Function TranslateCellValues(Data As Variant, FilterClass As Object, FilterName As String) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = CallByName(FilterClass, FilterName, VbMethod, Data(R, C))
+            Next
+        Next
+        TranslateCellValues = out
+    Else
+        TranslateCellValues = CallByName(FilterClass, FilterName, VbMethod, Data)
+    End If
+End Function
+
 '}}}
 
 'class
@@ -2974,6 +3044,7 @@ End Sub
 Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
     Dim Ws As Worksheet
     
+    SsfBlockIdentity.WriteTo Target, Stream, Env
     SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
     For Each Ws In Target.Worksheets
         SsfBlockWorksheet.WriteTo Ws, Stream, Env
@@ -3144,9 +3215,33 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
+Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
-    CellsFormulaWriteTo Target, Stream, Env
-    CellsNumberFormatWriteTo Target, Stream, Env
+    Dim AnArea As Range
+    
+    For Each AnArea In Target.Areas
+        CellsFormulaWriteTo AnArea, Stream, Env
+        CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsFontBoldWriteTo AnArea, Stream, Env
+        CellsHAlignWriteTo AnArea, Stream, Env
+    Next
 End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -3162,16 +3257,30 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
     Const LocalProperty = "NumberFormat"
     Const EmptyValue = "General"
     
-    Dim AllFormats As Variant
-    
-    AllFormats = Target.NumberFormat
-    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
-    If Not IsNull(AllFormats) Then
-        ' avoid this block when everything is "General"
-        If AllFormats = EmptyValue Then Exit Sub
-    End If
-    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    Const EmptyValue = XlHAlign.xlHAlignGeneral
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
@@ -3598,6 +3707,7 @@ Private CellCounter As Long
 Public Env As GlobalResources
 Public PropertyName As String
 Public Queue As Collection
+Public Translator As Object
 
 Public Property Get Worksheet() As Worksheet
     Set Worksheet = TargetSheet
@@ -3902,16 +4012,12 @@ Private Sub EnqueueRangeProperty(Optional ByVal EmptyValue As Variant = Empty)
     Dim C As Long
     Dim Data As Variant
     
-    On Error Resume Next
+    EmptyValue = TranslateFromCell(EmptyValue)
     
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
-                Data = CallByName(.Cells(R, C), PropertyName, VbGet)
-                If Err.Number <> 0 Then
-                    Env.LogWrite "EnqueueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
-                    Data = Empty
-                End If
+                Data = GetCellsProperty(.Cells(R, C), PropertyName)
                 If Data = EmptyValue Then
                     Enqueue Empty
                 Else
@@ -3933,10 +4039,7 @@ Private Sub DequeueRangeProperty()
             For C = 1 To .Columns.Count
                 Data = Dequeue
                 If Not IsEmpty(Data) Then
-                    CallByName .Cells(R, C), PropertyName, VbLet, Data
-                    If Err.Number <> 0 Then
-                        Env.LogWrite "DequeueRangeProperty: Error " & Err.Number & " " & Err.Description & "(" & R & "," & C & ")"
-                    End If
+                    SetCellsProperty Data, .Cells(R, C), PropertyName
                 End If
             Next
         Next
@@ -4014,7 +4117,7 @@ Private Sub UpdateQueueByCellProperty(Ra As Range, MyProperty As String)
     Row = Ra.Row - TargetRange.Cells(1).Row + 1
     Column = Ra.Column - TargetRange.Cells(1).Column + 1
     ColumnSize = TargetRange.Columns.Count
-    Data = CallByName(Ra, MyProperty, VbGet)
+    Data = GetCellsProperty(Ra, MyProperty)
     UpdateQueue2D Data, Row, Column, ColumnSize
     Exit Sub
     
@@ -4048,7 +4151,7 @@ Private Sub EnqueueRangeValueFamily(Optional ByVal EmptyValue As Variant = Empty
     If SsfUtilsExcel.IsASingleCell(TargetRange) Then
         EnqueueRangeProperty EmptyValue
     Else
-        Data = CallByName(TargetRange, PropertyName, VbGet)
+        Data = GetCellsProperty(TargetRange, PropertyName)
         EnqueueMatrix Data, EmptyValue
     End If
 End Sub
@@ -4057,7 +4160,7 @@ Private Sub DequeueRangeValueFamily()
     Dim Data As Variant
     
     Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-    CallByName TargetRange, PropertyName, VbLet, Data
+    SetCellsProperty Data, TargetRange, PropertyName
 End Sub
 
 Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
@@ -4256,6 +4359,63 @@ Private Function RealMinColumns() As Variant
     RealMinColumns = out
 End Function
 
+Private Function GetCellsProperty(Ra As Object, Optional ByVal Key As String = "") As Variant
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    GetCellsProperty = TranslateFromCell(CallByName(Receiver, Key, VbGet))
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "GetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    GetCellsProperty = Empty
+End Function
+
+Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal Key As String = "") As Boolean
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    CallByName Receiver, Key, VbLet, TranslateToCell(Data)
+    
+    SetCellsProperty = True
+    Exit Function
+    
+HasError:
+    Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    SetCellsProperty = False
+End Function
+
+Private Function TranslateFromCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateFromCell = Data
+    Else
+        TranslateFromCell = Translator.FromCell(Data)
+    End If
+End Function
+
+Private Function TranslateToCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateToCell = Data
+    Else
+        TranslateToCell = Translator.ToCell(Data)
+    End If
+End Function
+
 
 '=== cell utility end ===
 '=== calss events begin ===
@@ -4272,6 +4432,208 @@ Private Sub Class_Terminate()
 End Sub
 
 '=== calss events end ===
+
+'}}}
+
+'module
+'   name;SsfBlockIdentity
+'{{{
+Option Explicit
+
+Const MyKey = "book-identity"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Wb As Workbook
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    Set Wb = Env.Current("workbook")
+    If Wb Is Nothing Then Exit Sub
+    
+    For Each KeyValue In Block
+        If SsfUtils.ExtractKeyValue(KeyValue, Key, Value) <> "" Then
+            SetDocumentProperty Wb, Key, Value
+        End If
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Key As Variant
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    For Each Key In Array("title", "description")
+        SsfLineWriteTo Target, Stream, Env, Key
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub SsfLineWriteTo(Target As Object, Stream As Object, Env As GlobalResources, ByVal Key As String)
+    Dim Value As String
+    
+    Value = GetDocumentProperty(Target, Key)
+    Env.LogWrite Key & ": " & Value
+    If Value <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine(Key, Value)
+End Sub
+
+Private Sub SetDocumentProperty(Wb As Workbook, Key As String, Value As String)
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Wb.VBProject.Description = Value
+    End Select
+    
+    If Err.Number <> 0 Then Err.Clear
+    Wb.BuiltinDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Wb.CustomDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Err.Clear
+End Sub
+
+Private Function GetDocumentProperty(Wb As Workbook, Key As String) As String
+    Dim Value As String
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    Value = ""
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Value = Wb.VBProject.Description
+    End Select
+    
+    Value = Wb.CustomDocumentProperties(PropertyName)
+    Value = Wb.BuiltinDocumentProperties(PropertyName)
+    
+    GetDocumentProperty = Value
+    If Err.Number <> 0 Then Err.Clear
+End Function
+
+Private Function KeyToPropertyName(ByVal Key As String) As String
+    Select Case Key
+    Case "description"
+        Key = "comments"
+    Case "contributor"
+        Key = "author"
+    Case "tag"
+        Key = "keywords"
+    Case "timestamp"
+        Key = "creation-date"
+    End Select
+    
+    KeyToPropertyName = StrConv(Replace(Key, "-", " "), vbProperCase)
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellHAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlHAlign.xlHAlignCenter
+        FromSingleCell = "center"
+    Case XlHAlign.xlHAlignCenterAcrossSelection
+        FromSingleCell = "center-across-selection"
+    Case XlHAlign.xlHAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlHAlign.xlHAlignFill
+        FromSingleCell = "fill"
+    Case XlHAlign.xlHAlignGeneral
+        FromSingleCell = Empty
+    Case XlHAlign.xlHAlignJustify
+        FromSingleCell = "justify"
+    Case XlHAlign.xlHAlignLeft
+        FromSingleCell = "left"
+    Case XlHAlign.xlHAlignRight
+        FromSingleCell = "right"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlHAlign.xlHAlignCenter
+    Case "center-across-selection"
+        ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
+    Case "distributed"
+        ToSingleCell = XlHAlign.xlHAlignDistributed
+    Case "fill"
+        ToSingleCell = XlHAlign.xlHAlignFill
+    Case "", "general"
+        ToSingleCell = XlHAlign.xlHAlignGeneral
+    Case "justify"
+        ToSingleCell = XlHAlign.xlHAlignJustify
+    Case "left", "l", "左"
+        ToSingleCell = XlHAlign.xlHAlignLeft
+    Case "right", "r", "右"
+        ToSingleCell = XlHAlign.xlHAlignRight
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellBoolean
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case True
+        FromSingleCell = "yes"
+    Case Else
+        FromSingleCell = "no"
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
+        ToSingleCell = True
+    Case Else
+        ToSingleCell = False
+    End Select
+End Function
 
 '}}}
 

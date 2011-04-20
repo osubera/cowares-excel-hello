@@ -16,6 +16,7 @@ Private CellCounter As Long
 Public Env As GlobalResources
 Public PropertyName As String
 Public Queue As Collection
+Public Translator As Object
 
 Public Property Get Worksheet() As Worksheet
     Set Worksheet = TargetSheet
@@ -319,6 +320,8 @@ Private Sub EnqueueRangeProperty(Optional ByVal EmptyValue As Variant = Empty)
     Dim R As Long
     Dim C As Long
     Dim Data As Variant
+    
+    EmptyValue = TranslateFromCell(EmptyValue)
     
     With TargetRange
         For R = 1 To .Rows.Count
@@ -675,8 +678,8 @@ Private Function GetCellsProperty(Ra As Object, Optional ByVal Key As String = "
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
-    Set Receiver = TranslateDotProperties(Ra, Key)
-    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    GetCellsProperty = TranslateFromCell(CallByName(Receiver, Key, VbGet))
     
     Exit Function
     
@@ -695,8 +698,8 @@ Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal 
     Summary = Key & ": " & TypeName(Ra)
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
-    Set Receiver = TranslateDotProperties(Ra, Key)
-    CallByName Ra, Key, VbLet, Data
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    CallByName Receiver, Key, VbLet, TranslateToCell(Data)
     
     SetCellsProperty = True
     Exit Function
@@ -706,19 +709,20 @@ HasError:
     SetCellsProperty = False
 End Function
 
-Private Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
-    Dim Receiver As Object
-    Dim DotProperties As Variant
-    
-    Set Receiver = Origin
-    Do
-        DotProperties = Split(Key, ".", 2)
-        If UBound(DotProperties) = 0 Then Exit Do
-        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
-        Key = DotProperties(1)
-    Loop
-    
-    Set TranslateDotProperties = Receiver
+Private Function TranslateFromCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateFromCell = Data
+    Else
+        TranslateFromCell = Translator.FromCell(Data)
+    End If
+End Function
+
+Private Function TranslateToCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateToCell = Data
+    Else
+        TranslateToCell = Translator.ToCell(Data)
+    End If
 End Function
 
 

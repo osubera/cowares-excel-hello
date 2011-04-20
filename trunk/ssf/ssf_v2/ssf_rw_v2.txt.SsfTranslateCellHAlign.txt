@@ -1,0 +1,66 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfTranslateCellHAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlHAlign.xlHAlignCenter
+        FromSingleCell = "center"
+    Case XlHAlign.xlHAlignCenterAcrossSelection
+        FromSingleCell = "center-across-selection"
+    Case XlHAlign.xlHAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlHAlign.xlHAlignFill
+        FromSingleCell = "fill"
+    Case XlHAlign.xlHAlignGeneral
+        FromSingleCell = Empty
+    Case XlHAlign.xlHAlignJustify
+        FromSingleCell = "justify"
+    Case XlHAlign.xlHAlignLeft
+        FromSingleCell = "left"
+    Case XlHAlign.xlHAlignRight
+        FromSingleCell = "right"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlHAlign.xlHAlignCenter
+    Case "center-across-selection"
+        ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
+    Case "distributed"
+        ToSingleCell = XlHAlign.xlHAlignDistributed
+    Case "fill"
+        ToSingleCell = XlHAlign.xlHAlignFill
+    Case "", "general"
+        ToSingleCell = XlHAlign.xlHAlignGeneral
+    Case "justify"
+        ToSingleCell = XlHAlign.xlHAlignJustify
+    Case "left", "l", "左"
+        ToSingleCell = XlHAlign.xlHAlignLeft
+    Case "right", "r", "右"
+        ToSingleCell = XlHAlign.xlHAlignRight
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'ssf-end
+
