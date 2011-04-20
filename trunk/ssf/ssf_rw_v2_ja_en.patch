@@ -1,87 +1,87 @@
---- ssf_rw_v2.txt	2011-04-19 07:22:11.000000000 +0900
-+++ ssf_rw_v2_en.txt	2011-04-19 07:32:37.000000000 +0900
+--- ssf_rw_v2.txt	2011-04-20 10:43:55.000000000 +0900
++++ ssf_rw_v2_en.txt	2011-04-20 10:48:49.000000000 +0900
 @@ -1 +1 @@
 -﻿'ssf-begin
 +'ssf-begin
 @@ -5 +5 @@
 -'   name;ssf_rw_v2.xls/F3SsfRwV2
 +'   name;ssf_rw_v2_en.xls/F3SsfRwV2
-@@ -17 +17 @@
+@@ -21 +21 @@
 -'         ;名称
 +'         ;Public Name
-@@ -19,2 +19,2 @@
+@@ -23,2 +23,2 @@
 -'         ;コメント
 -'         ;SSFテキストとエクセルブックの変換を行う
 +'         ;Local Comment
 +'         ;to convert between SSF texts and Excel Books
-@@ -23 +23 @@
+@@ -27 +27 @@
 -'         ;著作権
 +'         ;Copyright
-@@ -25,3 +25,3 @@
+@@ -29,3 +29,3 @@
 -'         ;ライセンス
 -'         ;自律, 自由, 公正, http://cowares.nobody.jp
 -'         ;作者
 +'         ;License
 +'         ;Fortitudinous, Free, Fair, http://cowares.nobody.jp
 +'         ;Contributor
-@@ -29 +29 @@
+@@ -33 +33 @@
 -'         ;初版
 +'         ;Since
-@@ -31 +31 @@
+@@ -35 +35 @@
 -'         ;配布元
 +'         ;Url
-@@ -33 +33 @@
+@@ -37 +37 @@
 -'         ;更新
 +'         ;Timestamp
-@@ -38,2 +38,2 @@
+@@ -42,2 +42,2 @@
 -'         ;ボタンの表示
 -'         ;ボタンの機能
 +'         ;Button Face
 +'         ;Button Tips
-@@ -49,2 +49,2 @@
+@@ -53,2 +53,2 @@
 -'         ;コピーSSF
 -'         ;クリップボードにSSFを書き出す。
 +'         ;Copy as SSF
 +'         ;Write SSF into Clipboard
-@@ -58,2 +58,2 @@
+@@ -62,2 +62,2 @@
 -'         ;ペーストSSF
 -'         ;クリップボードのSSFを取り込む。
 +'         ;Paste from SSF
 +'         ;Read SSF from Clipboard
-@@ -65,2 +65,2 @@
+@@ -69,2 +69,2 @@
 -'         ;メモ帳へ
 -'         ;メモ帳にSSFを書き出す。
 +'         ;to Notepad
 +'         ;Write SSF into a Notepad
-@@ -74,2 +74,2 @@
+@@ -78,2 +78,2 @@
 -'         ;メモ帳から
 -'         ;メモ帳のSSFを取り込む。
 +'         ;from Notepad
 +'         ;Read SSF from a Notepad
-@@ -82 +82 @@
+@@ -86 +86 @@
 -'         ;連携中のメモ帳。
 +'         ;connection to Notepad
-@@ -88,2 +88,2 @@
+@@ -92,2 +92,2 @@
 -'         ;ファイルへ
 -'         ;ファイルにSSFを書き出す。
 +'         ;to File
 +'         ;Write SSF into a File
-@@ -97,2 +97,2 @@
+@@ -101,2 +101,2 @@
 -'         ;ファイルから
 -'         ;ファイルのSSFを取り込む。
 +'         ;from File
 +'         ;Read SSF from a File
-@@ -104,2 +104,2 @@
+@@ -108,2 +108,2 @@
 -'         ;文字コード
 -'         ;ファイルの文字コードを指定する。
 +'         ;Encoding
 +'         ;Character Encoding of File
-@@ -116,2 +116,2 @@
+@@ -120,2 +120,2 @@
 -'         ;対象
 -'         ;SSF書き出しの対象を指定する。
 +'         ;Object
 +'         ;What is converted when writing to SSF
-@@ -124,5 +124,5 @@
+@@ -128,5 +128,5 @@
 -'         ;ブック
 -'         ;シート
 -'         ;選択セル
@@ -92,28 +92,28 @@
 +'         ;Cells
 +'         ;Modules
 +'         ;Code
-@@ -130,2 +130,2 @@
+@@ -134,2 +134,2 @@
 -'         ;モジュール
 -'         ;VBAコードの扱いを指定する。
 +'         ;Module
 +'         ;How VBA codes are converted
-@@ -136,3 +136,3 @@
+@@ -140,3 +140,3 @@
 -'         ;VBA有り
 -'         ;VBA無し
 -'         ;VBA分離
 +'         ;with VBA
 +'         ;without VBA
 +'         ;separate VBA
-@@ -140,2 +140,2 @@
+@@ -144,2 +144,2 @@
 -'         ;混在
 -'         ;SSF宣言行より前の情報を取り込まない。
 +'         ;Mixed
 +'         ;use SSF declares to remove non SSF sections
-@@ -149,2 +149,2 @@
+@@ -153,2 +153,2 @@
 -'         ;ログ
 -'         ;メモ帳にログを出力する。
 +'         ;Log
 +'         ;Show verbose logs on Notepad
-@@ -160 +160 @@
+@@ -164 +164 @@
 -'         ;このシートを表示する。
 +'         ;Show this sheet
