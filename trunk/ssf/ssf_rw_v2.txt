@@ -4,6 +4,10 @@
 'workbook
 '   name;ssf_rw_v2.xls/F3SsfRwV2
 
+'book-identity
+'  title;SSF Reader / Writer
+'  description;to convert between SSF texts and Excel Books
+
 'require
 '       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
@@ -31,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40652.6666666667
+'         ;40653.4166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -837,6 +841,8 @@ Option Explicit
 
 Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
+    Case "book-identity"
+        SsfBlockIdentity.ReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-name"
@@ -2974,6 +2980,7 @@ End Sub
 Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
     Dim Ws As Worksheet
     
+    SsfBlockIdentity.WriteTo Target, Stream, Env
     SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
     For Each Ws In Target.Worksheets
         SsfBlockWorksheet.WriteTo Ws, Stream, Env
@@ -4276,6 +4283,114 @@ Private Sub Class_Terminate()
 End Sub
 
 '=== calss events end ===
+
+'}}}
+
+'module
+'   name;SsfBlockIdentity
+'{{{
+Option Explicit
+
+Const MyKey = "book-identity"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Wb As Workbook
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    Set Wb = Env.Current("workbook")
+    If Wb Is Nothing Then Exit Sub
+    
+    For Each KeyValue In Block
+        If SsfUtils.ExtractKeyValue(KeyValue, Key, Value) <> "" Then
+            SetDocumentProperty Wb, Key, Value
+        End If
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Key As Variant
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    For Each Key In Array("title", "description")
+        SsfLineWriteTo Target, Stream, Env, Key
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub SsfLineWriteTo(Target As Object, Stream As Object, Env As GlobalResources, ByVal Key As String)
+    Dim Value As String
+    
+    Value = GetDocumentProperty(Target, Key)
+    Env.LogWrite Key & ": " & Value
+    If Value <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine(Key, Value)
+End Sub
+
+Private Sub SetDocumentProperty(Wb As Workbook, Key As String, Value As String)
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Wb.VBProject.Description = Value
+    End Select
+    
+    If Err.Number <> 0 Then Err.Clear
+    Wb.BuiltinDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Wb.CustomDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Err.Clear
+End Sub
+
+Private Function GetDocumentProperty(Wb As Workbook, Key As String) As String
+    Dim Value As String
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    Value = ""
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Value = Wb.VBProject.Description
+    End Select
+    
+    Value = Wb.CustomDocumentProperties(PropertyName)
+    Value = Wb.BuiltinDocumentProperties(PropertyName)
+    
+    GetDocumentProperty = Value
+    If Err.Number <> 0 Then Err.Clear
+End Function
+
+Private Function KeyToPropertyName(ByVal Key As String) As String
+    Select Case Key
+    Case "description"
+        Key = "comments"
+    Case "contributor"
+        Key = "author"
+    Case "tag"
+        Key = "keywords"
+    Case "timestamp"
+        Key = "creation-date"
+    End Select
+    
+    KeyToPropertyName = StrConv(Replace(Key, "-", " "), vbProperCase)
+End Function
 
 '}}}
 
