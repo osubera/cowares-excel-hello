@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40653.8333333333
+'         ;40653.9166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -844,6 +844,8 @@ Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
     Case "book-identity"
         SsfBlockIdentity.ReadFrom Block, Env
+    Case "cells-font-bold"
+        SsfBlockCells.CellsFontBoldReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-h-align"
@@ -3222,12 +3224,22 @@ Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
         CellsFormulaWriteTo AnArea, Stream, Env
         CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsFontBoldWriteTo AnArea, Stream, Env
         CellsHAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
@@ -3256,6 +3268,17 @@ Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
     Set Env.CellStream.Translator = Nothing
 End Sub
@@ -3989,6 +4012,8 @@ Private Sub EnqueueRangeProperty(Optional ByVal EmptyValue As Variant = Empty)
     Dim C As Long
     Dim Data As Variant
     
+    EmptyValue = TranslateFromCell(EmptyValue)
+    
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
@@ -4365,7 +4390,7 @@ Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal 
     Summary = Summary & Ra.Address(False, False, xlA1, False)
     
     Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
-    CallByName Ra, Key, VbLet, TranslateToCell(Data)
+    CallByName Receiver, Key, VbLet, TranslateToCell(Data)
     
     SetCellsProperty = True
     Exit Function
@@ -4574,6 +4599,39 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = XlHAlign.xlHAlignRight
     Case Else
         ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellBoolean
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case True
+        FromSingleCell = "yes"
+    Case Else
+        FromSingleCell = "no"
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
+        ToSingleCell = True
+    Case Else
+        ToSingleCell = False
     End Select
 End Function
 
