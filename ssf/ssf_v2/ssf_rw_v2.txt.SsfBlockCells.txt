@@ -20,12 +20,32 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
+Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
         CellsFormulaWriteTo AnArea, Stream, Env
         CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsFontBoldWriteTo AnArea, Stream, Env
+        CellsHAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -42,16 +62,30 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
     Const LocalProperty = "NumberFormat"
     Const EmptyValue = "General"
     
-    Dim AllFormats As Variant
-    
-    AllFormats = Target.NumberFormat
-    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
-    If Not IsNull(AllFormats) Then
-        ' avoid this block when everything is "General"
-        If AllFormats = EmptyValue Then Exit Sub
-    End If
-    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    Const EmptyValue = XlHAlign.xlHAlignGeneral
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _

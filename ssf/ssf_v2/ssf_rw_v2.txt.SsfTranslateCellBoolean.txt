@@ -1,0 +1,38 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfTranslateCellBoolean
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case True
+        FromSingleCell = "yes"
+    Case Else
+        FromSingleCell = "no"
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
+        ToSingleCell = True
+    Case Else
+        ToSingleCell = False
+    End Select
+End Function
+
+'}}}
+
+'ssf-end
+

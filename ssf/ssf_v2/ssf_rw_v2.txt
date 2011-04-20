@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40653.5833333333
+'         ;40653.9166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -159,7 +159,8 @@
 '     skip;1
 '         ;1
 '         ;F3SsfRwV2.BaumMain.OnButtonToggle
-'     skip;6
+'         ;1
+'     skip;5
 '         ;?
 '         ;このシートを表示する。
 '         ;about

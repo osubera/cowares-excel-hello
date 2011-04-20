@@ -74,6 +74,65 @@ MayFailOnExcel2007:
     End If
 End Function
 
+Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
+End Function
+
+Public Function IsEmptyCellProperty(Target As Range, ByVal PropertyName As String, _
+        Optional EmptyValue As Variant = Empty) As Boolean
+    Dim Receiver As Object
+    Dim AllValues As Variant
+    Dim out As Boolean
+    
+    Set Receiver = TranslateDotProperties(Target, PropertyName)
+    AllValues = CallByName(Receiver, PropertyName, VbGet)
+    
+    If IsNull(AllValues) Then
+        out = False
+    Else
+        out = (AllValues = EmptyValue)
+    End If
+    
+    IsEmptyCellProperty = out
+End Function
+
+Public Function TranslateCellValues(Data As Variant, FilterClass As Object, FilterName As String) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = CallByName(FilterClass, FilterName, VbMethod, Data(R, C))
+            Next
+        Next
+        TranslateCellValues = out
+    Else
+        TranslateCellValues = CallByName(FilterClass, FilterName, VbMethod, Data)
+    End If
+End Function
+
 '}}}
 
 'ssf-end
