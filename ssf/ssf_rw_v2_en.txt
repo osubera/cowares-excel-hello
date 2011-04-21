@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40653.9166666667
+'         ;40654.2916666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -846,6 +846,12 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockIdentity.ReadFrom Block, Env
     Case "cells-font-bold"
         SsfBlockCells.CellsFontBoldReadFrom Block, Env
+    Case "cells-font-italic"
+        SsfBlockCells.CellsFontItalicReadFrom Block, Env
+    Case "cells-font-name"
+        SsfBlockCells.CellsFontNameReadFrom Block, Env
+    Case "cells-font-size"
+        SsfBlockCells.CellsFontSizeReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-h-align"
@@ -854,6 +860,8 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
         SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-v-align"
+        SsfBlockCells.CellsVAlignReadFrom Block, Env
     Case "module", "class", "code"
         SsfBlockModules.ReadFrom Block, Env, BlockName
     Case "require"
@@ -3224,9 +3232,41 @@ Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsVAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsFontSizeReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
 Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-font-bold"
     Const LocalProperty = "Font.Bold"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontItalicReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
     
     Set Env.CellStream.Translator = New SsfTranslateCellBoolean
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
@@ -3239,8 +3279,12 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
     For Each AnArea In Target.Areas
         CellsFormulaWriteTo AnArea, Stream, Env
         CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsFontNameWriteTo AnArea, Stream, Env
+        CellsFontSizeWriteTo AnArea, Stream, Env
         CellsFontBoldWriteTo AnArea, Stream, Env
+        CellsFontItalicWriteTo AnArea, Stream, Env
         CellsHAlignWriteTo AnArea, Stream, Env
+        CellsVAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -3272,9 +3316,53 @@ Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsVAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    Const EmptyValue = XlVAlign.xlVAlignBottom
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFont
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsFontSizeWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFontSize
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
 Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-font-bold"
     Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontItalicWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
     Const EmptyValue = False
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
@@ -4585,13 +4673,13 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = XlHAlign.xlHAlignCenter
     Case "center-across-selection"
         ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
-    Case "distributed"
+    Case "distributed", "均", "均等"
         ToSingleCell = XlHAlign.xlHAlignDistributed
     Case "fill"
         ToSingleCell = XlHAlign.xlHAlignFill
     Case "", "general"
         ToSingleCell = XlHAlign.xlHAlignGeneral
-    Case "justify"
+    Case "justify", "両", "両端"
         ToSingleCell = XlHAlign.xlHAlignJustify
     Case "left", "l"
         ToSingleCell = XlHAlign.xlHAlignLeft
@@ -4632,6 +4720,55 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = True
     Case Else
         ToSingleCell = False
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellVAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlVAlign.xlVAlignBottom
+        FromSingleCell = Empty
+    Case XlVAlign.xlVAlignCenter
+        FromSingleCell = "center"
+    Case XlVAlign.xlVAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlVAlign.xlVAlignJustify
+        FromSingleCell = "justify"
+    Case XlVAlign.xlVAlignTop
+        FromSingleCell = "top"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "", "bottom", "b", "下"
+        ToSingleCell = XlVAlign.xlVAlignBottom
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlVAlign.xlVAlignCenter
+    Case "distributed", "均", "均等"
+        ToSingleCell = XlVAlign.xlVAlignDistributed
+    Case "justify", "両", "両端"
+        ToSingleCell = XlVAlign.xlVAlignJustify
+    Case "top", "t", "上"
+        ToSingleCell = XlVAlign.xlVAlignTop
+    Case Else
+        ToSingleCell = Data
     End Select
 End Function
 
