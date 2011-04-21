@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40654.2916666667
+'         ;40654.4166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -3875,11 +3875,11 @@ Public Function SpawnAreas() As Collection
             If Not IsEmpty(Data) Then AllEmpty = False
         Next
         If AllEmpty Then
-            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Offset(R, Columns - 1))
+            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Cells(R + 1, Columns))
             Spawned.MinimizeRange
             out.Add Spawned
             Set Spawned = Spawn
-            Set TopLeftCell = TopLeftCell.Offset(R + 1, 0)
+            Set TopLeftCell = TopLeftCell.Cells(R + 2, 1)
             R = 0
         Else
             R = R + 1
@@ -4125,6 +4125,7 @@ Private Sub DequeueRangeProperty()
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
+                If IsEmptyQueue Then Exit Sub
                 Data = Dequeue
                 If Not IsEmpty(Data) Then
                     SetCellsProperty Data, .Cells(R, C), PropertyName
