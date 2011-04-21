@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40654.875
+'         ;40655.3333333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1159,6 +1159,21 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "copy-of", "COPY_ooop_"
     Env.SetEnv "ssf", "safe-module", "false"
     'Env.SetEnv "ssf", "safe-module", "true"
+    
+    Env.SetEnv "ssf", "enable-cells-formula", "true"
+    Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-width", "true"
+    Env.SetEnv "ssf", "enable-cells-height", "true"
+    Env.SetEnv "ssf", "enable-cells-background-color", "true"
+    Env.SetEnv "ssf", "enable-cells-color", "true"
+    Env.SetEnv "ssf", "enable-cells-font-name", "true"
+    Env.SetEnv "ssf", "enable-cells-font-size", "true"
+    Env.SetEnv "ssf", "enable-cells-font-bold", "true"
+    Env.SetEnv "ssf", "enable-cells-font-italic", "true"
+    Env.SetEnv "ssf", "enable-cells-h-align", "true"
+    Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    
+    Env.SetEnv "ssf", "cells-writer", "block"
     
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
@@ -3321,18 +3336,18 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
-        CellsFormulaWriteTo AnArea, Stream, Env
-        CellsNumberFormatWriteTo AnArea, Stream, Env
-        CellsWidthWriteTo AnArea, Stream, Env
-        CellsHeightWriteTo AnArea, Stream, Env
-        CellsBackgroundColorWriteTo AnArea, Stream, Env
-        CellsColorWriteTo AnArea, Stream, Env
-        CellsFontNameWriteTo AnArea, Stream, Env
-        CellsFontSizeWriteTo AnArea, Stream, Env
-        CellsFontBoldWriteTo AnArea, Stream, Env
-        CellsFontItalicWriteTo AnArea, Stream, Env
-        CellsHAlignWriteTo AnArea, Stream, Env
-        CellsVAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-width", "true") Then CellsWidthWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-height", "true") Then CellsHeightWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-background-color", "true") Then CellsBackgroundColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-color", "true") Then CellsColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-name", "true") Then CellsFontNameWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-size", "true") Then CellsFontSizeWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-bold", "true") Then CellsFontBoldWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-italic", "true") Then CellsFontItalicWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-h-align", "true") Then CellsHAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-v-align", "true") Then CellsVAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -3494,7 +3509,13 @@ Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalR
         .PropertyName = LocalProperty
         .SetRange Target
         .ReadTargetCell EmptyValue
-        .WriteSsfBlocks Stream
+        
+        Select Case Env.GetEnv("ssf", "cells-writer", "block")
+        Case "block"
+            .WriteSsfBlocks Stream
+        Case "simple"
+            .WriteSsfSimple Stream
+        End Select
     End With
     
     Stream.WriteLine SsfWriter.SsfBlockEnd
