@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40654.4166666667
+'         ;40654.5833333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -844,6 +844,10 @@ Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
     Case "book-identity"
         SsfBlockIdentity.ReadFrom Block, Env
+    Case "cells-background-color"
+        SsfBlockCells.CellsBackgroundColorReadFrom Block, Env
+    Case "cells-color"
+        SsfBlockCells.CellsColorReadFrom Block, Env
     Case "cells-font-bold"
         SsfBlockCells.CellsFontBoldReadFrom Block, Env
     Case "cells-font-italic"
@@ -3223,6 +3227,24 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
+Public Sub CellsBackgroundColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-h-align"
     Const LocalProperty = "HorizontalAlignment"
@@ -3279,6 +3301,8 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
     For Each AnArea In Target.Areas
         CellsFormulaWriteTo AnArea, Stream, Env
         CellsNumberFormatWriteTo AnArea, Stream, Env
+        CellsBackgroundColorWriteTo AnArea, Stream, Env
+        CellsColorWriteTo AnArea, Stream, Env
         CellsFontNameWriteTo AnArea, Stream, Env
         CellsFontSizeWriteTo AnArea, Stream, Env
         CellsFontBoldWriteTo AnArea, Stream, Env
@@ -3303,6 +3327,29 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsBackgroundColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    Const EmptyValue = 16777215 ' RGB(255, 255, 255)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, "Interior.ColorIndex", XlColorIndex.xlColorIndexNone) Then Exit Sub
+    ' Interior.Color returns "White" when multiple colors exist, not Null
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    Const EmptyValue = 0    ' RGB(0, 0, 0)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -4771,6 +4818,94 @@ Public Function ToSingleCell(Data As Variant) As Variant
     Case Else
         ToSingleCell = Data
     End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateColor
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If IsNull(Data) Then
+        ' the cell contains multi-color text
+        FromSingleCell = RGB(0, 0, 0)
+    Else
+        FromSingleCell = FromExcelColor(Data)
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    ToSingleCell = ToExcelColor(Data)
+End Function
+
+Public Function ToExcelColor(ByVal Color As String) As Long
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    Dim BGR As Long
+    
+    If Left(Color, 1) = "#" Then
+        ParseColorString Color, R, G, B
+        BGR = RGB(R, G, B)
+    Else
+        BGR = 0
+    End If
+    
+    ToExcelColor = BGR
+End Function
+
+Public Function FromExcelColor(ByVal Color As Long) As String
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    
+    R = Color Mod 256
+    Color = Int(Color / 256)
+    G = Color Mod 256
+    Color = Int(Color / 256)
+    B = Color Mod 256
+    
+    FromExcelColor = "#" & MakeColorString(R, G, B)
+End Function
+
+Public Function ParseColorString(ByVal Color As String, ByRef R As Long, ByRef G As Long, ByRef B As Long) As Boolean
+    If Left(Color, 1) = "#" Then Color = Mid(Color, 2)
+    Color = UCase(Color)
+    
+    If Len(Color) = 3 Then
+        Color = Mid(Color, 1, 1) & Mid(Color, 1, 1) & _
+                Mid(Color, 2, 1) & Mid(Color, 2, 1) & _
+                Mid(Color, 3, 1) & Mid(Color, 3, 1)
+    End If
+    
+    If Len(Color) <> 6 Then
+        R = 0
+        G = 0
+        B = 0
+        ParseColorString = False
+        Exit Function
+    End If
+    
+    R = Val("&H" & Mid(Color, 1, 2))
+    G = Val("&H" & Mid(Color, 3, 2))
+    B = Val("&H" & Mid(Color, 5, 2))
+    ParseColorString = True
+End Function
+
+Public Function MakeColorString(ByVal R As Long, ByVal G As Long, ByVal B As Long) As String
+    MakeColorString = Right(Hex(R + 256), 2) & _
+                        Right(Hex(G + 256), 2) & _
+                        Right(Hex(B + 256), 2)
 End Function
 
 '}}}
