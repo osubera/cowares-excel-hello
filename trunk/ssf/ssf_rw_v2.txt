@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40654.5833333333
+'         ;40654.8333333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -3430,6 +3430,7 @@ Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
     Env.LogWrite LocalKey
     
     With Env.CellStream
+        .Clear
         .PropertyName = LocalProperty
         .SetWorksheet Ws
         .ReadSsfCells Block, CrLf
@@ -3443,6 +3444,7 @@ Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalR
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
     
     With Env.CellStream
+        .Clear
         .PropertyName = LocalProperty
         .SetRange Target
         .ReadTargetCell EmptyValue
@@ -3837,7 +3839,6 @@ Option Explicit
 
 Private TargetRange As Range
 Private TargetSheet As Worksheet
-Private CellCounter As Long
 
 Public Env As GlobalResources
 Public PropertyName As String
@@ -3856,7 +3857,6 @@ Public Sub SetWorksheet(Ws As Worksheet)
     Set TargetSheet = Ws
     If Ws Is Nothing Then
         Set TargetRange = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         Set TargetRange = Ws.Cells
@@ -3867,7 +3867,6 @@ Public Sub SetRange(Ra As Range)
     Set TargetRange = Ra
     If Ra Is Nothing Then
         Set TargetSheet = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         If Not TargetSheet Is Ra.Worksheet Then Set TargetSheet = Ra.Worksheet
@@ -3877,6 +3876,10 @@ End Sub
 Public Function IsNotReady() As Boolean
     IsNotReady = IsEmptyQueue Or (TargetRange Is Nothing) Or (PropertyName = "")
 End Function
+
+Public Sub Clear()
+    ClearQueue
+End Sub
 
 
 '=== properties end ===
@@ -3999,6 +4002,7 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
         Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
         Case "address"
             If Not IsNotReady Then WriteTargetCell
+            ClearQueue
             Set TargetRange = SsfUtilsExcel.ExcelAddressToRange(TargetSheet, Value, TargetSheet.Cells)
         Case "skip"
             For i = 1 To CLng(Val(Value))
