@@ -12,6 +12,12 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockIdentity.ReadFrom Block, Env
     Case "cells-font-bold"
         SsfBlockCells.CellsFontBoldReadFrom Block, Env
+    Case "cells-font-italic"
+        SsfBlockCells.CellsFontItalicReadFrom Block, Env
+    Case "cells-font-name"
+        SsfBlockCells.CellsFontNameReadFrom Block, Env
+    Case "cells-font-size"
+        SsfBlockCells.CellsFontSizeReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-h-align"
@@ -20,6 +26,8 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
         SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-v-align"
+        SsfBlockCells.CellsVAlignReadFrom Block, Env
     Case "module", "class", "code"
         SsfBlockModules.ReadFrom Block, Env, BlockName
     Case "require"

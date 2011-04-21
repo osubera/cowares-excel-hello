@@ -1,0 +1,54 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfTranslateCellVAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlVAlign.xlVAlignBottom
+        FromSingleCell = Empty
+    Case XlVAlign.xlVAlignCenter
+        FromSingleCell = "center"
+    Case XlVAlign.xlVAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlVAlign.xlVAlignJustify
+        FromSingleCell = "justify"
+    Case XlVAlign.xlVAlignTop
+        FromSingleCell = "top"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "", "bottom", "b", "下"
+        ToSingleCell = XlVAlign.xlVAlignBottom
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlVAlign.xlVAlignCenter
+    Case "distributed", "均", "均等"
+        ToSingleCell = XlVAlign.xlVAlignDistributed
+    Case "justify", "両", "両端"
+        ToSingleCell = XlVAlign.xlVAlignJustify
+    Case "top", "t", "上"
+        ToSingleCell = XlVAlign.xlVAlignTop
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'ssf-end
+

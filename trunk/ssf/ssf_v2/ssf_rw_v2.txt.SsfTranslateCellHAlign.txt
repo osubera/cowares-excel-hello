@@ -43,13 +43,13 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = XlHAlign.xlHAlignCenter
     Case "center-across-selection"
         ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
-    Case "distributed"
+    Case "distributed", "均", "均等"
         ToSingleCell = XlHAlign.xlHAlignDistributed
     Case "fill"
         ToSingleCell = XlHAlign.xlHAlignFill
     Case "", "general"
         ToSingleCell = XlHAlign.xlHAlignGeneral
-    Case "justify"
+    Case "justify", "両", "両端"
         ToSingleCell = XlHAlign.xlHAlignJustify
     Case "left", "l", "左"
         ToSingleCell = XlHAlign.xlHAlignLeft
