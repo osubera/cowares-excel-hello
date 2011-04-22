@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40655.9166666667
+'         ;40656.2083333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1180,6 +1180,9 @@ Public Function CreateDefaultEnv() As GlobalResources
     'Env.SetEnv "ssf", "cells-writer", "simple"
     'Env.SetEnv "ssf", "cells-writer", "column"
     'Env.SetEnv "ssf", "cells-writer", "row"
+    
+    Env.SetEnv "ssf", "cells-writer-without-queue", "false"
+    'Env.SetEnv "ssf", "cells-writer-without-queue", "true"
     
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
@@ -4219,22 +4222,34 @@ End Sub
 Public Sub WriteSsfByRow(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
     ' it mixes cell reader and ssf writer, to minimize buffer usages
     Dim SingleRow As Range
+    Dim WithoutQueue As Boolean
     
     If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
     
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
     For Each SingleRow In TargetRange.Rows
-        WriteSsfWithoutQueue SingleRow, PropertyName, Stream, EmptyValue
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleRow, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleRow, PropertyName, Stream, EmptyValue
+        End If
     Next
 End Sub
 
 Public Sub WriteSsfByColumn(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
     ' it mixes cell reader and ssf writer, to minimize buffer usages
     Dim SingleColumn As Range
+    Dim WithoutQueue As Boolean
     
     If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
     
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
     For Each SingleColumn In TargetRange.Columns
-        WriteSsfWithoutQueue SingleColumn, PropertyName, Stream, EmptyValue
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleColumn, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleColumn, PropertyName, Stream, EmptyValue
+        End If
     Next
 End Sub
 
@@ -4286,6 +4301,56 @@ Private Sub WriteSsfWithoutQueue(Target As Range, ByVal MyProperty As String, _
     
 HasError:
     Env.LogWrite "WriteSsfWithoutQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Private Sub WriteSsfWithSimpleQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    Dim RememberTargetRange As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Set BeginAt = Target.Cells(1)
+    Set EndAt = BeginAt
+    ClearQueue
+    Set RememberTargetRange = TargetRange
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        If Data = EmptyValue Then Data = Empty
+        If Not IsEmpty(Data) Then
+            If IsEmptyQueue Then Set BeginAt = SingleCell
+            Enqueue Data
+        End If
+        
+        ' write ssf
+        If IsEmpty(Data) And Not IsEmptyQueue Then
+            Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+            WriteSsfSkip Stream
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Not IsEmptyQueue Then
+        Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+        WriteSsfSkip Stream
+    End If
+    
+    Set TargetRange = RememberTargetRange
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithSimpleQueue: Error " & Err.Number & " " & Err.Description
     Resume Next
 End Sub
 
