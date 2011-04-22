@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40655.375
+'         ;40655.9166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1160,6 +1160,9 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "safe-module", "false"
     'Env.SetEnv "ssf", "safe-module", "true"
     
+    Env.SetEnv "ssf", "safe-cell-text", "false"
+    'Env.SetEnv "ssf", "safe-cell-text", "true"
+    
     Env.SetEnv "ssf", "enable-cells-formula", "true"
     Env.SetEnv "ssf", "enable-cells-numberformat", "true"
     Env.SetEnv "ssf", "enable-cells-width", "true"
@@ -1174,6 +1177,9 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "enable-cells-v-align", "true"
     
     Env.SetEnv "ssf", "cells-writer", "block"
+    'Env.SetEnv "ssf", "cells-writer", "simple"
+    'Env.SetEnv "ssf", "cells-writer", "column"
+    'Env.SetEnv "ssf", "cells-writer", "row"
     
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
@@ -3354,9 +3360,49 @@ End Sub
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
     Const LocalProperty = "Formula-Or-Value"
-    Const EmptyValue = Empty
+    Const EmptyValue = vbNullString
     
+    Dim SafeCellText As Boolean
+    SafeCellText = Env.GetEnv("ssf", "safe-cell-text", "false")
+    
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, True
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, False
+End Sub
+
+Public Sub CellsSafeCellTextWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources, _
+        SafeOn As Boolean)
+    ' temporally change cells-numberformat to force cells to store any texts safe
+    Const LocalKey = "cells-numberformat"
+    
+    Dim Data As String
+    Dim TextCells As Range
+    Dim AnArea As Range
+    Dim Count As Long
+    
+    On Error GoTo ErrorIsDone
+    
+    Data = IIf(SafeOn, "@", "General")
+    Set TextCells = Target.SpecialCells(xlCellTypeConstants, xlTextValues)
+    
+    On Error GoTo NotDone
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    For Each AnArea In TextCells.Areas
+        Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(AnArea))
+        Count = AnArea.Cells.Count
+        If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+        Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
+    Next
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+ErrorIsDone:
+    Exit Sub
+    
+NotDone:
+    Env.LogWrite "CellsSafeCellTextWriteTo: Error " & Err.Number & " " & Err.Description
+    Resume Next
 End Sub
 
 Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -3500,7 +3546,10 @@ End Sub
 
 Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
         LocalKey As String, LocalProperty As String, EmptyValue As Variant)
-    ' generate cells-* block using WriteSsfBlocks
+    ' generate cells-* block
+    Dim CellsWriter As String
+    
+    CellsWriter = Env.GetEnv("ssf", "cells-writer", "block")
     Env.LogWrite LocalKey
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
     
@@ -3508,13 +3557,22 @@ Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalR
         .Clear
         .PropertyName = LocalProperty
         .SetRange Target
-        .ReadTargetCell EmptyValue
         
-        Select Case Env.GetEnv("ssf", "cells-writer", "block")
-        Case "block"
-            .WriteSsfBlocks Stream
-        Case "simple"
-            .WriteSsfSimple Stream
+        Select Case CellsWriter
+        Case "row"
+            .WriteSsfByRow Stream, EmptyValue
+        Case "column"
+            .WriteSsfByColumn Stream, EmptyValue
+        Case Else
+            ' depend on common reader for low level cells
+            .ReadTargetCell EmptyValue
+            
+            Select Case CellsWriter
+            Case "block"
+                .WriteSsfBlocks Stream
+            Case "simple"
+                .WriteSsfSimple Stream
+            End Select
         End Select
     End With
     
@@ -4158,6 +4216,79 @@ Public Sub WriteSsfBlocks(Stream As Object)
     Loop
 End Sub
 
+Public Sub WriteSsfByRow(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleRow As Range
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    For Each SingleRow In TargetRange.Rows
+        WriteSsfWithoutQueue SingleRow, PropertyName, Stream, EmptyValue
+    Next
+End Sub
+
+Public Sub WriteSsfByColumn(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleColumn As Range
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    For Each SingleColumn In TargetRange.Columns
+        WriteSsfWithoutQueue SingleColumn, PropertyName, Stream, EmptyValue
+    Next
+End Sub
+
+Private Sub WriteSsfWithoutQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Counter = 1
+    LastData = EmptyValue
+    Set BeginAt = Target.Cells(1)
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        
+        ' write ssf
+        If Data = LastData Then
+            Counter = Counter + 1
+        Else
+            If LastData <> EmptyValue Then
+                WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+                WriteLineSkipOrRepeat Stream, Counter, LastData
+            End If
+            LastData = Data
+            Counter = 1
+            Set BeginAt = SingleCell
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Counter > 0 And LastData <> EmptyValue Then
+        WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+        WriteLineRepeat Stream, Counter, LastData
+    End If
+    
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithoutQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
 
 '=== ssf writer end ===
 '=== ssf writer helper begin ===
@@ -4623,6 +4754,19 @@ Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal 
 HasError:
     Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
     SetCellsProperty = False
+End Function
+
+Private Function TranslatePropertyName(ByVal MyProperty As String, Target As Range) As String
+    Select Case LCase(MyProperty)
+    Case "formula-or-value"
+        Select Case Target.HasFormula
+        Case True
+            MyProperty = "FormulaR1C1"
+        Case False
+            MyProperty = "Value"
+        End Select
+    End Select
+    TranslatePropertyName = MyProperty
 End Function
 
 Private Function TranslateFromCell(Data As Variant) As Variant
