@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40653.9166666667
+'         ;40656.2083333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -173,6 +173,10 @@
 'cells-numberformat
 '  address;B9
 '         ;m/d/yyyy h:mm
+
+'cells-width
+'  address;B1
+'         ;15.5
 
 'cells-name
 '       ;=ssf_rw_v2!R15C1
@@ -844,16 +848,32 @@ Public Sub ReadFrom(BlockName, Block, Env)
     Select Case BlockName
     Case "book-identity"
         SsfBlockIdentity.ReadFrom Block, Env
+    Case "cells-background-color"
+        SsfBlockCells.CellsBackgroundColorReadFrom Block, Env
+    Case "cells-color"
+        SsfBlockCells.CellsColorReadFrom Block, Env
     Case "cells-font-bold"
         SsfBlockCells.CellsFontBoldReadFrom Block, Env
+    Case "cells-font-italic"
+        SsfBlockCells.CellsFontItalicReadFrom Block, Env
+    Case "cells-font-name"
+        SsfBlockCells.CellsFontNameReadFrom Block, Env
+    Case "cells-font-size"
+        SsfBlockCells.CellsFontSizeReadFrom Block, Env
     Case "cells-formula"
         SsfBlockCells.CellsFormulaReadFrom Block, Env
     Case "cells-h-align"
         SsfBlockCells.CellsHAlignReadFrom Block, Env
+    Case "cells-height"
+        SsfBlockCells.CellsHeightReadFrom Block, Env
     Case "cells-name"
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
         SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-v-align"
+        SsfBlockCells.CellsVAlignReadFrom Block, Env
+    Case "cells-width"
+        SsfBlockCells.CellsWidthReadFrom Block, Env
     Case "module", "class", "code"
         SsfBlockModules.ReadFrom Block, Env, BlockName
     Case "require"
@@ -862,8 +882,8 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.ReadFrom Block, Env
     Case "worksheet"
         SsfBlockWorksheet.ReadFrom Block, Env
-    Case "columns-width"
-        SsfBlockColumnsWidth.ReadFrom Block, Env
+    'Case "columns-width"
+    '    SsfBlockColumnsWidth.ReadFrom Block, Env
     End Select
 End Sub
 
@@ -1139,6 +1159,30 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "copy-of", "COPY_ooop_"
     Env.SetEnv "ssf", "safe-module", "false"
     'Env.SetEnv "ssf", "safe-module", "true"
+    
+    Env.SetEnv "ssf", "safe-cell-text", "false"
+    'Env.SetEnv "ssf", "safe-cell-text", "true"
+    
+    Env.SetEnv "ssf", "enable-cells-formula", "true"
+    Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-width", "true"
+    Env.SetEnv "ssf", "enable-cells-height", "true"
+    Env.SetEnv "ssf", "enable-cells-background-color", "true"
+    Env.SetEnv "ssf", "enable-cells-color", "true"
+    Env.SetEnv "ssf", "enable-cells-font-name", "true"
+    Env.SetEnv "ssf", "enable-cells-font-size", "true"
+    Env.SetEnv "ssf", "enable-cells-font-bold", "true"
+    Env.SetEnv "ssf", "enable-cells-font-italic", "true"
+    Env.SetEnv "ssf", "enable-cells-h-align", "true"
+    Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    
+    Env.SetEnv "ssf", "cells-writer", "block"
+    'Env.SetEnv "ssf", "cells-writer", "simple"
+    'Env.SetEnv "ssf", "cells-writer", "column"
+    'Env.SetEnv "ssf", "cells-writer", "row"
+    
+    Env.SetEnv "ssf", "cells-writer-without-queue", "false"
+    'Env.SetEnv "ssf", "cells-writer-without-queue", "true"
     
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
@@ -3215,6 +3259,38 @@ Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResour
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
+Public Sub CellsWidthReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-width"
+    Const LocalProperty = "ColumnWidth"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-height"
+    Const LocalProperty = "RowHeight"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsBackgroundColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-h-align"
     Const LocalProperty = "HorizontalAlignment"
@@ -3222,6 +3298,29 @@ Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Set Env.CellStream.Translator = New SsfTranslateCellHAlign
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
     Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsVAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsFontSizeReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
 End Sub
 
 Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
@@ -3233,23 +3332,80 @@ Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsFontItalicReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
-        CellsFormulaWriteTo AnArea, Stream, Env
-        CellsNumberFormatWriteTo AnArea, Stream, Env
-        CellsFontBoldWriteTo AnArea, Stream, Env
-        CellsHAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-width", "true") Then CellsWidthWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-height", "true") Then CellsHeightWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-background-color", "true") Then CellsBackgroundColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-color", "true") Then CellsColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-name", "true") Then CellsFontNameWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-size", "true") Then CellsFontSizeWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-bold", "true") Then CellsFontBoldWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-italic", "true") Then CellsFontItalicWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-h-align", "true") Then CellsHAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-v-align", "true") Then CellsVAlignWriteTo AnArea, Stream, Env
     Next
 End Sub
 
 Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-formula"
     Const LocalProperty = "Formula-Or-Value"
-    Const EmptyValue = Empty
+    Const EmptyValue = vbNullString
     
+    Dim SafeCellText As Boolean
+    SafeCellText = Env.GetEnv("ssf", "safe-cell-text", "false")
+    
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, True
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, False
+End Sub
+
+Public Sub CellsSafeCellTextWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources, _
+        SafeOn As Boolean)
+    ' temporally change cells-numberformat to force cells to store any texts safe
+    Const LocalKey = "cells-numberformat"
+    
+    Dim Data As String
+    Dim TextCells As Range
+    Dim AnArea As Range
+    Dim Count As Long
+    
+    On Error GoTo ErrorIsDone
+    
+    Data = IIf(SafeOn, "@", "General")
+    Set TextCells = Target.SpecialCells(xlCellTypeConstants, xlTextValues)
+    
+    On Error GoTo NotDone
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    For Each AnArea In TextCells.Areas
+        Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(AnArea))
+        Count = AnArea.Cells.Count
+        If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+        Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
+    Next
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+ErrorIsDone:
+    Exit Sub
+    
+NotDone:
+    Env.LogWrite "CellsSafeCellTextWriteTo: Error " & Err.Number & " " & Err.Description
+    Resume Next
 End Sub
 
 Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -3259,6 +3415,51 @@ Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Obje
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-width"
+    Const LocalProperty = "ColumnWidth"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Target.Worksheet.StandardWidth
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-height"
+    Const LocalProperty = "RowHeight"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Target.Worksheet.StandardHeight
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target.Columns(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsBackgroundColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    Const EmptyValue = 16777215 ' RGB(255, 255, 255)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, "Interior.ColorIndex", XlColorIndex.xlColorIndexNone) Then Exit Sub
+    ' Interior.Color returns "White" when multiple colors exist, not Null
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    Const EmptyValue = 0    ' RGB(0, 0, 0)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -3272,9 +3473,53 @@ Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsVAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    Const EmptyValue = XlVAlign.xlVAlignBottom
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFont
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsFontSizeWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFontSize
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
 Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-font-bold"
     Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontItalicWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
     Const EmptyValue = False
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
@@ -3295,6 +3540,7 @@ Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
     Env.LogWrite LocalKey
     
     With Env.CellStream
+        .Clear
         .PropertyName = LocalProperty
         .SetWorksheet Ws
         .ReadSsfCells Block, CrLf
@@ -3303,15 +3549,34 @@ End Sub
 
 Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
         LocalKey As String, LocalProperty As String, EmptyValue As Variant)
-    ' generate cells-* block using WriteSsfBlocks
+    ' generate cells-* block
+    Dim CellsWriter As String
+    
+    CellsWriter = Env.GetEnv("ssf", "cells-writer", "block")
     Env.LogWrite LocalKey
     Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
     
     With Env.CellStream
+        .Clear
         .PropertyName = LocalProperty
         .SetRange Target
-        .ReadTargetCell EmptyValue
-        .WriteSsfBlocks Stream
+        
+        Select Case CellsWriter
+        Case "row"
+            .WriteSsfByRow Stream, EmptyValue
+        Case "column"
+            .WriteSsfByColumn Stream, EmptyValue
+        Case Else
+            ' depend on common reader for low level cells
+            .ReadTargetCell EmptyValue
+            
+            Select Case CellsWriter
+            Case "block"
+                .WriteSsfBlocks Stream
+            Case "simple"
+                .WriteSsfSimple Stream
+            End Select
+        End Select
     End With
     
     Stream.WriteLine SsfWriter.SsfBlockEnd
@@ -3702,7 +3967,6 @@ Option Explicit
 
 Private TargetRange As Range
 Private TargetSheet As Worksheet
-Private CellCounter As Long
 
 Public Env As GlobalResources
 Public PropertyName As String
@@ -3721,7 +3985,6 @@ Public Sub SetWorksheet(Ws As Worksheet)
     Set TargetSheet = Ws
     If Ws Is Nothing Then
         Set TargetRange = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         Set TargetRange = Ws.Cells
@@ -3732,7 +3995,6 @@ Public Sub SetRange(Ra As Range)
     Set TargetRange = Ra
     If Ra Is Nothing Then
         Set TargetSheet = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         If Not TargetSheet Is Ra.Worksheet Then Set TargetSheet = Ra.Worksheet
@@ -3742,6 +4004,10 @@ End Sub
 Public Function IsNotReady() As Boolean
     IsNotReady = IsEmptyQueue Or (TargetRange Is Nothing) Or (PropertyName = "")
 End Function
+
+Public Sub Clear()
+    ClearQueue
+End Sub
 
 
 '=== properties end ===
@@ -3787,11 +4053,11 @@ Public Function SpawnAreas() As Collection
             If Not IsEmpty(Data) Then AllEmpty = False
         Next
         If AllEmpty Then
-            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Offset(R, Columns - 1))
+            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Cells(R + 1, Columns))
             Spawned.MinimizeRange
             out.Add Spawned
             Set Spawned = Spawn
-            Set TopLeftCell = TopLeftCell.Offset(R + 1, 0)
+            Set TopLeftCell = TopLeftCell.Cells(R + 2, 1)
             R = 0
         Else
             R = R + 1
@@ -3864,7 +4130,9 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
         Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
         Case "address"
             If Not IsNotReady Then WriteTargetCell
+            ClearQueue
             Set TargetRange = SsfUtilsExcel.ExcelAddressToRange(TargetSheet, Value, TargetSheet.Cells)
+            'Env.LogWrite "ReadSsfCells: TargetRange: " & TargetRange.Address()
         Case "skip"
             For i = 1 To CLng(Val(Value))
                 Enqueue Empty
@@ -3949,6 +4217,141 @@ Public Sub WriteSsfBlocks(Stream As Object)
         Set Block = Nothing
         Blocks.Remove 1
     Loop
+End Sub
+
+Public Sub WriteSsfByRow(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleRow As Range
+    Dim WithoutQueue As Boolean
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
+    For Each SingleRow In TargetRange.Rows
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleRow, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleRow, PropertyName, Stream, EmptyValue
+        End If
+    Next
+End Sub
+
+Public Sub WriteSsfByColumn(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleColumn As Range
+    Dim WithoutQueue As Boolean
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
+    For Each SingleColumn In TargetRange.Columns
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleColumn, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleColumn, PropertyName, Stream, EmptyValue
+        End If
+    Next
+End Sub
+
+Private Sub WriteSsfWithoutQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Counter = 1
+    LastData = EmptyValue
+    Set BeginAt = Target.Cells(1)
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        
+        ' write ssf
+        If Data = LastData Then
+            Counter = Counter + 1
+        Else
+            If LastData <> EmptyValue Then
+                WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+                WriteLineSkipOrRepeat Stream, Counter, LastData
+            End If
+            LastData = Data
+            Counter = 1
+            Set BeginAt = SingleCell
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Counter > 0 And LastData <> EmptyValue Then
+        WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+        WriteLineRepeat Stream, Counter, LastData
+    End If
+    
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithoutQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Private Sub WriteSsfWithSimpleQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    Dim RememberTargetRange As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Set BeginAt = Target.Cells(1)
+    Set EndAt = BeginAt
+    ClearQueue
+    Set RememberTargetRange = TargetRange
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        If Data = EmptyValue Then Data = Empty
+        If Not IsEmpty(Data) Then
+            If IsEmptyQueue Then Set BeginAt = SingleCell
+            Enqueue Data
+        End If
+        
+        ' write ssf
+        If IsEmpty(Data) And Not IsEmptyQueue Then
+            Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+            WriteSsfSkip Stream
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Not IsEmptyQueue Then
+        Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+        WriteSsfSkip Stream
+    End If
+    
+    Set TargetRange = RememberTargetRange
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithSimpleQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
 End Sub
 
 
@@ -4037,6 +4440,7 @@ Private Sub DequeueRangeProperty()
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
+                If IsEmptyQueue Then Exit Sub
                 Data = Dequeue
                 If Not IsEmpty(Data) Then
                     SetCellsProperty Data, .Cells(R, C), PropertyName
@@ -4158,9 +4562,26 @@ End Sub
 
 Private Sub DequeueRangeValueFamily()
     Dim Data As Variant
+    Dim SmallerTarget As Range
+    Dim Columns As Long
+    Dim Rows As Long
+    Dim EffectiveRows As Long
     
-    Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-    SetCellsProperty Data, TargetRange, PropertyName
+    Columns = TargetRange.Columns.Count
+    Rows = TargetRange.Rows.Count
+    EffectiveRows = Int(Queue.Count / Columns)
+    If Queue.Count Mod Columns > 0 Then EffectiveRows = EffectiveRows + 1
+    If Rows > EffectiveRows Then
+        ' avoid too large rows
+        Rows = EffectiveRows
+        Set SmallerTarget = TargetRange.Rows("1:" & EffectiveRows).Cells
+        'Env.LogWrite "DequeueRangeValueFamily: SmallerTarget: " & SmallerTarget.Address()
+    Else
+        Set SmallerTarget = TargetRange
+    End If
+    
+    Data = DequeueMatrix(Columns, Rows)
+    SetCellsProperty Data, SmallerTarget, PropertyName
 End Sub
 
 Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
@@ -4400,6 +4821,19 @@ HasError:
     SetCellsProperty = False
 End Function
 
+Private Function TranslatePropertyName(ByVal MyProperty As String, Target As Range) As String
+    Select Case LCase(MyProperty)
+    Case "formula-or-value"
+        Select Case Target.HasFormula
+        Case True
+            MyProperty = "FormulaR1C1"
+        Case False
+            MyProperty = "Value"
+        End Select
+    End Select
+    TranslatePropertyName = MyProperty
+End Function
+
 Private Function TranslateFromCell(Data As Variant) As Variant
     If Translator Is Nothing Then
         TranslateFromCell = Data
@@ -4585,13 +5019,13 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = XlHAlign.xlHAlignCenter
     Case "center-across-selection"
         ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
-    Case "distributed"
+    Case "distributed", "均", "均等"
         ToSingleCell = XlHAlign.xlHAlignDistributed
     Case "fill"
         ToSingleCell = XlHAlign.xlHAlignFill
     Case "", "general"
         ToSingleCell = XlHAlign.xlHAlignGeneral
-    Case "justify"
+    Case "justify", "両", "両端"
         ToSingleCell = XlHAlign.xlHAlignJustify
     Case "left", "l", "左"
         ToSingleCell = XlHAlign.xlHAlignLeft
@@ -4633,6 +5067,143 @@ Public Function ToSingleCell(Data As Variant) As Variant
     Case Else
         ToSingleCell = False
     End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellVAlign
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlVAlign.xlVAlignBottom
+        FromSingleCell = Empty
+    Case XlVAlign.xlVAlignCenter
+        FromSingleCell = "center"
+    Case XlVAlign.xlVAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlVAlign.xlVAlignJustify
+        FromSingleCell = "justify"
+    Case XlVAlign.xlVAlignTop
+        FromSingleCell = "top"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "", "bottom", "b", "下"
+        ToSingleCell = XlVAlign.xlVAlignBottom
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlVAlign.xlVAlignCenter
+    Case "distributed", "均", "均等"
+        ToSingleCell = XlVAlign.xlVAlignDistributed
+    Case "justify", "両", "両端"
+        ToSingleCell = XlVAlign.xlVAlignJustify
+    Case "top", "t", "上"
+        ToSingleCell = XlVAlign.xlVAlignTop
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateColor
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If IsNull(Data) Then
+        ' the cell contains multi-color text
+        FromSingleCell = RGB(0, 0, 0)
+    Else
+        FromSingleCell = FromExcelColor(Data)
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    ToSingleCell = ToExcelColor(Data)
+End Function
+
+Public Function ToExcelColor(ByVal Color As String) As Long
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    Dim BGR As Long
+    
+    If Left(Color, 1) = "#" Then
+        ParseColorString Color, R, G, B
+        BGR = RGB(R, G, B)
+    Else
+        BGR = 0
+    End If
+    
+    ToExcelColor = BGR
+End Function
+
+Public Function FromExcelColor(ByVal Color As Long) As String
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    
+    R = Color Mod 256
+    Color = Int(Color / 256)
+    G = Color Mod 256
+    Color = Int(Color / 256)
+    B = Color Mod 256
+    
+    FromExcelColor = "#" & MakeColorString(R, G, B)
+End Function
+
+Public Function ParseColorString(ByVal Color As String, ByRef R As Long, ByRef G As Long, ByRef B As Long) As Boolean
+    If Left(Color, 1) = "#" Then Color = Mid(Color, 2)
+    Color = UCase(Color)
+    
+    If Len(Color) = 3 Then
+        Color = Mid(Color, 1, 1) & Mid(Color, 1, 1) & _
+                Mid(Color, 2, 1) & Mid(Color, 2, 1) & _
+                Mid(Color, 3, 1) & Mid(Color, 3, 1)
+    End If
+    
+    If Len(Color) <> 6 Then
+        R = 0
+        G = 0
+        B = 0
+        ParseColorString = False
+        Exit Function
+    End If
+    
+    R = Val("&H" & Mid(Color, 1, 2))
+    G = Val("&H" & Mid(Color, 3, 2))
+    B = Val("&H" & Mid(Color, 5, 2))
+    ParseColorString = True
+End Function
+
+Public Function MakeColorString(ByVal R As Long, ByVal G As Long, ByVal B As Long) As String
+    MakeColorString = Right(Hex(R + 256), 2) & _
+                        Right(Hex(G + 256), 2) & _
+                        Right(Hex(B + 256), 2)
 End Function
 
 '}}}
