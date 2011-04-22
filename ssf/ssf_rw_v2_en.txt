@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40656.2083333333
+'         ;40656.25
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -4149,6 +4149,10 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
             Else
                 Enqueue Value
             End If
+        Case Else
+            If Not Translator Is Nothing Then
+                Translator.ReadSsf Key, Value, Me
+            End If
         End Select
         If Err.Number <> 0 Then
             Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
@@ -4982,6 +4986,10 @@ End Function
 '{{{
 Option Explicit
 
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function
@@ -5043,6 +5051,10 @@ End Function
 '{{{
 Option Explicit
 
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function
@@ -5075,6 +5087,10 @@ End Function
 '   name;SsfTranslateCellVAlign
 '{{{
 Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
 
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
@@ -5124,6 +5140,10 @@ End Function
 '   name;SsfTranslateColor
 '{{{
 Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
 
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
