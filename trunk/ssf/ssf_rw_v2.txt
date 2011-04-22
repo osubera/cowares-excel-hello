@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40656.25
+'         ;40656.2916666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -3561,6 +3561,11 @@ Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalR
         .PropertyName = LocalProperty
         .SetRange Target
         
+        If Not .Translator Is Nothing Then
+            ' translator specific options
+            .Translator.WriteSsf Stream, Env.CellStream
+        End If
+        
         Select Case CellsWriter
         Case "row"
             .WriteSsfByRow Stream, EmptyValue
@@ -4151,6 +4156,7 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
             End If
         Case Else
             If Not Translator Is Nothing Then
+                ' translator specific options
                 Translator.ReadSsf Key, Value, Me
             End If
         End Select
@@ -4990,6 +4996,10 @@ Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
 
 End Sub
 
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function
@@ -5055,6 +5065,10 @@ Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
 
 End Sub
 
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function
@@ -5089,6 +5103,10 @@ End Function
 Option Explicit
 
 Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
 
 End Sub
 
@@ -5142,6 +5160,10 @@ End Function
 Option Explicit
 
 Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
 
 End Sub
 
