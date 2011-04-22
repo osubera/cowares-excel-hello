@@ -1,0 +1,93 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfTranslateColor
+'{{{
+Option Explicit
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If IsNull(Data) Then
+        ' the cell contains multi-color text
+        FromSingleCell = RGB(0, 0, 0)
+    Else
+        FromSingleCell = FromExcelColor(Data)
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    ToSingleCell = ToExcelColor(Data)
+End Function
+
+Public Function ToExcelColor(ByVal Color As String) As Long
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    Dim BGR As Long
+    
+    If Left(Color, 1) = "#" Then
+        ParseColorString Color, R, G, B
+        BGR = RGB(R, G, B)
+    Else
+        BGR = 0
+    End If
+    
+    ToExcelColor = BGR
+End Function
+
+Public Function FromExcelColor(ByVal Color As Long) As String
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    
+    R = Color Mod 256
+    Color = Int(Color / 256)
+    G = Color Mod 256
+    Color = Int(Color / 256)
+    B = Color Mod 256
+    
+    FromExcelColor = "#" & MakeColorString(R, G, B)
+End Function
+
+Public Function ParseColorString(ByVal Color As String, ByRef R As Long, ByRef G As Long, ByRef B As Long) As Boolean
+    If Left(Color, 1) = "#" Then Color = Mid(Color, 2)
+    Color = UCase(Color)
+    
+    If Len(Color) = 3 Then
+        Color = Mid(Color, 1, 1) & Mid(Color, 1, 1) & _
+                Mid(Color, 2, 1) & Mid(Color, 2, 1) & _
+                Mid(Color, 3, 1) & Mid(Color, 3, 1)
+    End If
+    
+    If Len(Color) <> 6 Then
+        R = 0
+        G = 0
+        B = 0
+        ParseColorString = False
+        Exit Function
+    End If
+    
+    R = Val("&H" & Mid(Color, 1, 2))
+    G = Val("&H" & Mid(Color, 3, 2))
+    B = Val("&H" & Mid(Color, 5, 2))
+    ParseColorString = True
+End Function
+
+Public Function MakeColorString(ByVal R As Long, ByVal G As Long, ByVal B As Long) As String
+    MakeColorString = Right(Hex(R + 256), 2) & _
+                        Right(Hex(G + 256), 2) & _
+                        Right(Hex(B + 256), 2)
+End Function
+
+'}}}
+
+'ssf-end
+

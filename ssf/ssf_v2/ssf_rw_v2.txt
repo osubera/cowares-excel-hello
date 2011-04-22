@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40654.2916666667
+'         ;40656.2083333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -173,6 +173,10 @@
 'cells-numberformat
 '  address;B9
 '         ;m/d/yyyy h:mm
+
+'cells-width
+'  address;B1
+'         ;15.5
 
 'cells-name
 '       ;=ssf_rw_v2!R15C1

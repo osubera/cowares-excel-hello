@@ -33,6 +33,30 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "safe-module", "false"
     'Env.SetEnv "ssf", "safe-module", "true"
     
+    Env.SetEnv "ssf", "safe-cell-text", "false"
+    'Env.SetEnv "ssf", "safe-cell-text", "true"
+    
+    Env.SetEnv "ssf", "enable-cells-formula", "true"
+    Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-width", "true"
+    Env.SetEnv "ssf", "enable-cells-height", "true"
+    Env.SetEnv "ssf", "enable-cells-background-color", "true"
+    Env.SetEnv "ssf", "enable-cells-color", "true"
+    Env.SetEnv "ssf", "enable-cells-font-name", "true"
+    Env.SetEnv "ssf", "enable-cells-font-size", "true"
+    Env.SetEnv "ssf", "enable-cells-font-bold", "true"
+    Env.SetEnv "ssf", "enable-cells-font-italic", "true"
+    Env.SetEnv "ssf", "enable-cells-h-align", "true"
+    Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    
+    Env.SetEnv "ssf", "cells-writer", "block"
+    'Env.SetEnv "ssf", "cells-writer", "simple"
+    'Env.SetEnv "ssf", "cells-writer", "column"
+    'Env.SetEnv "ssf", "cells-writer", "row"
+    
+    Env.SetEnv "ssf", "cells-writer-without-queue", "false"
+    'Env.SetEnv "ssf", "cells-writer-without-queue", "true"
+    
     Set Env.Current("target") = ActiveWorkbook
     Set Env.Current("workbook") = ActiveWorkbook
     Set Env.Current("worksheet") = ActiveSheet
