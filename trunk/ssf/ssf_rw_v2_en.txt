@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40655.3333333333
+'         ;40655.375
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -4071,6 +4071,7 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
             If Not IsNotReady Then WriteTargetCell
             ClearQueue
             Set TargetRange = SsfUtilsExcel.ExcelAddressToRange(TargetSheet, Value, TargetSheet.Cells)
+            'Env.LogWrite "ReadSsfCells: TargetRange: " & TargetRange.Address()
         Case "skip"
             For i = 1 To CLng(Val(Value))
                 Enqueue Empty
@@ -4365,9 +4366,26 @@ End Sub
 
 Private Sub DequeueRangeValueFamily()
     Dim Data As Variant
+    Dim SmallerTarget As Range
+    Dim Columns As Long
+    Dim Rows As Long
+    Dim EffectiveRows As Long
     
-    Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-    SetCellsProperty Data, TargetRange, PropertyName
+    Columns = TargetRange.Columns.Count
+    Rows = TargetRange.Rows.Count
+    EffectiveRows = Int(Queue.Count / Columns)
+    If Queue.Count Mod Columns > 0 Then EffectiveRows = EffectiveRows + 1
+    If Rows > EffectiveRows Then
+        ' avoid too large rows
+        Rows = EffectiveRows
+        Set SmallerTarget = TargetRange.Rows("1:" & EffectiveRows).Cells
+        'Env.LogWrite "DequeueRangeValueFamily: SmallerTarget: " & SmallerTarget.Address()
+    Else
+        Set SmallerTarget = TargetRange
+    End If
+    
+    Data = DequeueMatrix(Columns, Rows)
+    SetCellsProperty Data, SmallerTarget, PropertyName
 End Sub
 
 Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
