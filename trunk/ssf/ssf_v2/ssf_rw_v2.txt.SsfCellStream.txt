@@ -11,7 +11,6 @@ Option Explicit
 
 Private TargetRange As Range
 Private TargetSheet As Worksheet
-Private CellCounter As Long
 
 Public Env As GlobalResources
 Public PropertyName As String
@@ -30,7 +29,6 @@ Public Sub SetWorksheet(Ws As Worksheet)
     Set TargetSheet = Ws
     If Ws Is Nothing Then
         Set TargetRange = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         Set TargetRange = Ws.Cells
@@ -41,7 +39,6 @@ Public Sub SetRange(Ra As Range)
     Set TargetRange = Ra
     If Ra Is Nothing Then
         Set TargetSheet = Nothing
-        CellCounter = 0
         ClearQueue
     Else
         If Not TargetSheet Is Ra.Worksheet Then Set TargetSheet = Ra.Worksheet
@@ -51,6 +48,10 @@ End Sub
 Public Function IsNotReady() As Boolean
     IsNotReady = IsEmptyQueue Or (TargetRange Is Nothing) Or (PropertyName = "")
 End Function
+
+Public Sub Clear()
+    ClearQueue
+End Sub
 
 
 '=== properties end ===
@@ -96,11 +97,11 @@ Public Function SpawnAreas() As Collection
             If Not IsEmpty(Data) Then AllEmpty = False
         Next
         If AllEmpty Then
-            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Offset(R, Columns - 1))
+            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Cells(R + 1, Columns))
             Spawned.MinimizeRange
             out.Add Spawned
             Set Spawned = Spawn
-            Set TopLeftCell = TopLeftCell.Offset(R + 1, 0)
+            Set TopLeftCell = TopLeftCell.Cells(R + 2, 1)
             R = 0
         Else
             R = R + 1
@@ -173,7 +174,9 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
         Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
         Case "address"
             If Not IsNotReady Then WriteTargetCell
+            ClearQueue
             Set TargetRange = SsfUtilsExcel.ExcelAddressToRange(TargetSheet, Value, TargetSheet.Cells)
+            'Env.LogWrite "ReadSsfCells: TargetRange: " & TargetRange.Address()
         Case "skip"
             For i = 1 To CLng(Val(Value))
                 Enqueue Empty
@@ -258,6 +261,141 @@ Public Sub WriteSsfBlocks(Stream As Object)
         Set Block = Nothing
         Blocks.Remove 1
     Loop
+End Sub
+
+Public Sub WriteSsfByRow(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleRow As Range
+    Dim WithoutQueue As Boolean
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
+    For Each SingleRow In TargetRange.Rows
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleRow, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleRow, PropertyName, Stream, EmptyValue
+        End If
+    Next
+End Sub
+
+Public Sub WriteSsfByColumn(Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleColumn As Range
+    Dim WithoutQueue As Boolean
+    
+    If (TargetRange Is Nothing) Or (PropertyName = "") Then Exit Sub
+    
+    WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
+    For Each SingleColumn In TargetRange.Columns
+        If WithoutQueue Then
+            WriteSsfWithoutQueue SingleColumn, PropertyName, Stream, EmptyValue
+        Else
+            WriteSsfWithSimpleQueue SingleColumn, PropertyName, Stream, EmptyValue
+        End If
+    Next
+End Sub
+
+Private Sub WriteSsfWithoutQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Counter = 1
+    LastData = EmptyValue
+    Set BeginAt = Target.Cells(1)
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        
+        ' write ssf
+        If Data = LastData Then
+            Counter = Counter + 1
+        Else
+            If LastData <> EmptyValue Then
+                WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+                WriteLineSkipOrRepeat Stream, Counter, LastData
+            End If
+            LastData = Data
+            Counter = 1
+            Set BeginAt = SingleCell
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Counter > 0 And LastData <> EmptyValue Then
+        WriteLineAddress Stream, TargetSheet.Range(BeginAt, EndAt)
+        WriteLineRepeat Stream, Counter, LastData
+    End If
+    
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithoutQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Private Sub WriteSsfWithSimpleQueue(Target As Range, ByVal MyProperty As String, _
+        Stream As Object, Optional ByVal EmptyValue As Variant = Empty)
+    ' it mixes cell reader and ssf writer, to minimize buffer usages
+    Dim SingleCell As Range
+    Dim Data As Variant
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    Dim RememberTargetRange As Range
+    
+    On Error GoTo HasError
+    
+    If (Target Is Nothing) Or (MyProperty = "") Then Exit Sub
+    
+    MyProperty = TranslatePropertyName(MyProperty, Target)
+    EmptyValue = TranslateFromCell(EmptyValue)
+    Set BeginAt = Target.Cells(1)
+    Set EndAt = BeginAt
+    ClearQueue
+    Set RememberTargetRange = TargetRange
+    
+    For Each SingleCell In Target.Cells
+        ' read a single cell
+        Data = GetCellsProperty(SingleCell, TranslatePropertyName(MyProperty, SingleCell))
+        If Data = EmptyValue Then Data = Empty
+        If Not IsEmpty(Data) Then
+            If IsEmptyQueue Then Set BeginAt = SingleCell
+            Enqueue Data
+        End If
+        
+        ' write ssf
+        If IsEmpty(Data) And Not IsEmptyQueue Then
+            Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+            WriteSsfSkip Stream
+        End If
+        Set EndAt = SingleCell
+    Next
+    ' write ssf for the last one
+    If Not IsEmptyQueue Then
+        Set TargetRange = TargetSheet.Range(BeginAt, EndAt)
+        WriteSsfSkip Stream
+    End If
+    
+    Set TargetRange = RememberTargetRange
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfWithSimpleQueue: Error " & Err.Number & " " & Err.Description
+    Resume Next
 End Sub
 
 
@@ -346,6 +484,7 @@ Private Sub DequeueRangeProperty()
     With TargetRange
         For R = 1 To .Rows.Count
             For C = 1 To .Columns.Count
+                If IsEmptyQueue Then Exit Sub
                 Data = Dequeue
                 If Not IsEmpty(Data) Then
                     SetCellsProperty Data, .Cells(R, C), PropertyName
@@ -467,9 +606,26 @@ End Sub
 
 Private Sub DequeueRangeValueFamily()
     Dim Data As Variant
+    Dim SmallerTarget As Range
+    Dim Columns As Long
+    Dim Rows As Long
+    Dim EffectiveRows As Long
     
-    Data = DequeueMatrix(TargetRange.Columns.Count, TargetRange.Rows.Count)
-    SetCellsProperty Data, TargetRange, PropertyName
+    Columns = TargetRange.Columns.Count
+    Rows = TargetRange.Rows.Count
+    EffectiveRows = Int(Queue.Count / Columns)
+    If Queue.Count Mod Columns > 0 Then EffectiveRows = EffectiveRows + 1
+    If Rows > EffectiveRows Then
+        ' avoid too large rows
+        Rows = EffectiveRows
+        Set SmallerTarget = TargetRange.Rows("1:" & EffectiveRows).Cells
+        'Env.LogWrite "DequeueRangeValueFamily: SmallerTarget: " & SmallerTarget.Address()
+    Else
+        Set SmallerTarget = TargetRange
+    End If
+    
+    Data = DequeueMatrix(Columns, Rows)
+    SetCellsProperty Data, SmallerTarget, PropertyName
 End Sub
 
 Private Sub EnqueueRangeFormulaValue(Optional ByVal EmptyValue As Variant = Empty)
@@ -707,6 +863,19 @@ Private Function SetCellsProperty(Data As Variant, Ra As Object, Optional ByVal 
 HasError:
     Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
     SetCellsProperty = False
+End Function
+
+Private Function TranslatePropertyName(ByVal MyProperty As String, Target As Range) As String
+    Select Case LCase(MyProperty)
+    Case "formula-or-value"
+        Select Case Target.HasFormula
+        Case True
+            MyProperty = "FormulaR1C1"
+        Case False
+            MyProperty = "Value"
+        End Select
+    End Select
+    TranslatePropertyName = MyProperty
 End Function
 
 Private Function TranslateFromCell(Data As Variant) As Variant
