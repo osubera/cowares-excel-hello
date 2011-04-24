@@ -44,8 +44,6 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.ReadFrom Block, Env
     Case "worksheet"
         SsfBlockWorksheet.ReadFrom Block, Env
-    'Case "columns-width"
-    '    SsfBlockColumnsWidth.ReadFrom Block, Env
     End Select
 End Sub
 
