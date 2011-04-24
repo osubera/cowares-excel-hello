@@ -59,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40657.5
+'         ;40657.7083333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -873,10 +873,14 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
         SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-shrink"
+        SsfBlockCells.CellsShrinkReadFrom Block, Env
     Case "cells-v-align"
         SsfBlockCells.CellsVAlignReadFrom Block, Env
     Case "cells-width"
         SsfBlockCells.CellsWidthReadFrom Block, Env
+    Case "cells-wrap"
+        SsfBlockCells.CellsWrapReadFrom Block, Env
     Case "module", "class", "code"
         SsfBlockModules.ReadFrom Block, Env, BlockName
     Case "require"
@@ -1061,8 +1065,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "safe-cell-text", "false"
     'Env.SetEnv "ssf", "safe-cell-text", "true"
     
-    Env.SetEnv "ssf", "size-calibration-h", "1"
-    Env.SetEnv "ssf", "size-calibration-w", "0.98167218"
+    Env.SetEnv "ssf", "size-calibration-v", "1"
+    Env.SetEnv "ssf", "size-calibration-h", "0.98167218"
     
     Env.SetEnv "ssf", "size-unit-from-reader", ""
     Env.SetEnv "ssf", "size-unit-to-reader", ""
@@ -1081,6 +1085,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     
     Env.SetEnv "ssf", "enable-cells-formula", "true"
     Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-wrap", "true"
+    Env.SetEnv "ssf", "enable-cells-shrink", "true"
     Env.SetEnv "ssf", "enable-cells-width", "true"
     Env.SetEnv "ssf", "enable-cells-height", "true"
     Env.SetEnv "ssf", "enable-cells-background-color", "true"
@@ -1936,6 +1942,7 @@ Private Sub CommonReader(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     ShowLog Env
     Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
 End Sub
 
 Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
@@ -1948,6 +1955,7 @@ Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     ShowLog Env
     Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
 End Sub
 
 Private Sub ShowLog(Env As GlobalResources)
@@ -3340,12 +3348,32 @@ Public Sub CellsFontItalicReadFrom(Block As Variant, ByVal Env As GlobalResource
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsWrapReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
         If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-wrap", "true") Then CellsWrapWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-shrink", "true") Then CellsShrinkWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-width", "true") Then CellsWidthWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-height", "true") Then CellsHeightWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-background-color", "true") Then CellsBackgroundColorWriteTo AnArea, Stream, Env
@@ -3525,6 +3553,28 @@ End Sub
 Public Sub CellsFontItalicWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Const LocalKey = "cells-font-italic"
     Const LocalProperty = "Font.Italic"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsWrapWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
     Const EmptyValue = False
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
@@ -5305,7 +5355,7 @@ End Function
 Public Sub SetUp(Env As GlobalResources, BlockName As String)
     Dim CalibName As String
     
-    CalibName = IIf(InStr(BlockName, "width") > 0, "w", "h")
+    CalibName = IIf(InStr(BlockName, "width") > 0, "h", "v")
     SetCalib Env, CalibName
     SetUnitFrom Env, BlockName
     SetUnitTo Env, BlockName
