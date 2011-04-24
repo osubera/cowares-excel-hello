@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40656.2916666667
+'         ;40657.4166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -281,6 +281,7 @@ Public Sub Menu_read_file(oAC As Object)
 End Sub
 
 Public Sub Menu_Charset(oAC As Object)
+    Helper.ComboAddHistory oAC, False
 End Sub
 
 Public Sub Menu_enable_magicword(oAC As Object)
@@ -915,6 +916,7 @@ End Sub
 '   name;SsfBlockColumnsWidth
 '{{{
 Option Explicit
+' going to obsolete
 
 Const MyKey = "columns-width"
 
@@ -951,7 +953,7 @@ Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
             End Select
         Case Else
             Counter = Counter + 1
-            Ra(Counter).ColumnWidth = ExcelCalculateColumnWidth(Val(Value), Unit)
+            Ra(Counter).ColumnWidth = Val(Value)
         End Select
         If Err.Number <> 0 Then
             Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
@@ -2808,22 +2810,6 @@ Public Function ExcelRangeToAddress(Ra As Range) As String
     ExcelRangeToAddress = Ra.Address(False, False, xlA1, False)
 End Function
 
-Public Function ExcelCalculateColumnWidth(ByVal Size As Double, Optional ByVal Unit As String = "zero") As Double
-    Const DefaultSize = 8.38    ' StandardWidth
-    
-    Dim out As Double
-    out = DefaultSize
-    
-    If Size > 0 Then
-        Select Case LCase(Unit)
-        Case "zero"
-            out = Size
-        End Select
-    End If
-    
-    ExcelCalculateColumnWidth = out
-End Function
-
 ' this function is required to avoid overflow errors on excel 2007 Cells.Count
 Public Function IsASingleCell(Target As Range) As Boolean
     On Error GoTo MayFailOnExcel2007
@@ -2980,6 +2966,74 @@ Public Function R1C1ToA1(ByVal R1C1 As String) As String
     End With
     
     R1C1ToA1 = A1
+End Function
+
+Public Function CellWidthFromZero(ByVal Size As Double) As Double
+    On Error Resume Next
+    
+    ' convert ColumnWidth(number of 0s) to Width(points)
+    With TestCell
+        .ColumnWidth = Size
+        CellWidthFromZero = .Width
+        .ColumnWidth = TestSheet.StandardWidth
+        
+        If Err.Number <> 0 Then
+            CellWidthFromZero = .Width
+            MyLogger "CellWidthFromZero: Error " & Err.Number & " " & Err.Description & "(" & Size & ")"
+            Err.Clear
+        End If
+    End With
+End Function
+
+Public Function CellWidthToZero(ByVal Size As Double) As Double
+    On Error GoTo Err1
+    
+    ' convert Width(points) to ColumnWidth(number of 0s)
+    Dim x1 As Double, x2 As Double, x3 As Double
+    Dim y1 As Double, y2 As Double, y3 As Double
+    Dim i As Long
+    
+    Const DZero As Double = 0.000001
+    Const EZero As Double = 0.255
+    Const k1 As Double = 9.375
+    Const k2 As Double = 6
+    
+    y1 = Size / k1
+    y2 = Size / k2
+    CellWidthToZero = (y1 + y2) / 2     ' start with an expected average
+    
+    With TestCell
+        .ColumnWidth = y1
+        x1 = .Width
+        .ColumnWidth = y2
+        x2 = .Width
+    End With
+    
+    ' 3 times itteration is enough
+    For i = 1 To 3
+        If Abs(x2 - x1) < DZero Then Exit For           ' matured
+        y3 = y1 + (Size - x1) * (y2 - y1) / (x2 - x1)   ' try linear
+        With TestCell
+            .ColumnWidth = y3
+            x3 = .Width
+        End With
+        If Abs(Size - x3) < EZero Then Exit For         ' matured
+        If Abs(Size - x1) > Abs(Size - x2) Then
+            y1 = y3
+            x1 = x3
+        Else
+            y2 = y3
+            x2 = x3
+        End If
+    Next
+    
+    CellWidthToZero = y3
+    TestCell.ColumnWidth = TestSheet.StandardWidth
+    Exit Function
+    
+Err1:
+    MyLogger "CellWidthToZero: Error " & Err.Number & " " & Err.Description & "(" & Size & ")"
+    TestCell.ColumnWidth = TestSheet.StandardWidth
 End Function
 
 '}}}
@@ -3263,7 +3317,10 @@ Public Sub CellsWidthReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-width"
     Const LocalProperty = "ColumnWidth"
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
@@ -3424,8 +3481,11 @@ Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByV
     Dim EmptyValue As Variant
     EmptyValue = Target.Worksheet.StandardWidth
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -5037,13 +5097,13 @@ Public Function ToSingleCell(Data As Variant) As Variant
         ToSingleCell = XlHAlign.xlHAlignCenter
     Case "center-across-selection"
         ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
-    Case "distributed", "均", "均等"
+    Case "distributed"
         ToSingleCell = XlHAlign.xlHAlignDistributed
     Case "fill"
         ToSingleCell = XlHAlign.xlHAlignFill
     Case "", "general"
         ToSingleCell = XlHAlign.xlHAlignGeneral
-    Case "justify", "両", "両端"
+    Case "justify"
         ToSingleCell = XlHAlign.xlHAlignJustify
     Case "left", "l"
         ToSingleCell = XlHAlign.xlHAlignLeft
@@ -5137,15 +5197,15 @@ End Function
 
 Public Function ToSingleCell(Data As Variant) As Variant
     Select Case LCase(Data)
-    Case "", "bottom", "b", "下"
+    Case "", "bottom", "b"
         ToSingleCell = XlVAlign.xlVAlignBottom
-    Case "center", "c", "中", "中央"
+    Case "center", "c"
         ToSingleCell = XlVAlign.xlVAlignCenter
-    Case "distributed", "均", "均等"
+    Case "distributed"
         ToSingleCell = XlVAlign.xlVAlignDistributed
-    Case "justify", "両", "両端"
+    Case "justify"
         ToSingleCell = XlVAlign.xlVAlignJustify
-    Case "top", "t", "上"
+    Case "top", "t"
         ToSingleCell = XlVAlign.xlVAlignTop
     Case Else
         ToSingleCell = Data
@@ -5247,6 +5307,182 @@ Public Function MakeColorString(ByVal R As Long, ByVal G As Long, ByVal B As Lon
                         Right(Hex(G + 256), 2) & _
                         Right(Hex(B + 256), 2)
 End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateSize
+'{{{
+Option Explicit
+
+Public UnitFrom As String
+Public UnitTo As String
+Public Calib As Double
+Public Cache As Scripting.Dictionary
+
+Const PointRatio As Double = 3.0969760158   ' points = 1mm / 5mm * 13.5points * 1.147028154
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+    Select Case Key
+    Case "unit"
+        UnitFrom = Value
+    End Select
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+    If UnitTo <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine("unit", UnitTo)
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If UnitFrom <> "" And UnitTo <> "" Then
+        FromSingleCell = Calculate(Data, UnitFrom, UnitTo)
+    Else
+        FromSingleCell = Data
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    If UnitFrom <> "" And UnitTo <> "" Then
+        ToSingleCell = Calculate(Data, UnitFrom, UnitTo)
+    Else
+        ToSingleCell = Data
+    End If
+End Function
+
+Public Sub SetUp(Env As GlobalResources, BlockName As String)
+    Dim CalibName As String
+    
+    CalibName = IIf(InStr(BlockName, "width") > 0, "w", "h")
+    SetCalib Env, CalibName
+    SetUnitFrom Env, BlockName
+    SetUnitTo Env, BlockName
+End Sub
+
+Public Sub SetCalib(Env As GlobalResources, CalibName As String)
+    Dim NewCalib As Double
+    
+    NewCalib = Val(Env.GetEnv("ssf", "size-calibration-" & CalibName, "1"))
+    If Calib <> NewCalib Then
+        Calib = NewCalib
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from", "")
+    If UnitFrom <> NewUnit Then
+        UnitFrom = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitTo(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to", "")
+    If UnitTo <> NewUnit Then
+        UnitTo = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Function Calculate(ByVal Size As Double, FromU As String, ToU As String) As Double
+    Dim NewSize As Double
+    
+    NewSize = Size
+    If FromU <> ToU Then
+        If Cache.Exists(Size) Then
+            NewSize = Cache(Size)
+        Else
+            NewSize = UnitFromMm(UnitToMm(Size, FromU, Size), ToU, Size)
+            Cache(Size) = NewSize
+        End If
+    End If
+    
+    Calculate = NewSize
+End Function
+
+Private Function MmFromPoint(ByVal x As Double) As Double
+    MmFromPoint = x / PointRatio / Calib
+End Function
+
+Private Function MmToPoint(ByVal x As Double) As Double
+    MmToPoint = x * PointRatio * Calib
+End Function
+
+Private Function LinearUnit(ByVal Unit As String) As Double
+    LinearUnit = -1
+    Select Case LCase(Unit)
+    Case "mm"
+        ' mm: =1mm
+        LinearUnit = 1
+    Case "cm"
+        ' cm: = 10mm
+        LinearUnit = 10
+    Case "inch"
+        ' inch: = 25.4mm
+        LinearUnit = 25.4
+    Case "sun"
+        ' sun: = 30.303mm
+        LinearUnit = 30.303
+    Case "point", "pt"
+        ' depends on calibration
+        LinearUnit = MmFromPoint(1)
+    Case "zero", "0"
+        ' zero: = nearly 1/8point
+        ' requires non-linear conversion
+    End Select
+End Function
+
+Private Function UnitToMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitToMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitToMm = x * Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0"
+            UnitToMm = MmFromPoint(SsfUtilsExcel.OpenBookTool.CellWidthFromZero(x))
+        End Select
+    End If
+End Function
+
+Private Function UnitFromMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitFromMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitFromMm = x / Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0"
+            UnitFromMm = SsfUtilsExcel.OpenBookTool.CellWidthToZero(MmToPoint(x))
+        End Select
+    End If
+End Function
+
+Private Sub Class_Initialize()
+    Calib = 1
+    Set Cache = New Scripting.Dictionary
+End Sub
+
+Private Sub Class_Terminate()
+    Cache.RemoveAll
+    Set Cache = Nothing
+End Sub
 
 '}}}
 

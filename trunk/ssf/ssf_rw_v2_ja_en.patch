@@ -1,5 +1,5 @@
---- ssf_rw_v2.txt	2011-04-21 21:54:21.000000000 +0900
-+++ ssf_rw_v2_en.txt	2011-04-21 21:57:24.000000000 +0900
+--- ssf_rw_v2.txt	2011-04-24 10:29:36.000000000 +0900
++++ ssf_rw_v2_en.txt	2011-04-24 10:39:23.000000000 +0900
 @@ -1 +1 @@
 -﻿'ssf-begin
 +'ssf-begin
@@ -117,15 +117,62 @@
 @@ -165 +165 @@
 -'         ;このシートを表示する。
 +'         ;Show this sheet
-@@ -4770 +4770 @@
+@@ -5096 +5096 @@
 -    Case "center", "c", "中", "中央"
 +    Case "center", "c"
-@@ -4782 +4782 @@
+@@ -5100 +5100 @@
+-    Case "distributed", "均", "均等"
++    Case "distributed"
+@@ -5106 +5106 @@
+-    Case "justify", "両", "両端"
++    Case "justify"
+@@ -5108 +5108 @@
 -    Case "left", "l", "左"
 +    Case "left", "l"
-@@ -4784 +4784 @@
+@@ -5110 +5110 @@
 -    Case "right", "r", "右"
 +    Case "right", "r"
-@@ -4817 +4817 @@
+@@ -5151 +5151 @@
 -    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
 +    Case "yes", "y", "true", "t", "on", "enable", "use"
+@@ -5200 +5200 @@
+-    Case "", "bottom", "b", "下"
++    Case "", "bottom", "b"
+@@ -5202 +5202 @@
+-    Case "center", "c", "中", "中央"
++    Case "center", "c"
+@@ -5204 +5204 @@
+-    Case "distributed", "均", "均等"
++    Case "distributed"
+@@ -5206 +5206 @@
+-    Case "justify", "両", "両端"
++    Case "justify"
+@@ -5208 +5208 @@
+-    Case "top", "t", "上"
++    Case "top", "t"
+@@ -5424 +5424 @@
+-    Case "mm", "ミリ"
++    Case "mm"
+@@ -5427 +5427 @@
+-    Case "cm", "センチ"
++    Case "cm"
+@@ -5430 +5430 @@
+-    Case "inch", "インチ", "吋"
++    Case "inch"
+@@ -5433,2 +5433,2 @@
+-    Case "sun", "寸"
+-        ' 寸: = 30.303mm
++    Case "sun"
++        ' sun: = 30.303mm
+@@ -5436 +5436 @@
+-    Case "point", "pt", "ポイント"
++    Case "point", "pt"
+@@ -5439 +5439 @@
+-    Case "zero", "0", "零"
++    Case "zero", "0"
+@@ -5455 +5455 @@
+-        Case "zero", "0", "零"
++        Case "zero", "0"
+@@ -5471 +5471 @@
+-        Case "zero", "0", "零"
++        Case "zero", "0"
