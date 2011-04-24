@@ -41,22 +41,6 @@ Public Function ExcelRangeToAddress(Ra As Range) As String
     ExcelRangeToAddress = Ra.Address(False, False, xlA1, False)
 End Function
 
-Public Function ExcelCalculateColumnWidth(ByVal Size As Double, Optional ByVal Unit As String = "zero") As Double
-    Const DefaultSize = 8.38    ' StandardWidth
-    
-    Dim out As Double
-    out = DefaultSize
-    
-    If Size > 0 Then
-        Select Case LCase(Unit)
-        Case "zero"
-            out = Size
-        End Select
-    End If
-    
-    ExcelCalculateColumnWidth = out
-End Function
-
 ' this function is required to avoid overflow errors on excel 2007 Cells.Count
 Public Function IsASingleCell(Target As Range) As Boolean
     On Error GoTo MayFailOnExcel2007

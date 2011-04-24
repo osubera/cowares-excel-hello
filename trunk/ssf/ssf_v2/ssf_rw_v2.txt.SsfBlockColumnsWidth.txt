@@ -5,6 +5,7 @@
 '   name;SsfBlockColumnsWidth
 '{{{
 Option Explicit
+' going to obsolete
 
 Const MyKey = "columns-width"
 
@@ -41,7 +42,7 @@ Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
             End Select
         Case Else
             Counter = Counter + 1
-            Ra(Counter).ColumnWidth = ExcelCalculateColumnWidth(Val(Value), Unit)
+            Ra(Counter).ColumnWidth = Val(Value)
         End Select
         If Err.Number <> 0 Then
             Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"

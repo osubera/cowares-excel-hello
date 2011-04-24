@@ -6,6 +6,14 @@
 '{{{
 Option Explicit
 
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
 Public Function FromCell(Data As Variant) As Variant
     FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
 End Function

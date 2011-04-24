@@ -1,0 +1,181 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfTranslateSize
+'{{{
+Option Explicit
+
+Public UnitFrom As String
+Public UnitTo As String
+Public Calib As Double
+Public Cache As Scripting.Dictionary
+
+Const PointRatio As Double = 3.0969760158   ' points = 1mm / 5mm * 13.5points * 1.147028154
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+    Select Case Key
+    Case "unit"
+        UnitFrom = Value
+    End Select
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+    If UnitTo <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine("unit", UnitTo)
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If UnitFrom <> "" And UnitTo <> "" Then
+        FromSingleCell = Calculate(Data, UnitFrom, UnitTo)
+    Else
+        FromSingleCell = Data
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    If UnitFrom <> "" And UnitTo <> "" Then
+        ToSingleCell = Calculate(Data, UnitFrom, UnitTo)
+    Else
+        ToSingleCell = Data
+    End If
+End Function
+
+Public Sub SetUp(Env As GlobalResources, BlockName As String)
+    Dim CalibName As String
+    
+    CalibName = IIf(InStr(BlockName, "width") > 0, "w", "h")
+    SetCalib Env, CalibName
+    SetUnitFrom Env, BlockName
+    SetUnitTo Env, BlockName
+End Sub
+
+Public Sub SetCalib(Env As GlobalResources, CalibName As String)
+    Dim NewCalib As Double
+    
+    NewCalib = Val(Env.GetEnv("ssf", "size-calibration-" & CalibName, "1"))
+    If Calib <> NewCalib Then
+        Calib = NewCalib
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from", "")
+    If UnitFrom <> NewUnit Then
+        UnitFrom = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitTo(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to", "")
+    If UnitTo <> NewUnit Then
+        UnitTo = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Function Calculate(ByVal Size As Double, FromU As String, ToU As String) As Double
+    Dim NewSize As Double
+    
+    NewSize = Size
+    If FromU <> ToU Then
+        If Cache.Exists(Size) Then
+            NewSize = Cache(Size)
+        Else
+            NewSize = UnitFromMm(UnitToMm(Size, FromU, Size), ToU, Size)
+            Cache(Size) = NewSize
+        End If
+    End If
+    
+    Calculate = NewSize
+End Function
+
+Private Function MmFromPoint(ByVal x As Double) As Double
+    MmFromPoint = x / PointRatio / Calib
+End Function
+
+Private Function MmToPoint(ByVal x As Double) As Double
+    MmToPoint = x * PointRatio * Calib
+End Function
+
+Private Function LinearUnit(ByVal Unit As String) As Double
+    LinearUnit = -1
+    Select Case LCase(Unit)
+    Case "mm", "ミリ"
+        ' mm: =1mm
+        LinearUnit = 1
+    Case "cm", "センチ"
+        ' cm: = 10mm
+        LinearUnit = 10
+    Case "inch", "インチ", "吋"
+        ' inch: = 25.4mm
+        LinearUnit = 25.4
+    Case "sun", "寸"
+        ' 寸: = 30.303mm
+        LinearUnit = 30.303
+    Case "point", "pt", "ポイント"
+        ' depends on calibration
+        LinearUnit = MmFromPoint(1)
+    Case "zero", "0", "零"
+        ' zero: = nearly 1/8point
+        ' requires non-linear conversion
+    End Select
+End Function
+
+Private Function UnitToMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitToMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitToMm = x * Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0", "零"
+            UnitToMm = MmFromPoint(SsfUtilsExcel.OpenBookTool.CellWidthFromZero(x))
+        End Select
+    End If
+End Function
+
+Private Function UnitFromMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitFromMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitFromMm = x / Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0", "零"
+            UnitFromMm = SsfUtilsExcel.OpenBookTool.CellWidthToZero(MmToPoint(x))
+        End Select
+    End If
+End Function
+
+Private Sub Class_Initialize()
+    Calib = 1
+    Set Cache = New Scripting.Dictionary
+End Sub
+
+Private Sub Class_Terminate()
+    Cache.RemoveAll
+    Set Cache = Nothing
+End Sub
+
+'}}}
+
+'ssf-end
+

@@ -80,6 +80,7 @@ Public Sub Menu_read_file(oAC As Object)
 End Sub
 
 Public Sub Menu_Charset(oAC As Object)
+    Helper.ComboAddHistory oAC, False
 End Sub
 
 Public Sub Menu_enable_magicword(oAC As Object)
