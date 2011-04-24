@@ -35,7 +35,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40657.4472222222
+'         ;40657.4583333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -175,8 +175,9 @@
 '         ;m/d/yyyy h:mm
 
 'cells-width
+'   unit;pt
 '  address;B1
-'         ;15.5
+'         ;96.75
 
 'cells-name
 '       ;=ssf_rw_v2!R15C1
@@ -392,6 +393,7 @@ Private Env As GlobalResources
 Public Function InitializeEnv()
     Set Env = SsfUtils.CreateDefaultEnv
     Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "reader"
 End Function
 
 Public Sub TerminateEnv()
@@ -920,6 +922,7 @@ Private Env As GlobalResources
 Public Function InitializeEnv()
     Set Env = SsfUtils.CreateDefaultEnv
     Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "writer"
 End Function
 
 Public Sub TerminateEnv()
@@ -1057,6 +1060,24 @@ Public Function CreateDefaultEnv() As GlobalResources
     
     Env.SetEnv "ssf", "safe-cell-text", "false"
     'Env.SetEnv "ssf", "safe-cell-text", "true"
+    
+    Env.SetEnv "ssf", "size-calibration-h", "1"
+    Env.SetEnv "ssf", "size-calibration-w", "0.98167218"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader", ""
+    Env.SetEnv "ssf", "size-unit-to-reader", ""
+    Env.SetEnv "ssf", "size-unit-from-writer", ""
+    Env.SetEnv "ssf", "size-unit-to-writer", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-width", "zero"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-width", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-height", "pt"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-height", "pt"
     
     Env.SetEnv "ssf", "enable-cells-formula", "true"
     Env.SetEnv "ssf", "enable-cells-numberformat", "true"
@@ -3220,7 +3241,10 @@ Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-height"
     Const LocalProperty = "RowHeight"
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsBackgroundColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
@@ -3374,9 +3398,9 @@ Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByV
     Dim EmptyValue As Variant
     EmptyValue = Target.Worksheet.StandardWidth
     
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     Set Env.CellStream.Translator = New SsfTranslateSize
     Env.CellStream.Translator.SetUp Env, LocalKey
-    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
     Set Env.CellStream.Translator = Nothing
 End Sub
@@ -3389,7 +3413,10 @@ Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     EmptyValue = Target.Worksheet.StandardHeight
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsMakeSsfBlocks Target.Columns(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsBackgroundColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -5270,8 +5297,11 @@ Public Sub SetCalib(Env As GlobalResources, CalibName As String)
 End Sub
 
 Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & BlockName, "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from", "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll, "")
     If UnitFrom <> NewUnit Then
         UnitFrom = NewUnit
         Cache.RemoveAll
@@ -5279,8 +5309,11 @@ Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByV
 End Sub
 
 Public Sub SetUnitTo(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & BlockName, "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to", "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll, "")
     If UnitTo <> NewUnit Then
         UnitTo = NewUnit
         Cache.RemoveAll
