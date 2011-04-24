@@ -35,7 +35,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40657.4166666667
+'         ;40657.4472222222
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -883,8 +883,6 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.ReadFrom Block, Env
     Case "worksheet"
         SsfBlockWorksheet.ReadFrom Block, Env
-    'Case "columns-width"
-    '    SsfBlockColumnsWidth.ReadFrom Block, Env
     End Select
 End Sub
 
@@ -908,111 +906,6 @@ Public Sub WriteTo(Stream, Env)
     Case Else
         Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
     End Select
-End Sub
-
-'}}}
-
-'module
-'   name;SsfBlockColumnsWidth
-'{{{
-Option Explicit
-' going to obsolete
-
-Const MyKey = "columns-width"
-
-Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
-    Dim KeyValue As Variant
-    Dim Key As String
-    Dim Value As String
-    Dim Counter As Long
-    Dim Ws As Worksheet
-    Dim Ra As Range
-    Dim Unit As String
-    
-    Counter = 0
-    Unit = "zero"
-    Set Ws = Env.Current("worksheet")
-    Set Ra = Ws.Cells
-    
-    Env.LogWrite MyKey & " into " & Ws.Name
-    
-    On Error Resume Next
-    
-    For Each KeyValue In Block
-        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
-        Case "address"
-            Set Ra = SsfUtilsExcel.ExcelAddressToRange(Ws, Value, Ws.Cells)
-            Counter = 0
-        Case "unit"
-            Value = LCase(Trim(Value))
-            Select Case Value
-            Case "zero"
-                Unit = Value
-            Case Else
-                Env.LogWrite MyKey & ": unsupported unit, ignored. " & Value
-            End Select
-        Case Else
-            Counter = Counter + 1
-            Ra(Counter).ColumnWidth = Val(Value)
-        End Select
-        If Err.Number <> 0 Then
-            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
-            Err.Clear
-        End If
-    Next
-End Sub
-
-Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
-    Dim Ws As Worksheet
-    
-    Select Case TypeName(Target)
-    Case "Range"
-        RangeWriteTo Target, Stream, Env
-    Case "Worksheet"
-        RangeWriteTo Target.UsedRange, Stream, Env
-    Case "Workbook"
-        For Each Ws In Target.Worksheets
-            WorksheetBlock Ws, Stream, Env
-            If (TypeName(Ws.UsedRange.Value) <> "Empty") Then
-                RangeWriteTo Ws.UsedRange, Stream, Env
-            End If
-        Next
-    Case Else
-        Env.LogWrite MyKey & ": " & "unknown type, ignored: " & TypeName(Target)
-    End Select
-    
-    Set Target = Nothing
-End Sub
-
-Private Sub RangeWriteTo(Ra As Range, Stream As Object, Env As GlobalResources)
-    Dim Ce As Range
-    
-    Env.LogWrite MyKey & " from " & Ra.Worksheet.Name
-    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
-    
-    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Ra.EntireColumn))
-    Stream.WriteLine SsfWriter.MakeSsfLine("unit", "zero")
-    For Each Ce In Ra.EntireColumn
-        Stream.WriteLine SsfWriter.MakeSsfLine("", Ce.ColumnWidth)
-    Next
-    
-    Stream.WriteLine SsfWriter.SsfBlockEnd
-End Sub
-
-Private Sub WorksheetBlock(Ws As Worksheet, Stream As Object, Env As GlobalResources)
-    Dim Names As String
-    
-    Env.LogWrite "worksheet " & Ws.Name
-    Stream.WriteLine SsfWriter.SsfBlockBegin("worksheet")
-    
-    Names = Ws.Name
-    ' avoid to print the default codename
-    If Ws.Name <> Ws.CodeName Then
-        Names = Names & "/" & Ws.CodeName
-    End If
-    Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
-    
-    Stream.WriteLine SsfWriter.SsfBlockEnd
 End Sub
 
 '}}}
