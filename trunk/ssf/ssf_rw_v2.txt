@@ -59,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40657.7083333333
+'         ;40657.9166666667
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1097,6 +1097,7 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "enable-cells-font-italic", "true"
     Env.SetEnv "ssf", "enable-cells-h-align", "true"
     Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    Env.SetEnv "ssf", "enable-cells-border", "true"
     
     Env.SetEnv "ssf", "cells-writer", "block"
     'Env.SetEnv "ssf", "cells-writer", "simple"
@@ -2752,12 +2753,15 @@ End Function
 Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
     Dim Receiver As Object
     Dim DotProperties As Variant
+    Dim MayHaveIndex As Variant
     
     Set Receiver = Origin
     Do
         DotProperties = Split(Key, ".", 2)
         If UBound(DotProperties) = 0 Then Exit Do
-        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        MayHaveIndex = Split(DotProperties(0), "(", 2)
+        Set Receiver = CallByName(Receiver, MayHaveIndex(0), VbGet)
+        If UBound(MayHaveIndex) = 1 Then Set Receiver = Receiver(Val(MayHaveIndex(1)))
         Key = DotProperties(1)
     Loop
     
@@ -3384,6 +3388,7 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
         If Env.GetEnv("ssf", "enable-cells-font-italic", "true") Then CellsFontItalicWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-h-align", "true") Then CellsHAlignWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-v-align", "true") Then CellsVAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-border", "true") Then CellsBorderWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -3581,6 +3586,34 @@ Public Sub CellsShrinkWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     Set Env.CellStream.Translator = New SsfTranslateCellBoolean
     CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
     Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsBorderWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-border"
+    Const EmptyValue = XlLineStyle.xlLineStyleNone
+    
+    Dim LocalProperty As String
+    Dim Border As Variant
+    Dim BordersIndex As Variant
+    
+    BordersIndex = Array( _
+        XlBordersIndex.xlEdgeTop, _
+        XlBordersIndex.xlEdgeBottom, _
+        XlBordersIndex.xlEdgeLeft, _
+        XlBordersIndex.xlEdgeRight, _
+        XlBordersIndex.xlDiagonalDown, _
+        XlBordersIndex.xlDiagonalUp, _
+        XlBordersIndex.xlInsideHorizontal, _
+        XlBordersIndex.xlInsideVertical)
+    
+    For Each Border In BordersIndex
+        LocalProperty = "Borders(" & CStr(Border) & ").LineStyle"
+        If Not SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then
+            'Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+            CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+            'Set Env.CellStream.Translator = Nothing
+        End If
+    Next
 End Sub
 
 Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
