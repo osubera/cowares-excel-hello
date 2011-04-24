@@ -1,87 +1,87 @@
---- ssf_rw_v2.txt	2011-04-24 11:45:32.000000000 +0900
-+++ ssf_rw_v2_en.txt	2011-04-24 11:48:21.000000000 +0900
+--- ssf_rw_v2.txt	2011-04-24 12:14:30.000000000 +0900
++++ ssf_rw_v2_en.txt	2011-04-24 12:20:39.000000000 +0900
 @@ -1 +1 @@
 -﻿'ssf-begin
 +'ssf-begin
 @@ -5 +5 @@
 -'   name;ssf_rw_v2.xls/F3SsfRwV2
 +'   name;ssf_rw_v2_en.xls/F3SsfRwV2
-@@ -21 +21 @@
+@@ -45 +45 @@
 -'         ;名称
 +'         ;Public Name
-@@ -23,2 +23,2 @@
+@@ -47,2 +47,2 @@
 -'         ;コメント
 -'         ;SSFテキストとエクセルブックの変換を行う
 +'         ;Local Comment
 +'         ;to convert between SSF texts and Excel Books
-@@ -27 +27 @@
+@@ -51 +51 @@
 -'         ;著作権
 +'         ;Copyright
-@@ -29,3 +29,3 @@
+@@ -53,3 +53,3 @@
 -'         ;ライセンス
 -'         ;自律, 自由, 公正, http://cowares.nobody.jp
 -'         ;作者
 +'         ;License
 +'         ;Fortitudinous, Free, Fair, http://cowares.nobody.jp
 +'         ;Contributor
-@@ -33 +33 @@
+@@ -57 +57 @@
 -'         ;初版
 +'         ;Since
-@@ -35 +35 @@
+@@ -59 +59 @@
 -'         ;配布元
 +'         ;Url
-@@ -37 +37 @@
+@@ -61 +61 @@
 -'         ;更新
 +'         ;Timestamp
-@@ -42,2 +42,2 @@
+@@ -66,2 +66,2 @@
 -'         ;ボタンの表示
 -'         ;ボタンの機能
 +'         ;Button Face
 +'         ;Button Tips
-@@ -53,2 +53,2 @@
+@@ -77,2 +77,2 @@
 -'         ;コピーSSF
 -'         ;クリップボードにSSFを書き出す。
 +'         ;Copy as SSF
 +'         ;Write SSF into Clipboard
-@@ -62,2 +62,2 @@
+@@ -86,2 +86,2 @@
 -'         ;ペーストSSF
 -'         ;クリップボードのSSFを取り込む。
 +'         ;Paste from SSF
 +'         ;Read SSF from Clipboard
-@@ -69,2 +69,2 @@
+@@ -93,2 +93,2 @@
 -'         ;メモ帳へ
 -'         ;メモ帳にSSFを書き出す。
 +'         ;to Notepad
 +'         ;Write SSF into a Notepad
-@@ -78,2 +78,2 @@
+@@ -102,2 +102,2 @@
 -'         ;メモ帳から
 -'         ;メモ帳のSSFを取り込む。
 +'         ;from Notepad
 +'         ;Read SSF from a Notepad
-@@ -86 +86 @@
+@@ -110 +110 @@
 -'         ;連携中のメモ帳。
 +'         ;connection to Notepad
-@@ -92,2 +92,2 @@
+@@ -116,2 +116,2 @@
 -'         ;ファイルへ
 -'         ;ファイルにSSFを書き出す。
 +'         ;to File
 +'         ;Write SSF into a File
-@@ -101,2 +101,2 @@
+@@ -125,2 +125,2 @@
 -'         ;ファイルから
 -'         ;ファイルのSSFを取り込む。
 +'         ;from File
 +'         ;Read SSF from a File
-@@ -108,2 +108,2 @@
+@@ -132,2 +132,2 @@
 -'         ;文字コード
 -'         ;ファイルの文字コードを指定する。
 +'         ;Encoding
 +'         ;Character Encoding of File
-@@ -120,2 +120,2 @@
+@@ -144,2 +144,2 @@
 -'         ;対象
 -'         ;SSF書き出しの対象を指定する。
 +'         ;Object
 +'         ;What is converted when writing to SSF
-@@ -128,5 +128,5 @@
+@@ -152,5 +152,5 @@
 -'         ;ブック
 -'         ;シート
 -'         ;選択セル
@@ -92,87 +92,87 @@
 +'         ;Cells
 +'         ;Modules
 +'         ;Code
-@@ -134,2 +134,2 @@
+@@ -158,2 +158,2 @@
 -'         ;モジュール
 -'         ;VBAコードの扱いを指定する。
 +'         ;Module
 +'         ;How VBA codes are converted
-@@ -140,3 +140,3 @@
+@@ -164,3 +164,3 @@
 -'         ;VBA有り
 -'         ;VBA無し
 -'         ;VBA分離
 +'         ;with VBA
 +'         ;without VBA
 +'         ;separate VBA
-@@ -144,2 +144,2 @@
+@@ -168,2 +168,2 @@
 -'         ;混在
 -'         ;SSF宣言行より前の情報を取り込まない。
 +'         ;Mixed
 +'         ;use SSF declares to remove non SSF sections
-@@ -153,2 +153,2 @@
+@@ -177,2 +177,2 @@
 -'         ;ログ
 -'         ;メモ帳にログを出力する。
 +'         ;Log
 +'         ;Show verbose logs on Notepad
-@@ -165 +165 @@
+@@ -189 +189 @@
 -'         ;このシートを表示する。
 +'         ;Show this sheet
-@@ -5016 +5016 @@
+@@ -5041 +5041 @@
 -    Case "center", "c", "中", "中央"
 +    Case "center", "c"
-@@ -5020 +5020 @@
+@@ -5045 +5045 @@
 -    Case "distributed", "均", "均等"
 +    Case "distributed"
-@@ -5026 +5026 @@
+@@ -5051 +5051 @@
 -    Case "justify", "両", "両端"
 +    Case "justify"
-@@ -5028 +5028 @@
+@@ -5053 +5053 @@
 -    Case "left", "l", "左"
 +    Case "left", "l"
-@@ -5030 +5030 @@
+@@ -5055 +5055 @@
 -    Case "right", "r", "右"
 +    Case "right", "r"
-@@ -5071 +5071 @@
+@@ -5096 +5096 @@
 -    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
 +    Case "yes", "y", "true", "t", "on", "enable", "use"
-@@ -5120 +5120 @@
+@@ -5145 +5145 @@
 -    Case "", "bottom", "b", "下"
 +    Case "", "bottom", "b"
-@@ -5122 +5122 @@
+@@ -5147 +5147 @@
 -    Case "center", "c", "中", "中央"
 +    Case "center", "c"
-@@ -5124 +5124 @@
+@@ -5149 +5149 @@
 -    Case "distributed", "均", "均等"
 +    Case "distributed"
-@@ -5126 +5126 @@
+@@ -5151 +5151 @@
 -    Case "justify", "両", "両端"
 +    Case "justify"
-@@ -5128 +5128 @@
+@@ -5153 +5153 @@
 -    Case "top", "t", "上"
 +    Case "top", "t"
-@@ -5350 +5350 @@
+@@ -5375 +5375 @@
 -    Case "mm", "ミリ"
 +    Case "mm"
-@@ -5353 +5353 @@
+@@ -5378 +5378 @@
 -    Case "cm", "センチ"
 +    Case "cm"
-@@ -5356 +5356 @@
+@@ -5381 +5381 @@
 -    Case "inch", "インチ", "吋"
 +    Case "inch"
-@@ -5359,2 +5359,2 @@
+@@ -5384,2 +5384,2 @@
 -    Case "sun", "寸"
 -        ' 寸: = 30.303mm
 +    Case "sun"
 +        ' sun: = 30.303mm
-@@ -5362 +5362 @@
+@@ -5387 +5387 @@
 -    Case "point", "pt", "ポイント"
 +    Case "point", "pt"
-@@ -5365 +5365 @@
+@@ -5390 +5390 @@
 -    Case "zero", "0", "零"
 +    Case "zero", "0"
-@@ -5381 +5381 @@
+@@ -5406 +5406 @@
 -        Case "zero", "0", "零"
 +        Case "zero", "0"
-@@ -5397 +5397 @@
+@@ -5422 +5422 @@
 -        Case "zero", "0", "零"
 +        Case "zero", "0"
