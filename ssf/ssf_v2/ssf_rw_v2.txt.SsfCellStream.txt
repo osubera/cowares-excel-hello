@@ -193,6 +193,11 @@ Public Sub ReadSsfCells(Block As Variant, LineFeed As String)
             Else
                 Enqueue Value
             End If
+        Case Else
+            If Not Translator Is Nothing Then
+                ' translator specific options
+                Translator.ReadSsf Key, Value, Me
+            End If
         End Select
         If Err.Number <> 0 Then
             Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"

@@ -24,7 +24,10 @@ Public Sub CellsWidthReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-width"
     Const LocalProperty = "ColumnWidth"
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
@@ -185,8 +188,11 @@ Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByV
     Dim EmptyValue As Variant
     EmptyValue = Target.Worksheet.StandardWidth
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -321,6 +327,11 @@ Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalR
         .Clear
         .PropertyName = LocalProperty
         .SetRange Target
+        
+        If Not .Translator Is Nothing Then
+            ' translator specific options
+            .Translator.WriteSsf Stream, Env.CellStream
+        End If
         
         Select Case CellsWriter
         Case "row"
