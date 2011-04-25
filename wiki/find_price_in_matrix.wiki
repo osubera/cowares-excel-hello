@@ -30,7 +30,7 @@
  * 開発者用メモ
     # ツールバーを追加する
     # ルール行、データ行をidにする
-    # FindPrice の双子で FindPriceRow を Public で作って使う
+    # !FindPrice の双子で !FindPriceRow を Public で作って使う
 
 == 要望 ==
  * ２つの軸から単価を決める。
