@@ -18,6 +18,20 @@
  * because the rules are not finalized, we need to make an exception. in that case, the price overwritten should be explicitly distiguished by a sign.
  * because the rules are variable, we need a flexible way to apply a new one.
 
+== 2011/4/25 修正案 ==
+
+ * 操作ボタンを出すようにし、ボタン操作で集計シートを作る。
+ * 操作のイメージ
+    # 今の関数、 `=FindPrice(ルールエリア,F3,E3:P3)` の３つの引数に相当する範囲を、それぞれに応じたボタン操作で設定する。
+    # `集計` ボタンを押すと、データ明細のあるブックにシートを追加し、そこで集計する。
+ * 集計表には次の項目が並ぶ。
+    # 件数、単価、２軸ルールの項目名
+    # 他に集計作業に必要な列も追加される。
+ * 開発者用メモ
+    # ツールバーを追加する
+    # ルール行、データ行をidにする
+    # FindPrice の双子で FindPriceRow を Public で作って使う
+
 == 要望 ==
  * ２つの軸から単価を決める。
  * フラグ（第１軸）は、おおまかなグループ分けをする。
