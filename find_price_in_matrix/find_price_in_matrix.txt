@@ -445,6 +445,98 @@
 '         ;4
 '         ;1.5
 
+'cells-background-color
+'  address;A1:N1
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;12
+'         ;#FFFF00
+'  address;A3:N3
+'         ;#FFFF00
+'     skip;1
+'   repeat;12
+'         ;#FFFF00
+'  address;A5:N30
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;13
+'         ;#FFFF00
+'         ;#FF99CC
+'   repeat;12
+'         ;#FFFF00
+
 'worksheet
 '   name;find_price_in_matrix/BaumMain
 
@@ -467,7 +559,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/find_price_in_matrix
 '         ;更新
-'         ;40659.9166666667
+'         ;40660.2916666667
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
@@ -1688,9 +1780,8 @@ Private Sub SetListTitle(Ra As Range, RuleNames As Variant)
     Ra.Range("A1:D1").Value = Array("ルール行番号", "件数", "単価", "フラグ")
     Ra.Range("E1:" & cEnd).Value = RuleNames
     
-    With Ra.Range("A1:" & cEnd)
-        .Interior.ColorIndex = 43   ' ライム
-    End With
+    Ra.Range("A1:" & cEnd).Interior.ColorIndex = 43 ' ライム
+    Ra.Range("A1:D1").Interior.ColorIndex = 4       ' 明るい緑
 End Sub
 
 Private Sub SumUp(DataList As Range)
@@ -1727,6 +1818,7 @@ Private Sub SumUp(DataList As Range)
             If .Range("A1").Value = 0 Then  ' can't summarize, because it includes many flags
                 .Worksheet.Range(.Range("D1"), .Cells(1, .Rows(1).Cells.Count)).ClearContents
             End If
+            .Interior.ColorIndex = 40       ' ベージュ
         End With
     Next
 End Sub
