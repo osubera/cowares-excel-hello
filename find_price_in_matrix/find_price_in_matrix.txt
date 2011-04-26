@@ -559,7 +559,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/find_price_in_matrix
 '         ;更新
-'         ;40660.2916666667
+'         ;40660.3194444444
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
@@ -1698,6 +1698,7 @@ Public Sub Exec_sumup()
     
     If IsNotReady Then Exit Sub
     Set Ws = GetNewSheet(TargetData.Worksheet)
+    SetEntireFormat Ws
     
     Application.ScreenUpdating = False
     Set Ra = MakeList(Ws, RuleArea, FlagColumn, TargetData)
@@ -1721,7 +1722,6 @@ Private Function MakeList(Ws As Worksheet, Rule As Range, Flag As Range, Data As
     
     DataOffset = Data.Cells(1).Row - 1
     R = 1
-    Ws.Cells.ShrinkToFit = True
     RuleNames = FindPriceInMatrix.GetRuleNames(Rule)
     SetListTitle Ws.Rows(1).Cells, RuleNames
     
@@ -1753,18 +1753,19 @@ Private Sub CopyListData(Ra As Range, FoundRule As Variant, RuleNames As Variant
         MaxCol = 4
         ReDim buff(1 To MaxCol)
         buff(3) = 0
+        buff(4) = "×"  ' indicates clearly no flags available
     Else
         'Debug.Assert Flag = RuleRow(1)
         MaxCol = RuleOutputColBegin + UBound(RuleNames)
         ReDim buff(1 To MaxCol)
-        buff(3) = RuleRow(0)  ' price
+        buff(3) = RuleRow(0)    ' price
+        buff(4) = RuleRow(1)    ' flag, not in data but in rule
         For i = 0 To UBound(RuleNames)
             buff(RuleOutputColBegin + i) = IIf(IsEmpty(RuleRow(2)(i)), vbNullString, RuleNames(i))
         Next
     End If
     buff(1) = RuleNo
-    buff(2) = RowNumber   ' to be count
-    buff(4) = Flag        ' flag
+    buff(2) = RowNumber     ' to be count
     
     Ra.Worksheet.Range(Ra.Columns(1), Ra.Columns(MaxCol)).Value = buff
     
@@ -1777,11 +1778,19 @@ Private Sub SetListTitle(Ra As Range, RuleNames As Variant)
     Dim cEnd As String
     cEnd = Ra(5 + UBound(RuleNames)).Address(False, False, xlA1, False)
     
-    Ra.Range("A1:D1").Value = Array("ルール行番号", "件数", "単価", "フラグ")
     Ra.Range("E1:" & cEnd).Value = RuleNames
-    
     Ra.Range("A1:" & cEnd).Interior.ColorIndex = 43 ' ライム
-    Ra.Range("A1:D1").Interior.ColorIndex = 4       ' 明るい緑
+    
+    With Ra.Range("A1:D1")
+        .Value = Array("ルール行番号", "件数", "単価", "フラグ")
+        .Interior.ColorIndex = 4                    ' 明るい緑
+        .HorizontalAlignment = xlHAlignCenter
+    End With
+End Sub
+
+Private Sub SetEntireFormat(Ws As Worksheet)
+    Ws.Cells.ShrinkToFit = True
+    Ws.Columns("D").HorizontalAlignment = xlHAlignCenter
 End Sub
 
 Private Sub SumUp(DataList As Range)
@@ -1809,15 +1818,14 @@ Private Sub SumUp(DataList As Range)
             RememberFormula = .Range("B1").FormulaR1C1
             .Rows(1).FormulaR1C1 = "=R[-1]C"
             .Range("B1").FormulaR1C1 = RememberFormula
-            RememberFormula = Replace(RememberFormula, 3, 1, 1, 1)  ' counta to average
+            RememberFormula = Replace(RememberFormula, 3, 1, 1, 1)  ' counta(3) to average(1)
             .Range("C1").FormulaR1C1 = RememberFormula
+            
             .Rows(1).NumberFormat = "General;;"                     ' avoid to show 0(empty)
             .Range("A1,D1").NumberFormat = "General"
             .Columns("B").NumberFormat = "General""件"""
             .Range("C1").NumberFormat = "General""円"""
-            If .Range("A1").Value = 0 Then  ' can't summarize, because it includes many flags
-                .Worksheet.Range(.Range("D1"), .Cells(1, .Rows(1).Cells.Count)).ClearContents
-            End If
+            
             .Interior.ColorIndex = 40       ' ベージュ
         End With
     Next
