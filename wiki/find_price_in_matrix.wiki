@@ -120,22 +120,37 @@
  * 集計表には次の項目が並ぶ。
     # 件数、単価、２軸ルールの項目名
     # 他に集計作業に必要な列も追加される。
- * 開発者用メモ
-    # ツールバーを追加する
-    # ルール行、データ行をidにする
-    # !FindPrice の双子で !FindPriceRow を Public で作って使う
 
  * Excel 2000 Tool Bar
     http://3.bp.blogspot.com/-mSHoWf6CtQE/TbdmaDQWuZI/AAAAAAAAAFA/W37nyqxpGsY/s1600/shot2.png
+    # 計算対象のデータ範囲を指定する。 `FindPrice` 関数の第３引数を、全データ行に拡張した範囲。 データの左上セルにカーソルを置いてからボタンを押すと、範囲を自動選択する。 下のサンプルでは、 E3 セルだけを選んでからボタンを押すと、自動選択となる。 このボタンを押すと、残りの引数、フラグ列とルールエリアを自動設定する。
+    # フラグがどの列にあるかを指定する。 `FindPrice` 関数の第２引数。 見出しが `フラグ` になっている項目を自動選択するので、それと異なる列を選びたいときに、このボタンを使う。
+    # ルールエリアを指定する。 `FindPrice` 関数の第１引数。 デフォルトの範囲名 `ルールエリア` と違う場所を使うときや、他のブックにルールがある場合に、このボタンを使う。
  * Ready to Calculate
     http://3.bp.blogspot.com/-hwfbuS30OUY/TbdmadE_FWI/AAAAAAAAAFE/mQILInO5DnE/s1600/shot3.png
+    # ３つのボタンすべてが on になったら、集計ボタンを押す。
  * Data Area selected
     http://4.bp.blogspot.com/-ejOO79Bt1Sg/TbdmbAQbVkI/AAAAAAAAAFI/nt57ewWsdYg/s1600/shot4.png
+    # 見本のシートでは、 E3 セルを選んで、データ範囲ボタンを押すと、自動選択でこのように拡張される。
  * Summary Report created
     http://2.bp.blogspot.com/-rKzLkmubDqA/Tbdmbgyk8PI/AAAAAAAAAFM/5yZ4nywa7d8/s1600/shot5.png
+    # 集計で作成されるレポートの見本。
+    # エクセルの集計表機能で、レベル２に絞り込んだ表を作成する。
+    # 掘り下げて、明細レベルを確認することができる。
+    # データ数が多い場合、作成に１分程度かかる場合もある。
  * Drill down to check details
     http://4.bp.blogspot.com/-VMsIlu2b9oA/Tbdmb4HG54I/AAAAAAAAAFQ/4LMCuTfVsaI/s1600/shot6.png
+    # 左端(A列)は、ルールエリアの各ルールを、行番号として示している。これで集計している。
+    # ルールに該当しないものは、ルール番号 0 として、先頭で集計される。
+    # 明細では、件数欄(B列)に、対象データの行番号が入っていて、これでデータを特定できる。
+    # 明細の右側には、対象データがコピーされていて、そちらで確認することもできる。
 
+ * 処理内容についてのメモ
+    # ワークシート関数 `FindPrice` と同等の処理をして、ルールデータを返す `FindPriceRow` 関数を使用して集計している。
+      * ２つの関数は内部が共通なので、完全に同等の処理をする。
+    # データを行単位で、関数による計算結果を反映させる処理をし、ソート、集計する。
+      * データ行でソートしなおせば、ワークシート関数による計算と本質的に同じものが出る。
+      * 行単位処理なので、行数に比例して時間がかかる。行単位までの最適化しか行っていない。
 
 = Code =
 
