@@ -18,20 +18,6 @@
  * because the rules are not finalized, we need to make an exception. in that case, the price overwritten should be explicitly distiguished by a sign.
  * because the rules are variable, we need a flexible way to apply a new one.
 
-== 2011/4/25 修正案 ==
-
- * 操作ボタンを出すようにし、ボタン操作で集計シートを作る。
- * 操作のイメージ
-    # 今の関数、 `=FindPrice(ルールエリア,F3,E3:P3)` の３つの引数に相当する範囲を、それぞれに応じたボタン操作で設定する。
-    # `集計` ボタンを押すと、データ明細のあるブックにシートを追加し、そこで集計する。
- * 集計表には次の項目が並ぶ。
-    # 件数、単価、２軸ルールの項目名
-    # 他に集計作業に必要な列も追加される。
- * 開発者用メモ
-    # ツールバーを追加する
-    # ルール行、データ行をidにする
-    # !FindPrice の双子で !FindPriceRow を Public で作って使う
-
 == 要望 ==
  * ２つの軸から単価を決める。
  * フラグ（第１軸）は、おおまかなグループ分けをする。
@@ -124,6 +110,31 @@
     * =find_price_in_matrix.xls!findprice(find_price_in_matrix.xls!ルールエリア,C4,B4:M4)
     * このように、エクセルの通常の外部参照と同じ方法で、別のブックから、ワークシート関数とルールエリアを呼び出して使うことができる。
     * １つのルールで複数のブックを計算したい場合や、計算した数値を値コピーして確定してしまう場合には、この方法で手軽に計算だけ利用できる。
+
+== 2011/4/27 の修正 ==
+
+ * 操作ボタンを出すようにし、ボタン操作で集計シートを作る。
+ * 操作のイメージ
+    # 今の関数、 `=FindPrice(ルールエリア,F3,E3:P3)` の３つの引数に相当する範囲を、それぞれに応じたボタン操作で設定する。
+    # `集計` ボタンを押すと、データ明細のあるブックにシートを追加し、そこで集計する。
+ * 集計表には次の項目が並ぶ。
+    # 件数、単価、２軸ルールの項目名
+    # 他に集計作業に必要な列も追加される。
+ * 開発者用メモ
+    # ツールバーを追加する
+    # ルール行、データ行をidにする
+    # !FindPrice の双子で !FindPriceRow を Public で作って使う
+
+ * Excel 2000 Tool Bar
+    http://3.bp.blogspot.com/-mSHoWf6CtQE/TbdmaDQWuZI/AAAAAAAAAFA/W37nyqxpGsY/s1600/shot2.png
+ * Ready to Calculate
+    http://3.bp.blogspot.com/-hwfbuS30OUY/TbdmadE_FWI/AAAAAAAAAFE/mQILInO5DnE/s1600/shot3.png
+ * Data Area selected
+    http://4.bp.blogspot.com/-ejOO79Bt1Sg/TbdmbAQbVkI/AAAAAAAAAFI/nt57ewWsdYg/s1600/shot4.png
+ * Summary Report created
+    http://2.bp.blogspot.com/-rKzLkmubDqA/Tbdmbgyk8PI/AAAAAAAAAFM/5yZ4nywa7d8/s1600/shot5.png
+ * Drill down to check details
+    http://4.bp.blogspot.com/-VMsIlu2b9oA/Tbdmb4HG54I/AAAAAAAAAFQ/4LMCuTfVsaI/s1600/shot6.png
 
 
 = Code =
