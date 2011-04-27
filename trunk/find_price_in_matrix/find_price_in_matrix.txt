@@ -559,7 +559,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/find_price_in_matrix
 '         ;更新
-'         ;40660.3194444444
+'         ;40660.3333333333
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
@@ -575,7 +575,7 @@
 '         ;Initialize ..
 '  address;A15:H18
 '         ;データ範囲
-'         ;集計の対象とするデータ範囲を指定する。セルが１つしか選ばれていなければ、そのセルを含む範囲で自動設定する。フラグ列を自動設定する。
+'         ;集計の対象とするデータ範囲を指定する。セルが１つしか選ばれていなければ、そのセルを左上端とした範囲で自動設定する。フラグ列を自動設定する。
 '         ;data
 '         ;=_ButtonCaption
 '         ;1
@@ -1696,6 +1696,8 @@ Public Sub Exec_sumup()
     Dim Ws As Worksheet
     Dim Ra As Range
     
+    On Error GoTo HasError
+    
     If IsNotReady Then Exit Sub
     Set Ws = GetNewSheet(TargetData.Worksheet)
     SetEntireFormat Ws
@@ -1704,6 +1706,12 @@ Public Sub Exec_sumup()
     Set Ra = MakeList(Ws, RuleArea, FlagColumn, TargetData)
     SumUp Ra
     Application.ScreenUpdating = True
+    Exit Sub
+    
+HasError:
+    Application.ScreenUpdating = True
+    MsgBox "集計できません。 " & Err.Number & " " & Err.Description, _
+            vbExclamation Or vbOKOnly, "Exec_sumup"
 End Sub
 
 Private Function GetNewSheet(Ws As Worksheet) As Worksheet
