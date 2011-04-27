@@ -133,6 +133,22 @@ Sub test3()
     Debug.Print WordsToString(DecBase64(EncBase64(StringToWords(a))))
 End Sub
 
+Sub test3_more()
+    Dim Encoded As String
+    Dim Decoded As Variant
+    Dim Rounded As String
+    Dim x As Variant
+    
+    Encoded = "VEVTVA=="
+    Decoded = DecBase64(Encoded)
+    For Each x In Decoded
+        Debug.Print "&H" & Hex(x), x
+    Next
+    
+    Rounded = EncBase64(Decoded)
+    Debug.Print Rounded
+End Sub
+
 Sub test4()
     ' encode from a binary file
     ' 時間かかりすぎて実用的でない。enc6が遅い。 pan array が悪い？
