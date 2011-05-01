@@ -59,7 +59,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40664.5
+'         ;40664.875
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1249,6 +1249,34 @@ Public Function DivideLine(Line As Variant, Delimiter As String, Number As Long)
         Next
         DivideLine = y
     End If
+End Function
+
+Public Function ExactEqual(x As Variant, y As Variant) As Boolean
+    Dim Equal As Boolean
+    
+    ' handle Null
+    If IsNull(x) <> IsNull(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsNull(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' handle Empty
+    If IsEmpty(x) <> IsEmpty(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsEmpty(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' no more nulls nor empties
+    Equal = (x = y)
+    
+DONE:
+    ExactEqual = Equal
 End Function
 
 '}}}
@@ -5458,10 +5486,10 @@ Public Sub WriteSsfForSingleRowOrColumn(Stream As Object, Target As Range)
         Do Until .IsEmptyQueue
             Data = .BaseQueue.Dequeue
             'Env.LogWrite "WriteSsfForSingleRowOrColumn: " & CellCounter & " " & Data
-            If Data = LastData Then
+            If SsfUtils.ExactEqual(Data, LastData) Then
                 RepeatCounter = RepeatCounter + 1
             Else
-                If LastData <> MyEmpty Then
+                If Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
                     WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
                 End If
                 LastData = Data
@@ -5473,7 +5501,7 @@ Public Sub WriteSsfForSingleRowOrColumn(Stream As Object, Target As Range)
     End With
     
     ' write ssf for the last one
-    If RepeatCounter > 0 And LastData <> MyEmpty Then
+    If RepeatCounter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
         WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
     End If
     
@@ -6287,7 +6315,7 @@ Public Sub WriteSsfSkip(Stream As Object)
     With CellStream.Queue
         Do Until .IsEmptyQueue
             Data = .BaseQueue.Dequeue
-            If Data = LastData Then
+            If SsfUtils.ExactEqual(Data, LastData) Then
                 Counter = Counter + 1
             Else
                 SsfCellStreamHelper.WriteLineSkipOrRepeat Stream, Counter, CellStream.TranslateFromCell(LastData), MySsfEmpty
@@ -6295,7 +6323,7 @@ Public Sub WriteSsfSkip(Stream As Object)
                 Counter = 1
             End If
         Loop
-        If Counter > 0 And LastData <> MyEmpty Then
+        If Counter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
             SsfCellStreamHelper.WriteLineRepeat Stream, Counter, CellStream.TranslateFromCell(LastData)
         End If
     End With
