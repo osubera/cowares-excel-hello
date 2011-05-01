@@ -59,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40664.9583333333
+'         ;40665.25
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -5212,7 +5212,7 @@ Public Sub ReadSsfLineAddress(Key As String, Value As String)
     Flush
     With CellStream
         .SetRange SsfUtilsExcel.ExcelAddressToRange(.Worksheet, Value, .Worksheet.Cells)
-        Env.LogWrite "ReadSsfLineAddress: new TargetRange: " & .Range.Address()
+        'Env.LogWrite "ReadSsfLineAddress: new TargetRange: " & .Range.Address()
     End With
 End Sub
 
