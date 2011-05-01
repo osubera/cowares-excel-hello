@@ -59,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40664.875
+'         ;40664.9583333333
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -5234,18 +5234,19 @@ End Sub
 
 Public Sub ReadSsfLine(Key As String, Value As String)
     Dim RepeatCounter As Long
+    Dim Data As Variant
     
     RepeatCounter = Env.GetEnv("current", "repeat-counter", 0)
     With CellStream
-        Value = CellStream.TranslateToCell(SsfUtils.LineFeedToLf(Value, LineFeed))
+        Data = CellStream.TranslateToCell(SsfUtils.LineFeedToLf(Value, LineFeed))
         If RepeatCounter > 0 Then
             Do While RepeatCounter > 0
                 RepeatCounter = RepeatCounter - 1
-                CellStream.Queue.BaseQueue.Enqueue Value
+                CellStream.Queue.BaseQueue.Enqueue Data
             Loop
             Env.SetEnv "current", "repeat-counter", 0
         Else
-            CellStream.Queue.BaseQueue.Enqueue Value
+            CellStream.Queue.BaseQueue.Enqueue Data
         End If
     End With
 End Sub
