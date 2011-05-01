@@ -38,9 +38,11 @@ Public Sub CellsNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Dim Counter As Long
     Dim ThePreviousValue As String
     Dim CellsName As Names
+    Dim Wb As Workbook
     
     Counter = 0
-    Set CellsName = Env.Current("workbook").Names
+    Set Wb = Env.Current("workbook")
+    Set CellsName = Wb.Names
     
     Env.LogWrite LocalKey
     
@@ -50,6 +52,7 @@ Public Sub CellsNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
         Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
         Case ""
             Counter = Counter + 1
+            EnsureHavingSheetFor Value, Wb
             If Counter Mod 2 = 1 Then
                 ThePreviousValue = Value
             Else
@@ -107,10 +110,10 @@ Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalRes
     
     SsfBlockIdentity.WriteTo Target, Stream, Env
     SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
+    CellsNameWriteTo Target, Stream, Env
     For Each Ws In Target.Worksheets
         SsfBlockWorksheet.WriteTo Ws, Stream, Env
     Next
-    CellsNameWriteTo Target, Stream, Env
     ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
     SsfBlockModules.WriteTo Target, Stream, Env
 End Sub
@@ -131,6 +134,28 @@ Private Sub SwitchBook(Names As String, Env As GlobalResources)
         Book.VBProject.Name = ProjectName
         Env.LogWrite "vbproject " & ProjectName
     End If
+End Sub
+
+Private Sub EnsureHavingSheetFor(Data As String, Wb As Workbook)
+    ' pre-create a worksheet required for the cells-name
+    On Error Resume Next
+    
+    Dim SheetName As String
+    Dim At As Long
+    Dim Ws As Worksheet
+    
+    At = InStr(Data, "!")
+    If At = 0 Then Exit Sub             ' no sheet names
+    
+    SheetName = Left(Data, At - 1)
+    If Left(SheetName, 1) = "=" Then SheetName = Mid(SheetName, 2)
+    At = Wb.Worksheets(SheetName).Index
+    If Err.Number = 0 Then Exit Sub     ' sheet exists
+    
+    Err.Clear
+    Set Ws = Wb.Worksheets.Add
+    Ws.Name = SheetName
+    If Err.Number <> 0 Then Err.Clear
 End Sub
 
 '}}}

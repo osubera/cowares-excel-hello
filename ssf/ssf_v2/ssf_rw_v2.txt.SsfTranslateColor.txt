@@ -27,7 +27,7 @@ Public Function FromSingleCell(Data As Variant) As Variant
         ' the cell contains multi-color text
         FromSingleCell = RGB(0, 0, 0)
     Else
-        FromSingleCell = FromExcelColor(Data)
+        FromSingleCell = FromExcelColor(Val(Data))
     End If
 End Function
 

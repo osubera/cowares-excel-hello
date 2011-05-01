@@ -1,0 +1,143 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamQueueFormula
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private ValueQueue As SsfCellStreamQueueValue
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ValueQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    ValueQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim FormulaCells As Range
+    Dim FormulaCell As Range
+    Dim Target As Range
+    Dim TranslatedPropertyname As String
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    
+    TranslatedPropertyname = LCase(PropertyName)
+    Select Case TranslatedPropertyname
+    Case "formula-or-value"
+        ' contains Formulas and Constants
+        If ValueQueue.TryEnqueueRangeValueFamily("FormulaR1C1", Target) Then GoTo DONE
+        If Not ValueQueue.TryEnqueueRangeValueFamily("Value", Target) Then
+            Env.LogWrite "SsfCellStreamQueueFormula.Enqueue: Error at " & Target.Address(False, False, xlA1, False)
+            GoTo DONE
+        End If
+        Set FormulaCells = Target.SpecialCells(xlCellTypeFormulas)
+        For Each FormulaCell In FormulaCells
+            UpdateQueueByCellProperty FormulaCell, "FormulaR1C1"
+        Next
+    Case Else
+        ' contains only Formula(s) / contains only Constant(s)
+        ValueQueue.TryEnqueueRangeValueFamily TranslatedPropertyname, Target
+    End Select
+    
+DONE:
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dequeue = ValueQueue.Dequeue(Data)
+End Function
+
+Private Sub UpdateQueueByCellProperty(Ra As Range, OneTimeProperty As String)
+    Dim Row As Long
+    Dim Column As Long
+    Dim ColumnSize As Long
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Row = Ra.Row - CellStream.Range.Cells(1).Row + 1
+    Column = Ra.Column - CellStream.Range.Cells(1).Column + 1
+    ColumnSize = CellStream.Range.Columns.Count
+    Data = BaseQueue.GetCellsProperty(Ra, OneTimeProperty)
+    BaseQueue.UpdateQueue2D Data, Row, Column, ColumnSize
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "UpdateQueueByCellProperty: Error " & Err.Number & " " & Err.Description & "(" & Row & "," & Column & ")"
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    ValueQueue.OptimizeRange
+End Sub
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set ValueQueue = New SsfCellStreamQueueValue
+    Set BaseQueue = ValueQueue.BaseQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+    Set ValueQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

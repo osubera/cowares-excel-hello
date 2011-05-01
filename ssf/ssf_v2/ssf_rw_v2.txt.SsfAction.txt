@@ -32,10 +32,14 @@ Public Sub ReadFrom(BlockName, Block, Env)
         SsfBlockWorkbook.CellsNameReadFrom Block, Env
     Case "cells-numberformat"
         SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-shrink"
+        SsfBlockCells.CellsShrinkReadFrom Block, Env
     Case "cells-v-align"
         SsfBlockCells.CellsVAlignReadFrom Block, Env
     Case "cells-width"
         SsfBlockCells.CellsWidthReadFrom Block, Env
+    Case "cells-wrap"
+        SsfBlockCells.CellsWrapReadFrom Block, Env
     Case "module", "class", "code"
         SsfBlockModules.ReadFrom Block, Env, BlockName
     Case "require"

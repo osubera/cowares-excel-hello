@@ -34,7 +34,10 @@ Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
     Const LocalKey = "cells-height"
     Const LocalProperty = "RowHeight"
     
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsBackgroundColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
@@ -105,12 +108,32 @@ Public Sub CellsFontItalicReadFrom(Block As Variant, ByVal Env As GlobalResource
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsWrapReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
 Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
     Dim AnArea As Range
     
     For Each AnArea In Target.Areas
         If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-wrap", "true") Then CellsWrapWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-shrink", "true") Then CellsShrinkWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-width", "true") Then CellsWidthWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-height", "true") Then CellsHeightWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-background-color", "true") Then CellsBackgroundColorWriteTo AnArea, Stream, Env
@@ -121,6 +144,7 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
         If Env.GetEnv("ssf", "enable-cells-font-italic", "true") Then CellsFontItalicWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-h-align", "true") Then CellsHAlignWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-v-align", "true") Then CellsVAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-border", "true") Then CellsBorderWriteTo AnArea, Stream, Env
     Next
 End Sub
 
@@ -188,9 +212,9 @@ Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByV
     Dim EmptyValue As Variant
     EmptyValue = Target.Worksheet.StandardWidth
     
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     Set Env.CellStream.Translator = New SsfTranslateSize
     Env.CellStream.Translator.SetUp Env, LocalKey
-    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
     CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
     Set Env.CellStream.Translator = Nothing
 End Sub
@@ -203,7 +227,10 @@ Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, By
     EmptyValue = Target.Worksheet.StandardHeight
     
     If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
     CellsMakeSsfBlocks Target.Columns(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
 End Sub
 
 Public Sub CellsBackgroundColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -295,63 +322,68 @@ Public Sub CellsFontItalicWriteTo(ByVal Target As Object, ByVal Stream As Object
     Set Env.CellStream.Translator = Nothing
 End Sub
 
+Public Sub CellsWrapWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsBorderWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-border"
+    Const EmptyValue = XlLineStyle.xlLineStyleNone
+    
+    Dim LocalProperty As String
+    Dim Border As Variant
+    Dim BordersIndex As Variant
+    
+    BordersIndex = Array( _
+        XlBordersIndex.xlEdgeTop, _
+        XlBordersIndex.xlEdgeBottom, _
+        XlBordersIndex.xlEdgeLeft, _
+        XlBordersIndex.xlEdgeRight, _
+        XlBordersIndex.xlDiagonalDown, _
+        XlBordersIndex.xlDiagonalUp, _
+        XlBordersIndex.xlInsideHorizontal, _
+        XlBordersIndex.xlInsideVertical)
+    
+    For Each Border In BordersIndex
+        LocalProperty = "Borders(" & CStr(Border) & ").LineStyle"
+        If Not SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then
+            'Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+            CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+            'Set Env.CellStream.Translator = Nothing
+        End If
+    Next
+End Sub
+
 Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
         LocalKey As String, LocalProperty As String)
-    ' parse cells-* block using ReadSsfCells
-    Dim CrLf As String
-    Dim Ws As Worksheet
-    
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
-    Set Ws = Env.Current("worksheet")
-    
+    ' parse cells-* block
     Env.LogWrite LocalKey
-    
-    With Env.CellStream
-        .Clear
-        .PropertyName = LocalProperty
-        .SetWorksheet Ws
-        .ReadSsfCells Block, CrLf
-    End With
+    Env.CellStream.ReadFrom Block, LocalKey, LocalProperty
 End Sub
 
 Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
         LocalKey As String, LocalProperty As String, EmptyValue As Variant)
     ' generate cells-* block
-    Dim CellsWriter As String
-    
-    CellsWriter = Env.GetEnv("ssf", "cells-writer", "block")
     Env.LogWrite LocalKey
-    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
-    
-    With Env.CellStream
-        .Clear
-        .PropertyName = LocalProperty
-        .SetRange Target
-        
-        If Not .Translator Is Nothing Then
-            ' translator specific options
-            .Translator.WriteSsf Stream, Env.CellStream
-        End If
-        
-        Select Case CellsWriter
-        Case "row"
-            .WriteSsfByRow Stream, EmptyValue
-        Case "column"
-            .WriteSsfByColumn Stream, EmptyValue
-        Case Else
-            ' depend on common reader for low level cells
-            .ReadTargetCell EmptyValue
-            
-            Select Case CellsWriter
-            Case "block"
-                .WriteSsfBlocks Stream
-            Case "simple"
-                .WriteSsfSimple Stream
-            End Select
-        End Select
-    End With
-    
-    Stream.WriteLine SsfWriter.SsfBlockEnd
+    Env.CellStream.WriteTo Target, Stream, LocalKey, LocalProperty, EmptyValue
 End Sub
 
 '}}}

@@ -1,0 +1,102 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamQueueDumb
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Object
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private CurArea As Long
+Private CurCell As Long
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    If SsfUtilsExcel.IsValidAreaNumber(CellStream.Range, CurArea) Then
+        IsEmptyQueue = Not SsfUtilsExcel.IsInsideCell(CellStream.Range.Areas(CurArea), CurCell)
+    Else
+        IsEmptyQueue = True
+    End If
+End Function
+
+Public Sub ClearQueue()
+    CurArea = 1
+    CurCell = 1
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Empty) As Variant
+    Dequeue = BaseQueue.SetSmartProperty(BaseQueue.GetSmartProperty(CellStream.Range.Areas(CurArea).Cells(CurCell)), Data)
+    CurCell = CurCell + 1
+    If Not SsfUtilsExcel.IsInsideCell(CellStream.Range.Areas(CurArea), CurCell) Then
+        CurArea = CurArea + 1
+        CurCell = 1
+    End If
+End Function
+
+Public Sub UpdateQueue(Data As Variant, Position As Long)
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+End Sub
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set BaseQueue = New SsfCellStreamQueue
+    CurCell = 1
+    CurArea = 1
+End Sub
+
+Private Sub Class_Terminate()
+    Set BaseQueue = Nothing
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

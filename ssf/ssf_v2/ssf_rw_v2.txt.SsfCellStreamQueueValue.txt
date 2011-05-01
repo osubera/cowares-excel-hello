@@ -1,0 +1,203 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamQueueValue
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private RangeQueue As SsfCellStreamQueueRange
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    RangeQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    RangeQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim Target As Range
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    EnqueueRangeValueFamily Target
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dim Target As Range
+    
+    If Data Is Nothing Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    DequeueRangeValueFamily Target
+End Function
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    RangeQueue.OptimizeRange
+End Sub
+
+Public Function TryEnqueueRangeValueFamily(NewProperty As String, Target As Range) As Boolean
+    PropertyName = NewProperty
+    
+    On Error Resume Next
+    EnqueueRangeValueFamily Target
+    TryEnqueueRangeValueFamily = (Err.Number = 0)
+    If Err.Number <> 0 Then
+        'Env.LogWrite "TryEnqueueRangeValueFamily: " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+    
+    PropertyName = ""
+End Function
+
+Public Sub EnqueueRangeValueFamily(Target As Range)
+    Dim Data As Variant
+    
+    If SsfUtilsExcel.IsASingleCell(Target) Then
+        RangeQueue.Enqueue Target
+    Else
+        Data = BaseQueue.GetCellsProperty(Target, PropertyName)
+        EnqueueMatrix Data
+    End If
+End Sub
+
+Public Sub DequeueRangeValueFamily(Target As Range)
+    Dim Data As Variant
+    Dim SmallerTarget As Range
+    Dim Columns As Long
+    Dim Rows As Long
+    Dim EffectiveRows As Long
+    
+    Columns = Target.Columns.Count
+    Rows = Target.Rows.Count
+    EffectiveRows = Int(Queue.Count / Columns)
+    If Queue.Count Mod Columns > 0 Then EffectiveRows = EffectiveRows + 1
+    If Rows > EffectiveRows Then
+        ' avoid too large rows
+        Rows = EffectiveRows
+        Set SmallerTarget = Target.Rows("1:" & EffectiveRows).Cells
+        'Env.LogWrite "DequeueRangeValueFamily: SmallerTarget: " & SmallerTarget.Address()
+    Else
+        Set SmallerTarget = Target
+    End If
+    
+    Data = DequeueMatrix(Columns, Rows)
+    BaseQueue.SetCellsProperty Data, SmallerTarget, PropertyName
+End Sub
+
+Public Sub EnqueueMatrix(Data As Variant)
+    Dim R As Long
+    Dim C As Long
+    Dim MyEmpty As Variant
+    
+    For R = LBound(Data, 1) To UBound(Data, 1)
+        For C = LBound(Data, 2) To UBound(Data, 2)
+            BaseQueue.Enqueue Data(R, C)
+        Next
+    Next
+End Sub
+
+Public Function DequeueMatrix(ByVal Columns As Long, ByVal Rows As Long) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim MyDefault As Variant
+    
+    If Columns <= 0 Or Rows <= 0 Then
+        DequeueMatrix = Empty
+        Exit Function
+    End If
+    
+    ReDim out(1 To Rows, 1 To Columns)
+    MyDefault = CellStream.DefaultValue
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If IsEmptyQueue Then GoTo EmptyQueue
+            out(R, C) = BaseQueue.Dequeue
+        Next
+    Next
+    
+EmptyQueue:
+    Do While R <= Rows
+        Do While C <= Columns
+            out(R, C) = MyDefault
+            C = C + 1
+        Loop
+        R = R + 1
+    Loop
+    
+    DequeueMatrix = out
+End Function
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set RangeQueue = New SsfCellStreamQueueRange
+    Set BaseQueue = RangeQueue.BaseQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+    Set RangeQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

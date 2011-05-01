@@ -1,0 +1,122 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamReaderFill
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+Public LineFeed As String
+
+Private FillIt As Scripting.Dictionary
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub ReadSsf(Key As String, Value As String)
+    On Error Resume Next
+    
+    Select Case Key
+    Case "fill", ""
+        CallByName Me, "ReadSsfLine" & Key, VbMethod, Key, Value
+    Case Else
+        ReadSsfLineKeyValue Key, Value
+    End Select
+    
+    If Err.Number <> 0 Then
+        Env.LogWrite Key & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub Flush()
+    Const MaxAreas = 30
+    Dim AreaCounter As Long
+    Dim AreaString As String
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    AreaCounter = 0
+    
+    With CellStream.Queue.BaseQueue
+        Do Until .IsEmptyQueue
+            AreaCounter = AreaCounter + 1
+            AreaString = IIf(AreaCounter > 1, AreaString & ",", "") & .Dequeue
+            Env.LogWrite "ReadSsfLineFill: " & AreaString
+            If AreaCounter >= MaxAreas Then
+                FillCells AreaString
+                AreaCounter = 0
+            End If
+        Loop
+    End With
+    
+    If AreaCounter > 0 Then FillCells AreaString
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfLineFill(Key As String, Value As String)
+    Flush
+    FillIt.RemoveAll
+End Sub
+
+Public Sub ReadSsfLineKeyValue(Key As String, Value As String)
+    FillIt(Key) = Value
+End Sub
+
+Public Sub ReadSsfLine(Key As String, Value As String)
+    CellStream.Queue.BaseQueue.Enqueue Value
+End Sub
+
+
+'=== ssf reader end ===
+'=== cell filler begin ===
+
+
+Private Sub FillCells(Address As String)
+    Dim Ws As Worksheet
+    Set Ws = CellStream.Worksheet
+    FillerSimple SsfUtilsExcel.ExcelAddressToRange(Ws, Address), FillIt
+End Sub
+
+Private Sub FillerSimple(Target As Range, Data As Scripting.Dictionary)
+    Dim Value As Variant
+    
+    If Target Is Nothing Then Exit Sub
+    If Not Data.Exists("value") Then Exit Sub
+    Value = CellStream.TranslateToCell(Data("value"))
+    CellStream.Queue.BaseQueue.SetCellsProperty Value, Target
+End Sub
+
+
+'=== cell filler end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    LineFeed = vbCrLf
+    Set FillIt = New Scripting.Dictionary
+End Sub
+
+Private Sub Class_Terminate()
+    FillIt.RemoveAll
+    Set FillIt = Nothing
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

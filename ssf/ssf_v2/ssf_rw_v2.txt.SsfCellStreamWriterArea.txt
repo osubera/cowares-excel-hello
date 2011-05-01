@@ -1,0 +1,60 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamWriterArea
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfBlocks Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfBlocks(Stream As Object)
+    Dim Block As SsfCellStream
+    Dim Blocks As Collection
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    ' spawn child blocks divided by empty rows
+    Set Blocks = CellStream.SpawnAreas()
+    Do While Blocks.Count > 0
+        Set Block = Blocks(1)
+        With Block
+            Set .Writer = New SsfCellStreamWriterSkip
+            .Writer.SetUp Block, Env
+            .Writer.WriteSsfSkip Stream
+            .SetRange Nothing
+        End With
+        Set Block = Nothing
+        Blocks.Remove 1
+    Loop
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'ssf-end
+

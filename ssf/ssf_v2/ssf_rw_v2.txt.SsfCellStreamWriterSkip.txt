@@ -1,0 +1,74 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamWriterSkip
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfSkip Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfSkip(Stream As Object)
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    Dim MyEmpty As Variant
+    Dim MySsfEmpty As Variant
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    'Env.LogWrite "WriteSsfSkip: " & CellStream.Range.Address & " " & CellStream.Queue.Queue.Count
+    SsfCellStreamHelper.WriteLineAddress Stream, CellStream.Range
+    ' simple list with skip and repeat
+    MyEmpty = CellStream.EmptyValue
+    MySsfEmpty = CellStream.SsfEmptyValue
+    'Env.LogWrite "e" & MyEmpty & " " & MySsfEmpty
+    Counter = 0
+    LastData = MyEmpty
+    
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Data = .BaseQueue.Dequeue
+            If SsfUtils.ExactEqual(Data, LastData) Then
+                Counter = Counter + 1
+            Else
+                SsfCellStreamHelper.WriteLineSkipOrRepeat Stream, Counter, CellStream.TranslateFromCell(LastData), MySsfEmpty
+                LastData = Data
+                Counter = 1
+            End If
+        Loop
+        If Counter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+            SsfCellStreamHelper.WriteLineRepeat Stream, Counter, CellStream.TranslateFromCell(LastData)
+        End If
+    End With
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'ssf-end
+

@@ -58,15 +58,50 @@ MayFailOnExcel2007:
     End If
 End Function
 
+Public Function IsValidAreaNumber(Target As Range, ByVal Number As Long) As Boolean
+    IsValidAreaNumber = False
+    
+    If Target Is Nothing Then Exit Function
+    If Number <= 0 Then Exit Function
+    If Number > Target.Areas.Count Then Exit Function
+    
+    IsValidAreaNumber = True
+End Function
+
+Public Function IsInsideCell(Target As Range, ByVal Number As Variant) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    IsInsideCell = False
+    
+    On Error Resume Next
+    If Target Is Nothing Then Exit Function
+    If Number <= 0 Then Exit Function
+    If Number > Target.Cells.Count Then Exit Function
+    
+    IsInsideCell = True
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+        If Number > CDec(Target.Cells.CountLarge) Then Exit Function
+        IsInsideCell = True
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
 Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
     Dim Receiver As Object
     Dim DotProperties As Variant
+    Dim MayHaveIndex As Variant
     
     Set Receiver = Origin
     Do
         DotProperties = Split(Key, ".", 2)
         If UBound(DotProperties) = 0 Then Exit Do
-        Set Receiver = CallByName(Receiver, DotProperties(0), VbGet)
+        MayHaveIndex = Split(DotProperties(0), "(", 2)
+        Set Receiver = CallByName(Receiver, MayHaveIndex(0), VbGet)
+        If UBound(MayHaveIndex) = 1 Then Set Receiver = Receiver(Val(MayHaveIndex(1)))
         Key = DotProperties(1)
     Loop
     

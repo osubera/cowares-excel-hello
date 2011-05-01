@@ -28,7 +28,7 @@ Public Function MoreText()
 End Function
 
 Public Function FindString(StartAt, Search, CompareMethod)
-    Dim out, more, at, Require
+    Dim out, more, At, Require
     
     Require = StartAt + Len(Search) - 1
     Do While Len(Text) < Require
@@ -38,11 +38,11 @@ Public Function FindString(StartAt, Search, CompareMethod)
     
     out = InStr(StartAt, Text, Search, CompareMethod)
     Do While out = 0
-        at = Len(Text) - Len(Search) + 2
+        At = Len(Text) - Len(Search) + 2
         more = MoreText
         If more = "" Then Exit Do
         
-        out = InStr(at, Text, Search, CompareMethod)
+        out = InStr(At, Text, Search, CompareMethod)
     Loop
     
     FindString = out

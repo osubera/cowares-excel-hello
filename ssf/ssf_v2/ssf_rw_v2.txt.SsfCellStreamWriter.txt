@@ -1,0 +1,55 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamWriter
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfSimple Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Private Sub WriteSsfSimple(Stream As Object)
+    ' compatible with the primitive
+    Dim Value As Variant
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    SsfCellStreamHelper.WriteLineAddress Stream, CellStream.Range
+    ' simple list, each cell in each line
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Value = CellStream.TranslateFromCell(.BaseQueue.Dequeue)
+            Stream.WriteLine SsfWriter.MakeSsfLineCellData(Value)
+        Loop
+    End With
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'ssf-end
+

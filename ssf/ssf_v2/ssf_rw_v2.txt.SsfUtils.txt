@@ -36,8 +36,28 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "safe-cell-text", "false"
     'Env.SetEnv "ssf", "safe-cell-text", "true"
     
+    Env.SetEnv "ssf", "size-calibration-v", "1"
+    Env.SetEnv "ssf", "size-calibration-h", "0.98167218"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader", ""
+    Env.SetEnv "ssf", "size-unit-to-reader", ""
+    Env.SetEnv "ssf", "size-unit-from-writer", ""
+    Env.SetEnv "ssf", "size-unit-to-writer", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-width", "zero"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-width", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-height", "pt"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-height", "pt"
+    
     Env.SetEnv "ssf", "enable-cells-formula", "true"
     Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-wrap", "true"
+    Env.SetEnv "ssf", "enable-cells-shrink", "true"
     Env.SetEnv "ssf", "enable-cells-width", "true"
     Env.SetEnv "ssf", "enable-cells-height", "true"
     Env.SetEnv "ssf", "enable-cells-background-color", "true"
@@ -48,6 +68,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "enable-cells-font-italic", "true"
     Env.SetEnv "ssf", "enable-cells-h-align", "true"
     Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    
+    Env.SetEnv "ssf", "enable-cells-border", "false"
     
     Env.SetEnv "ssf", "cells-writer", "block"
     'Env.SetEnv "ssf", "cells-writer", "simple"
@@ -198,6 +220,34 @@ Public Function DivideLine(Line As Variant, Delimiter As String, Number As Long)
         Next
         DivideLine = y
     End If
+End Function
+
+Public Function ExactEqual(x As Variant, y As Variant) As Boolean
+    Dim Equal As Boolean
+    
+    ' handle Null
+    If IsNull(x) <> IsNull(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsNull(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' handle Empty
+    If IsEmpty(x) <> IsEmpty(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsEmpty(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' no more nulls nor empties
+    Equal = (x = y)
+    
+DONE:
+    ExactEqual = Equal
 End Function
 
 '}}}
