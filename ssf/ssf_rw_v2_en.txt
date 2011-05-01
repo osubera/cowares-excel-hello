@@ -59,7 +59,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40664.2916666667
+'         ;40664.375
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -4125,13 +4125,23 @@ Public Sub SetRange(Ra As Range)
     End If
 End Sub
 
-Public Sub SetRoll(NewRoll As String)
+Public Sub SetRoll(NewRoll As String, Optional ExMode As Variant = "")
     Dim CellsWriter As String
     Dim WithoutQueue As Boolean
+    Dim CrLf As String
     
     Select Case NewRoll
     Case "reader"
-        Set Reader = New SsfCellStreamReader
+        CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
+        Select Case CStr(ExMode)
+        Case "fill"
+            Set Reader = New SsfCellStreamReaderFill
+        Case Else
+            Set Reader = New SsfCellStreamReader
+        End Select
+        Reader.SetUp Me, Env
+        Reader.LineFeed = CrLf
+        
     Case "writer"
         CellsWriter = Env.GetEnv("ssf", "cells-writer", "block")
         WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
@@ -4149,9 +4159,11 @@ Public Sub SetRoll(NewRoll As String)
             WithoutQueue = False
         End Select
         If WithoutQueue Then Set Queue = New SsfCellStreamQueueDumb
+        
     Case ""
         If Not Reader Is Nothing Then Set Reader = Nothing
         If Not Writer Is Nothing Then Set Writer = Nothing
+        
     Case Else
         Exit Sub
     End Select
@@ -4258,19 +4270,15 @@ End Function
 
 Public Sub ReadFrom(Block As Variant, LocalKey As String, LocalProperty As String)
     ' parse cells-* block
-    Dim CrLf As String
     Dim Ws As Worksheet
     
     SetRoll "reader"
     
-    CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
     Set Ws = Env.Current("worksheet")
     
     Clear
     PropertyName = LocalProperty
     SetWorksheet Ws
-    Reader.SetUp Me, Env
-    Reader.LineFeed = CrLf
     
     ReadSsf Block
     
@@ -4288,6 +4296,7 @@ Public Sub ReadSsf(Block As Variant)
     
     For Each KeyValue In Block
         SsfUtils.ExtractKeyValue KeyValue, Key, Value
+        If Key = "fill" Then SetRoll "reader", "fill"
         If Reader.ReadSsf(Key, Value) Then GoTo DONE
         If Translator Is Nothing Then GoTo DONE
         Translator.ReadSsf Key, Value, Me
@@ -4298,11 +4307,15 @@ DONE:
         End If
     Next
     
-    If Not IsNotReady Then Queue.Dequeue
+    Reader.Flush
     If Err.Number <> 0 Then
         Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description
         Err.Clear
     End If
+End Sub
+
+Private Sub SwitchReader()
+
 End Sub
 
 Public Sub WriteTo(Target As Range, Stream As Object, _
@@ -5158,15 +5171,21 @@ Public Sub ReadSsf(Key As String, Value As String)
     End If
 End Sub
 
+Public Sub Flush()
+    If CellStream.IsNotReady Then Exit Sub
+    
+    CellStream.Queue.Dequeue
+    CellStream.Clear
+End Sub
+
 
 '=== common interfaces end ===
 '=== ssf reader begin ===
 
 
 Public Sub ReadSsfLineAddress(Key As String, Value As String)
+    Flush
     With CellStream
-        If Not .IsNotReady Then .Queue.Dequeue
-        .Clear
         .SetRange SsfUtilsExcel.ExcelAddressToRange(.Worksheet, Value, .Worksheet.Cells)
         Env.LogWrite "ReadSsfLineAddress: new TargetRange: " & .Range.Address()
     End With
@@ -6287,6 +6306,77 @@ End Sub
 
 
 '=== ssf writer end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamReaderFill
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+Public LineFeed As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub ReadSsf(Key As String, Value As String)
+    On Error Resume Next
+    
+    CallByName Me, "ReadSsfLine" & Key, VbMethod, Key, Value
+    If Err.Number <> 0 Then
+        'Env.LogWrite Key & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub Flush()
+    If CellStream.IsNotReady Then Exit Sub
+    
+        With CellStream.Queue.BaseQueue
+            Do Until .IsEmptyQueue
+                Env.LogWrite "ReadSsfLineFill: " & .Dequeue
+            Loop
+        End With
+        '.SetRange SsfUtilsExcel.ExcelAddressToRange(.Worksheet, Value, .Worksheet.Cells)
+    CellStream.Clear
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfLineFill(Key As String, Value As String)
+    Flush
+    'initialize?
+End Sub
+
+Public Sub ReadSsfLineXXX(Key As String, Value As String)
+    'Env.SetEnv "current", "repeat-counter", CLng(Val(Value))
+End Sub
+
+Public Sub ReadSsfLine(Key As String, Value As String)
+    CellStream.Queue.BaseQueue.Enqueue Value
+End Sub
+
+
+'=== ssf reader end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    LineFeed = vbCrLf
+End Sub
+
+
+'=== calss events end ===
 
 '}}}
 
