@@ -33,25 +33,25 @@ Public Function ToCell(Data As Variant) As Variant
 End Function
 
 Public Function FromSingleCell(Data As Variant) As Variant
-    If UnitFrom <> "" And UnitTo <> "" Then
-        FromSingleCell = Calculate(Data, UnitFrom, UnitTo)
-    Else
+    If UnitFrom = "" Or UnitTo = "" Or IsEmpty(Data) Then
         FromSingleCell = Data
+    Else
+        FromSingleCell = Calculate(Val(Data), UnitFrom, UnitTo)
     End If
 End Function
 
 Public Function ToSingleCell(Data As Variant) As Variant
-    If UnitFrom <> "" And UnitTo <> "" Then
-        ToSingleCell = Calculate(Data, UnitFrom, UnitTo)
-    Else
+    If UnitFrom = "" Or UnitTo = "" Or IsEmpty(Data) Then
         ToSingleCell = Data
+    Else
+        ToSingleCell = Calculate(Data, UnitFrom, UnitTo)
     End If
 End Function
 
 Public Sub SetUp(Env As GlobalResources, BlockName As String)
     Dim CalibName As String
     
-    CalibName = IIf(InStr(BlockName, "width") > 0, "w", "h")
+    CalibName = IIf(InStr(BlockName, "width") > 0, "h", "v")
     SetCalib Env, CalibName
     SetUnitFrom Env, BlockName
     SetUnitTo Env, BlockName
@@ -68,8 +68,11 @@ Public Sub SetCalib(Env As GlobalResources, CalibName As String)
 End Sub
 
 Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & BlockName, "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from", "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll, "")
     If UnitFrom <> NewUnit Then
         UnitFrom = NewUnit
         Cache.RemoveAll
@@ -77,8 +80,11 @@ Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByV
 End Sub
 
 Public Sub SetUnitTo(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & BlockName, "")
-    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to", "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll, "")
     If UnitTo <> NewUnit Then
         UnitTo = NewUnit
         Cache.RemoveAll

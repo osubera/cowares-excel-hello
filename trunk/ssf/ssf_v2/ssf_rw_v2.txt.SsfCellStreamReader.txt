@@ -1,0 +1,101 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamReader
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+Public LineFeed As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub ReadSsf(Key As String, Value As String)
+    On Error Resume Next
+    
+    CallByName Me, "ReadSsfLine" & Key, VbMethod, Key, Value
+    If Err.Number <> 0 Then
+        'Env.LogWrite Key & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub Flush()
+    If CellStream.IsNotReady Then Exit Sub
+    
+    CellStream.Queue.Dequeue
+    CellStream.Clear
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfLineAddress(Key As String, Value As String)
+    Flush
+    With CellStream
+        .SetRange SsfUtilsExcel.ExcelAddressToRange(.Worksheet, Value, .Worksheet.Cells)
+        'Env.LogWrite "ReadSsfLineAddress: new TargetRange: " & .Range.Address()
+    End With
+End Sub
+
+Public Sub ReadSsfLineSkip(Key As String, Value As String)
+    Dim i As Long
+    Dim MyDefault As Variant
+    
+    With CellStream
+        MyDefault = .DefaultValue
+        For i = 1 To CLng(Val(Value))
+            .Queue.BaseQueue.Enqueue MyDefault
+        Next
+    End With
+End Sub
+
+Public Sub ReadSsfLineRepeat(Key As String, Value As String)
+    Env.SetEnv "current", "repeat-counter", CLng(Val(Value))
+End Sub
+
+Public Sub ReadSsfLine(Key As String, Value As String)
+    Dim RepeatCounter As Long
+    Dim Data As Variant
+    
+    RepeatCounter = Env.GetEnv("current", "repeat-counter", 0)
+    With CellStream
+        Data = CellStream.TranslateToCell(SsfUtils.LineFeedToLf(Value, LineFeed))
+        If RepeatCounter > 0 Then
+            Do While RepeatCounter > 0
+                RepeatCounter = RepeatCounter - 1
+                CellStream.Queue.BaseQueue.Enqueue Data
+            Loop
+            Env.SetEnv "current", "repeat-counter", 0
+        Else
+            CellStream.Queue.BaseQueue.Enqueue Data
+        End If
+    End With
+End Sub
+
+
+'=== ssf reader end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    LineFeed = vbCrLf
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

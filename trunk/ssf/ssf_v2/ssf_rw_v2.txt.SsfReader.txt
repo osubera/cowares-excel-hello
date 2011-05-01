@@ -11,6 +11,7 @@ Private Env As GlobalResources
 Public Function InitializeEnv()
     Set Env = SsfUtils.CreateDefaultEnv
     Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "reader"
 End Function
 
 Public Sub TerminateEnv()
@@ -62,7 +63,7 @@ Private Sub EndTheMagic()
 End Sub
 
 Private Function BeginTheMagic(Finder)
-    Dim i, EndBegins, at
+    Dim i, EndBegins, At
     Dim Bch, Ech
     Dim MagicBegin
     
@@ -74,10 +75,10 @@ Private Function BeginTheMagic(Finder)
     
     BeginTheMagic = False
     
-    at = Finder.FindString(1, MagicBegin, vbBinaryCompare)
-    If at <= 1 Then Exit Function
+    At = Finder.FindString(1, MagicBegin, vbBinaryCompare)
+    If At <= 1 Then Exit Function
     
-    Finder.Text = Mid(Finder.Text, at - 1)
+    Finder.Text = Mid(Finder.Text, At - 1)
     
     Bch = Left(Finder.Text, 1)
     EndBegins = Len(MagicBegin) + 2
@@ -134,15 +135,15 @@ Private Sub EvalAfter(Finder)
 End Sub
 
 Private Sub EvalComma(ByRef BeforeTag, Finder, Bch, Ech)
-    Dim at
+    Dim At
     
-    at = Finder.FindString(1, Ech, vbBinaryCompare)
-    If at = 0 Then
+    At = Finder.FindString(1, Ech, vbBinaryCompare)
+    If At = 0 Then
         BeforeTag = Finder.Text
         Finder.Text = ""
     Else
-        BeforeTag = Left(Finder.Text, at - 1)
-        Finder.Text = Right(Finder.Text, Len(Finder.Text) - at + 1 - Len(Ech))
+        BeforeTag = Left(Finder.Text, At - 1)
+        Finder.Text = Right(Finder.Text, Len(Finder.Text) - At + 1 - Len(Ech))
     End If
 End Sub
 

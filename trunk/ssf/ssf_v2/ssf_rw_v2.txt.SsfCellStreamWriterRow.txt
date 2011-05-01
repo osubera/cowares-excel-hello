@@ -1,0 +1,129 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamWriterRow
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Direction As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Clear
+        .TranslatorHeadWriter Stream
+        Select Case Direction
+        Case "row"
+            WriteSsfByRow Stream
+        Case "column"
+            WriteSsfByColumn Stream
+        End Select
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfByRow(Stream As Object)
+    Dim SingleRow As Range
+    
+    If CellStream.HasNoRanges Then Exit Sub
+    
+    For Each SingleRow In CellStream.Range.Rows
+        CellStream.Clear
+        CellStream.Queue.Enqueue SingleRow
+        WriteSsfForSingleRowOrColumn Stream, SingleRow
+    Next
+End Sub
+
+Public Sub WriteSsfByColumn(Stream As Object)
+    Dim SingleColumn As Range
+    
+    If CellStream.HasNoRanges Then Exit Sub
+    
+    For Each SingleColumn In CellStream.Range.Columns
+        CellStream.Clear
+        CellStream.Queue.Enqueue SingleColumn
+        WriteSsfForSingleRowOrColumn Stream, SingleColumn
+    Next
+End Sub
+
+Public Sub WriteSsfForSingleRowOrColumn(Stream As Object, Target As Range)
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim CellCounter As Long
+    Dim RepeatCounter As Long
+    Dim BeginAt As Long
+    Dim MyEmpty As Variant
+    
+    On Error GoTo HasError
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    'Env.LogWrite "WriteSsfForSingleRowOrColumn: " & Target.Address & " " & CellStream.Queue.Queue.Count
+    MyEmpty = CellStream.EmptyValue
+    BeginAt = 1
+    CellCounter = 1
+    LastData = MyEmpty
+    
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Data = .BaseQueue.Dequeue
+            'Env.LogWrite "WriteSsfForSingleRowOrColumn: " & CellCounter & " " & Data
+            If SsfUtils.ExactEqual(Data, LastData) Then
+                RepeatCounter = RepeatCounter + 1
+            Else
+                If Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+                    WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
+                End If
+                LastData = Data
+                RepeatCounter = 1
+                BeginAt = CellCounter
+            End If
+            CellCounter = CellCounter + 1
+        Loop
+    End With
+    
+    ' write ssf for the last one
+    If RepeatCounter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+        WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
+    End If
+    
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfForSingleRowOrColumn: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Private Sub WriteSsfLineForCellsRepeat(Stream As Object, Target As Range, Data As Variant, _
+        Counter As Long, CellBegin As Long)
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    
+    Set BeginAt = Target.Cells(CellBegin)
+    Set EndAt = Target.Cells(CellBegin + Counter - 1)
+    SsfCellStreamHelper.WriteLineAddress Stream, Target.Worksheet.Range(BeginAt, EndAt)
+    SsfCellStreamHelper.WriteLineRepeat Stream, Counter, CellStream.TranslateFromCell(Data)
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'ssf-end
+

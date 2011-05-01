@@ -13,6 +13,30 @@
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 '       ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
 
+'cells-name
+'       ;=ssf_rw_v2!R15C1
+'       ;ssf_rw_v2!_ButtonCaption
+'       ;=ssf_rw_v2!R3C2
+'       ;ssf_rw_v2!_Comment
+'       ;=ssf_rw_v2!R6C2
+'       ;ssf_rw_v2!_Contributor
+'       ;=ssf_rw_v2!R4C2
+'       ;ssf_rw_v2!_Copyright
+'       ;=ssf_rw_v2!R5C2
+'       ;ssf_rw_v2!_License
+'       ;=ssf_rw_v2!R2C2
+'       ;ssf_rw_v2!_LocalComment
+'       ;=ssf_rw_v2!R1C2
+'       ;ssf_rw_v2!_PublicName
+'       ;=ssf_rw_v2!R7C2
+'       ;ssf_rw_v2!_Since
+'       ;=ssf_rw_v2!R10C2
+'       ;ssf_rw_v2!_Tag
+'       ;=ssf_rw_v2!R9C2
+'       ;ssf_rw_v2!_Timestamp
+'       ;=ssf_rw_v2!R8C2
+'       ;ssf_rw_v2!_Url
+
 'worksheet
 '   name;ssf_rw_v2/BaumMain
 
@@ -35,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;更新
-'         ;40657.4472222222
+'         ;40665.25
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -175,32 +199,9 @@
 '         ;m/d/yyyy h:mm
 
 'cells-width
+'   unit;pt
 '  address;B1
-'         ;15.5
-
-'cells-name
-'       ;=ssf_rw_v2!R15C1
-'       ;ssf_rw_v2!_ButtonCaption
-'       ;=ssf_rw_v2!R3C2
-'       ;ssf_rw_v2!_Comment
-'       ;=ssf_rw_v2!R6C2
-'       ;ssf_rw_v2!_Contributor
-'       ;=ssf_rw_v2!R4C2
-'       ;ssf_rw_v2!_Copyright
-'       ;=ssf_rw_v2!R5C2
-'       ;ssf_rw_v2!_License
-'       ;=ssf_rw_v2!R2C2
-'       ;ssf_rw_v2!_LocalComment
-'       ;=ssf_rw_v2!R1C2
-'       ;ssf_rw_v2!_PublicName
-'       ;=ssf_rw_v2!R7C2
-'       ;ssf_rw_v2!_Since
-'       ;=ssf_rw_v2!R10C2
-'       ;ssf_rw_v2!_Tag
-'       ;=ssf_rw_v2!R9C2
-'       ;ssf_rw_v2!_Timestamp
-'       ;=ssf_rw_v2!R8C2
-'       ;ssf_rw_v2!_Url
+'         ;96.75
 
 'ssf-end
 

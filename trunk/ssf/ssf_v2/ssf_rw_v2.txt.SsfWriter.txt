@@ -11,6 +11,7 @@ Private Env As GlobalResources
 Public Function InitializeEnv()
     Set Env = SsfUtils.CreateDefaultEnv
     Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "writer"
 End Function
 
 Public Sub TerminateEnv()

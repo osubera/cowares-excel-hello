@@ -1,0 +1,40 @@
+﻿'ssf-begin
+';
+
+'module
+'   name;SsfCellStreamHelper
+'{{{
+Option Explicit
+
+'=== ssf writer helper begin ===
+
+
+Public Sub WriteLineAddress(Stream As Object, Target As Range)
+    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
+End Sub
+
+Public Sub WriteLineSkipOrRepeat(Stream As Object, Count As Long, _
+        Data As Variant, Optional ByVal EmptyValue As Variant = Empty)
+    If Data = EmptyValue Then
+        WriteLineSkip Stream, Count
+    Else
+        WriteLineRepeat Stream, Count, Data
+    End If
+End Sub
+
+Public Sub WriteLineSkip(Stream As Object, Count As Long)
+    If Count > 0 Then Stream.WriteLine SsfWriter.MakeSsfLine("skip", Count)
+End Sub
+
+Public Sub WriteLineRepeat(Stream As Object, Count As Long, Data As Variant)
+    If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+    Stream.WriteLine SsfWriter.MakeSsfLineCellData(Data)
+End Sub
+
+
+'=== ssf writer helper end ===
+
+'}}}
+
+'ssf-end
+

@@ -1,0 +1,180 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamQueue
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = (Queue.Count = 0)
+End Function
+
+Public Sub ClearQueue()
+    Do While Queue.Count > 0
+        Queue.Remove 1
+    Loop
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Queue.Add GetSmartProperty(Data)
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Empty) As Variant
+    Dequeue = SetSmartProperty(Queue(1), Data)
+    Queue.Remove 1
+End Function
+
+Public Sub UpdateQueue(Data As Variant, Position As Long)
+    Queue.Add Data, After:=Position
+    Queue.Remove Position
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub UpdateQueue2D(Data As Variant, Row As Long, Column As Long, ColumnSize As Long)
+    UpdateQueue Data, (Row - 1) * ColumnSize + Column
+End Sub
+
+Public Function CheatQueue2D(Row As Long, Column As Long, ColumnSize As Long) As Variant
+    CheatQueue2D = Queue((Row - 1) * ColumnSize + Column)
+End Function
+
+Public Sub OptimizeRange()
+End Sub
+
+
+'=== extended queue end ===
+'=== cell utility begin ===
+
+
+Public Function GetSmartProperty(Data As Variant) As Variant
+    Dim Value As Variant
+    Dim MyProperty As String
+    
+    MyProperty = PropertyName
+    If TypeName(Data) = "Range" And MyProperty <> "" Then
+        Value = GetCellsProperty(Data, MyProperty)
+    Else
+        Value = Data
+    End If
+    
+    GetSmartProperty = Value
+End Function
+
+Public Function SetSmartProperty(ByVal Data As Variant, Ra As Variant) As Variant
+    Dim MyProperty As String
+    
+    If IsObject(Ra) Then
+        MyProperty = PropertyName
+        If TypeName(Ra) = "Range" And MyProperty <> "" Then
+            SetCellsProperty Data, Ra, MyProperty
+        End If
+    ElseIf Not IsEmpty(Ra) Then
+        Ra = Data
+    End If
+    
+    SetSmartProperty = Data
+End Function
+
+Public Function GetCellsProperty(ByVal Ra As Object, Optional ByVal Key As String = "") As Variant
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "GetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    GetCellsProperty = CellStream.EmptyValue
+End Function
+
+Public Function SetCellsProperty(Data As Variant, ByVal Ra As Object, Optional ByVal Key As String = "") As Boolean
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    SetCellsProperty = True
+    If CellStream.IsDefaultValue(Data) Then Exit Function
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & " " & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    CallByName Receiver, Key, VbLet, Data
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    SetCellsProperty = False
+End Function
+
+
+'=== cell utility end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set Queue = New Collection
+    Set BaseQueue = Me
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

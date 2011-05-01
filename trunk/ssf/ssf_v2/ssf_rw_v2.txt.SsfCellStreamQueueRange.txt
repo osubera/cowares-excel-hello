@@ -1,0 +1,309 @@
+﻿'ssf-begin
+';
+
+'class
+'   name;SsfCellStreamQueueRange
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    BaseQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    BaseQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim R As Long
+    Dim C As Long
+    Dim Value As Variant
+    Dim Target As Range
+    Dim MyProperty As String
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    
+    MyProperty = PropertyName
+    With Target
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                Value = BaseQueue.GetCellsProperty(.Cells(R, C), MyProperty)
+                Queue.Add Value
+            Next
+        Next
+    End With
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Value As Variant
+    Dim Target As Range
+    Dim MyProperty As String
+    
+    If Data Is Nothing Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    
+    MyProperty = PropertyName
+    
+    With Target
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                If IsEmptyQueue Then Exit Function
+                Value = Queue(1)
+                Queue.Remove 1
+                BaseQueue.SetCellsProperty Value, .Cells(R, C), MyProperty
+            Next
+        Next
+    End With
+End Function
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    MinimizeRange
+End Sub
+
+
+'=== extended queue end ===
+'=== cell utility begin ===
+
+
+Public Sub MinimizeRange()
+    Dim R As Long
+    Dim C As Long
+    Dim RowBegin As Long
+    Dim RowEnd As Long
+    Dim ColumnBegin As Long
+    Dim ColumnEnd As Long
+    Dim NewRow As Range
+    Dim NewColumn As Range
+    
+    ColumnEnd = CalculateMaxColumnAndRow(RowBegin, RowEnd)
+    ColumnBegin = CalculateMinColumn()
+    
+    If ColumnEnd = 0 Or RowEnd = 0 Then
+        CellStream.SetRange Nothing
+        Exit Sub
+    End If
+    
+    Set NewRow = CropUnusedRows(RowBegin, RowEnd)
+    Set NewColumn = CropUnusedColumns(RowBegin, RowEnd, ColumnBegin, ColumnEnd)
+    CellStream.SetRange Application.Intersect(NewRow, NewColumn)
+End Sub
+
+Private Function CropUnusedRows(RowBegin As Long, RowEnd As Long) As Range
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewRow As Range
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    
+    Set NewRow = CellStream.Range.EntireRow
+    If RowBegin > 1 Or RowEnd < Rows Then
+        Set NewRow = NewRow.Rows(RowBegin & ":" & RowEnd)
+        ' remove unused data from queue
+        For R = RowEnd + 1 To Rows
+            For C = 1 To Columns
+                Queue.Remove RowEnd * Columns + 1
+            Next
+        Next
+        For R = 1 To RowBegin - 1
+            For C = 1 To Columns
+                Queue.Remove 1
+            Next
+        Next
+    End If
+    
+    Set CropUnusedRows = NewRow
+End Function
+
+Private Function CropUnusedColumns(RowBegin As Long, RowEnd As Long, ColumnBegin As Long, ColumnEnd As Long) As Range
+    ' expect this is called after CropUnusedRows
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewColumn As Range
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    
+    Set NewColumn = CellStream.Range.EntireColumn
+    If ColumnBegin > 1 Or ColumnEnd < Columns Then
+        Set NewColumn = CellStream.Worksheet.Range(NewColumn.Columns(ColumnBegin), NewColumn.Columns(ColumnEnd))
+        For R = RowEnd - RowBegin + 1 To 1 Step -1
+            For C = Columns To ColumnEnd + 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+            For C = ColumnBegin - 1 To 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+        Next
+    End If
+    
+    Set CropUnusedColumns = NewColumn
+End Function
+
+Private Function CalculateMaxColumnAndRow(ByRef RowBegin As Long, ByRef RowEnd As Long) As Long
+    Dim RealMaximums As Variant
+    Dim MaxCount As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMaximums = RealMaxColumns()
+    RowBegin = 0
+    RowEnd = 0
+    MaxCount = 0
+    For R = 1 To UBound(RealMaximums)
+        If RealMaximums(R) > 0 Then
+            If MaxCount < RealMaximums(R) Then MaxCount = RealMaximums(R)
+            If RowBegin = 0 Then RowBegin = R
+            RowEnd = R
+        End If
+    Next
+    
+    CalculateMaxColumnAndRow = MaxCount
+End Function
+
+Private Function CalculateMinColumn() As Long
+    Dim RealMinimums As Variant
+    Dim MinColumn As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMinimums = RealMinColumns()
+    MinColumn = CellStream.Range.Columns.Count + 1
+    For R = 1 To UBound(RealMinimums)
+        If RealMinimums(R) > 0 Then
+            If MinColumn > RealMinimums(R) Then MinColumn = RealMinimums(R)
+        End If
+    Next
+    
+    CalculateMinColumn = MinColumn
+End Function
+
+Private Function RealMaxColumns() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = Columns To 1 Step -1
+            'Env.LogWrite BaseQueue.CheatQueue2D(R, C, Columns)
+            If EmptyValue <> BaseQueue.CheatQueue2D(R, C, Columns) Then Exit For
+        Next
+        out(R) = C
+        'Env.LogWrite "RealMaxColumns: " & R & " " & C
+    Next
+    
+    RealMaxColumns = out
+End Function
+
+Private Function RealMinColumns() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If EmptyValue <> BaseQueue.CheatQueue2D(R, C, Columns) Then Exit For
+        Next
+        If C > Columns Then C = 0
+        out(R) = C
+        'Env.LogWrite "RealMinColumns: " & R & " " & C
+    Next
+    
+    RealMinColumns = out
+End Function
+
+Private Function EmptyValue() As Variant
+    EmptyValue = CellStream.EmptyValue
+End Function
+
+
+'=== cell utility end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set BaseQueue = New SsfCellStreamQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'ssf-end
+

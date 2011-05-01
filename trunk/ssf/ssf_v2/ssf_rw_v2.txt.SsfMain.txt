@@ -81,6 +81,7 @@ Private Sub CommonReader(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     ShowLog Env
     Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
 End Sub
 
 Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
@@ -93,6 +94,7 @@ Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
     
     ShowLog Env
     Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
 End Sub
 
 Private Sub ShowLog(Env As GlobalResources)
