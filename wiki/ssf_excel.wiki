@@ -99,6 +99,13 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
     これは包含関係によるのではなく、そこでグローバルな環境の「対象とするWorkbook」が書き換えられたからと考える。
     ssf は包含性を明確にする記述方法を持ってないので、グローバルな切り替えという発想で見ないと解釈にゆらぎが生じる。
 
+= history / 改定履歴 =
+
+ * 2011/5/2 many verbs are removed and added at svn r 735
+
+
+
+
 = Declare / 宣言 =
 
 === ssf-begin ===
