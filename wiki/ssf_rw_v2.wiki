@@ -11,6 +11,8 @@
 
 = Details =
 
+http://4.bp.blogspot.com/-EDfMXcoX1f8/Tb4pscXoCJI/AAAAAAAAAFU/hU2ETtUzks4/s1600/shot1.png
+
  * next version of [ssf_reader_primitive] , [ssf_writer_primitive] and [ssf_rw_primitive] .
  * new features.
     # read and write file with a dialog.
@@ -58,6 +60,7 @@
 
 = Interface / 操作 =
 
+http://2.bp.blogspot.com/-VFlDVjhi6aM/Tb4ps6zYJ5I/AAAAAAAAAFY/kpJ43ab8G34/s1600/shot2.png
 
  # * Copy as SSF * | Write SSF into Clipboard
  # * Paste from SSF * | Read SSF from Clipboard
@@ -89,6 +92,7 @@
 
 = Snapshots =
 
+http://1.bp.blogspot.com/-wrRgIjFfAH0/Tb4ptoXW7tI/AAAAAAAAAFc/B4hCdrbdXSQ/s1600/shot3.png
 
 
 = Code =
