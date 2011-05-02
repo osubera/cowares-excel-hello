@@ -1,0 +1,6569 @@
+#summary a converter between an SSF text and an Excel Book, the 2nd
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+#sidebar ssf_navigation
+
+= Introduction =
+
+ * a converter between an SSF text and an Excel Book, the 2nd
+
+== 概要 ==
+ * SSF テキストとエクセルブックの間を変換するツール、２号機
+
+= Details =
+
+ * next version of [ssf_reader_primitive] , [ssf_writer_primitive] and [ssf_rw_primitive] .
+ * new features.
+    # read and write file with a dialog.
+    # support many encodings arround utf-8. while the primitive support only the localized ANSI.
+    # write SSF for the selected part.
+    # write SSF for each module.
+    # read SSF from a mixed text source, like this wiki.
+    # handle colors, font and more formats.
+
+== 説明 ==
+ * [ssf_reader_primitive] と [ssf_writer_primitive] と [ssf_rw_primitive] の次バージョン。
+ * 主な追加機能。
+    # ダイアログ付きのファイル入出力。
+    # ANSI 以外の多数の文字コードにも対応。 UTF-8 を標準。
+    # 部分的な SSF 出力。
+    # モジュール単位での SSF 出力。
+    # 混在テキストからの SSF 抽出。
+    # 色や文字サイズなど、書式の強化。
+
+= Downloads =
+
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=ssf downloads / ダウンロード]
+
+= How to use =
+
+ # download binary excel book, ssf_rw_v2.xls (Japanese Excel 2000) or ssf_rw_v2.xlsm (Japanese Excel 2007) , from above url.
+    * you must enable your excel to run a macro, when you can't see a toolbar.
+    * you must do [vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B Trust macro to access the VBA Project Object Model]  to handle VBA code.
+ # you may want to start with ssf_rw_v2_en.xls (English Excel 2000) , if your PC doesn't handle Japanese language.
+ # build your book from text source, if you can't download binary books, or you are prohibited to download any macro book from the internet.
+    # First of all, copy and generate manually the [ssf_reader_primitive] to a module of a new excel book.
+    # download a english source text file, or copy the code at below. then convert it to an excel book with the [ssf_reader_primitive].
+    # while [ssf_reader_primitive] doesn't change the project name, you have to do it manually. change `VBAProject` to `F3SsfRwV2` and save.
+
+== 使い方 ==
+ # 上記、ダウンロード先から、 ssf_rw_v2.xls (Excel 2000) または ssf_rw_v2.xlsm (Excel 2007) をダウンロードして使う。
+    * ブックを開いてもツールバーが現われないときは、エクセルでマクロが実行できるような設定を行う。
+    * VBA コードを入出力するには、 [vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B VBA プロジェクト オブジェクト モデルへのアクセスを信頼する] が必要。
+ # 日本語以外の環境で使うなら、 ssf_rw_v2_en.xls (英語版 Excel 2000) をダウンロードして使う。
+ # バイナリのダウンロードや、マクロ付きブックの持込みができない場合、次の手順でソースから構築する。
+    # 最初に [ssf_reader_primitive] を標準モジュールへの手動コピーで作成する。
+    # 次に SJIS 版または英語版のソーステキストをダウンロードするか、下のコードをコピーし、 [ssf_reader_primitive] でエクセルブックに変換する。
+    # [ssf_reader_primitive] では、 VBA プロジェクト名を自動設定しないため、変換後に手動で `VBAProject` を `F3SsfRwV2` に変更してから保存する。
+
+
+= Interface / 操作 =
+
+
+ # * Copy as SSF | Write SSF into Clipboard
+ # * Paste from SSF | Read SSF from Clipboard
+ # * to Notepad | Write SSF into a Notepad
+ # * from Notepad | Read SSF from a Notepad
+ # * 0 | connection to Notepad
+ # * to File | Write SSF into a File
+ # * from File | Read SSF from a File
+ # * Encoding | Character Encoding of File
+ # * Object | What is converted when writing to SSF
+ # * Module | How VBA codes are converted
+ # * Mixed | use SSF declares to remove non SSF sections
+ # * Log | Show verbose logs on Notepad
+ # * ? | Show an information
+
+ # * コピーSSF * | クリップボードにSSFを書き出す。
+ # * ペーストSSF * | クリップボードのSSFを取り込む。
+ # * メモ帳へ * | メモ帳にSSFを書き出す。
+ # * メモ帳から * | メモ帳のSSFを取り込む。
+ # * 0 * | 連携中のメモ帳。
+ # * ファイルへ * | ファイルにSSFを書き出す。
+ # * ファイルから * | ファイルのSSFを取り込む。
+ # * 文字コード * | ファイルの文字コードを指定する。
+ # * 対象 * | SSF書き出しの対象を指定する。
+ # * モジュール * | VBAコードの扱いを指定する。
+ # * 混在 * | SSF宣言行より前の情報を取り込まない。
+ # * ログ * | メモ帳にログを出力する。
+ # * ? * | 情報シートを表示する。
+
+= Snapshots =
+
+
+
+= Code =
+
+{{{
+'ssf-begin
+';
+
+'workbook
+'   name;ssf_rw_v2.xls/F3SsfRwV2
+
+'book-identity
+'  title;SSF Reader / Writer
+'  description;to convert between SSF texts and Excel Books
+
+'require
+'       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+'       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'       ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
+
+'cells-name
+'       ;=ssf_rw_v2!R15C1
+'       ;ssf_rw_v2!_ButtonCaption
+'       ;=ssf_rw_v2!R3C2
+'       ;ssf_rw_v2!_Comment
+'       ;=ssf_rw_v2!R6C2
+'       ;ssf_rw_v2!_Contributor
+'       ;=ssf_rw_v2!R4C2
+'       ;ssf_rw_v2!_Copyright
+'       ;=ssf_rw_v2!R5C2
+'       ;ssf_rw_v2!_License
+'       ;=ssf_rw_v2!R2C2
+'       ;ssf_rw_v2!_LocalComment
+'       ;=ssf_rw_v2!R1C2
+'       ;ssf_rw_v2!_PublicName
+'       ;=ssf_rw_v2!R7C2
+'       ;ssf_rw_v2!_Since
+'       ;=ssf_rw_v2!R10C2
+'       ;ssf_rw_v2!_Tag
+'       ;=ssf_rw_v2!R9C2
+'       ;ssf_rw_v2!_Timestamp
+'       ;=ssf_rw_v2!R8C2
+'       ;ssf_rw_v2!_Url
+
+'worksheet
+'   name;ssf_rw_v2/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;ssf_rw_v2
+'         ;コメント
+'         ;SSFテキストとエクセルブックの変換を行う
+'         ;comment
+'         ;to convert between SSF texts and Excel Books
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;初版
+'         ;2010
+'         ;配布元
+'         ;http://cowares.blogspot.com/search/label/ssf
+'         ;更新
+'         ;40665.25
+'         ;keyword
+'         ;vba,excel,ssf
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:O27
+'         ;コピーSSF
+'         ;クリップボードにSSFを書き出す。
+'         ;write_clipboard
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;7
+'         ;ペーストSSF
+'         ;クリップボードのSSFを取り込む。
+'         ;read_clipboard
+'     skip;1
+'         ;1
+'         ;2
+'     skip;9
+'         ;メモ帳へ
+'         ;メモ帳にSSFを書き出す。
+'         ;write_notepad
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;7
+'         ;メモ帳から
+'         ;メモ帳のSSFを取り込む。
+'         ;read_notepad
+'     skip;1
+'         ;1
+'         ;2
+'     skip;9
+'         ;0
+'         ;連携中のメモ帳。
+'         ;hwnd
+'     skip;1
+'         ;1
+'         ;2
+'     skip;9
+'         ;ファイルへ
+'         ;ファイルにSSFを書き出す。
+'         ;write_file
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;7
+'         ;ファイルから
+'         ;ファイルのSSFを取り込む。
+'         ;read_file
+'     skip;1
+'         ;1
+'         ;2
+'     skip;9
+'         ;文字コード
+'         ;ファイルの文字コードを指定する。
+'         ;charset
+'     skip;1
+'         ;4
+'     skip;4
+'         ;utf-8
+'         ;shift_jis
+'         ;euc-jp
+'         ;iso-2022-jp
+'         ;unicode
+'         ;ascii
+'         ;対象
+'         ;SSF書き出しの対象を指定する。
+'         ;target
+'     skip;1
+'         ;3
+'     skip;2
+'         ;1
+'     skip;1
+'         ;ブック
+'         ;シート
+'         ;選択セル
+'         ;モジュール
+'         ;コード
+'     skip;1
+'         ;モジュール
+'         ;VBAコードの扱いを指定する。
+'         ;module
+'     skip;1
+'         ;3
+'     skip;4
+'         ;VBA有り
+'         ;VBA無し
+'         ;VBA分離
+'     skip;3
+'         ;混在
+'         ;SSF宣言行より前の情報を取り込まない。
+'         ;enable_magicword
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;F3SsfRwV2.BaumMain.OnButtonToggle
+'     skip;6
+'         ;ログ
+'         ;メモ帳にログを出力する。
+'         ;verbose
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3SsfRwV2.BaumMain.OnButtonToggle
+'         ;1
+'     skip;5
+'         ;?
+'         ;このシートを表示する。
+'         ;about
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3SsfRwV2"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
+    Else
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "Tool bar was temporally broken, and reloaded. Try again.", vbExclamation, BaumMain.Name
+    Else
+        Helper.OnButtonToggle
+    End If
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_write_clipboard(oAC As Object)
+    SsfMain.ClipboardWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_clipboard(oAC As Object)
+    SsfMain.ClipboardReader oAC, Helper
+End Sub
+
+Public Sub Menu_write_notepad(oAC As Object)
+    SsfMain.NotepadWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_notepad(oAC As Object)
+    SsfMain.NotepadReader oAC, Helper
+End Sub
+
+Public Sub Menu_hWnd(oAC As Object)
+    SsfMain.ConnectNotepad oAC, Helper
+End Sub
+
+Public Sub Menu_write_file(oAC As Object)
+    SsfMain.FileWriter oAC, Helper
+End Sub
+
+Public Sub Menu_read_file(oAC As Object)
+    SsfMain.FileReader oAC, Helper
+End Sub
+
+Public Sub Menu_Charset(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+End Sub
+
+Public Sub Menu_enable_magicword(oAC As Object)
+End Sub
+
+Public Sub Menu_target(oAC As Object)
+End Sub
+
+Public Sub Menu_module(oAC As Object)
+End Sub
+
+Public Sub Menu_verbose(oAC As Object)
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    If ThisWorkbook.IsAddin Then
+        Dim Wb As Workbook
+        Set Wb = Workbooks.Add
+        Me.Copy Before:=Wb.Sheets(1)
+        Wb.Saved = True
+        Set Wb = Nothing
+    Else
+        Me.Activate
+    End If
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'module
+'   name;SsfReader
+'{{{
+Option Explicit
+
+Private Env As GlobalResources
+
+Public Function InitializeEnv()
+    Set Env = SsfUtils.CreateDefaultEnv
+    Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "reader"
+End Function
+
+Public Sub TerminateEnv()
+    Set Env = Nothing
+End Sub
+
+Public Sub ReadSsf(Stream)
+    Dim Finder
+    
+    If Env Is Nothing Then InitializeEnv
+    
+    Set Finder = New StreamParser
+    Set Finder.Stream = Stream
+    With Stream
+        If .OpenRead Then
+            ParseSsf Finder
+            .CloseRead
+        End If
+    End With
+    
+    Set Finder = Nothing
+    TerminateEnv
+End Sub
+
+Public Sub ParseSsf(Finder)
+    Do
+        If Not BeginTheMagic(Finder) Then Exit Sub
+        EvalAfter Finder
+        EndTheMagic
+    Loop While RequireTheMagic And Not Finder.AtEndOfStream
+End Sub
+
+Private Function RequireTheMagic() As Boolean
+    On Error Resume Next
+    RequireTheMagic = CBool(Env.GetEnv("ssf", "enable-magic-word", "FALSE"))
+End Function
+
+Private Sub DoFlush()
+    Dim BlockName
+    
+    BlockName = Env.PopEnv("current", "last-blockname", "")
+    If BlockName <> "" Then
+        SsfAction.ReadFrom BlockName, Env.GetArray("block"), Env
+    End If
+End Sub
+
+Private Sub EndTheMagic()
+    DoFlush
+End Sub
+
+Private Function BeginTheMagic(Finder)
+    Dim i, EndBegins, At
+    Dim Bch, Ech
+    Dim MagicBegin
+    
+    BeginTheMagic = True
+    
+    If Not RequireTheMagic Then Exit Function
+    MagicBegin = Env.GetEnv("ssf", "magic-begin", "")
+    If MagicBegin = "" Then Exit Function
+    
+    BeginTheMagic = False
+    
+    At = Finder.FindString(1, MagicBegin, vbBinaryCompare)
+    If At <= 1 Then Exit Function
+    
+    Finder.Text = Mid(Finder.Text, At - 1)
+    
+    Bch = Left(Finder.Text, 1)
+    EndBegins = Len(MagicBegin) + 2
+    i = Finder.FindString(EndBegins, Bch, vbBinaryCompare)
+    If i <= EndBegins Then Exit Function
+    
+    Ech = Mid(Finder.Text, EndBegins, i - EndBegins)
+    Env.SetEnv "ssf", "line-begin", Bch
+    Env.SetEnv "ssf", "line-end", Ech
+    
+    BeginTheMagic = True
+End Function
+
+Private Sub SetSpecialChars(ByRef Bch, ByRef Ech, ByRef EscapeBegin, ByRef MagicEnd, ByRef Delimiter)
+    EscapeBegin = Env.GetEnv("ssf", "escape-begin", "{{{")
+    MagicEnd = Env.GetEnv("ssf", "magic-end", "ssf-end")
+    Delimiter = Env.GetEnv("ssf", "value-delimiter", ";")
+    Bch = Env.GetEnv("ssf", "line-begin", "'")
+    EscapeOff Bch, Ech
+End Sub
+
+Private Sub EscapeOn(ByRef Bch, ByRef Ech)
+    Ech = Ech & Bch & Env.GetEnv("ssf", "escape-end", "}}}") & Ech
+End Sub
+
+Private Sub EscapeOff(ByRef Bch, ByRef Ech)
+    Ech = Env.GetEnv("ssf", "line-end", vbCrLf)
+End Sub
+
+Private Sub EvalAfter(Finder)
+    Dim Bch, Ech
+    Dim EscapeBegin, MagicEnd, Delimiter
+    Dim BlockName, Key, Value, BeforeTag
+    Dim BlockVoid
+    Dim EchNextBlock
+    
+    SetSpecialChars Bch, Ech, EscapeBegin, MagicEnd, Delimiter
+    
+    BlockName = ""
+    EchNextBlock = Ech & Bch
+    Do Until Finder.AtEndOfStream
+        EvalComma BeforeTag, Finder, Bch, Ech
+        EvalEscape BeforeTag, Finder, Bch, Ech, EscapeBegin, Delimiter
+        EvalBefore BeforeTag, Bch, Delimiter, BlockName, Key, Value, BlockVoid
+        
+        If BlockName = "" Then
+            Finder.Text = Ech & Finder.Text
+            EvalComma BeforeTag, Finder, Bch, EchNextBlock
+            If Finder.Text <> "" Then Finder.Text = Bch & Finder.Text
+        ElseIf BlockName = MagicEnd Then
+            Exit Do
+        End If
+    Loop
+End Sub
+
+Private Sub EvalComma(ByRef BeforeTag, Finder, Bch, Ech)
+    Dim At
+    
+    At = Finder.FindString(1, Ech, vbBinaryCompare)
+    If At = 0 Then
+        BeforeTag = Finder.Text
+        Finder.Text = ""
+    Else
+        BeforeTag = Left(Finder.Text, At - 1)
+        Finder.Text = Right(Finder.Text, Len(Finder.Text) - At + 1 - Len(Ech))
+    End If
+End Sub
+
+Private Sub EvalEscape(ByRef BeforeTag, Finder, Bch, Ech, EscapeBegin, Delimiter)
+    Dim MyBeforeTag
+    
+    If BeforeTag <> Bch & EscapeBegin Then Exit Sub
+    
+    EscapeOn Bch, Ech
+    EvalComma MyBeforeTag, Finder, Bch, Ech
+    BeforeTag = Bch & Delimiter & MyBeforeTag
+    EscapeOff Bch, Ech
+End Sub
+
+Private Sub EvalBefore(BeforeTag, Bch, Delimiter, ByRef BlockName, ByRef Key, ByRef Value, ByRef BlockVoid)
+    Dim KeyValue
+    
+    If BeforeTag = "" Then
+        BlockName = ""
+    ElseIf Left(BeforeTag, 1) <> Bch Then
+        BlockName = ""
+    ElseIf BlockName = "" Then
+        DoFlush
+        BlockName = Mid(BeforeTag, 2)
+        Key = ""
+        Value = ""
+        BlockVoid = False
+        Env.SetEnv "current", "last-blockname", BlockName
+    ElseIf Not BlockVoid Then
+        KeyValue = Split(BeforeTag, Delimiter, 2, vbBinaryCompare)
+        Key = Trim(Replace(Mid(KeyValue(0), 2), vbTab, ""))
+        If UBound(KeyValue) = 1 Then
+            Value = KeyValue(1)
+        Else
+            Value = ""
+        End If
+        If Key = "void" Then
+            BlockVoid = True
+        Else
+            Env.AddArray "block", Array(Key, Value)
+        End If
+    End If
+End Sub
+
+'}}}
+
+'class
+'   name;StreamParser
+'{{{
+Option Explicit
+
+Public Text
+Public Stream
+
+Public Property Get EOS()
+    EOS = Stream.EOS
+End Property
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = EOS And (Text = "")
+End Property
+
+Public Function MoreText()
+    If EOS Then Exit Function
+    
+    Const BuffSize = 8192
+    Dim out
+    out = Stream.ReadText(BuffSize)
+    Text = Text & out
+    MoreText = out
+End Function
+
+Public Function FindString(StartAt, Search, CompareMethod)
+    Dim out, more, At, Require
+    
+    Require = StartAt + Len(Search) - 1
+    Do While Len(Text) < Require
+        more = MoreText
+        If more = "" Then Exit Do
+    Loop
+    
+    out = InStr(StartAt, Text, Search, CompareMethod)
+    Do While out = 0
+        At = Len(Text) - Len(Search) + 2
+        more = MoreText
+        If more = "" Then Exit Do
+        
+        out = InStr(At, Text, Search, CompareMethod)
+    Loop
+    
+    FindString = out
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+End Sub
+
+'}}}
+
+'class
+'   name;StringStream
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+
+'class
+'   name;GlobalResources
+'{{{
+Option Explicit
+
+Public Env, Log, Ssf, Current, Block
+Public CellStream
+
+Private Logger
+
+Public Sub LogWrite(Text)
+    Logger.WriteLine Text
+    'Debug.Print Text
+End Sub
+
+Public Function LogRead()
+    LogRead = Logger.Text
+End Function
+
+Public Function PopEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            PopEnv = Env(BlockName)(Key)
+            Env(BlockName).Remove Key
+        Else
+            PopEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Function GetEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            GetEnv = Env(BlockName)(Key)
+        Else
+            GetEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Sub SetEnv(BlockName, Key, Value)
+    If Env.Exists(BlockName) Then
+        If Key = "clear" Then
+            Env(BlockName).RemoveAll
+        Else
+            Env(BlockName)(Key) = Value
+        End If
+    Else
+        'LogWrite "SetEnv: Unknown Block: " & BlockName & ", " & Key & ", " & Value
+    End If
+    'LogWrite "SetEnv: " & BlockName & ", " & Key & ", " & Value
+End Sub
+
+Public Function GetArray(BlockName)
+    Dim Key, Count, out()
+    
+    GetArray = Array()
+    
+    If Env.Exists(BlockName) Then
+        Count = Env(BlockName).Count
+        If Count > 0 Then
+            ReDim out(Count - 1)
+            For Key = 1 To Count
+                out(Key - 1) = Env(BlockName)(Key)
+                Env(BlockName).Remove Key
+            Next
+            GetArray = out
+        End If
+    End If
+End Function
+
+Public Sub AddArray(BlockName, Value)
+    Dim Key
+    
+    If Env.Exists(BlockName) Then
+        Key = Env(BlockName).Count + 1
+        Env(BlockName)(Key) = Value
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Dim x
+    Const TextCompare = 1
+    
+    Set Logger = New StringStream
+    Set Env = CreateObject("Scripting.Dictionary")
+    Set Log = CreateObject("Scripting.Dictionary")
+    Set Ssf = CreateObject("Scripting.Dictionary")
+    Set Current = CreateObject("Scripting.Dictionary")
+    Set Block = CreateObject("Scripting.Dictionary")
+    
+    Set Env("log") = Log
+    Set Env("ssf") = Ssf
+    Set Env("current") = Current
+    Set Env("block") = Block
+    
+    For Each x In Env.Items
+        x.CompareMode = TextCompare
+    Next
+    
+    Set CellStream = New SsfCellStream
+    Set CellStream.Env = Me
+End Sub
+
+Private Sub Class_Terminate()
+    Env.RemoveAll
+    Set CellStream = Nothing
+    Set Block = Nothing
+    Set Current = Nothing
+    Set Ssf = Nothing
+    Set Log = Nothing
+    Set Env = Nothing
+    Set Logger = Nothing
+End Sub
+
+'}}}
+
+'module
+'   name;SsfAction
+'{{{
+Option Explicit
+
+Public Sub ReadFrom(BlockName, Block, Env)
+    Select Case BlockName
+    Case "book-identity"
+        SsfBlockIdentity.ReadFrom Block, Env
+    Case "cells-background-color"
+        SsfBlockCells.CellsBackgroundColorReadFrom Block, Env
+    Case "cells-color"
+        SsfBlockCells.CellsColorReadFrom Block, Env
+    Case "cells-font-bold"
+        SsfBlockCells.CellsFontBoldReadFrom Block, Env
+    Case "cells-font-italic"
+        SsfBlockCells.CellsFontItalicReadFrom Block, Env
+    Case "cells-font-name"
+        SsfBlockCells.CellsFontNameReadFrom Block, Env
+    Case "cells-font-size"
+        SsfBlockCells.CellsFontSizeReadFrom Block, Env
+    Case "cells-formula"
+        SsfBlockCells.CellsFormulaReadFrom Block, Env
+    Case "cells-h-align"
+        SsfBlockCells.CellsHAlignReadFrom Block, Env
+    Case "cells-height"
+        SsfBlockCells.CellsHeightReadFrom Block, Env
+    Case "cells-name"
+        SsfBlockWorkbook.CellsNameReadFrom Block, Env
+    Case "cells-numberformat"
+        SsfBlockCells.CellsNumberFormatReadFrom Block, Env
+    Case "cells-shrink"
+        SsfBlockCells.CellsShrinkReadFrom Block, Env
+    Case "cells-v-align"
+        SsfBlockCells.CellsVAlignReadFrom Block, Env
+    Case "cells-width"
+        SsfBlockCells.CellsWidthReadFrom Block, Env
+    Case "cells-wrap"
+        SsfBlockCells.CellsWrapReadFrom Block, Env
+    Case "module", "class", "code"
+        SsfBlockModules.ReadFrom Block, Env, BlockName
+    Case "require"
+        SsfBlockModules.ProjectRequiresReadFrom Block, Env
+    Case "workbook"
+        SsfBlockWorkbook.ReadFrom Block, Env
+    Case "worksheet"
+        SsfBlockWorksheet.ReadFrom Block, Env
+    End Select
+End Sub
+
+Public Sub WriteTo(Stream, Env)
+    Dim Target As Object
+    
+    Set Target = Env.Current("target")
+    Select Case Env.Current("target-type")
+    Case "Workbook"
+        SsfBlockWorkbook.WriteTo Target, Stream, Env
+    Case "Worksheet"
+        SsfBlockWorksheet.WriteTo Target, Stream, Env
+    Case "Range"
+        SsfBlockCells.WriteTo Target, Stream, Env
+    Case "VBProject"
+        SsfBlockModules.WriteTo Target, Stream, Env
+    Case "CodeModule"
+        If SsfBlockModules.ShallDumpModule(Target, Env) Then
+            SsfBlockModules.VbaCodeModuleWriteTo Target.VBProject.VBE.ActiveCodePane.CodeModule, Stream, Env
+        End If
+    Case Else
+        Env.LogWrite "SsfAction.WriteTo: unknown type: " & TypeName(Target)
+    End Select
+End Sub
+
+'}}}
+
+'module
+'   name;SsfWriter
+'{{{
+Option Explicit
+
+Private Env As GlobalResources
+
+Public Function InitializeEnv()
+    Set Env = SsfUtils.CreateDefaultEnv
+    Set InitializeEnv = Env
+    Env.SetEnv "current", "roll", "writer"
+End Function
+
+Public Sub TerminateEnv()
+    Set Env = Nothing
+End Sub
+
+Public Sub WriteSsf(Stream)
+    If Env Is Nothing Then InitializeEnv
+    
+    With Stream
+        If .OpenWrite Then
+            WriteSsfBegin Stream
+            SsfAction.WriteTo Stream, Env
+            WriteSsfEnd Stream
+            .CloseWrite
+        End If
+    End With
+    
+    TerminateEnv
+End Sub
+
+Public Sub WriteSsfBegin(Stream)
+    With Stream
+        .WriteLine SsfBegin
+        .WriteLine LineBegin & ValueDelimiter
+        .WriteLine SsfBlockEnd
+    End With
+End Sub
+
+Public Sub WriteSsfEnd(Stream)
+    With Stream
+        .WriteLine SsfEnd
+        .WriteLine SsfBlockEnd
+    End With
+End Sub
+
+Private Function LineBegin()
+    LineBegin = Env.GetEnv("ssf", "line-begin", "'")
+End Function
+
+Private Function LineEnd()
+    LineEnd = Env.GetEnv("ssf", "line-end", vbCrLf)
+End Function
+
+Private Function EscapeBegin()
+    EscapeBegin = LineBegin & Env.GetEnv("ssf", "escape-begin", "{{{")
+End Function
+
+Private Function EscapeEnd()
+    EscapeEnd = LineBegin & Env.GetEnv("ssf", "escape-end", "}}}")
+End Function
+
+Private Function EscapeNotBegin()
+    EscapeNotBegin = LineBegin & "#" & Env.GetEnv("ssf", "escape-begin", "{{{")
+End Function
+
+Private Function EscapeNotEnd()
+    EscapeNotEnd = LineBegin & "#" & Env.GetEnv("ssf", "escape-end", "}}}")
+End Function
+
+Private Function ValueDelimiter()
+    ValueDelimiter = Env.GetEnv("ssf", "value-delimiter", ";")
+End Function
+
+Private Function SsfBegin()
+    SsfBegin = LineBegin & Env.GetEnv("ssf", "magic-begin", "ssf-begin")
+End Function
+
+Private Function SsfEnd()
+    SsfEnd = LineBegin & Env.GetEnv("ssf", "magic-end", "ssf-end")
+End Function
+
+Public Function SsfBlockBegin(SsfKey)
+    SsfBlockBegin = LineBegin & SsfUtils.InsertSpaces(7&) & SsfKey
+End Function
+
+Public Function SsfBlockEnd()
+    ' just returns a blank, expects the Stream.WriteLine is used
+    'SsfBlockEnd = LineEnd
+    SsfBlockEnd = ""
+End Function
+
+Public Function MakeSsfLine(Key, Value)
+    MakeSsfLine = LineBegin & SsfUtils.InsertSpaces(Key) & ValueDelimiter & Value
+End Function
+
+Public Function MakeSsfLineEscaped(ByVal Value)
+    ' must disable escaping signs in the value itself
+    Value = Replace(Value, LineEnd & EscapeBegin & LineEnd, LineEnd & EscapeNotBegin & LineEnd)
+    Value = Replace(Value, LineEnd & EscapeEnd & LineEnd, LineEnd & EscapeNotEnd & LineEnd)
+    MakeSsfLineEscaped = EscapeBegin & LineEnd & Value & LineEnd & EscapeEnd
+End Function
+
+Public Function MakeSsfLineCellData(Value)
+    If InStr(Value, vbLf) = 0 Then
+        MakeSsfLineCellData = MakeSsfLine("", Value)
+    Else
+        MakeSsfLineCellData = MakeSsfLineEscaped(SsfUtils.LineFeedFromLf(Value, LineEnd))
+    End If
+End Function
+
+'}}}
+
+'module
+'   name;SsfUtils
+'{{{
+Option Explicit
+
+Public Function CreateDefaultEnv() As GlobalResources
+    Dim Env As GlobalResources
+    
+    Set Env = New GlobalResources
+    
+    Env.SetEnv "ssf", "encoding", "utf-8"
+    
+    Env.SetEnv "ssf", "magic-begin", "ssf-begin"
+    Env.SetEnv "ssf", "magic-end", "ssf-end"
+    Env.SetEnv "ssf", "line-begin", "'"
+    Env.SetEnv "ssf", "line-end", vbCrLf
+    Env.SetEnv "ssf", "escape-begin", "{{{"
+    Env.SetEnv "ssf", "escape-end", "}}}"
+    Env.SetEnv "ssf", "value-delimiter", ";"
+    
+    Env.SetEnv "ssf", "verbose", "false"
+    'Env.SetEnv "ssf", "verbose", "true"
+    Env.SetEnv "ssf", "enable-magic-word", "false"
+    'Env.SetEnv "ssf", "enable-magic-word", "true"
+    Env.SetEnv "ssf", "enable-module", "true"
+    'Env.SetEnv "ssf", "enable-module", "false"
+    'Env.SetEnv "ssf", "enable-module", "every"
+    
+    Env.SetEnv "ssf", "copy-of", "COPY_ooop_"
+    Env.SetEnv "ssf", "safe-module", "false"
+    'Env.SetEnv "ssf", "safe-module", "true"
+    
+    Env.SetEnv "ssf", "safe-cell-text", "false"
+    'Env.SetEnv "ssf", "safe-cell-text", "true"
+    
+    Env.SetEnv "ssf", "size-calibration-v", "1"
+    Env.SetEnv "ssf", "size-calibration-h", "0.98167218"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader", ""
+    Env.SetEnv "ssf", "size-unit-to-reader", ""
+    Env.SetEnv "ssf", "size-unit-from-writer", ""
+    Env.SetEnv "ssf", "size-unit-to-writer", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-width", "zero"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-width", "zero"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-width", "pt"
+    
+    Env.SetEnv "ssf", "size-unit-from-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-to-reader-cells-height", "pt"
+    Env.SetEnv "ssf", "size-unit-from-writer-cells-height", "pt"
+    'Env.SetEnv "ssf", "size-unit-to-writer-cells-height", "pt"
+    
+    Env.SetEnv "ssf", "enable-cells-formula", "true"
+    Env.SetEnv "ssf", "enable-cells-numberformat", "true"
+    Env.SetEnv "ssf", "enable-cells-wrap", "true"
+    Env.SetEnv "ssf", "enable-cells-shrink", "true"
+    Env.SetEnv "ssf", "enable-cells-width", "true"
+    Env.SetEnv "ssf", "enable-cells-height", "true"
+    Env.SetEnv "ssf", "enable-cells-background-color", "true"
+    Env.SetEnv "ssf", "enable-cells-color", "true"
+    Env.SetEnv "ssf", "enable-cells-font-name", "true"
+    Env.SetEnv "ssf", "enable-cells-font-size", "true"
+    Env.SetEnv "ssf", "enable-cells-font-bold", "true"
+    Env.SetEnv "ssf", "enable-cells-font-italic", "true"
+    Env.SetEnv "ssf", "enable-cells-h-align", "true"
+    Env.SetEnv "ssf", "enable-cells-v-align", "true"
+    
+    Env.SetEnv "ssf", "enable-cells-border", "false"
+    
+    Env.SetEnv "ssf", "cells-writer", "block"
+    'Env.SetEnv "ssf", "cells-writer", "simple"
+    'Env.SetEnv "ssf", "cells-writer", "column"
+    'Env.SetEnv "ssf", "cells-writer", "row"
+    
+    Env.SetEnv "ssf", "cells-writer-without-queue", "false"
+    'Env.SetEnv "ssf", "cells-writer-without-queue", "true"
+    
+    Set Env.Current("target") = ActiveWorkbook
+    Set Env.Current("workbook") = ActiveWorkbook
+    Set Env.Current("worksheet") = ActiveSheet
+    Set Env.Current("module") = Nothing
+    
+    Set CreateDefaultEnv = Env
+End Function
+
+Public Function GetFileName(Style As String) As String
+    GetFileName = GetFileNameDialog(Style)
+End Function
+
+Public Function GetFileNameDialog(Optional Style As String = "open") As Variant
+    Const FileFilter = "ssf text (*.txt;*.ssf),*.txt;*.ssf,all (*.*),*.*"
+    Const OpenTitle = "Read from SSF text file"
+    Const SaveTitle = "Write to SSF text file"
+    
+    Dim InitName As String
+    Dim Result As Variant
+    Dim out As Variant
+    
+    Select Case Style
+    Case "open"
+        Result = Application.GetOpenFilename(FileFilter:=FileFilter, Title:=OpenTitle)
+    Case "save"
+        InitName = FileNameCandidate(ActiveWorkbook)
+        Result = Application.GetSaveAsFilename(InitialFilename:=InitName, FileFilter:=FileFilter, Title:=SaveTitle)
+    Case "fixed"
+        Result = "C:\tmp\ssf.txt"
+    End Select
+    
+    If IsArray(Result) Then
+        out = Result
+    ElseIf TypeName(Result) = "Boolean" Then
+        out = Empty
+    Else
+        out = CStr(Result)
+    End If
+    
+    GetFileNameDialog = out
+End Function
+
+Public Function FileNameCandidate(Target As Object) As String
+    Const SsfExt = ".txt"
+    Dim out As String
+    Dim dot As Long
+    
+    Select Case TypeName(Target)
+    Case "Workbook"
+        out = Target.Name
+        dot = InStrRev(out, ".")
+        If dot > 1 Then out = Left(out, dot - 1)
+        out = out & SsfExt
+    Case Else
+        out = TypeName(Target) & SsfExt
+    End Select
+    
+    FileNameCandidate = out
+End Function
+
+Public Function InsertSpaces(Name As Variant) As String
+    Static RememberLength As Long
+    Dim Length As Long
+    
+    If TypeName(Name) = "Long" Then
+        InsertSpaces = ""
+        RememberLength = Name
+    Else
+        Length = Len(CStr(Name))
+        If RememberLength <= Length Then RememberLength = Length + 2
+        InsertSpaces = Space(RememberLength - Length) & Name
+    End If
+End Function
+
+Public Function Chop(ByVal Text As String, ByVal LineFeed As String) As String
+    Dim LineFeedLength
+    
+    LineFeedLength = Len(LineFeed)
+    
+    Do While Right(Text, LineFeedLength) = LineFeed
+        Text = Left(Text, Len(Text) - LineFeedLength)
+    Loop
+    
+    Chop = Text
+End Function
+
+Public Function LineFeedToLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbLf
+    If LineFeed <> Lf Then Text = Replace(Text, LineFeed, Lf)
+    LineFeedToLf = Text
+End Function
+
+Public Function LineFeedFromLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbLf
+    If LineFeed <> Lf Then Text = Replace(Text, Lf, LineFeed)
+    LineFeedFromLf = Text
+End Function
+
+Public Function LineFeedToCrLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbCrLf
+    If LineFeed <> Lf Then Text = Replace(Text, LineFeed, Lf)
+    LineFeedToCrLf = Text
+End Function
+
+Public Function LineFeedFromCrLf(ByVal Text As String, ByVal LineFeed As String) As String
+    Const Lf = vbCrLf
+    If LineFeed <> Lf Then Text = Replace(Text, Lf, LineFeed)
+    LineFeedFromCrLf = Text
+End Function
+
+Public Function ExtractKeyValue(KeyValue As Variant, ByRef Key As String, ByRef Value As String) As String
+    Key = KeyValue(0)
+    Value = KeyValue(1)
+    ExtractKeyValue = Key
+End Function
+
+Public Function DivideName(Line As Variant, ByRef Name As String, ByRef CodeName As String, _
+        Optional ByVal DefaultCodeName As String = "") As String
+    Dim x As Variant
+    x = DivideLine(Line, "/", 2)
+    Name = x(0)
+    If DefaultCodeName = "" Then DefaultCodeName = Name
+    CodeName = IIf(x(1) = "", DefaultCodeName, x(1))
+    DivideName = Name
+End Function
+
+Public Function DivideLine(Line As Variant, Delimiter As String, Number As Long) As Variant
+    Dim x As Variant
+    Dim y() As Variant
+    Dim i As Long
+    
+    x = Split(Line, Delimiter, Number)
+    If UBound(x) = Number - 1 Then
+        DivideLine = x
+    Else
+        ReDim y(0 To Number - 1)
+        For i = 0 To UBound(x)
+            y(i) = x(i)
+        Next
+        DivideLine = y
+    End If
+End Function
+
+Public Function ExactEqual(x As Variant, y As Variant) As Boolean
+    Dim Equal As Boolean
+    
+    ' handle Null
+    If IsNull(x) <> IsNull(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsNull(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' handle Empty
+    If IsEmpty(x) <> IsEmpty(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsEmpty(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' no more nulls nor empties
+    Equal = (x = y)
+    
+DONE:
+    ExactEqual = Equal
+End Function
+
+'}}}
+
+'module
+'   name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
+            Optional NameMe As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcID As Long
+    Dim i As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    
+    On Error GoTo Err1
+    
+    TitleText = " - notepad - meets VBA"
+    ExePath = "notepad.exe"
+    
+    ProcID = Shell(ExePath, iWindowState)
+    If ProcID = 0 Then GoTo Err1
+    
+    hWnd = GetWindowByProcessId(ProcID)
+    If hWnd = 0 Then GoTo Err1
+    
+    TitleText = IIf(NameMe = "", ProcID, NameMe) & TitleText
+    i = SetWindowText(hWnd, TitleText)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' SetWindowPos can be used to change Z-order
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "failed to start a notepad", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+    OpenNotepad = 0
+End Function
+
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' push text into the notepad with a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' push text into the notepad without a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' select all
+        SendMessage i, EM_SETSEL, -1, 0     ' unselect (let the cursor move to the end of the selection)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+' get text length from the notepad
+Public Function ReadNotepadLength(hWnd As Long) As Long
+    Dim i As Long
+    Dim j As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    j = SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    ReadNotepadLength = j
+End Function
+
+' get a ProcessID from hWnd
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    GetWindowProcessId = ProcID
+End Function
+
+' get an hWnd from ProcessID (Notepad only)
+Public Function GetWindowByProcessId(ProcessId As Long, _
+        Optional TaskName As String = "Notepad", _
+        Optional TitleText As String = vbNullString) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    Dim hWnd As Long
+
+    hWnd = 0
+    Do
+        hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        If hWnd = 0 Then Exit Do
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until ProcessId = ProcID
+    
+    GetWindowByProcessId = hWnd
+End Function
+
+' notify user to see the notepad described with the hWnd
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+
+'}}}
+
+'class
+'   name;StringStreamClipboard
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    CopyToClipboard Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue CopyFromClipboard
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+' get text from clipboard
+Private Function CopyFromClipboard() As String
+    Const CFText As Long = 1
+    Dim Data As String
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.GetFromClipboard
+    If Clip.GetFormat(CFText) Then
+        Data = Clip.GetText()
+    Else
+        Data = ""
+    End If
+    CopyFromClipboard = Data
+End Function
+ 
+' put text into clipboard
+Private Sub CopyToClipboard(Data As String)
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Data
+    Clip.PutInClipboard
+End Sub
+
+'}}}
+
+'class
+'   name;StringStreamNotepad
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public hWndNotepad As Long
+Public NameNotepad As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    If hWndNotepad = 0 Then Exit Sub
+    WriteNotepad hWndNotepad, Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue ReadNotepad(hWndNotepad)
+    OpenRead = (hWndNotepad <> 0)
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    hWndNotepad = OpenNotepad(1, NameNotepad)
+    OpenWrite = (hWndNotepad <> 0)
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = New StringStreamNotepad
+    With OpenSpawn
+        .LineFeed = LineFeed
+        .NameNotepad = SpawnName
+        If Not .OpenWrite Then Set OpenSpawn = Nothing
+    End With
+End Function
+
+Public Function CloseSpawn()
+    CloseWrite
+    If ReadNotepadLength(hWndNotepad) = 0 Then CloseNotepad (hWndNotepad)
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    hWndNotepad = 0
+    NameNotepad = ""
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+
+'class
+'   name;StringStreamFile
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public FileName As String
+Public Charset As String
+
+Private FileStream As Object
+Private CanRead As Boolean
+Private CanWrite As Boolean
+Private SpawnCount As Long
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+    If Not CanRead Then Exit Sub
+    
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanRead = False
+End Sub
+
+Public Sub FlushWrite()
+    If Not CanWrite Then Exit Sub
+    
+    FileStream.WriteText Dequeue(-1)
+    SaveToFile
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanWrite = False
+End Sub
+
+Private Sub SaveToFile()
+    Const adSaveCreateOverWrite = 2
+    If FileName = "" Then Exit Sub
+    
+    FileStream.SaveToFile FileName, adSaveCreateOverWrite
+End Sub
+
+Public Function OpenRead()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    If FileName = "" Then Exit Function
+    
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeText
+        .Charset = Charset
+        .LoadFromFile FileName
+    End With
+    
+    CanRead = True
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeText
+        .Charset = Charset
+    End With
+    
+    CanWrite = True
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Const SsfExt = ".txt"
+    
+    If CanWrite Then
+        Set OpenSpawn = New StringStreamFile
+        SpawnCount = SpawnCount + 1
+        With OpenSpawn
+            .LineFeed = LineFeed
+            .Charset = Charset
+            If SpawnName = "" Then
+                .FileName = FileName & "." & CStr(SpawnCount) & SsfExt
+            Else
+                .FileName = FileName & "." & SpawnName & SsfExt
+            End If
+            .OpenWrite
+        End With
+    Else
+        Set OpenSpawn = Nothing
+    End If
+End Function
+
+Public Function CloseSpawn()
+    If CanWrite Then CloseWrite
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    FileName = ""
+    Charset = "utf-8"
+    CanRead = False
+    CanWrite = False
+    SpawnCount = 0
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    
+    If Not FileStream Is Nothing Then
+        FileStream.Close
+        Set FileStream = Nothing
+    End If
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    If CanWrite Then
+        FileStream.WriteText Dequeue(-1) & Data
+    Else
+        Text = Text & Data
+    End If
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        If CanRead Then
+            If Len(Text) < Size Then
+                Text = Text & FileStream.ReadText(Size)
+            End If
+        End If
+        
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+        
+        If CanRead Then
+            Dequeue = Dequeue & FileStream.ReadText(-1)
+        End If
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = ((Text = "") And FileStream.EOS)
+End Function
+
+'}}}
+
+'module
+'   name;SsfMain
+'{{{
+Option Explicit
+
+Public Sub NotepadReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamNotepad
+    Dim hWnd As Long
+    
+    hWnd = GetWndFromButton(Helper.GetButton("hwnd"))
+    If hWnd = 0 Then Exit Sub
+    
+    Set Stream = New StringStreamNotepad
+    Stream.hWndNotepad = hWnd
+    
+    CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub NotepadWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamNotepad
+    Set Stream = New StringStreamNotepad
+    
+    CommonWriter oAC, Helper, Stream
+    SetWndToButton Helper.GetButton("hwnd"), Stream.hWndNotepad
+    Set Stream = Nothing
+End Sub
+
+Public Sub ClipboardReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamClipboard
+    Set Stream = New StringStreamClipboard
+    
+    CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub ClipboardWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamClipboard
+    Set Stream = New StringStreamClipboard
+    
+    CommonWriter oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub FileReader(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamFile
+    Set Stream = New StringStreamFile
+    Stream.Charset = Helper.GetControlText("charset")
+    Stream.FileName = SsfUtils.GetFileName("open")
+    
+    If Stream.FileName <> "" Then CommonReader oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub FileWriter(oAC As Object, Helper As ToolBarV2)
+    Dim Stream As StringStreamFile
+    Set Stream = New StringStreamFile
+    Stream.Charset = Helper.GetControlText("charset")
+    Stream.FileName = SsfUtils.GetFileName("save")
+    
+    If Stream.FileName <> "" Then CommonWriter oAC, Helper, Stream
+    Set Stream = Nothing
+End Sub
+
+Public Sub ConnectNotepad(oAC As Object, Helper As ToolBarV2)
+    Dim hWnd As Long
+    hWnd = Val(oAC.Parameter)
+    If Not DoNotepad.ShowNotepad(hWnd) Then SetWndToButton oAC, 0
+End Sub
+
+Private Sub CommonReader(oAC As Object, Helper As ToolBarV2, Stream As Object)
+    Dim Env As GlobalResources
+    
+    Set Env = SsfReader.InitializeEnv
+    SetTarget oAC, Helper, Env
+    
+    SsfReader.ReadSsf Stream
+    
+    ShowLog Env
+    Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
+End Sub
+
+Private Sub CommonWriter(oAC As Object, Helper As ToolBarV2, Stream As Object)
+    Dim Env As GlobalResources
+    
+    Set Env = SsfWriter.InitializeEnv
+    SetTarget oAC, Helper, Env
+    
+    SsfWriter.WriteSsf Stream
+    
+    ShowLog Env
+    Set Env = Nothing
+    SsfUtilsExcel.CloseBookTool
+End Sub
+
+Private Sub ShowLog(Env As GlobalResources)
+    On Error GoTo NOP
+    Dim Stream As StringStreamNotepad
+    
+    Debug.Print Env.LogRead
+    
+    If CBool(Env.GetEnv("ssf", "verbose", "false")) Then
+        Set Stream = New StringStreamNotepad
+        With Stream
+            .NameNotepad = "Log " & Time()
+            If .OpenWrite Then
+                .WriteText Env.LogRead
+                .CloseWrite
+            End If
+        End With
+        Set Stream = Nothing
+    End If
+    Exit Sub
+NOP:
+End Sub
+
+Private Sub SetTarget(oAC As Object, Helper As ToolBarV2, Env As GlobalResources)
+    Env.SetEnv "ssf", "encoding", Helper.GetControlText("charset")
+    Env.SetEnv "ssf", "verbose", CStr(Helper.GetControlState("verbose"))
+    Env.SetEnv "ssf", "enable-magic-word", CStr(Helper.GetControlState("enable_magicword"))
+    
+    Env.SetEnv "current", "target-type", Choose(Helper.GetButton("target").ListIndex, _
+            "Workbook", "Worksheet", "Range", "VBProject", "CodeModule")
+    Select Case Env.Current("target-type")
+    Case "Workbook", "VBProject", "CodeModule"
+        Set Env.Current("target") = ActiveWorkbook
+    Case "Worksheet"
+        Set Env.Current("target") = ActiveSheet
+    Case "Range"
+        Set Env.Current("target") = Selection
+    End Select
+    
+    Select Case Helper.GetButton("module").ListIndex
+    Case 1  ' with Modules
+        Env.SetEnv "ssf", "enable-module", "true"
+    Case 2  ' without Modules
+        Env.SetEnv "ssf", "enable-module", "false"
+    Case 3  ' every Module
+        Env.SetEnv "ssf", "enable-module", "every"
+    End Select
+    
+    ' Log
+    Env.LogWrite oAC.Tag & " " & oAC.Caption
+    If InStr(oAC.Tag, "file") > 0 Then Env.LogWrite Env.Ssf("encoding")
+    Env.LogWrite "TARGET: " & Env.Current("target-type") & " " & TypeName(Env.Current("target"))
+    Env.LogWrite "MODULE: " & Env.Ssf("enable-module")
+    Env.LogWrite "MAGIC : " & Env.Ssf("enable-magic-word")
+End Sub
+
+Private Function GetWndFromButton(oAC As Object) As Long
+    Dim hWnd As Long
+    hWnd = CLng(oAC.Parameter)
+    GetWndFromButton = hWnd
+End Function
+
+Private Sub SetWndToButton(oAC As Object, hWnd As Long)
+    oAC.Caption = CStr(DoNotepad.GetWindowProcessId(hWnd))  ' ProcessID for human
+    oAC.Parameter = CStr(hWnd)                              ' hWnd for me
+End Sub
+
+'}}}
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'module
+'   name;SsfUtilsExcel
+'{{{
+Option Explicit
+
+Private BookTool As SsfUtilsExcelBook
+
+Public Function OpenBookTool() As SsfUtilsExcelBook
+    If BookTool Is Nothing Then Set BookTool = New SsfUtilsExcelBook
+    Set OpenBookTool = BookTool
+End Function
+
+Public Function CloseBookTool() As Object
+    If Not BookTool Is Nothing Then Set BookTool = Nothing
+    Set CloseBookTool = Nothing
+End Function
+
+Public Function ExcelAddressToRange(Ws As Worksheet, ByVal A1orR1C1 As String, _
+        Optional FailSafe As Object = Nothing) As Range
+    Dim TryR1C1 As String
+    
+    On Error Resume Next
+    Set ExcelAddressToRange = Ws.Range(A1orR1C1)
+    If Err.Number = 0 Then Exit Function
+    Err.Clear
+    
+    TryR1C1 = OpenBookTool.R1C1ToA1(A1orR1C1)
+    If TryR1C1 <> A1orR1C1 Then
+        Set ExcelAddressToRange = Ws.Range(TryR1C1)
+        If Err.Number = 0 Then Exit Function
+        Err.Clear
+    End If
+    
+    Set ExcelAddressToRange = FailSafe
+End Function
+
+Public Function ExcelRangeToAddress(Ra As Range) As String
+    ExcelRangeToAddress = Ra.Address(False, False, xlA1, False)
+End Function
+
+' this function is required to avoid overflow errors on excel 2007 Cells.Count
+Public Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+        ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function IsValidAreaNumber(Target As Range, ByVal Number As Long) As Boolean
+    IsValidAreaNumber = False
+    
+    If Target Is Nothing Then Exit Function
+    If Number <= 0 Then Exit Function
+    If Number > Target.Areas.Count Then Exit Function
+    
+    IsValidAreaNumber = True
+End Function
+
+Public Function IsInsideCell(Target As Range, ByVal Number As Variant) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    IsInsideCell = False
+    
+    On Error Resume Next
+    If Target Is Nothing Then Exit Function
+    If Number <= 0 Then Exit Function
+    If Number > Target.Cells.Count Then Exit Function
+    
+    IsInsideCell = True
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+        If Number > CDec(Target.Cells.CountLarge) Then Exit Function
+        IsInsideCell = True
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function TranslateDotProperties(Origin As Object, ByRef Key As String) As Object
+    Dim Receiver As Object
+    Dim DotProperties As Variant
+    Dim MayHaveIndex As Variant
+    
+    Set Receiver = Origin
+    Do
+        DotProperties = Split(Key, ".", 2)
+        If UBound(DotProperties) = 0 Then Exit Do
+        MayHaveIndex = Split(DotProperties(0), "(", 2)
+        Set Receiver = CallByName(Receiver, MayHaveIndex(0), VbGet)
+        If UBound(MayHaveIndex) = 1 Then Set Receiver = Receiver(Val(MayHaveIndex(1)))
+        Key = DotProperties(1)
+    Loop
+    
+    Set TranslateDotProperties = Receiver
+End Function
+
+Public Function IsEmptyCellProperty(Target As Range, ByVal PropertyName As String, _
+        Optional EmptyValue As Variant = Empty) As Boolean
+    Dim Receiver As Object
+    Dim AllValues As Variant
+    Dim out As Boolean
+    
+    Set Receiver = TranslateDotProperties(Target, PropertyName)
+    AllValues = CallByName(Receiver, PropertyName, VbGet)
+    
+    If IsNull(AllValues) Then
+        out = False
+    Else
+        out = (AllValues = EmptyValue)
+    End If
+    
+    IsEmptyCellProperty = out
+End Function
+
+Public Function TranslateCellValues(Data As Variant, FilterClass As Object, FilterName As String) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim R1 As Long
+    Dim R2 As Long
+    Dim C1 As Long
+    Dim C2 As Long
+    
+    If IsArray(Data) Then
+        R1 = LBound(Data, 1)
+        R2 = UBound(Data, 1)
+        C1 = LBound(Data, 2)
+        C2 = UBound(Data, 2)
+        ReDim out(R1 To R2, C1 To C2)
+        For R = R1 To R2
+            For C = C1 To C2
+                out(R, C) = CallByName(FilterClass, FilterName, VbMethod, Data(R, C))
+            Next
+        Next
+        TranslateCellValues = out
+    Else
+        TranslateCellValues = CallByName(FilterClass, FilterName, VbMethod, Data)
+    End If
+End Function
+
+'}}}
+
+'class
+'   name;SsfUtilsExcelBook
+'{{{
+Option Explicit
+
+Public TestBook As Workbook
+Public TestSheet As Worksheet
+Public TestCell As Range
+Public Logger As Object
+
+Private PushedWindow As Window
+
+Private Sub Class_Initialize()
+    PushActiveWindow
+    
+    Set TestBook = Application.Workbooks.Add
+    TestBook.Windows(1).Visible = False
+    Set TestSheet = TestBook.Worksheets(1)
+    Set TestCell = TestSheet.Range("A1")
+    
+    PopActiveWindow
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    PushActiveWindow
+    
+    TestBook.Close False
+    Set TestBook = Nothing
+    Set TestSheet = Nothing
+    Set TestCell = Nothing
+    
+    PopActiveWindow
+End Sub
+
+Private Sub MyLogger(Text As String)
+    If Logger Is Nothing Then
+        Debug.Print Text
+    Else
+        Logger.WriteText Text
+    End If
+End Sub
+
+Public Sub PushActiveWindow()
+    Set PushedWindow = ActiveWindow
+End Sub
+
+Public Sub PopActiveWindow()
+    If PushedWindow Is Nothing Then Exit Sub
+    PushedWindow.Activate
+End Sub
+
+Public Function IsValidAddress(ByVal Address As String) As Boolean
+    On Error Resume Next
+    Dim Dummy As Long
+    Dummy = TestSheet.Range(Address).Row
+    IsValidAddress = (Err.Number = 0)
+End Function
+
+Public Function R1C1ToA1(ByVal R1C1 As String) As String
+    On Error Resume Next
+    
+    Dim A1 As String
+    A1 = R1C1   ' on failed
+    
+    With TestCell
+        .FormulaR1C1 = "=COUNTBLANK(" & R1C1 & ")"
+        If Err.Number <> 0 Then
+            MyLogger "ExcelAddressR1C1ToA1: Error " & Err.Number & " " & Err.Description & ": " & R1C1
+        ElseIf IsError(.Value) Then
+            MyLogger "ExcelAddressR1C1ToA1: Error : invalid address " & R1C1
+        Else
+            A1 = .DirectPrecedents.Address(False, False, xlA1, False)
+        End If
+        .Clear
+    End With
+    
+    R1C1ToA1 = A1
+End Function
+
+Public Function CellWidthFromZero(ByVal Size As Double) As Double
+    On Error Resume Next
+    
+    ' convert ColumnWidth(number of 0s) to Width(points)
+    With TestCell
+        .ColumnWidth = Size
+        CellWidthFromZero = .Width
+        .ColumnWidth = TestSheet.StandardWidth
+        
+        If Err.Number <> 0 Then
+            CellWidthFromZero = .Width
+            MyLogger "CellWidthFromZero: Error " & Err.Number & " " & Err.Description & "(" & Size & ")"
+            Err.Clear
+        End If
+    End With
+End Function
+
+Public Function CellWidthToZero(ByVal Size As Double) As Double
+    On Error GoTo Err1
+    
+    ' convert Width(points) to ColumnWidth(number of 0s)
+    Dim x1 As Double, x2 As Double, x3 As Double
+    Dim y1 As Double, y2 As Double, y3 As Double
+    Dim i As Long
+    
+    Const DZero As Double = 0.000001
+    Const EZero As Double = 0.255
+    Const k1 As Double = 9.375
+    Const k2 As Double = 6
+    
+    y1 = Size / k1
+    y2 = Size / k2
+    CellWidthToZero = (y1 + y2) / 2     ' start with an expected average
+    
+    With TestCell
+        .ColumnWidth = y1
+        x1 = .Width
+        .ColumnWidth = y2
+        x2 = .Width
+    End With
+    
+    ' 3 times itteration is enough
+    For i = 1 To 3
+        If Abs(x2 - x1) < DZero Then Exit For           ' matured
+        y3 = y1 + (Size - x1) * (y2 - y1) / (x2 - x1)   ' try linear
+        With TestCell
+            .ColumnWidth = y3
+            x3 = .Width
+        End With
+        If Abs(Size - x3) < EZero Then Exit For         ' matured
+        If Abs(Size - x1) > Abs(Size - x2) Then
+            y1 = y3
+            x1 = x3
+        Else
+            y2 = y3
+            x2 = x3
+        End If
+    Next
+    
+    CellWidthToZero = y3
+    TestCell.ColumnWidth = TestSheet.StandardWidth
+    Exit Function
+    
+Err1:
+    MyLogger "CellWidthToZero: Error " & Err.Number & " " & Err.Description & "(" & Size & ")"
+    TestCell.ColumnWidth = TestSheet.StandardWidth
+End Function
+
+'}}}
+
+'module
+'   name;SsfBlockWorkbook
+'{{{
+Option Explicit
+
+Const MyKey = "workbook"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchBook Value, Env
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub CellsNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-name"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim ThePreviousValue As String
+    Dim CellsName As Names
+    Dim Wb As Workbook
+    
+    Counter = 0
+    Set Wb = Env.Current("workbook")
+    Set CellsName = Wb.Names
+    
+    Env.LogWrite LocalKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case ""
+            Counter = Counter + 1
+            EnsureHavingSheetFor Value, Wb
+            If Counter Mod 2 = 1 Then
+                ThePreviousValue = Value
+            Else
+                CellsName.Add Name:=Value, RefersToR1C1:=ThePreviousValue
+            End If
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Names As String
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    Names = Target.Name
+    If SsfBlockModules.CanTouchVBProject Then
+        Names = Names & "/" & Target.VBProject.Name
+    End If
+    Env.LogWrite Names
+    Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+    ChildrenWriteTo Target, Stream, Env
+End Sub
+
+Public Sub CellsNameWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-name"
+    
+    Dim CellNames As Names
+    Dim CellName As Name
+    
+    Set CellNames = Target.Names
+    If CellNames.Count = 0 Then Exit Sub
+    
+    ' simple list, 2 lines for a single (address, name) pair
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    For Each CellName In CellNames
+        Stream.WriteLine SsfWriter.MakeSsfLine("", CellName.RefersToR1C1)
+        Stream.WriteLine SsfWriter.MakeSsfLine("", CellName.Name)
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
+    Dim Ws As Worksheet
+    
+    SsfBlockIdentity.WriteTo Target, Stream, Env
+    SsfBlockModules.ProjectRequiresWriteTo Target, Stream, Env
+    CellsNameWriteTo Target, Stream, Env
+    For Each Ws In Target.Worksheets
+        SsfBlockWorksheet.WriteTo Ws, Stream, Env
+    Next
+    ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
+    SsfBlockModules.WriteTo Target, Stream, Env
+End Sub
+
+Private Sub SwitchBook(Names As String, Env As GlobalResources)
+    ' currently, we just open a new book
+    ' not name it, nor search an existing book
+    Dim Book As Workbook
+    Dim BookName As String
+    Dim ProjectName As String
+    
+    Set Book = Application.Workbooks.Add
+    Set Env.Current("workbook") = Book
+    Env.LogWrite "new workbook " & Names
+    
+    SsfUtils.DivideName Names, BookName, ProjectName, "VBAProject"
+    If (ProjectName <> "") And (ProjectName <> "VBAProject") And SsfBlockModules.CanTouchVBProject() Then
+        Book.VBProject.Name = ProjectName
+        Env.LogWrite "vbproject " & ProjectName
+    End If
+End Sub
+
+Private Sub EnsureHavingSheetFor(Data As String, Wb As Workbook)
+    ' pre-create a worksheet required for the cells-name
+    On Error Resume Next
+    
+    Dim SheetName As String
+    Dim At As Long
+    Dim Ws As Worksheet
+    
+    At = InStr(Data, "!")
+    If At = 0 Then Exit Sub             ' no sheet names
+    
+    SheetName = Left(Data, At - 1)
+    If Left(SheetName, 1) = "=" Then SheetName = Mid(SheetName, 2)
+    At = Wb.Worksheets(SheetName).Index
+    If Err.Number = 0 Then Exit Sub     ' sheet exists
+    
+    Err.Clear
+    Set Ws = Wb.Worksheets.Add
+    Ws.Name = SheetName
+    If Err.Number <> 0 Then Err.Clear
+End Sub
+
+'}}}
+
+'module
+'   name;SsfBlockWorksheet
+'{{{
+Option Explicit
+
+Const MyKey = "worksheet"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchWorksheet Value, Env
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Names As String
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    Names = Target.Name
+    ' avoid to print the default codename
+    If Target.Name <> Target.CodeName Then
+        Names = Names & "/" & Target.CodeName
+    End If
+    Env.LogWrite Names
+    Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+    ChildrenWriteTo Target, Stream, Env
+End Sub
+
+Private Sub ChildrenWriteTo(Target As Object, Stream As Object, Env As GlobalResources)
+    ' go into cells when this sheet is not protected and has cell values
+    If Not Target.ProtectContents Then
+        If (TypeName(Target.UsedRange.Value) <> "Empty") Then
+            SsfBlockCells.WriteTo Target.UsedRange, Stream, Env
+        End If
+    End If
+End Sub
+
+Private Sub SwitchWorksheet(Names As String, Env As GlobalResources)
+    ' 1. add a new sheet unless names are given
+    ' 2. search existing sheet by the given name, not by codename
+    ' 3. add a new sheet if above 2nd fails
+    ' 4. modify the codename when it is different from the given codename
+    ' 5. an existing code sheet will be overwritten if above 4th fails
+    ' 6. fail safe
+    
+    Dim Name As String
+    Dim CodeName As String
+    Dim Book As Workbook
+    Dim Ws As Worksheet
+    Dim Comp As VBComponent
+    
+    Env.LogWrite "worksheet " & Names
+    
+    Set Book = Env.Current("workbook")
+    Set Ws = Nothing
+    
+    On Error Resume Next
+    
+    ' rule#1 no names
+    If SsfUtils.DivideName(Names, Name, CodeName) <> "" Then
+        ' rule#2 search
+        Set Ws = Book.Worksheets(Name)
+        Select Case Err.Number
+        Case 0
+            Env.LogWrite Name & " exists. recycles"
+        Case 9
+            Env.LogWrite Name & " is not found."
+            Err.Clear
+        End Select
+    End If
+    If Err.Number <> 0 Then
+        Env.LogWrite Names & " " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+    
+    ' rule#1 #3 add
+    If Ws Is Nothing Then Set Ws = Book.Worksheets.Add
+    If Ws.Name <> Name Then Ws.Name = Name
+    
+    ' rule#4 rename
+    If Ws.CodeName <> CodeName Then
+        If SsfBlockModules.CanReallyTouchVBProject(Ws) Then
+            Book.VBProject.VBComponents(Ws.CodeName).Name = CodeName
+            If Err.Number <> 0 Then
+                ' rule#5 alarm
+                Env.LogWrite CodeName & " conflicts with existing codename"
+                Env.LogWrite Names & " " & Err.Number & " " & Err.Description
+                Err.Clear
+            End If
+        End If
+    End If
+    
+    ' rule #6 safe
+    If Ws Is Nothing Then
+        Env.LogWrite "failed to switch " & Names & " " & Err.Number & " " & Err.Description
+        Exit Sub
+    End If
+    
+    Set Env.Current("worksheet") = Ws
+End Sub
+
+'}}}
+
+'module
+'   name;SsfBlockCells
+'{{{
+Option Explicit
+
+Public Sub CellsFormulaReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-formula"
+    Const LocalProperty = "FormulaR1C1"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsNumberFormatReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsWidthReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-width"
+    Const LocalProperty = "ColumnWidth"
+    
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsHeightReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-height"
+    Const LocalProperty = "RowHeight"
+    
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsBackgroundColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsHAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsVAlignReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsFontSizeReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+End Sub
+
+Public Sub CellsFontBoldReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontItalicReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsWrapReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
+    
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsParseSsfBlocks Block, Env, LocalKey, LocalProperty
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim AnArea As Range
+    
+    For Each AnArea In Target.Areas
+        If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-wrap", "true") Then CellsWrapWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-shrink", "true") Then CellsShrinkWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-width", "true") Then CellsWidthWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-height", "true") Then CellsHeightWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-background-color", "true") Then CellsBackgroundColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-color", "true") Then CellsColorWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-name", "true") Then CellsFontNameWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-size", "true") Then CellsFontSizeWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-bold", "true") Then CellsFontBoldWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-font-italic", "true") Then CellsFontItalicWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-h-align", "true") Then CellsHAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-v-align", "true") Then CellsVAlignWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-border", "true") Then CellsBorderWriteTo AnArea, Stream, Env
+    Next
+End Sub
+
+Public Sub CellsFormulaWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-formula"
+    Const LocalProperty = "Formula-Or-Value"
+    Const EmptyValue = vbNullString
+    
+    Dim SafeCellText As Boolean
+    SafeCellText = Env.GetEnv("ssf", "safe-cell-text", "false")
+    
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, True
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    If SafeCellText Then CellsSafeCellTextWriteTo Target, Stream, Env, False
+End Sub
+
+Public Sub CellsSafeCellTextWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources, _
+        SafeOn As Boolean)
+    ' temporally change cells-numberformat to force cells to store any texts safe
+    Const LocalKey = "cells-numberformat"
+    
+    Dim Data As String
+    Dim TextCells As Range
+    Dim AnArea As Range
+    Dim Count As Long
+    
+    On Error GoTo ErrorIsDone
+    
+    Data = IIf(SafeOn, "@", "General")
+    Set TextCells = Target.SpecialCells(xlCellTypeConstants, xlTextValues)
+    
+    On Error GoTo NotDone
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    For Each AnArea In TextCells.Areas
+        Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(AnArea))
+        Count = AnArea.Cells.Count
+        If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+        Stream.WriteLine SsfWriter.MakeSsfLine("", Data)
+    Next
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+ErrorIsDone:
+    Exit Sub
+    
+NotDone:
+    Env.LogWrite "CellsSafeCellTextWriteTo: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-numberformat"
+    Const LocalProperty = "NumberFormat"
+    Const EmptyValue = "General"
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsWidthWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-width"
+    Const LocalProperty = "ColumnWidth"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Target.Worksheet.StandardWidth
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
+    CellsMakeSsfBlocks Target.Rows(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsHeightWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-height"
+    Const LocalProperty = "RowHeight"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Target.Worksheet.StandardHeight
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateSize
+    Env.CellStream.Translator.SetUp Env, LocalKey
+    CellsMakeSsfBlocks Target.Columns(1).Cells, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsBackgroundColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-background-color"
+    Const LocalProperty = "Interior.Color"
+    Const EmptyValue = 16777215 ' RGB(255, 255, 255)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, "Interior.ColorIndex", XlColorIndex.xlColorIndexNone) Then Exit Sub
+    ' Interior.Color returns "White" when multiple colors exist, not Null
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsColorWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-color"
+    Const LocalProperty = "Font.Color"
+    Const EmptyValue = 0    ' RGB(0, 0, 0)
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateColor
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsHAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-h-align"
+    Const LocalProperty = "HorizontalAlignment"
+    Const EmptyValue = XlHAlign.xlHAlignGeneral
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellHAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsVAlignWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-v-align"
+    Const LocalProperty = "VerticalAlignment"
+    Const EmptyValue = XlVAlign.xlVAlignBottom
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellVAlign
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontNameWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-name"
+    Const LocalProperty = "Font.Name"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFont
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsFontSizeWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-size"
+    Const LocalProperty = "Font.Size"
+    
+    Dim EmptyValue As Variant
+    EmptyValue = Application.StandardFontSize
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsFontBoldWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-bold"
+    Const LocalProperty = "Font.Bold"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsFontItalicWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-font-italic"
+    Const LocalProperty = "Font.Italic"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsWrapWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-wrap"
+    Const LocalProperty = "WrapText"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsShrinkWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-shrink"
+    Const LocalProperty = "ShrinkToFit"
+    Const EmptyValue = False
+    
+    If SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then Exit Sub
+    Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+    Set Env.CellStream.Translator = Nothing
+End Sub
+
+Public Sub CellsBorderWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-border"
+    Const EmptyValue = XlLineStyle.xlLineStyleNone
+    
+    Dim LocalProperty As String
+    Dim Border As Variant
+    Dim BordersIndex As Variant
+    
+    BordersIndex = Array( _
+        XlBordersIndex.xlEdgeTop, _
+        XlBordersIndex.xlEdgeBottom, _
+        XlBordersIndex.xlEdgeLeft, _
+        XlBordersIndex.xlEdgeRight, _
+        XlBordersIndex.xlDiagonalDown, _
+        XlBordersIndex.xlDiagonalUp, _
+        XlBordersIndex.xlInsideHorizontal, _
+        XlBordersIndex.xlInsideVertical)
+    
+    For Each Border In BordersIndex
+        LocalProperty = "Borders(" & CStr(Border) & ").LineStyle"
+        If Not SsfUtilsExcel.IsEmptyCellProperty(Target, LocalProperty, EmptyValue) Then
+            'Set Env.CellStream.Translator = New SsfTranslateCellBoolean
+            CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+            'Set Env.CellStream.Translator = Nothing
+        End If
+    Next
+End Sub
+
+Private Sub CellsParseSsfBlocks(Block As Variant, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String)
+    ' parse cells-* block
+    Env.LogWrite LocalKey
+    Env.CellStream.ReadFrom Block, LocalKey, LocalProperty
+End Sub
+
+Private Sub CellsMakeSsfBlocks(Target As Range, Stream As Object, Env As GlobalResources, _
+        LocalKey As String, LocalProperty As String, EmptyValue As Variant)
+    ' generate cells-* block
+    Env.LogWrite LocalKey
+    Env.CellStream.WriteTo Target, Stream, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+'}}}
+
+'module
+'   name;SsfBlockModules
+'{{{
+Option Explicit
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources, _
+        Optional ByVal BlockName As String = "module")
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Source As String
+    
+    If Not ShallDumpModule(Env.Current("workbook"), Env) Then Exit Sub
+    
+    Env.LogWrite BlockName
+    Source = ""
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case "name"
+            SwitchModule Value, Env, BlockName
+        Case ""
+            Source = Source & Value
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite BlockName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+    
+    If Source <> "" And Not Env.Current("module") Is Nothing Then
+        With Env.Current("module").CodeModule
+            .DeleteLines 1, .CountOfLines
+            .InsertLines 1, Source
+        End With
+    End If
+End Sub
+
+Public Sub ProjectRequiresReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Const LocalKey = "require"
+    
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Project As VBProject
+    Dim GuidMajorMinorDescription As Variant
+    
+    If Not ShallDumpModule(Env.Current("workbook"), Env) Then Exit Sub
+    
+    Env.LogWrite LocalKey
+    Set Project = Env.Current("workbook").VBProject
+    
+    On Error Resume Next
+    
+    For Each KeyValue In Block
+        Select Case SsfUtils.ExtractKeyValue(KeyValue, Key, Value)
+        Case ""
+            GuidMajorMinorDescription = DivideLine(Value, " ", 4)
+            Env.LogWrite GuidMajorMinorDescription(3)
+            Project.References.AddFromGuid GuidMajorMinorDescription(0), GuidMajorMinorDescription(1), GuidMajorMinorDescription(2)
+        End Select
+        If Err.Number <> 0 Then
+            Env.LogWrite LocalKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Module As VBComponent
+    Dim BookModule As VBComponent
+    
+    If Not ShallDumpModule(Target, Env) Then Exit Sub
+    
+    If ShallDumpModuleEach(Target, Env) Then
+        WriteToEach Target, Stream, Env
+    Else
+        ' let ThisWorkbook go to the last
+        For Each Module In Target.VBProject.VBComponents
+            If Module.Name = "ThisWorkbook" Then
+                Set BookModule = Module
+            Else
+                VbaCodeModuleWriteTo Module.CodeModule, Stream, Env
+            End If
+        Next
+        If Not BookModule Is Nothing Then
+            VbaCodeModuleWriteTo BookModule.CodeModule, Stream, Env
+        End If
+    End If
+End Sub
+
+Public Sub WriteToEach(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Module As VBComponent
+    Dim Spawned As Object
+    
+    For Each Module In Target.VBProject.VBComponents
+        Set Spawned = Stream.OpenSpawn(Module.Name)
+        If Not Spawned Is Nothing Then
+            SsfWriter.WriteSsfBegin Spawned
+            VbaCodeModuleWriteTo Module.CodeModule, Spawned, Env
+            SsfWriter.WriteSsfEnd Spawned
+            Set Spawned = Spawned.CloseSpawn
+        End If
+    Next
+End Sub
+
+Public Sub VbaCodeModuleWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim LocalKey As String
+    Dim Names As String
+    Dim NumberOfLines As Long
+    Dim Source As String
+    
+    LocalKey = VbaModuleTypeToSsfBlockName(Target)
+    Names = VbaModuleCodeName(Target)
+    NumberOfLines = Target.CountOfLines
+    
+    If NumberOfLines > Target.CountOfDeclarationLines Then
+        ' avoid to print a blank code, that contains "Option Explicit" only
+        Env.LogWrite LocalKey
+        Env.LogWrite Names & " " & CStr(NumberOfLines)
+        Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+        Stream.WriteLine SsfWriter.MakeSsfLine("name", Names)
+        
+        Source = Target.Lines(1, NumberOfLines)
+        ' need at least one linefeed on the end, and prefer just 1
+        Source = Chop(Source, vbCrLf) & vbCrLf
+        ' vba sources use vbCrLf
+        Source = LineFeedFromCrLf(Source, Env.GetEnv("ssf", "line-end", vbCrLf))
+        
+        Stream.WriteLine SsfWriter.MakeSsfLineEscaped(Source)
+        Stream.WriteLine SsfWriter.SsfBlockEnd
+    End If
+End Sub
+
+Public Sub ProjectRequiresWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "require"
+    
+    Dim NumberOfReferences As Long
+    Dim i As Long
+    
+    If Not CanReallyTouchVBProject(Target) Then Exit Sub
+    
+    NumberOfReferences = Target.VBProject.References.Count
+    If NumberOfReferences = 0 Then Exit Sub
+    ' it doesn't work, because we have at least 4 references.
+    
+    Env.LogWrite LocalKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    
+    For i = 1 To NumberOfReferences
+        ' avoid to print 4 standard references
+        ' VBA (builtin), Excel (builtin), stdole and Office
+        With Target.VBProject
+            If Not .References(i).BuiltIn Then
+                If LCase(.References(i).Name) <> "stdole" _
+                        And LCase(.References(i).Name) <> "office" Then
+                    ' machine needs Guid, Major and Minor.  human needs Description
+                    Stream.WriteLine SsfWriter.MakeSsfLine("", _
+                        .References(i).GUID & " " & _
+                        .References(i).Major & " " & _
+                        .References(i).Minor & " " & _
+                        .References(i).Description)
+                End If
+            End If
+        End With
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Public Function CanTouchVBProject() As Boolean
+    ' it doesn't check protection of each book.
+    ' it's purpose is to check the excel setting to trust vba accessing the vbprojet object.
+    On Error GoTo NoTouches
+    
+    Dim Dummy As Long
+    Dummy = ThisWorkbook.VBProject.Protection
+    CanTouchVBProject = True
+    Exit Function
+    
+NoTouches:
+    CanTouchVBProject = False
+End Function
+
+Public Function CanReallyTouchVBProject(Target As Object) As Boolean
+    Dim out As Boolean
+    
+    out = CanTouchVBProject
+    If out Then out = Not IsLockedProject(Target)
+    
+    CanReallyTouchVBProject = out
+End Function
+
+Public Function IsLockedProject(Target As Object) As Boolean
+    Dim P As VBProject
+    
+    Select Case TypeName(Target)
+    Case "VBProject"
+        Set P = Target
+    Case "Workbook"
+        Set P = Target.VBProject
+    Case "Worksheet"
+        Set P = Target.Parent.VBProject
+    Case Else
+        IsLockedProject = True
+        Exit Function
+    End Select
+    
+    IsLockedProject = (P.Protection = vbext_pp_locked)
+    Set P = Nothing
+End Function
+
+Public Function ShallDumpModule(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = Env.GetEnv("ssf", "enable-module", "true")
+    out = CBool(out)
+    If Err.Number <> 0 Then ' every or others
+        out = True
+        Err.Clear
+    End If
+    
+    If out Then
+        out = CanReallyTouchVBProject(Target)
+        If Not out Then Env.LogWrite "ShallDumpModule: module disabled by protection"
+    End If
+    
+    ShallDumpModule = out
+End Function
+
+Public Function ShallDumpModuleEach(ByVal Target As Object, ByVal Env As GlobalResources) As Boolean
+    Dim out As Boolean
+    
+    out = (LCase(Env.GetEnv("ssf", "enable-module", "true")) = "every")
+    If out Then out = CanReallyTouchVBProject(Target)
+    
+    ShallDumpModuleEach = out
+End Function
+
+Public Function VbaModuleTypeToSsfBlockName(Target As Object) As String
+    Dim ModuleType As String
+    Dim TargetModule As Object
+    
+    If TypeName(Target) = "CodeModule" Then
+        Set TargetModule = Target.Parent
+    Else
+        Set TargetModule = Target
+    End If
+    
+    Select Case TargetModule.Type
+    Case vbext_ct_StdModule
+        ModuleType = "module"   ' Module
+    Case vbext_ct_ClassModule
+        ModuleType = "class"    ' Class
+    Case vbext_ct_MSForm
+        ModuleType = "form"     ' not for Excel 2000
+    Case vbext_ct_ActiveXDesigner
+        ModuleType = "activex"
+    Case vbext_ct_Document
+        ModuleType = "code"     ' Excel Objects
+    Case Else
+        ModuleType = "unknown-type-" & TargetModule.Type
+    End Select
+    
+    Set TargetModule = Nothing
+    VbaModuleTypeToSsfBlockName = ModuleType
+End Function
+
+Public Function SsfBlockNameToVbaModuleType(BlockName As String) As Long
+    Dim out As Long
+    
+    Select Case BlockName
+    Case "activex"
+        out = vbext_ct_ActiveXDesigner  ' not defined in ssf
+    Case "form"
+        out = vbext_ct_MSForm           ' not for Excel 2000 form?
+    Case "code"
+        out = vbext_ct_Document
+    Case "class"
+        out = vbext_ct_ClassModule
+    Case "module"
+        out = vbext_ct_StdModule
+    Case Else
+        out = vbext_ct_StdModule        ' default is module
+    End Select
+    
+    SsfBlockNameToVbaModuleType = out
+End Function
+
+Public Function VbaModuleCodeName(Target As Object) As String
+    If TypeName(Target) = "CodeModule" Then
+        VbaModuleCodeName = Target.Parent.Name
+    Else
+        VbaModuleCodeName = Target.Name
+    End If
+End Function
+
+Private Sub SwitchModule(Name As String, Env As GlobalResources, BlockName As String)
+    ' 1. add a new component unless names are given
+    ' 2. search existing component for the given name
+    ' 3. make a copy if "safe-module" is "true"
+    ' 4. add a new component if above 2nd fails
+    ' 5. do not add sheets and thisworkbook
+    
+    Dim Project As VBProject
+    Dim Comp As VBComponent
+    Dim NewName As String
+    Dim NewType As vbext_ComponentType
+    Dim ComponentType As vbext_ComponentType
+    Dim ModuleFound As Boolean
+    
+    ComponentType = SsfBlockNameToVbaModuleType(BlockName)
+    Env.LogWrite "component type " & ComponentType
+    
+    Set Project = Env.Current("workbook").VBProject
+    ModuleFound = False
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If Name = "" Then GoTo AddNew
+    
+    ' rule#2 search
+    Set Comp = Project.VBComponents(Name)
+    ModuleFound = True
+    Env.LogWrite Name & " found"
+    If Comp.Type <> ComponentType Then GoTo AddNew
+    
+    ' rule#3 safe
+    If CBool(Env.GetEnv("ssf", "safe-module", "false")) Then GoTo AddNew
+    
+    GoTo DONE
+    
+    ' rule#4 add
+AddNew:
+    Select Case Err.Number
+    Case 0
+        GoTo AddNew2
+    Case 9
+        Env.LogWrite Name & " is not found."
+    Case Else
+        Env.LogWrite Name & " " & Err.Number & " " & Err.Description
+    End Select
+    Resume AddNew2
+AddNew2:
+    On Error Resume Next
+    
+    ' rule#5 add modules instead of documents
+    NewName = Env.GetEnv("ssf", "copy-of", "COPY_ooop_") & Name
+    Select Case BlockName
+    Case "module", "class"
+        NewType = ComponentType
+        If Not ModuleFound Then NewName = Name
+    Case Else
+        NewType = SsfBlockNameToVbaModuleType("module")
+    End Select
+    
+    Set Comp = Project.VBComponents.Add(NewType)
+    If NewName <> "" Then Comp.Name = NewName
+    If Comp Is Nothing Then
+        Env.LogWrite "failed to switch " & Name & " " & Err.Number & " " & Err.Description
+        Exit Sub
+    End If
+    Env.LogWrite "add " & NewName & " type " & VbaModuleTypeToSsfBlockName(Comp)
+    
+DONE:
+    Set Env.Current("module") = Comp
+End Sub
+
+'}}}
+
+'class
+'   name;SsfCellStream
+'{{{
+Option Explicit
+
+'=== properties begin ===
+
+
+Private TargetRange As Range
+Private TargetSheet As Worksheet
+Private MyProperty As String
+Private MyRoll As String
+Private CellEmptyValue As Variant
+Private CellDefaultValue As Variant
+
+Public Reader As Object     ' SsfCellStreamReader
+Public Writer As Object     ' SsfCellStreamWriter
+Public Queue As Object      ' SsfCellStreamQueue
+Public Env As GlobalResources
+Public Translator As Object
+Public SsfEmptyValue As Variant
+Public SsfDefaultValue As Variant
+
+Public Property Get PropertyName() As String
+    PropertyName = TranslatePropertyName(MyProperty, TargetRange)
+End Property
+
+Public Property Let PropertyName(NewProperty As String)
+    Select Case LCase(NewProperty)
+    Case "formula-or-value"
+        Set Queue = New SsfCellStreamQueueFormula
+    Case "value", "value2", "text", "formula", "formular1c1"
+        Set Queue = New SsfCellStreamQueueValue
+    Case Else
+        Set Queue = New SsfCellStreamQueueRange
+    End Select
+    
+    Queue.SetUp Me, Env
+    MyProperty = NewProperty
+End Property
+
+Public Property Get EmptyValue() As Variant
+    EmptyValue = CellEmptyValue
+End Property
+
+Public Property Let EmptyValue(ByVal NewValue As Variant)
+    SsfEmptyValue = TranslateFromCell(NewValue)
+    CellEmptyValue = NewValue
+End Property
+
+Public Property Get DefaultValue() As Variant
+    DefaultValue = CellDefaultValue
+End Property
+
+Public Property Let DefaultValue(ByVal NewValue As Variant)
+    SsfDefaultValue = TranslateFromCell(NewValue)
+    CellDefaultValue = NewValue
+End Property
+
+Public Property Get Worksheet() As Worksheet
+    Set Worksheet = TargetSheet
+End Property
+
+Public Property Get Range() As Range
+    Set Range = TargetRange
+End Property
+
+Public Sub SetWorksheet(Ws As Worksheet)
+    Set TargetSheet = Ws
+    If Ws Is Nothing Then
+        Set TargetRange = Nothing
+        Clear
+    Else
+        Set TargetRange = Ws.Cells
+    End If
+End Sub
+
+Public Sub SetRange(Ra As Range)
+    Set TargetRange = Ra
+    If Ra Is Nothing Then
+        Set TargetSheet = Nothing
+        Clear
+    Else
+        If Not TargetSheet Is Ra.Worksheet Then Set TargetSheet = Ra.Worksheet
+        'Env.LogWrite "SetRange: " & Ra.Address(False, False, xlA1, False)
+    End If
+End Sub
+
+Public Sub SetRoll(NewRoll As String, Optional ExMode As Variant = "")
+    Dim CellsWriter As String
+    Dim WithoutQueue As Boolean
+    Dim CrLf As String
+    
+    Select Case NewRoll
+    Case "reader"
+        CrLf = Env.GetEnv("ssf", "line-end", vbCrLf)
+        Select Case CStr(ExMode)
+        Case "fill"
+            Set Reader = New SsfCellStreamReaderFill
+        Case Else
+            Set Reader = New SsfCellStreamReader
+        End Select
+        Reader.SetUp Me, Env
+        Reader.LineFeed = CrLf
+        
+    Case "writer"
+        CellsWriter = Env.GetEnv("ssf", "cells-writer", "block")
+        WithoutQueue = Env.GetEnv("ssf", "cells-writer-without-queue", "false")
+        Select Case CellsWriter
+        Case "row", "column"
+            Set Writer = New SsfCellStreamWriterRow
+            Writer.Direction = CellsWriter
+        Case "simple"
+            Set Writer = New SsfCellStreamWriter
+        Case "block"
+            Set Writer = New SsfCellStreamWriterArea
+            WithoutQueue = False
+        Case Else
+            Set Writer = New SsfCellStreamWriterArea
+            WithoutQueue = False
+        End Select
+        If WithoutQueue Then Set Queue = New SsfCellStreamQueueDumb
+        
+    Case ""
+        If Not Reader Is Nothing Then Set Reader = Nothing
+        If Not Writer Is Nothing Then Set Writer = Nothing
+        
+    Case Else
+        Exit Sub
+    End Select
+    
+    MyRoll = NewRoll
+End Sub
+
+Public Function IsDefaultValue(Data As Variant) As Boolean
+    IsDefaultValue = False
+    
+    If IsNull(Data) Then Exit Function
+    If IsArray(Data) Then Exit Function
+    If IsObject(Data) Then Exit Function
+    
+    IsDefaultValue = (Data = CellDefaultValue)
+End Function
+
+Public Function HasNoRanges() As Boolean
+    HasNoRanges = (TargetRange Is Nothing) Or (PropertyName = "")
+End Function
+
+Public Function IsNotReady() As Boolean
+    IsNotReady = Queue.IsEmptyQueue Or HasNoRanges
+End Function
+
+Public Sub Clear()
+    Queue.ClearQueue
+End Sub
+
+
+'=== properties end ===
+'=== spawn begin ===
+
+
+Public Function Spawn() As SsfCellStream
+    Set Spawn = New SsfCellStream
+    With Spawn
+        Set .Env = Env
+        Set .Translator = Translator
+        .PropertyName = PropertyName
+        .EmptyValue = EmptyValue
+        .DefaultValue = DefaultValue
+    End With
+End Function
+
+Public Function SpawnAreas() As Collection
+    Dim out As Collection
+    Dim Spawned As SsfCellStream
+    Dim R As Long
+    Dim C As Long
+    Dim Columns As Long
+    Dim Data As Variant
+    Dim AllEmpty As Boolean
+    Dim TopLeftCell As Range
+    
+    If IsNotReady Then Exit Function
+    
+    Set out = New Collection
+    Columns = TargetRange.Columns.Count
+    'Env.LogWrite "empty: " & MyCellEmpty & " " & MyRawEmpty & " " & TypeName(MyCellEmpty) & " " & TypeName(MyRawEmpty)
+    
+    ' add 1 empty row as a terminator
+    For C = 1 To Columns
+        Queue.BaseQueue.Enqueue CellEmptyValue
+    Next
+    'Env.LogWrite Queue.Queue.Count
+    
+    Set Spawned = Spawn
+    Set TopLeftCell = TargetRange.Cells(1)
+    R = 0
+    Do Until Queue.IsEmptyQueue
+        AllEmpty = True
+        For C = 1 To Columns
+            Data = Queue.BaseQueue.Dequeue
+            Spawned.Queue.BaseQueue.Enqueue Data
+            'Env.LogWrite Data & " " & Spawned.Queue.Queue(Spawned.Queue.Queue.Count)
+            'If Not (IsEmpty(Data) Or (Data = MyRawEmpty)) Then AllEmpty = False
+            If Data <> CellEmptyValue Then AllEmpty = False
+        Next
+        'Env.LogWrite AllEmpty
+        If AllEmpty Then
+            Spawned.SetRange TargetSheet.Range(TopLeftCell, TopLeftCell.Cells(R + 1, Columns))
+            'Env.LogWrite Spawned.Range.Address
+            Spawned.Queue.OptimizeRange
+            'Env.LogWrite TypeName(Spawned.Range)
+            out.Add Spawned
+            Set Spawned = Spawn
+            Set TopLeftCell = TopLeftCell.Cells(R + 2, 1)
+            R = 0
+        Else
+            R = R + 1
+        End If
+    Loop
+    'Env.LogWrite Queue.Queue.Count
+    Set Spawned = Nothing
+    
+    Set SpawnAreas = out
+End Function
+
+
+'=== spawn end ===
+'=== cell reader / writer begin ===
+
+
+Public Sub ReadFrom(Block As Variant, LocalKey As String, LocalProperty As String)
+    ' parse cells-* block
+    Dim Ws As Worksheet
+    
+    SetRoll "reader"
+    
+    Set Ws = Env.Current("worksheet")
+    
+    Clear
+    PropertyName = LocalProperty
+    SetWorksheet Ws
+    
+    ReadSsf Block
+    
+    SetRoll ""
+End Sub
+
+Public Sub ReadSsf(Block As Variant)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    
+    On Error Resume Next
+    
+    Env.SetEnv "current", "repeat-counter", 0
+    
+    For Each KeyValue In Block
+        SsfUtils.ExtractKeyValue KeyValue, Key, Value
+        If Key = "fill" Then SetRoll "reader", "fill"
+        If Reader.ReadSsf(Key, Value) Then GoTo DONE
+        If Translator Is Nothing Then GoTo DONE
+        Translator.ReadSsf Key, Value, Me
+DONE:
+        If Err.Number <> 0 Then
+            Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+    
+    Reader.Flush
+    If Err.Number <> 0 Then
+        Env.LogWrite PropertyName & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub WriteTo(Target As Range, Stream As Object, _
+        LocalKey As String, LocalProperty As String, LocalEmptyValue As Variant)
+    ' generate cells-* block
+    SetRoll "writer"
+    
+    PropertyName = LocalProperty
+    EmptyValue = LocalEmptyValue
+    'Env.LogWrite "WriteTo: empty: " & CellEmptyValue & SsfEmptyValue
+    Clear
+    SetRange Target
+    Writer.SetUp Me, Env
+    
+    Stream.WriteLine SsfWriter.SsfBlockBegin(LocalKey)
+    WriteSsf Stream
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+    
+    SetRoll ""
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    On Error Resume Next
+    
+    Writer.WriteSsf Stream
+    
+    If Err.Number <> 0 Then
+        Env.LogWrite Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+
+'=== cell reader / writer end ===
+'=== translator helper begin ===
+
+
+Public Function TranslateFromCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateFromCell = Data
+    Else
+        TranslateFromCell = Translator.FromCell(Data)
+    End If
+End Function
+
+Public Function TranslateToCell(Data As Variant) As Variant
+    If Translator Is Nothing Then
+        TranslateToCell = Data
+    Else
+        TranslateToCell = Translator.ToCell(Data)
+    End If
+End Function
+
+Public Sub TranslatorHeadWriter(Stream As Object)
+    If Not Translator Is Nothing Then
+        ' translator specific options
+        Translator.WriteSsf Stream, Me
+    End If
+End Sub
+
+Private Function TranslatePropertyName(ByVal FromProperty As String, FromRange As Range) As String
+    Select Case LCase(FromProperty)
+    Case "formula-or-value"
+        If Not FromRange Is Nothing Then
+            Select Case FromRange.HasFormula
+            Case True
+                FromProperty = "FormulaR1C1"
+            Case False
+                FromProperty = "Value"
+            End Select
+        End If
+    End Select
+    
+    TranslatePropertyName = FromProperty
+End Function
+
+
+'=== translator helper end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    Set Queue = New SsfCellStreamQueue
+    CellDefaultValue = vbNullString
+    SsfDefaultValue = vbNullString
+End Sub
+
+Private Sub Class_Terminate()
+    Set Env = Nothing
+    SetRange Nothing
+    Clear
+    Set Queue = Nothing
+    Set Reader = Nothing
+    Set Writer = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'module
+'   name;SsfBlockIdentity
+'{{{
+Option Explicit
+
+Const MyKey = "book-identity"
+
+Public Sub ReadFrom(Block As Variant, ByVal Env As GlobalResources)
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Wb As Workbook
+    
+    Env.LogWrite MyKey
+    
+    On Error Resume Next
+    
+    Set Wb = Env.Current("workbook")
+    If Wb Is Nothing Then Exit Sub
+    
+    For Each KeyValue In Block
+        If SsfUtils.ExtractKeyValue(KeyValue, Key, Value) <> "" Then
+            SetDocumentProperty Wb, Key, Value
+        End If
+        If Err.Number <> 0 Then
+            Env.LogWrite MyKey & ": " & Err.Number & " " & Err.Description & "(" & Key & "," & Value & ")"
+            Err.Clear
+        End If
+    Next
+End Sub
+
+Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Dim Key As Variant
+    
+    Env.LogWrite MyKey
+    Stream.WriteLine SsfWriter.SsfBlockBegin(MyKey)
+    
+    For Each Key In Array("title", "description")
+        SsfLineWriteTo Target, Stream, Env, Key
+    Next
+    
+    Stream.WriteLine SsfWriter.SsfBlockEnd
+End Sub
+
+Private Sub SsfLineWriteTo(Target As Object, Stream As Object, Env As GlobalResources, ByVal Key As String)
+    Dim Value As String
+    
+    Value = GetDocumentProperty(Target, Key)
+    Env.LogWrite Key & ": " & Value
+    If Value <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine(Key, Value)
+End Sub
+
+Private Sub SetDocumentProperty(Wb As Workbook, Key As String, Value As String)
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Wb.VBProject.Description = Value
+    End Select
+    
+    If Err.Number <> 0 Then Err.Clear
+    Wb.BuiltinDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Wb.CustomDocumentProperties(PropertyName) = Value
+    If Err.Number <> 0 Then Err.Clear
+End Sub
+
+Private Function GetDocumentProperty(Wb As Workbook, Key As String) As String
+    Dim Value As String
+    Dim PropertyName As String
+    
+    On Error Resume Next
+    
+    Value = ""
+    PropertyName = KeyToPropertyName(Key)
+    
+    Select Case PropertyName
+    Case "Comments"
+        Value = Wb.VBProject.Description
+    End Select
+    
+    Value = Wb.CustomDocumentProperties(PropertyName)
+    Value = Wb.BuiltinDocumentProperties(PropertyName)
+    
+    GetDocumentProperty = Value
+    If Err.Number <> 0 Then Err.Clear
+End Function
+
+Private Function KeyToPropertyName(ByVal Key As String) As String
+    Select Case Key
+    Case "description"
+        Key = "comments"
+    Case "contributor"
+        Key = "author"
+    Case "tag"
+        Key = "keywords"
+    Case "timestamp"
+        Key = "creation-date"
+    End Select
+    
+    KeyToPropertyName = StrConv(Replace(Key, "-", " "), vbProperCase)
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellHAlign
+'{{{
+Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlHAlign.xlHAlignCenter
+        FromSingleCell = "center"
+    Case XlHAlign.xlHAlignCenterAcrossSelection
+        FromSingleCell = "center-across-selection"
+    Case XlHAlign.xlHAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlHAlign.xlHAlignFill
+        FromSingleCell = "fill"
+    Case XlHAlign.xlHAlignGeneral
+        FromSingleCell = Empty
+    Case XlHAlign.xlHAlignJustify
+        FromSingleCell = "justify"
+    Case XlHAlign.xlHAlignLeft
+        FromSingleCell = "left"
+    Case XlHAlign.xlHAlignRight
+        FromSingleCell = "right"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlHAlign.xlHAlignCenter
+    Case "center-across-selection"
+        ToSingleCell = XlHAlign.xlHAlignCenterAcrossSelection
+    Case "distributed", "均", "均等"
+        ToSingleCell = XlHAlign.xlHAlignDistributed
+    Case "fill"
+        ToSingleCell = XlHAlign.xlHAlignFill
+    Case "", "general"
+        ToSingleCell = XlHAlign.xlHAlignGeneral
+    Case "justify", "両", "両端"
+        ToSingleCell = XlHAlign.xlHAlignJustify
+    Case "left", "l", "左"
+        ToSingleCell = XlHAlign.xlHAlignLeft
+    Case "right", "r", "右"
+        ToSingleCell = XlHAlign.xlHAlignRight
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellBoolean
+'{{{
+Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case True
+        FromSingleCell = "yes"
+    Case Else
+        FromSingleCell = "no"
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "yes", "y", "true", "t", "on", "enable", "use", "真", "はい"
+        ToSingleCell = True
+    Case Else
+        ToSingleCell = False
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateCellVAlign
+'{{{
+Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    Select Case Data
+    Case XlVAlign.xlVAlignBottom
+        FromSingleCell = Empty
+    Case XlVAlign.xlVAlignCenter
+        FromSingleCell = "center"
+    Case XlVAlign.xlVAlignDistributed
+        FromSingleCell = "distributed"
+    Case XlVAlign.xlVAlignJustify
+        FromSingleCell = "justify"
+    Case XlVAlign.xlVAlignTop
+        FromSingleCell = "top"
+    Case Else
+        FromSingleCell = Data
+    End Select
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    Select Case LCase(Data)
+    Case "", "bottom", "b", "下"
+        ToSingleCell = XlVAlign.xlVAlignBottom
+    Case "center", "c", "中", "中央"
+        ToSingleCell = XlVAlign.xlVAlignCenter
+    Case "distributed", "均", "均等"
+        ToSingleCell = XlVAlign.xlVAlignDistributed
+    Case "justify", "両", "両端"
+        ToSingleCell = XlVAlign.xlVAlignJustify
+    Case "top", "t", "上"
+        ToSingleCell = XlVAlign.xlVAlignTop
+    Case Else
+        ToSingleCell = Data
+    End Select
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateColor
+'{{{
+Option Explicit
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If IsNull(Data) Then
+        ' the cell contains multi-color text
+        FromSingleCell = RGB(0, 0, 0)
+    Else
+        FromSingleCell = FromExcelColor(Val(Data))
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    ToSingleCell = ToExcelColor(Data)
+End Function
+
+Public Function ToExcelColor(ByVal Color As String) As Long
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    Dim BGR As Long
+    
+    If Left(Color, 1) = "#" Then
+        ParseColorString Color, R, G, B
+        BGR = RGB(R, G, B)
+    Else
+        BGR = 0
+    End If
+    
+    ToExcelColor = BGR
+End Function
+
+Public Function FromExcelColor(ByVal Color As Long) As String
+    Dim R As Long
+    Dim G As Long
+    Dim B As Long
+    
+    R = Color Mod 256
+    Color = Int(Color / 256)
+    G = Color Mod 256
+    Color = Int(Color / 256)
+    B = Color Mod 256
+    
+    FromExcelColor = "#" & MakeColorString(R, G, B)
+End Function
+
+Public Function ParseColorString(ByVal Color As String, ByRef R As Long, ByRef G As Long, ByRef B As Long) As Boolean
+    If Left(Color, 1) = "#" Then Color = Mid(Color, 2)
+    Color = UCase(Color)
+    
+    If Len(Color) = 3 Then
+        Color = Mid(Color, 1, 1) & Mid(Color, 1, 1) & _
+                Mid(Color, 2, 1) & Mid(Color, 2, 1) & _
+                Mid(Color, 3, 1) & Mid(Color, 3, 1)
+    End If
+    
+    If Len(Color) <> 6 Then
+        R = 0
+        G = 0
+        B = 0
+        ParseColorString = False
+        Exit Function
+    End If
+    
+    R = Val("&H" & Mid(Color, 1, 2))
+    G = Val("&H" & Mid(Color, 3, 2))
+    B = Val("&H" & Mid(Color, 5, 2))
+    ParseColorString = True
+End Function
+
+Public Function MakeColorString(ByVal R As Long, ByVal G As Long, ByVal B As Long) As String
+    MakeColorString = Right(Hex(R + 256), 2) & _
+                        Right(Hex(G + 256), 2) & _
+                        Right(Hex(B + 256), 2)
+End Function
+
+'}}}
+
+'class
+'   name;SsfTranslateSize
+'{{{
+Option Explicit
+
+Public UnitFrom As String
+Public UnitTo As String
+Public Calib As Double
+Public Cache As Scripting.Dictionary
+
+Const PointRatio As Double = 3.0969760158   ' points = 1mm / 5mm * 13.5points * 1.147028154
+
+Public Sub ReadSsf(Key As String, Value As String, CellStream As SsfCellStream)
+    Select Case Key
+    Case "unit"
+        UnitFrom = Value
+    End Select
+End Sub
+
+Public Sub WriteSsf(Stream As Object, CellStream As SsfCellStream)
+    If UnitTo <> "" Then Stream.WriteLine SsfWriter.MakeSsfLine("unit", UnitTo)
+End Sub
+
+Public Function FromCell(Data As Variant) As Variant
+    FromCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "FromSingleCell")
+End Function
+
+Public Function ToCell(Data As Variant) As Variant
+    ToCell = SsfUtilsExcel.TranslateCellValues(Data, Me, "ToSingleCell")
+End Function
+
+Public Function FromSingleCell(Data As Variant) As Variant
+    If UnitFrom = "" Or UnitTo = "" Or IsEmpty(Data) Then
+        FromSingleCell = Data
+    Else
+        FromSingleCell = Calculate(Val(Data), UnitFrom, UnitTo)
+    End If
+End Function
+
+Public Function ToSingleCell(Data As Variant) As Variant
+    If UnitFrom = "" Or UnitTo = "" Or IsEmpty(Data) Then
+        ToSingleCell = Data
+    Else
+        ToSingleCell = Calculate(Data, UnitFrom, UnitTo)
+    End If
+End Function
+
+Public Sub SetUp(Env As GlobalResources, BlockName As String)
+    Dim CalibName As String
+    
+    CalibName = IIf(InStr(BlockName, "width") > 0, "h", "v")
+    SetCalib Env, CalibName
+    SetUnitFrom Env, BlockName
+    SetUnitTo Env, BlockName
+End Sub
+
+Public Sub SetCalib(Env As GlobalResources, CalibName As String)
+    Dim NewCalib As Double
+    
+    NewCalib = Val(Env.GetEnv("ssf", "size-calibration-" & CalibName, "1"))
+    If Calib <> NewCalib Then
+        Calib = NewCalib
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitFrom(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-from-" & Roll, "")
+    If UnitFrom <> NewUnit Then
+        UnitFrom = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Sub SetUnitTo(Env As GlobalResources, BlockName As String, Optional ByVal NewUnit As String = "")
+    Dim Roll As String
+    
+    Roll = Env.GetEnv("current", "roll", "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll & "-" & BlockName, "")
+    If NewUnit = "" Then NewUnit = Env.GetEnv("ssf", "size-unit-to-" & Roll, "")
+    If UnitTo <> NewUnit Then
+        UnitTo = NewUnit
+        Cache.RemoveAll
+    End If
+End Sub
+
+Public Function Calculate(ByVal Size As Double, FromU As String, ToU As String) As Double
+    Dim NewSize As Double
+    
+    NewSize = Size
+    If FromU <> ToU Then
+        If Cache.Exists(Size) Then
+            NewSize = Cache(Size)
+        Else
+            NewSize = UnitFromMm(UnitToMm(Size, FromU, Size), ToU, Size)
+            Cache(Size) = NewSize
+        End If
+    End If
+    
+    Calculate = NewSize
+End Function
+
+Private Function MmFromPoint(ByVal x As Double) As Double
+    MmFromPoint = x / PointRatio / Calib
+End Function
+
+Private Function MmToPoint(ByVal x As Double) As Double
+    MmToPoint = x * PointRatio * Calib
+End Function
+
+Private Function LinearUnit(ByVal Unit As String) As Double
+    LinearUnit = -1
+    Select Case LCase(Unit)
+    Case "mm", "ミリ"
+        ' mm: =1mm
+        LinearUnit = 1
+    Case "cm", "センチ"
+        ' cm: = 10mm
+        LinearUnit = 10
+    Case "inch", "インチ", "吋"
+        ' inch: = 25.4mm
+        LinearUnit = 25.4
+    Case "sun", "寸"
+        ' 寸: = 30.303mm
+        LinearUnit = 30.303
+    Case "point", "pt", "ポイント"
+        ' depends on calibration
+        LinearUnit = MmFromPoint(1)
+    Case "zero", "0", "零"
+        ' zero: = nearly 1/8point
+        ' requires non-linear conversion
+    End Select
+End Function
+
+Private Function UnitToMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitToMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitToMm = x * Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0", "零"
+            UnitToMm = MmFromPoint(SsfUtilsExcel.OpenBookTool.CellWidthFromZero(x))
+        End Select
+    End If
+End Function
+
+Private Function UnitFromMm(ByVal x As Double, ByVal Unit As String, _
+        Optional DefaultValue As Double = 0) As Double
+    Dim Ratio As Double
+    
+    UnitFromMm = DefaultValue
+    Ratio = LinearUnit(Unit)
+    If Ratio > 0 Then
+        UnitFromMm = x / Ratio
+    Else
+        Select Case LCase(Unit)
+        Case "zero", "0", "零"
+            UnitFromMm = SsfUtilsExcel.OpenBookTool.CellWidthToZero(MmToPoint(x))
+        End Select
+    End If
+End Function
+
+Private Sub Class_Initialize()
+    Calib = 1
+    Set Cache = New Scripting.Dictionary
+End Sub
+
+Private Sub Class_Terminate()
+    Cache.RemoveAll
+    Set Cache = Nothing
+End Sub
+
+'}}}
+
+'class
+'   name;SsfCellStreamQueue
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = (Queue.Count = 0)
+End Function
+
+Public Sub ClearQueue()
+    Do While Queue.Count > 0
+        Queue.Remove 1
+    Loop
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Queue.Add GetSmartProperty(Data)
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Empty) As Variant
+    Dequeue = SetSmartProperty(Queue(1), Data)
+    Queue.Remove 1
+End Function
+
+Public Sub UpdateQueue(Data As Variant, Position As Long)
+    Queue.Add Data, After:=Position
+    Queue.Remove Position
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub UpdateQueue2D(Data As Variant, Row As Long, Column As Long, ColumnSize As Long)
+    UpdateQueue Data, (Row - 1) * ColumnSize + Column
+End Sub
+
+Public Function CheatQueue2D(Row As Long, Column As Long, ColumnSize As Long) As Variant
+    CheatQueue2D = Queue((Row - 1) * ColumnSize + Column)
+End Function
+
+Public Sub OptimizeRange()
+End Sub
+
+
+'=== extended queue end ===
+'=== cell utility begin ===
+
+
+Public Function GetSmartProperty(Data As Variant) As Variant
+    Dim Value As Variant
+    Dim MyProperty As String
+    
+    MyProperty = PropertyName
+    If TypeName(Data) = "Range" And MyProperty <> "" Then
+        Value = GetCellsProperty(Data, MyProperty)
+    Else
+        Value = Data
+    End If
+    
+    GetSmartProperty = Value
+End Function
+
+Public Function SetSmartProperty(ByVal Data As Variant, Ra As Variant) As Variant
+    Dim MyProperty As String
+    
+    If IsObject(Ra) Then
+        MyProperty = PropertyName
+        If TypeName(Ra) = "Range" And MyProperty <> "" Then
+            SetCellsProperty Data, Ra, MyProperty
+        End If
+    ElseIf Not IsEmpty(Ra) Then
+        Ra = Data
+    End If
+    
+    SetSmartProperty = Data
+End Function
+
+Public Function GetCellsProperty(ByVal Ra As Object, Optional ByVal Key As String = "") As Variant
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    GetCellsProperty = CallByName(Receiver, Key, VbGet)
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "GetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    GetCellsProperty = CellStream.EmptyValue
+End Function
+
+Public Function SetCellsProperty(Data As Variant, ByVal Ra As Object, Optional ByVal Key As String = "") As Boolean
+    On Error GoTo HasError
+    
+    Dim Summary As String
+    Dim Receiver As Object
+    
+    SetCellsProperty = True
+    If CellStream.IsDefaultValue(Data) Then Exit Function
+    
+    If Key = "" Then Key = PropertyName
+    Summary = Key & ": " & TypeName(Ra)
+    Summary = Summary & " " & Ra.Address(False, False, xlA1, False)
+    
+    Set Receiver = SsfUtilsExcel.TranslateDotProperties(Ra, Key)
+    CallByName Receiver, Key, VbLet, Data
+    
+    Exit Function
+    
+HasError:
+    Env.LogWrite "SetCellsProperty: Error " & Err.Number & " " & Err.Description & " " & Summary
+    SetCellsProperty = False
+End Function
+
+
+'=== cell utility end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set Queue = New Collection
+    Set BaseQueue = Me
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamReader
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+Public LineFeed As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub ReadSsf(Key As String, Value As String)
+    On Error Resume Next
+    
+    CallByName Me, "ReadSsfLine" & Key, VbMethod, Key, Value
+    If Err.Number <> 0 Then
+        'Env.LogWrite Key & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub Flush()
+    If CellStream.IsNotReady Then Exit Sub
+    
+    CellStream.Queue.Dequeue
+    CellStream.Clear
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfLineAddress(Key As String, Value As String)
+    Flush
+    With CellStream
+        .SetRange SsfUtilsExcel.ExcelAddressToRange(.Worksheet, Value, .Worksheet.Cells)
+        'Env.LogWrite "ReadSsfLineAddress: new TargetRange: " & .Range.Address()
+    End With
+End Sub
+
+Public Sub ReadSsfLineSkip(Key As String, Value As String)
+    Dim i As Long
+    Dim MyDefault As Variant
+    
+    With CellStream
+        MyDefault = .DefaultValue
+        For i = 1 To CLng(Val(Value))
+            .Queue.BaseQueue.Enqueue MyDefault
+        Next
+    End With
+End Sub
+
+Public Sub ReadSsfLineRepeat(Key As String, Value As String)
+    Env.SetEnv "current", "repeat-counter", CLng(Val(Value))
+End Sub
+
+Public Sub ReadSsfLine(Key As String, Value As String)
+    Dim RepeatCounter As Long
+    Dim Data As Variant
+    
+    RepeatCounter = Env.GetEnv("current", "repeat-counter", 0)
+    With CellStream
+        Data = CellStream.TranslateToCell(SsfUtils.LineFeedToLf(Value, LineFeed))
+        If RepeatCounter > 0 Then
+            Do While RepeatCounter > 0
+                RepeatCounter = RepeatCounter - 1
+                CellStream.Queue.BaseQueue.Enqueue Data
+            Loop
+            Env.SetEnv "current", "repeat-counter", 0
+        Else
+            CellStream.Queue.BaseQueue.Enqueue Data
+        End If
+    End With
+End Sub
+
+
+'=== ssf reader end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    LineFeed = vbCrLf
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamWriter
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfSimple Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Private Sub WriteSsfSimple(Stream As Object)
+    ' compatible with the primitive
+    Dim Value As Variant
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    SsfCellStreamHelper.WriteLineAddress Stream, CellStream.Range
+    ' simple list, each cell in each line
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Value = CellStream.TranslateFromCell(.BaseQueue.Dequeue)
+            Stream.WriteLine SsfWriter.MakeSsfLineCellData(Value)
+        Loop
+    End With
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamWriterArea
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfBlocks Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfBlocks(Stream As Object)
+    Dim Block As SsfCellStream
+    Dim Blocks As Collection
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    ' spawn child blocks divided by empty rows
+    Set Blocks = CellStream.SpawnAreas()
+    Do While Blocks.Count > 0
+        Set Block = Blocks(1)
+        With Block
+            Set .Writer = New SsfCellStreamWriterSkip
+            .Writer.SetUp Block, Env
+            .Writer.WriteSsfSkip Stream
+            .SetRange Nothing
+        End With
+        Set Block = Nothing
+        Blocks.Remove 1
+    Loop
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'module
+'   name;SsfCellStreamHelper
+'{{{
+Option Explicit
+
+'=== ssf writer helper begin ===
+
+
+Public Sub WriteLineAddress(Stream As Object, Target As Range)
+    Stream.WriteLine SsfWriter.MakeSsfLine("address", SsfUtilsExcel.ExcelRangeToAddress(Target))
+End Sub
+
+Public Sub WriteLineSkipOrRepeat(Stream As Object, Count As Long, _
+        Data As Variant, Optional ByVal EmptyValue As Variant = Empty)
+    If Data = EmptyValue Then
+        WriteLineSkip Stream, Count
+    Else
+        WriteLineRepeat Stream, Count, Data
+    End If
+End Sub
+
+Public Sub WriteLineSkip(Stream As Object, Count As Long)
+    If Count > 0 Then Stream.WriteLine SsfWriter.MakeSsfLine("skip", Count)
+End Sub
+
+Public Sub WriteLineRepeat(Stream As Object, Count As Long, Data As Variant)
+    If Count > 1 Then Stream.WriteLine SsfWriter.MakeSsfLine("repeat", Count)
+    Stream.WriteLine SsfWriter.MakeSsfLineCellData(Data)
+End Sub
+
+
+'=== ssf writer helper end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamWriterRow
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Direction As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Clear
+        .TranslatorHeadWriter Stream
+        Select Case Direction
+        Case "row"
+            WriteSsfByRow Stream
+        Case "column"
+            WriteSsfByColumn Stream
+        End Select
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfByRow(Stream As Object)
+    Dim SingleRow As Range
+    
+    If CellStream.HasNoRanges Then Exit Sub
+    
+    For Each SingleRow In CellStream.Range.Rows
+        CellStream.Clear
+        CellStream.Queue.Enqueue SingleRow
+        WriteSsfForSingleRowOrColumn Stream, SingleRow
+    Next
+End Sub
+
+Public Sub WriteSsfByColumn(Stream As Object)
+    Dim SingleColumn As Range
+    
+    If CellStream.HasNoRanges Then Exit Sub
+    
+    For Each SingleColumn In CellStream.Range.Columns
+        CellStream.Clear
+        CellStream.Queue.Enqueue SingleColumn
+        WriteSsfForSingleRowOrColumn Stream, SingleColumn
+    Next
+End Sub
+
+Public Sub WriteSsfForSingleRowOrColumn(Stream As Object, Target As Range)
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim CellCounter As Long
+    Dim RepeatCounter As Long
+    Dim BeginAt As Long
+    Dim MyEmpty As Variant
+    
+    On Error GoTo HasError
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    'Env.LogWrite "WriteSsfForSingleRowOrColumn: " & Target.Address & " " & CellStream.Queue.Queue.Count
+    MyEmpty = CellStream.EmptyValue
+    BeginAt = 1
+    CellCounter = 1
+    LastData = MyEmpty
+    
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Data = .BaseQueue.Dequeue
+            'Env.LogWrite "WriteSsfForSingleRowOrColumn: " & CellCounter & " " & Data
+            If SsfUtils.ExactEqual(Data, LastData) Then
+                RepeatCounter = RepeatCounter + 1
+            Else
+                If Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+                    WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
+                End If
+                LastData = Data
+                RepeatCounter = 1
+                BeginAt = CellCounter
+            End If
+            CellCounter = CellCounter + 1
+        Loop
+    End With
+    
+    ' write ssf for the last one
+    If RepeatCounter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+        WriteSsfLineForCellsRepeat Stream, Target, LastData, RepeatCounter, BeginAt
+    End If
+    
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "WriteSsfForSingleRowOrColumn: Error " & Err.Number & " " & Err.Description
+    Resume Next
+End Sub
+
+Private Sub WriteSsfLineForCellsRepeat(Stream As Object, Target As Range, Data As Variant, _
+        Counter As Long, CellBegin As Long)
+    Dim BeginAt As Range
+    Dim EndAt As Range
+    
+    Set BeginAt = Target.Cells(CellBegin)
+    Set EndAt = Target.Cells(CellBegin + Counter - 1)
+    SsfCellStreamHelper.WriteLineAddress Stream, Target.Worksheet.Range(BeginAt, EndAt)
+    SsfCellStreamHelper.WriteLineRepeat Stream, Counter, CellStream.TranslateFromCell(Data)
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamQueueDumb
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Object
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private CurArea As Long
+Private CurCell As Long
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    If SsfUtilsExcel.IsValidAreaNumber(CellStream.Range, CurArea) Then
+        IsEmptyQueue = Not SsfUtilsExcel.IsInsideCell(CellStream.Range.Areas(CurArea), CurCell)
+    Else
+        IsEmptyQueue = True
+    End If
+End Function
+
+Public Sub ClearQueue()
+    CurArea = 1
+    CurCell = 1
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Empty) As Variant
+    Dequeue = BaseQueue.SetSmartProperty(BaseQueue.GetSmartProperty(CellStream.Range.Areas(CurArea).Cells(CurCell)), Data)
+    CurCell = CurCell + 1
+    If Not SsfUtilsExcel.IsInsideCell(CellStream.Range.Areas(CurArea), CurCell) Then
+        CurArea = CurArea + 1
+        CurCell = 1
+    End If
+End Function
+
+Public Sub UpdateQueue(Data As Variant, Position As Long)
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+End Sub
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set BaseQueue = New SsfCellStreamQueue
+    CurCell = 1
+    CurArea = 1
+End Sub
+
+Private Sub Class_Terminate()
+    Set BaseQueue = Nothing
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamQueueValue
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private RangeQueue As SsfCellStreamQueueRange
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    RangeQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    RangeQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim Target As Range
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    EnqueueRangeValueFamily Target
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dim Target As Range
+    
+    If Data Is Nothing Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    DequeueRangeValueFamily Target
+End Function
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    RangeQueue.OptimizeRange
+End Sub
+
+Public Function TryEnqueueRangeValueFamily(NewProperty As String, Target As Range) As Boolean
+    PropertyName = NewProperty
+    
+    On Error Resume Next
+    EnqueueRangeValueFamily Target
+    TryEnqueueRangeValueFamily = (Err.Number = 0)
+    If Err.Number <> 0 Then
+        'Env.LogWrite "TryEnqueueRangeValueFamily: " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+    
+    PropertyName = ""
+End Function
+
+Public Sub EnqueueRangeValueFamily(Target As Range)
+    Dim Data As Variant
+    
+    If SsfUtilsExcel.IsASingleCell(Target) Then
+        RangeQueue.Enqueue Target
+    Else
+        Data = BaseQueue.GetCellsProperty(Target, PropertyName)
+        EnqueueMatrix Data
+    End If
+End Sub
+
+Public Sub DequeueRangeValueFamily(Target As Range)
+    Dim Data As Variant
+    Dim SmallerTarget As Range
+    Dim Columns As Long
+    Dim Rows As Long
+    Dim EffectiveRows As Long
+    
+    Columns = Target.Columns.Count
+    Rows = Target.Rows.Count
+    EffectiveRows = Int(Queue.Count / Columns)
+    If Queue.Count Mod Columns > 0 Then EffectiveRows = EffectiveRows + 1
+    If Rows > EffectiveRows Then
+        ' avoid too large rows
+        Rows = EffectiveRows
+        Set SmallerTarget = Target.Rows("1:" & EffectiveRows).Cells
+        'Env.LogWrite "DequeueRangeValueFamily: SmallerTarget: " & SmallerTarget.Address()
+    Else
+        Set SmallerTarget = Target
+    End If
+    
+    Data = DequeueMatrix(Columns, Rows)
+    BaseQueue.SetCellsProperty Data, SmallerTarget, PropertyName
+End Sub
+
+Public Sub EnqueueMatrix(Data As Variant)
+    Dim R As Long
+    Dim C As Long
+    Dim MyEmpty As Variant
+    
+    For R = LBound(Data, 1) To UBound(Data, 1)
+        For C = LBound(Data, 2) To UBound(Data, 2)
+            BaseQueue.Enqueue Data(R, C)
+        Next
+    Next
+End Sub
+
+Public Function DequeueMatrix(ByVal Columns As Long, ByVal Rows As Long) As Variant
+    Dim out() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim MyDefault As Variant
+    
+    If Columns <= 0 Or Rows <= 0 Then
+        DequeueMatrix = Empty
+        Exit Function
+    End If
+    
+    ReDim out(1 To Rows, 1 To Columns)
+    MyDefault = CellStream.DefaultValue
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If IsEmptyQueue Then GoTo EmptyQueue
+            out(R, C) = BaseQueue.Dequeue
+        Next
+    Next
+    
+EmptyQueue:
+    Do While R <= Rows
+        Do While C <= Columns
+            out(R, C) = MyDefault
+            C = C + 1
+        Loop
+        R = R + 1
+    Loop
+    
+    DequeueMatrix = out
+End Function
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set RangeQueue = New SsfCellStreamQueueRange
+    Set BaseQueue = RangeQueue.BaseQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+    Set RangeQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamQueueRange
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    BaseQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    BaseQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim R As Long
+    Dim C As Long
+    Dim Value As Variant
+    Dim Target As Range
+    Dim MyProperty As String
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    
+    MyProperty = PropertyName
+    With Target
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                Value = BaseQueue.GetCellsProperty(.Cells(R, C), MyProperty)
+                Queue.Add Value
+            Next
+        Next
+    End With
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Value As Variant
+    Dim Target As Range
+    Dim MyProperty As String
+    
+    If Data Is Nothing Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    
+    MyProperty = PropertyName
+    
+    With Target
+        For R = 1 To .Rows.Count
+            For C = 1 To .Columns.Count
+                If IsEmptyQueue Then Exit Function
+                Value = Queue(1)
+                Queue.Remove 1
+                BaseQueue.SetCellsProperty Value, .Cells(R, C), MyProperty
+            Next
+        Next
+    End With
+End Function
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    MinimizeRange
+End Sub
+
+
+'=== extended queue end ===
+'=== cell utility begin ===
+
+
+Public Sub MinimizeRange()
+    Dim R As Long
+    Dim C As Long
+    Dim RowBegin As Long
+    Dim RowEnd As Long
+    Dim ColumnBegin As Long
+    Dim ColumnEnd As Long
+    Dim NewRow As Range
+    Dim NewColumn As Range
+    
+    ColumnEnd = CalculateMaxColumnAndRow(RowBegin, RowEnd)
+    ColumnBegin = CalculateMinColumn()
+    
+    If ColumnEnd = 0 Or RowEnd = 0 Then
+        CellStream.SetRange Nothing
+        Exit Sub
+    End If
+    
+    Set NewRow = CropUnusedRows(RowBegin, RowEnd)
+    Set NewColumn = CropUnusedColumns(RowBegin, RowEnd, ColumnBegin, ColumnEnd)
+    CellStream.SetRange Application.Intersect(NewRow, NewColumn)
+End Sub
+
+Private Function CropUnusedRows(RowBegin As Long, RowEnd As Long) As Range
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewRow As Range
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    
+    Set NewRow = CellStream.Range.EntireRow
+    If RowBegin > 1 Or RowEnd < Rows Then
+        Set NewRow = NewRow.Rows(RowBegin & ":" & RowEnd)
+        ' remove unused data from queue
+        For R = RowEnd + 1 To Rows
+            For C = 1 To Columns
+                Queue.Remove RowEnd * Columns + 1
+            Next
+        Next
+        For R = 1 To RowBegin - 1
+            For C = 1 To Columns
+                Queue.Remove 1
+            Next
+        Next
+    End If
+    
+    Set CropUnusedRows = NewRow
+End Function
+
+Private Function CropUnusedColumns(RowBegin As Long, RowEnd As Long, ColumnBegin As Long, ColumnEnd As Long) As Range
+    ' expect this is called after CropUnusedRows
+    Dim C As Long
+    Dim R As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim NewColumn As Range
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    
+    Set NewColumn = CellStream.Range.EntireColumn
+    If ColumnBegin > 1 Or ColumnEnd < Columns Then
+        Set NewColumn = CellStream.Worksheet.Range(NewColumn.Columns(ColumnBegin), NewColumn.Columns(ColumnEnd))
+        For R = RowEnd - RowBegin + 1 To 1 Step -1
+            For C = Columns To ColumnEnd + 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+            For C = ColumnBegin - 1 To 1 Step -1
+                Queue.Remove (R - 1) * Columns + C
+            Next
+        Next
+    End If
+    
+    Set CropUnusedColumns = NewColumn
+End Function
+
+Private Function CalculateMaxColumnAndRow(ByRef RowBegin As Long, ByRef RowEnd As Long) As Long
+    Dim RealMaximums As Variant
+    Dim MaxCount As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMaximums = RealMaxColumns()
+    RowBegin = 0
+    RowEnd = 0
+    MaxCount = 0
+    For R = 1 To UBound(RealMaximums)
+        If RealMaximums(R) > 0 Then
+            If MaxCount < RealMaximums(R) Then MaxCount = RealMaximums(R)
+            If RowBegin = 0 Then RowBegin = R
+            RowEnd = R
+        End If
+    Next
+    
+    CalculateMaxColumnAndRow = MaxCount
+End Function
+
+Private Function CalculateMinColumn() As Long
+    Dim RealMinimums As Variant
+    Dim MinColumn As Long
+    Dim R As Long
+    Dim Rows As Long
+    
+    RealMinimums = RealMinColumns()
+    MinColumn = CellStream.Range.Columns.Count + 1
+    For R = 1 To UBound(RealMinimums)
+        If RealMinimums(R) > 0 Then
+            If MinColumn > RealMinimums(R) Then MinColumn = RealMinimums(R)
+        End If
+    Next
+    
+    CalculateMinColumn = MinColumn
+End Function
+
+Private Function RealMaxColumns() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = Columns To 1 Step -1
+            'Env.LogWrite BaseQueue.CheatQueue2D(R, C, Columns)
+            If EmptyValue <> BaseQueue.CheatQueue2D(R, C, Columns) Then Exit For
+        Next
+        out(R) = C
+        'Env.LogWrite "RealMaxColumns: " & R & " " & C
+    Next
+    
+    RealMaxColumns = out
+End Function
+
+Private Function RealMinColumns() As Variant
+    Dim R As Long
+    Dim C As Long
+    Dim Rows As Long
+    Dim Columns As Long
+    Dim out() As Variant
+    
+    Rows = CellStream.Range.Rows.Count
+    Columns = CellStream.Range.Columns.Count
+    ReDim out(1 To Rows + 1)
+    out(Rows + 1) = 0   ' always add a 0 as a terminator
+    
+    For R = 1 To Rows
+        For C = 1 To Columns
+            If EmptyValue <> BaseQueue.CheatQueue2D(R, C, Columns) Then Exit For
+        Next
+        If C > Columns Then C = 0
+        out(R) = C
+        'Env.LogWrite "RealMinColumns: " & R & " " & C
+    Next
+    
+    RealMinColumns = out
+End Function
+
+Private Function EmptyValue() As Variant
+    EmptyValue = CellStream.EmptyValue
+End Function
+
+
+'=== cell utility end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set BaseQueue = New SsfCellStreamQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamQueueFormula
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+Public Queue As Collection
+Public BaseQueue As SsfCellStreamQueue
+
+Private TemporaryPropertyName As String
+Private ValueQueue As SsfCellStreamQueueValue
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+    ValueQueue.SetUp CellStream, Env
+    ClearQueue
+End Sub
+
+Public Property Get PropertyName() As String
+    If TemporaryPropertyName = "" Then
+        PropertyName = CellStream.PropertyName
+    Else
+        PropertyName = TemporaryPropertyName
+    End If
+End Property
+
+Public Property Let PropertyName(NewName As String)
+    ValueQueue.PropertyName = NewName
+    TemporaryPropertyName = NewName
+End Property
+
+
+'=== common interfaces end ===
+'=== queue begin ===
+
+
+Public Function IsEmptyQueue() As Boolean
+    IsEmptyQueue = BaseQueue.IsEmptyQueue
+End Function
+
+Public Sub ClearQueue()
+    BaseQueue.ClearQueue
+End Sub
+
+Public Sub Enqueue(Optional Data As Variant = Empty)
+    Dim FormulaCells As Range
+    Dim FormulaCell As Range
+    Dim Target As Range
+    Dim TranslatedPropertyname As String
+    
+    If IsEmpty(Data) Then
+        Set Target = CellStream.Range
+    Else
+        Set Target = Data
+    End If
+    If Target Is Nothing Then Exit Sub
+    
+    TranslatedPropertyname = LCase(PropertyName)
+    Select Case TranslatedPropertyname
+    Case "formula-or-value"
+        ' contains Formulas and Constants
+        If ValueQueue.TryEnqueueRangeValueFamily("FormulaR1C1", Target) Then GoTo DONE
+        If Not ValueQueue.TryEnqueueRangeValueFamily("Value", Target) Then
+            Env.LogWrite "SsfCellStreamQueueFormula.Enqueue: Error at " & Target.Address(False, False, xlA1, False)
+            GoTo DONE
+        End If
+        Set FormulaCells = Target.SpecialCells(xlCellTypeFormulas)
+        For Each FormulaCell In FormulaCells
+            UpdateQueueByCellProperty FormulaCell, "FormulaR1C1"
+        Next
+    Case Else
+        ' contains only Formula(s) / contains only Constant(s)
+        ValueQueue.TryEnqueueRangeValueFamily TranslatedPropertyname, Target
+    End Select
+    
+DONE:
+End Sub
+
+Public Function Dequeue(Optional Data As Variant = Nothing) As Variant
+    Dequeue = ValueQueue.Dequeue(Data)
+End Function
+
+Private Sub UpdateQueueByCellProperty(Ra As Range, OneTimeProperty As String)
+    Dim Row As Long
+    Dim Column As Long
+    Dim ColumnSize As Long
+    Dim Data As Variant
+    
+    On Error GoTo HasError
+    
+    Row = Ra.Row - CellStream.Range.Cells(1).Row + 1
+    Column = Ra.Column - CellStream.Range.Cells(1).Column + 1
+    ColumnSize = CellStream.Range.Columns.Count
+    Data = BaseQueue.GetCellsProperty(Ra, OneTimeProperty)
+    BaseQueue.UpdateQueue2D Data, Row, Column, ColumnSize
+    Exit Sub
+    
+HasError:
+    Env.LogWrite "UpdateQueueByCellProperty: Error " & Err.Number & " " & Err.Description & "(" & Row & "," & Column & ")"
+End Sub
+
+
+'=== queue end ===
+'=== extended queue begin ===
+
+
+Public Sub OptimizeRange()
+    ValueQueue.OptimizeRange
+End Sub
+
+
+'=== extended queue end ===
+'=== calss events begin ===
+
+
+Public Sub Class_Initialize()
+    Set ValueQueue = New SsfCellStreamQueueValue
+    Set BaseQueue = ValueQueue.BaseQueue
+    Set Queue = BaseQueue.Queue
+End Sub
+
+Public Sub Class_Terminate()
+    ClearQueue
+    Set Queue = Nothing
+    Set BaseQueue = Nothing
+    Set ValueQueue = Nothing
+End Sub
+
+'=== calss events end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamWriterSkip
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub WriteSsf(Stream As Object)
+    With CellStream
+        .Queue.Enqueue .Range
+        .TranslatorHeadWriter Stream
+        WriteSsfSkip Stream
+    End With
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf writer begin ===
+
+
+Public Sub WriteSsfSkip(Stream As Object)
+    Dim Data As Variant
+    Dim LastData As Variant
+    Dim Counter As Long
+    Dim MyEmpty As Variant
+    Dim MySsfEmpty As Variant
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    'Env.LogWrite "WriteSsfSkip: " & CellStream.Range.Address & " " & CellStream.Queue.Queue.Count
+    SsfCellStreamHelper.WriteLineAddress Stream, CellStream.Range
+    ' simple list with skip and repeat
+    MyEmpty = CellStream.EmptyValue
+    MySsfEmpty = CellStream.SsfEmptyValue
+    'Env.LogWrite "e" & MyEmpty & " " & MySsfEmpty
+    Counter = 0
+    LastData = MyEmpty
+    
+    With CellStream.Queue
+        Do Until .IsEmptyQueue
+            Data = .BaseQueue.Dequeue
+            If SsfUtils.ExactEqual(Data, LastData) Then
+                Counter = Counter + 1
+            Else
+                SsfCellStreamHelper.WriteLineSkipOrRepeat Stream, Counter, CellStream.TranslateFromCell(LastData), MySsfEmpty
+                LastData = Data
+                Counter = 1
+            End If
+        Loop
+        If Counter > 0 And Not SsfUtils.ExactEqual(LastData, MyEmpty) Then
+            SsfCellStreamHelper.WriteLineRepeat Stream, Counter, CellStream.TranslateFromCell(LastData)
+        End If
+    End With
+End Sub
+
+
+'=== ssf writer end ===
+
+'}}}
+
+'class
+'   name;SsfCellStreamReaderFill
+'{{{
+Option Explicit
+
+Public Env As GlobalResources
+Public CellStream As SsfCellStream
+Public LineFeed As String
+
+Private FillIt As Scripting.Dictionary
+
+'=== common interfaces begin ===
+
+
+Public Sub SetUp(ParentStream As SsfCellStream, ParentEnv As GlobalResources)
+    Set Env = ParentEnv
+    Set CellStream = ParentStream
+End Sub
+
+Public Sub ReadSsf(Key As String, Value As String)
+    On Error Resume Next
+    
+    Select Case Key
+    Case "fill", ""
+        CallByName Me, "ReadSsfLine" & Key, VbMethod, Key, Value
+    Case Else
+        ReadSsfLineKeyValue Key, Value
+    End Select
+    
+    If Err.Number <> 0 Then
+        Env.LogWrite Key & ": " & Err.Number & " " & Err.Description
+        Err.Clear
+    End If
+End Sub
+
+Public Sub Flush()
+    Const MaxAreas = 30
+    Dim AreaCounter As Long
+    Dim AreaString As String
+    
+    If CellStream.IsNotReady Then Exit Sub
+    
+    AreaCounter = 0
+    
+    With CellStream.Queue.BaseQueue
+        Do Until .IsEmptyQueue
+            AreaCounter = AreaCounter + 1
+            AreaString = IIf(AreaCounter > 1, AreaString & ",", "") & .Dequeue
+            Env.LogWrite "ReadSsfLineFill: " & AreaString
+            If AreaCounter >= MaxAreas Then
+                FillCells AreaString
+                AreaCounter = 0
+            End If
+        Loop
+    End With
+    
+    If AreaCounter > 0 Then FillCells AreaString
+End Sub
+
+
+'=== common interfaces end ===
+'=== ssf reader begin ===
+
+
+Public Sub ReadSsfLineFill(Key As String, Value As String)
+    Flush
+    FillIt.RemoveAll
+End Sub
+
+Public Sub ReadSsfLineKeyValue(Key As String, Value As String)
+    FillIt(Key) = Value
+End Sub
+
+Public Sub ReadSsfLine(Key As String, Value As String)
+    CellStream.Queue.BaseQueue.Enqueue Value
+End Sub
+
+
+'=== ssf reader end ===
+'=== cell filler begin ===
+
+
+Private Sub FillCells(Address As String)
+    Dim Ws As Worksheet
+    Set Ws = CellStream.Worksheet
+    FillerSimple SsfUtilsExcel.ExcelAddressToRange(Ws, Address), FillIt
+End Sub
+
+Private Sub FillerSimple(Target As Range, Data As Scripting.Dictionary)
+    Dim Value As Variant
+    
+    If Target Is Nothing Then Exit Sub
+    If Not Data.Exists("value") Then Exit Sub
+    Value = CellStream.TranslateToCell(Data("value"))
+    CellStream.Queue.BaseQueue.SetCellsProperty Value, Target
+End Sub
+
+
+'=== cell filler end ===
+'=== calss events begin ===
+
+
+Private Sub Class_Initialize()
+    LineFeed = vbCrLf
+    Set FillIt = New Scripting.Dictionary
+End Sub
+
+Private Sub Class_Terminate()
+    FillIt.RemoveAll
+    Set FillIt = Nothing
+End Sub
+
+
+'=== calss events end ===
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
+}}}
+
