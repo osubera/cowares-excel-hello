@@ -99,72 +99,32 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
     これは包含関係によるのではなく、そこでグローバルな環境の「対象とするWorkbook」が書き換えられたからと考える。
     ssf は包含性を明確にする記述方法を持ってないので、グローバルな切り替えという発想で見ないと解釈にゆらぎが生じる。
 
-= Information / 情報 =
+= Declare / 宣言 =
 
-=== names / 名前 ===
-
-==== en, ja, ,,, (languages / 言語) ====
-
-==== timestamp ====
-
-==== url ====
-
-==== license ====
-
-==== contributors ====
-
-==== since ====
-
-=== identity ===
+=== ssf-begin ===
 
 {{{
-'identity
-' timestamp;2010/12/07 20:40 JST
-'       url;http://code.google.com/p/cowares-excel-hello/wiki/hello_world
+'ssf-begin
+';
 }}}
 
- # supports timestamp and url
-  timestamp, url が有効
- # give an identification to thie release, with a unique name and version
-  一意な名称とバージョンの組み合わせで、このリリースを特定できるようにする
- # the url is a good choice for a unique name, and the timestamp is good to describe version
-  名称として url 、バージョンとして日時を使うのがお奨め
+ # declare a start line of ssf
+  ssf の開始を宣言する。
+ # a blank ssf-line is always required for the 2nd line of this block.
+  ２行目に空の ssf 行を必ず書く。
+ # an ssf parser can use this block to determin both characters of begin and end of an ssf line.
+  ssf パーサーは、このブロックを利用して ssf 行の先頭記号と行末記号を判定することができる。
+ # ssf-begin and ssf-end are optional. an ssf parser can ignore this block to parse everything before the declare.
+  ssf-begin と ssf-end は必須ではない。 ssf パーサーは、これを無視して、宣言前のブロックをパースして使ってもよい。
 
-=== comment ===
+=== ssf-end ===
 
 {{{
-'comment
-' en;public text which implements a traditional "Hello World" on VBA
-' ja;伝統的な Hello World で VBA の雛型を用意する
+'ssf-end
 }}}
 
- # supports (languages)
-  (言語) が有効
-
-=== tag ===
-
-{{{
-'tag
-' en;hello,vba,excel
-}}}
-
- # supports (languages)
-  (言語) が有効
- # the delimiter is `,(x2c)` 
-  `,(x2c)` で区切る
-
-=== copyright ===
-
-{{{
-'copyright
-'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
-' contributors;Tomizono - kobobau.com
-'        since;2008
-}}}
-
- # supports license, contributors and since
-  license, contributors, since が有効
-
+ # declare an end line of ssf
+  ssf の終了を宣言する。
 
 = Book, Sheet / ブック、シート =
 
@@ -184,6 +144,8 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
   対象物の名前を指定できる
  # when the target has 2 different names, use a `/(0x2f)` to separate them. the 2nd line of the example is showing a worksheet with its name is "Sheet1" and codename is "Sheet2"
   対象物が２つの異なる名前を持つ時は、 `/(0x2f)` で区切る。２行目の例では、 "Sheet1" という name と "Sheet2" という codename を持つようなワークシートを示す。
+ # the 2nd name for a book is considered to be a vba project name.
+  ブックの場合、２つ目の名前は、 vba プロジェクト名として扱う。
  # a new one is created if no names or not found,
   名前が指定されないときや、指定した名前がないときは新規に作る
 
@@ -312,6 +274,57 @@ We mostly target Microsoft Excel Books here, so we have some additional rules to
 
  # this example shows a single # is used as a delimiter
   １つの # だけを区切りに指定した例
+
+==== skip ====
+
+{{{
+'   skip;3
+}}}
+
+ # means continuous 3 empty data
+  空データが３つ続くという意味
+ # reader should not touch the cell but just move the cursor for the specified amount
+  読み取りの場合、セルには何もせず、カーソルを指示された数だけ進めるべき
+
+==== repeat ====
+
+{{{
+'  repeat;5
+'           ;=R[-1]C
+}}}
+
+ # means continuous 5 same data `=R[-1]C`
+  `=R[-1]C` という同一データが５つ続くという意味
+
+==== fill ====
+
+{{{
+'    fill;
+'   value;yyyy/m/d
+'        ;B3:B5
+'        ;D3:D5
+'        ;E8:F9
+}}}
+
+ # declare the data first, then put to the address list specified in an anonymous line
+  先にデータを与え、無名データで渡されたアドレス一覧に埋め込む。
+
+
+==== value ====
+
+ # declare a fixed value to fill.
+  fill で使う固定値を宣言する。
+
+==== unit ====
+
+{{{
+'  unit;pt
+}}}
+
+ # declare a scale unit
+  サイズの単位を宣言する。
+
+
 
 === cells-formula ===
 
@@ -452,6 +465,113 @@ http://cowares.nobody.jp
  # mark the Names object belongs to a Excel Workbook object, not a Worksheet
   エクセルではワークシートでなくブックが、名前オブジェクトを所有していることに注意
 
+=== cells-color ===
+
+{{{
+'cells-color
+'  address;C27:H27
+'   repeat;2
+'         ;#FFCC99
+'   repeat;4
+'         ;#CCFFCC
+}}}
+
+=== cells-background-color ===
+
+{{{
+'cells-background-color
+'  address;A24:M24
+'   repeat;13
+'         ;#FF6600
+}}}
+
+=== cells-font-name ===
+
+{{{
+'cells-font-name
+'  address;B24
+'         ;Arial
+}}}
+
+=== cells-font-size ===
+
+{{{
+'cells-font-size
+'  address;B24
+'         ;12
+}}}
+
+=== cells-font-bold ===
+
+{{{
+'cells-font-bold
+'  address;B24
+'         ;yes
+}}}
+
+=== cells-font-italic ===
+
+{{{
+'cells-font-italic
+'  address;B24
+'         ;yes
+}}}
+
+=== cells-height ===
+
+{{{
+'cells-height
+'   unit;pt
+'  address;A24
+'         ;14.25
+}}}
+
+=== cells-width ===
+
+{{{
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+}}}
+
+=== cells-v-align ===
+
+{{{
+'cells-v-align
+'  address;C35:F35
+'   repeat;4
+'         ;center
+}}}
+
+=== cells-h-align ===
+
+{{{
+'cells-h-align
+'  address;C35:F35
+'   repeat;4
+'         ;right
+}}}
+
+=== cells-shrink ===
+
+{{{
+'cells-shrink
+'  address;B24
+'         ;yes
+}}}
+
+=== cells-wrap ===
+
+{{{
+'cells-wrap
+'  address;B24
+'         ;yes
+}}}
+
+=== cells-border ===
+
+
 
 = VBA Code / VBA コード =
 
@@ -538,8 +658,17 @@ End Sub
  # delimiters are 'space(x020)` 
   '空白(x020)` で区切る
 
+= Book Properties / ブックに属するもの =
 
-= candidates / 候補 =
+=== book-identity ===
 
- * origin, offset
- * ssf-begin, ssf-end
+{{{
+'book-identity
+'  title;セル計算値確定
+'  description;セル数式の計算値を確定する
+}}}
+
+ # informations found in a buitlin book properties.
+  標準のブック情報に入る項目
+ # title and description are listed when the book is used as an addin.
+  title と description は、アドインブックの一覧で利用される。
