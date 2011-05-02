@@ -40,7 +40,7 @@ http://4.bp.blogspot.com/-EDfMXcoX1f8/Tb4pscXoCJI/AAAAAAAAAFU/hU2ETtUzks4/s1600/
 
  # download binary excel book, ssf_rw_v2.xls (Japanese Excel 2000) or ssf_rw_v2.xlsm (Japanese Excel 2007) , from above url.
     * you must enable your excel to run a macro, when you can't see a toolbar.
-    * you must do [vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B Trust macro to access the VBA Project Object Model]  to handle VBA code.
+    * you must do [vba#how_to_allow_access_to_a_Visual_Basic_project allow access to a VBA Project Object Model]  to handle VBA code.
  # you may want to start with ssf_rw_v2_en.xls (English Excel 2000) , if your PC doesn't handle Japanese language.
  # build your book from text source, if you can't download binary books, or you are prohibited to download any macro book from the internet.
     # First of all, copy and generate manually the [ssf_reader_primitive] to a module of a new excel book.

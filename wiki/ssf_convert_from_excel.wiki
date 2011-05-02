@@ -33,3 +33,20 @@ intoroduce tools to convert an Excel book to an SSF text
  * [ssf_reader_primitive] と [ssf_writer_primitive] を１つのブックにまとめた。
  * ツールバーで操作する。
  * [ssf_rw_primitive もっと詳しく>>]
+
+= ssf rw v2 =
+
+  # read and write file with a dialog.
+  # support many encodings arround utf-8. while the primitive support only the localized ANSI.
+  # write SSF for the selected part.
+  # write SSF for each module.
+  # handle colors, font and more formats.
+  * [ssf_rw_v2 more>>]
+
+== SSF読み書き ２号機 ==
+  # ダイアログ付きのファイル入出力。
+  # ANSI 以外の多数の文字コードにも対応。 UTF-8 を標準。
+  # 部分的な SSF 出力。
+  # モジュール単位での SSF 出力。
+  # 色や文字サイズなど、書式の強化。
+  * [ssf_rw_v2 もっと詳しく>>]

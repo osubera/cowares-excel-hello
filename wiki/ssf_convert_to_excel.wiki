@@ -34,3 +34,17 @@ SSF 形式のテキストをエクセルブックに変換するツールを紹�
  * ツールバーで操作する。
  * [ssf_rw_primitive もっと詳しく>>]
 
+= ssf rw v2 =
+
+  # read and write file with a dialog.
+  # support many encodings arround utf-8. while the primitive support only the localized ANSI.
+  # read SSF from a mixed text source, like this wiki.
+  # handle colors, font and more formats.
+  * [ssf_rw_v2 more>>]
+
+== SSF読み書き ２号機 ==
+  # ダイアログ付きのファイル入出力。
+  # ANSI 以外の多数の文字コードにも対応。 UTF-8 を標準。
+  # 混在テキストからの SSF 抽出。
+  # 色や文字サイズなど、書式の強化。
+  * [ssf_rw_v2 もっと詳しく>>]
