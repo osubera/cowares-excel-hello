@@ -59,19 +59,19 @@
 = Interface / 操作 =
 
 
- # * Copy as SSF | Write SSF into Clipboard
- # * Paste from SSF | Read SSF from Clipboard
- # * to Notepad | Write SSF into a Notepad
- # * from Notepad | Read SSF from a Notepad
- # * 0 | connection to Notepad
- # * to File | Write SSF into a File
- # * from File | Read SSF from a File
- # * Encoding | Character Encoding of File
- # * Object | What is converted when writing to SSF
- # * Module | How VBA codes are converted
- # * Mixed | use SSF declares to remove non SSF sections
- # * Log | Show verbose logs on Notepad
- # * ? | Show an information
+ # * Copy as SSF * | Write SSF into Clipboard
+ # * Paste from SSF * | Read SSF from Clipboard
+ # * to Notepad * | Write SSF into a Notepad
+ # * from Notepad * | Read SSF from a Notepad
+ # * 0 * | connection to Notepad
+ # * to File * | Write SSF into a File
+ # * from File * | Read SSF from a File
+ # * Encoding * | Character Encoding of File
+ # * Object * | What is converted when writing to SSF
+ # * Module * | How VBA codes are converted
+ # * Mixed * | use SSF declares to remove non SSF sections
+ # * Log * | Show verbose logs on Notepad
+ # * ? * | Show an information
 
  # * コピーSSF * | クリップボードにSSFを書き出す。
  # * ペーストSSF * | クリップボードのSSFを取り込む。
