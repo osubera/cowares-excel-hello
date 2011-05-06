@@ -1,14 +1,14 @@
-'workbook
+ï»¿'workbook
 '  name;baum_base_2k_generic.xls
 
 'require
 
 'worksheet
-'  name;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é/BaumMain
+'  name;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹/BaumMain
 
 'cells-formula
 '  address;A1:M22
-'         ;–¼Ì
+'         ;åç§°
 '         ;baum_base
 '         ;
 '         ;
@@ -21,8 +21,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒRƒƒ“ƒg
-'         ;ƒ\ƒtƒg‚Ìà–¾‚ð“ü‚ê‚é
+'         ;ã‚³ãƒ¡ãƒ³ãƒˆ
+'         ;ã‚½ãƒ•ãƒˆã®èª¬æ˜Žã‚’å…¥ã‚Œã‚‹
 '         ;
 '         ;
 '         ;
@@ -35,7 +35,7 @@
 '         ;
 '         ;
 '         ;comment
-'         ;‰pŒê‚Ìà–¾‚ð“ü‚ê‚é
+'         ;è‹±èªžã®èª¬æ˜Žã‚’å…¥ã‚Œã‚‹
 '         ;
 '         ;
 '         ;
@@ -47,7 +47,7 @@
 '         ;
 '         ;
 '         ;
-'         ;’˜ìŒ 
+'         ;è‘—ä½œæ¨©
 '         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
 '         ;
 '         ;
@@ -60,8 +60,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ‰ƒCƒZƒ“ƒX
-'         ;Ž©—¥, Ž©—R, Œö³, http://cowares.nobody.jp
+'         ;ãƒ©ã‚¤ã‚»ãƒ³ã‚¹
+'         ;è‡ªå¾‹, è‡ªç”±, å…¬æ­£, http://cowares.nobody.jp
 '         ;
 '         ;
 '         ;
@@ -73,7 +73,7 @@
 '         ;
 '         ;
 '         ;
-'         ;ìŽÒ
+'         ;ä½œè€…
 '         ;Tomizono - kobobau.com
 '         ;
 '         ;
@@ -86,7 +86,7 @@
 '         ;
 '         ;
 '         ;
-'         ;‰”Å
+'         ;åˆç‰ˆ
 '         ;2011
 '         ;
 '         ;
@@ -99,7 +99,7 @@
 '         ;
 '         ;
 '         ;
-'         ;”z•zŒ³
+'         ;é…å¸ƒå…ƒ
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;
 '         ;
@@ -112,7 +112,7 @@
 '         ;
 '         ;
 '         ;
-'         ;XV
+'         ;æ›´æ–°
 '         ;40639.8333333333
 '         ;
 '         ;
@@ -164,8 +164,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ{ƒ^ƒ“‚Ì•\Ž¦
-'         ;ƒ{ƒ^ƒ“‚Ì‹@”\
+'         ;ãƒœã‚¿ãƒ³ã®è¡¨ç¤º
+'         ;ãƒœã‚¿ãƒ³ã®æ©Ÿèƒ½
 '         ;Tag
 '         ;Parameter
 '         ;ControlType
@@ -190,8 +190,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ{ƒ^ƒ“
-'         ;’Êí‚Ìƒ{ƒ^ƒ“
+'         ;ãƒœã‚¿ãƒ³
+'         ;é€šå¸¸ã®ãƒœã‚¿ãƒ³
 '         ;you
 '         ;
 '         ;1
@@ -203,8 +203,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒgƒOƒ‹
-'         ;ƒIƒ“‚ÆƒIƒt‚ðØ‚è‘Ö‚¦‚éƒgƒOƒ‹ƒ{ƒ^ƒ“
+'         ;ãƒˆã‚°ãƒ«
+'         ;ã‚ªãƒ³ã¨ã‚ªãƒ•ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ãƒˆã‚°ãƒ«ãƒœã‚¿ãƒ³
 '         ;must
 '         ;
 '         ;1
@@ -216,8 +216,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒeƒLƒXƒg
-'         ;ƒeƒLƒXƒgƒ{ƒbƒNƒX‚É“ü—Í‚·‚é
+'         ;ãƒ†ã‚­ã‚¹ãƒˆ
+'         ;ãƒ†ã‚­ã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã«å…¥åŠ›ã™ã‚‹
 '         ;set
 '         ;
 '         ;2
@@ -229,8 +229,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒŠƒXƒg
-'         ;ƒŠƒXƒg‚©‚ç‘I‚Ô
+'         ;ãƒªã‚¹ãƒˆ
+'         ;ãƒªã‚¹ãƒˆã‹ã‚‰é¸ã¶
 '         ;a
 '         ;
 '         ;3
@@ -238,12 +238,12 @@
 '         ;
 '         ;
 '         ;
-'         ;‚è‚ñ‚²
-'         ;‚Ý‚©‚ñ
-'         ;‚¢‚¿‚²
+'         ;ã‚Šã‚“ã”
+'         ;ã¿ã‹ã‚“
+'         ;ã„ã¡ã”
 '         ;
-'         ;ƒRƒ“ƒ{
-'         ;ƒŠƒXƒg‚©‚ç‘I‚Ô‚±‚Æ‚à“ü—Í‚·‚é‚±‚Æ‚à‚Å‚«‚é
+'         ;ã‚³ãƒ³ãƒœ
+'         ;ãƒªã‚¹ãƒˆã‹ã‚‰é¸ã¶ã“ã¨ã‚‚å…¥åŠ›ã™ã‚‹ã“ã¨ã‚‚ã§ãã‚‹
 '         ;tag
 '         ;
 '         ;4
@@ -251,12 +251,12 @@
 '         ;
 '         ;
 '         ;
-'         ;—ÑŒç
-'         ;–¨Š¹
-'         ;ä•
-'         ;•’“¸
-'         ;’·‚¢ƒ{ƒ^ƒ“
-'         ;à–¾‚ª’·‚¢ƒ{ƒ^ƒ“
+'         ;æž—æªŽ
+'         ;èœœæŸ‘
+'         ;è‹º
+'         ;è‘¡è„
+'         ;é•·ã„ãƒœã‚¿ãƒ³
+'         ;èª¬æ˜ŽãŒé•·ã„ãƒœã‚¿ãƒ³
 '         ;to
 '         ;
 '         ;1
@@ -268,8 +268,8 @@
 '         ;
 '         ;
 '         ;
-'         ;ƒ|ƒbƒvƒAƒbƒv
-'         ;ŠK‘wƒƒjƒ…[‚É‚·‚é
+'         ;ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—
+'         ;éšŽå±¤ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã«ã™ã‚‹
 '         ;every
 '         ;
 '         ;10
@@ -281,8 +281,8 @@
 '         ;
 '         ;
 '         ;
-'         ;=R1C2 & " ‚É‚Â‚¢‚Ä"
-'         ;‚±‚ÌƒV[ƒg‚ð•\Ž¦‚·‚éB
+'         ;=R1C2 & " ã«ã¤ã„ã¦"
+'         ;ã“ã®ã‚·ãƒ¼ãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 '         ;item
 '         ;
 '         ;1
@@ -585,28 +585,28 @@
 '         ;General
 
 'cells-name
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R15C1
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_ButtonCaption
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R3C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Comment
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R6C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Contributor
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R4C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Copyright
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R5C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_License
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R2C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_LocalComment
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R1C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_PublicName
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R7C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Since
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R10C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Tag
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R9C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Timestamp
-'  ;=ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!R8C2
-'  ;ƒ\ƒtƒg‚Ì–¼‘O‚ð“ü‚ê‚é!_Url
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R15C1
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_ButtonCaption
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R3C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Comment
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R6C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Contributor
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R4C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Copyright
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R5C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_License
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R2C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_LocalComment
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R1C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_PublicName
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R7C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Since
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R10C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Tag
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R9C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Timestamp
+'  ;=ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!R8C2
+'  ;ã‚½ãƒ•ãƒˆã®åå‰ã‚’å…¥ã‚Œã‚‹!_Url
 
 'class
 '  name;ToolBarV2
@@ -1306,7 +1306,7 @@ End Function
 Public Sub BarMain(Optional oWho As Object = Nothing)
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "ƒc[ƒ‹ƒo[‚ðC•œ‚µ‚Ü‚µ‚½B‚à‚¤ˆê“x‘€ì‚µ‚Ä‚­‚¾‚³‚¢B", vbExclamation, BaumMain.Name
+        MsgBox "ãƒ„ãƒ¼ãƒ«ãƒãƒ¼ã‚’ä¿®å¾©ã—ã¾ã—ãŸã€‚ã‚‚ã†ä¸€åº¦æ“ä½œã—ã¦ãã ã•ã„ã€‚", vbExclamation, BaumMain.Name
     Else
         Helper.BarMain Me
     End If
