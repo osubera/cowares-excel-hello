@@ -93,8 +93,8 @@ Function DumpStreamBinary(FileName As String) As String
 
     Set Stream = New ADODB.Stream
     Stream.Open
-    Stream.LoadFromFile FileName
     Stream.Type = adTypeBinary
+    Stream.LoadFromFile FileName
     out = ""
     Do Until Stream.EOS
         bs = Stream.Read(1)
@@ -115,11 +115,11 @@ Function DumpFileText(FileName As String, ByVal Enc As String) As String
 
     Set Stream = New ADODB.Stream
     Stream.Open
-    Stream.LoadFromFile FileName
     Stream.Type = adTypeText
     Stream.Charset = Enc
+    Stream.LoadFromFile FileName
     
-    SkipBom Stream
+    'SkipBom Stream
     
     out = Stream.ReadText
     Stream.Close
@@ -168,6 +168,8 @@ Function SaveFileNoBom(FileName As String, Text As String) As Boolean
     Set Stream = Nothing
 End Function
 
+' === WE DON'T NEED THIS SkipBom FUNCTION AFTER FIX FOR ISSUE 24 ===
+'
 ' detect BOMs, locate the position after the BOM, and return a length of the BOM.
 ' adTypeText and Charset must be set to the Stream before calling this.
 Function SkipBom(Stream As ADODB.Stream) As Long
