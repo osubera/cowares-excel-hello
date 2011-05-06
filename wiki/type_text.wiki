@@ -78,10 +78,9 @@ Sub Main(Opts, Files)
     
     For Each File in Files
         ts.Open
-        ts.LoadFromFile File
         ts.Type = adTypeText
         ts.Charset = Charset
-        ts.Position = 2   ' skip bom
+        ts.LoadFromFile File
         StdOut.Write R.Replace(ts.ReadText, vbCrLf)
         ts.Close
     Next
@@ -171,7 +170,6 @@ Private Sub SaveTextNoBom(inSt, File, Charset)
     buff.Position = 0
     buff.Type = adTypeBinary
     buff.Position = 3
-    
     
     ' save as binary
     outSt.Open
