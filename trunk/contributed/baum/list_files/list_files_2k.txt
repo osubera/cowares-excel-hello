@@ -57,7 +57,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;40669.5
+'         ;40670.1666666667
 '         ;keyword
 '         ;vba,excel,folder,file
 '  address;A13:J13
@@ -1611,6 +1611,7 @@ End Sub
 
 #Const EnableHyperLinks = True
 #Const EnableFastWriting = True
+#Const DisableCalculation = False
 
 Option Explicit
 
@@ -1769,7 +1770,11 @@ Err1:
     MsgBox "ファイルの検索中にエラーが発生しました。" & _
          vbCrLf & vbCrLf & Err.Description, _
         vbOKOnly, BAUCAP
+    
+#If DisableCalculation = True Then
     Application.Calculation = oldCalcMode   ' 計算開始
+#End If
+
 End Function
 
 
@@ -1898,6 +1903,7 @@ Private Function FileAttr(file1 As Object) As Variant
     Dim a4 As Variant, a5 As Variant, a6 As Variant
     a1 = file1.Path
     a2 = file1.ShortPath      ' pagefileではエラー
+    'a2 = Replace(Mid(a1, Len(FolderName) + 1), "\", "/")   ' relative name, instead of dos-name
     a3 = file1.Size
     a4 = file1.DateLastModified
     a5 = prtAttr(file1.Attributes)
@@ -1940,8 +1946,12 @@ End Function
 Private Sub Class_Initialize()
 ' 初期化
     On Error Resume Next
+    
+#If DisableCalculation = True Then
     oldCalcMode = Application.Calculation
     Application.Calculation = xlCalculationManual   ' 計算抑止
+#End If
+
     FolderName = CurDir()
     SubFolderDepth = 0
     ShowDotFolders = False
@@ -1960,7 +1970,11 @@ Private Sub Class_Initialize()
 End Sub
 
 Private Sub Class_Terminate()
+
+#If DisableCalculation = True Then
     Application.Calculation = oldCalcMode   ' 計算開始
+#End If
+
     Set OutputRange = Nothing
     Set OutputSheet = Nothing
 End Sub
