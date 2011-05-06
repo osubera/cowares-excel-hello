@@ -16,7 +16,6 @@ Sub Main(Opts, Files)
     Dim vChars, vWrap, PrintAs, vSkip
     Dim bLowbitFirst, bC0, bC1
     Dim StdOut, ts
-    Dim x, BomIsOnlyForTheFirstOne
     Const adTypeBinary = 1
     Const adTypeText = 2
     
@@ -42,14 +41,12 @@ Sub Main(Opts, Files)
         If Opts.Exists(x) Then PrintAs = x
     Next
     
-    BomIsOnlyForTheFirstOne = 2   ' 2 is for skipping unicode bom, and only for the 1st file
     For Each File in Files
         If Files.Count > 1 Then StdOut.Write File & vbCrLf
         ts.Open
-        ts.LoadFromFile File
         ts.Type = adTypeBinary
-        ts.Position = vSkip + BomIsOnlyForTheFirstOne
-        BomIsOnlyForTheFirstOne = 0
+        ts.LoadFromFile File
+        ts.Position = vSkip
         
         Select Case PrintAs
         Case "x"
