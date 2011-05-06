@@ -47,18 +47,22 @@
 = Code =
 
 {{{
+'ssf-begin
+';
+
 'workbook
-'  name;hello_charset_adodb_stream.xls
+'   name;hello_charset_adodb_stream.xls/VBAProject
+
+'book-identity
 
 'require
-'  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+'       ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
 
 'worksheet
-'  name;Sheet1
-
+'   name;Sheet1
 
 'module
-'  name;HelloCharsetAdodbStream
+'   name;HelloCharsetAdodbStream
 '{{{
 Option Explicit
 
@@ -138,8 +142,8 @@ Function DumpStreamBinary(FileName As String) As String
 
     Set Stream = New ADODB.Stream
     Stream.Open
-    Stream.LoadFromFile FileName
     Stream.Type = adTypeBinary
+    Stream.LoadFromFile FileName
     out = ""
     Do Until Stream.EOS
         bs = Stream.Read(1)
@@ -160,11 +164,11 @@ Function DumpFileText(FileName As String, ByVal Enc As String) As String
 
     Set Stream = New ADODB.Stream
     Stream.Open
-    Stream.LoadFromFile FileName
     Stream.Type = adTypeText
     Stream.Charset = Enc
+    Stream.LoadFromFile FileName
     
-    SkipBom Stream
+    'SkipBom Stream
     
     out = Stream.ReadText
     Stream.Close
@@ -213,6 +217,8 @@ Function SaveFileNoBom(FileName As String, Text As String) As Boolean
     Set Stream = Nothing
 End Function
 
+' === WE DON'T NEED THIS SkipBom FUNCTION AFTER FIX FOR ISSUE 24 ===
+'
 ' detect BOMs, locate the position after the BOM, and return a length of the BOM.
 ' adTypeText and Charset must be set to the Stream before calling this.
 Function SkipBom(Stream As ADODB.Stream) As Long
@@ -252,7 +258,11 @@ NOBOM:
     Stream.Position = 2
     SkipBom = 2
 End Function
+
 '}}}
+
+'ssf-end
+
 }}}
 
 === Result ===
@@ -277,16 +287,16 @@ charset: unicode
 FF FE 4A 30 30 5E 8A 30 6A 30 55 30 44 30 7E 30 5B 30 
 お帰りなさいませ
 charset: utf-8
-FF FE EF BB BF E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 
+EF BB BF E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 
 お帰りなさいませ
 charset: shift_jis
-FF FE 82 A8 8B 41 82 E8 82 C8 82 B3 82 A2 82 DC 82 B9 
+82 A8 8B 41 82 E8 82 C8 82 B3 82 A2 82 DC 82 B9 
 お帰りなさいませ
 charset: euc-jp
-FF FE A4 AA B5 A2 A4 EA A4 CA A4 B5 A4 A4 A4 DE A4 BB 
+A4 AA B5 A2 A4 EA A4 CA A4 B5 A4 A4 A4 DE A4 BB 
 お帰りなさいませ
 charset: iso-2022-jp
-FF FE 1B 24 42 24 2A 35 22 24 6A 24 4A 24 35 24 24 24 5E 24 3B 1B 28 42 
+1B 24 42 24 2A 35 22 24 6A 24 4A 24 35 24 24 24 5E 24 3B 1B 28 42 
 お帰りなさいませ
 
 SaveFileAsUTF8withoutBOM()
