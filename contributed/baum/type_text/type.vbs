@@ -25,10 +25,9 @@ Sub Main(Opts, Files)
     
     For Each File in Files
         ts.Open
-        ts.LoadFromFile File
         ts.Type = adTypeText
         ts.Charset = Charset
-        ts.Position = 2   ' skip bom
+        ts.LoadFromFile File
         StdOut.Write R.Replace(ts.ReadText, vbCrLf)
         ts.Close
     Next

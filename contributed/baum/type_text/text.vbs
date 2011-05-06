@@ -63,7 +63,6 @@ Private Sub SaveTextNoBom(inSt, File, Charset)
     buff.Type = adTypeBinary
     buff.Position = 3
     
-    
     ' save as binary
     outSt.Open
     outSt.Type = adTypeBinary
