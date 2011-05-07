@@ -57,7 +57,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;40670.3396990741
+'         ;40671.2916666667
 '         ;keyword
 '         ;vba,excel,file
 '  address;A13:J13
@@ -1424,7 +1424,7 @@ End Sub
 Option Explicit
 
 Public Sub Head(Target As Object, BytesShow As Long, BytesJudge As Long)
-    Const ShowAtRelative = "B1:F1"
+    Const ShowAtRelative = "B1:F1"  ' 5 columns begining at the next right
     
     Dim Ws As Worksheet
     Dim ShowAt As Range
@@ -1443,13 +1443,13 @@ Public Sub Head(Target As Object, BytesShow As Long, BytesJudge As Long)
     Set Ws = ReservedArea.Worksheet
     TitleRow = ReservedArea.Cells(1).Row
     CurrentColumns = ReservedArea.EntireColumn.Address(False, False, xlA1, False)
-    CurrentEndColumn = Split(CurrentColumns, ":")(1) & "1"
+    CurrentEndColumn = Split(CurrentColumns, ":")(1) & "1"  ' right edge
     OutputColumns = Ws.Range(CurrentEndColumn).Range(ShowAtRelative).EntireColumn.Address(False, False, xlA1, False)
     'Debug.Print CurrentColumns, OutputColumns, TitleRow
     
     ShowTitle Ws.Range(OutputColumns).Rows(TitleRow)
     For Each FileName In FileNamesArea.Cells
-        If Not FileName.EntireRow.Hidden Then     ' skip filtered hiddens
+        If Not (FileName.EntireRow.Hidden Or FileName.EntireColumn.Hidden) Then     ' skip filtered hiddens
             Set ShowAt = FileName.EntireRow.Columns(OutputColumns)
             ShowHead FileName, ShowAt, BytesShow, BytesJudge
         End If
