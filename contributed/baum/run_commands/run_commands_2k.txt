@@ -1509,7 +1509,7 @@ Public Sub Execute(Target As Object, LogStdOut As Boolean, LogStdErr As Boolean,
     
     ShowTitle Ws.Range(OutputColumns).Rows(TitleRow)
     For Each Command In CommandsArea.Cells
-        LogWrite Command.Value
+        LogWrite Command.Address(False, False, xlA1, False)
         DoEvents
         If EmergencyStop("executing " & Command.Row & vbCrLf & Command.Value) Then
             LogWrite "emergency stop: " & Command.Row
@@ -1585,8 +1585,11 @@ Private Sub ShowExecution(CommandAt As Range, ShowAt As Range, LogStdOut As Bool
     
     On Error GoTo CommandFailed
     
-    Command = CommandPrefix & CommandAt.Value
+    Command = CommandAt.Value
     If Command = "" Then Exit Sub
+    
+    Command = CommandPrefix & Command
+    LogWrite Command
     
     Set wsh = New WshShell
     Set con = wsh.Exec(Command)
@@ -1600,7 +1603,10 @@ Private Sub ShowExecution(CommandAt As Range, ShowAt As Range, LogStdOut As Bool
         ElseIf WaitCounter > 10 Then
             Application.Wait Now() + TimeValue("0:00:01")
         End If
-        If EmergencyStop("waiting") Then GoTo Terminate
+        If EmergencyStop("waiting") Then
+            con.Terminate
+            GoTo Terminate
+        End If
         WaitCounter = WaitCounter + 1
     Loop
     
@@ -1746,7 +1752,7 @@ Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
     i = SetWindowText(hWnd, TitleText)
     'MoveWindow hWnd, 0, 50, 300, 200, 1
     ' SetWindowPos can be used to change Z-order
-    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
     OpenNotepad = hWnd
     Exit Function
 Err1:
