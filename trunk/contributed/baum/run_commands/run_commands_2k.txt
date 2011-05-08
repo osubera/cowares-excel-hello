@@ -1548,16 +1548,17 @@ Private Function EmergencyStop(Optional Action As String = "") As Boolean
     Case "end"
         DoNotepad.CloseNotepad St
     Case "waiting"
-        If Not DoNotepad.WriteTextNotepad(St, ">", 1) Then
+        If Not DoNotepad.WriteTextNotepad(St, ">") Then
             EmergencyStop = True
             Exit Function
         End If
         DoNotepad.SetSavedNotepad St
     Case Else
-        If Not DoNotepad.WriteNotepad(St, NoteMessage & vbCrLf & vbCrLf & Action & vbCrLf) Then
+        If Not DoNotepad.WriteNotepad(St, NoteMessage & vbCrLf & vbCrLf & Action) Then
             EmergencyStop = True
             Exit Function
         End If
+        DoNotepad.WriteTextNotepad St, vbCrLf, 1    ' required to move cursor to the end
         DoNotepad.SetSavedNotepad St
     End Select
     
