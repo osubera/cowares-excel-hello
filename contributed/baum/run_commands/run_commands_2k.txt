@@ -1548,7 +1548,7 @@ Private Function EmergencyStop(Optional Action As String = "") As Boolean
     Case "end"
         DoNotepad.CloseNotepad St
     Case "waiting"
-        If Not DoNotepad.WriteTextNotepad(St, ">") Then
+        If Not DoNotepad.WriteTextNotepad(St, ">", 1) Then
             EmergencyStop = True
             Exit Function
         End If
@@ -1581,6 +1581,7 @@ Private Sub ShowExecution(CommandAt As Range, ShowAt As Range, LogStdOut As Bool
     Dim ReturnCode As Long
     Dim StdOutText As String
     Dim StdErrText As String
+    Dim WaitCounter As Long
     
     On Error GoTo CommandFailed
     
@@ -1590,9 +1591,17 @@ Private Sub ShowExecution(CommandAt As Range, ShowAt As Range, LogStdOut As Bool
     Set wsh = New WshShell
     Set con = wsh.Exec(Command)
     
+    WaitCounter = 0
     Do While con.Status = WshRunning
         DoEvents
+        If WaitCounter = 0 Then
+        ElseIf WaitCounter > 50 Then
+            Application.Wait Now() + TimeValue("0:00:10")
+        ElseIf WaitCounter > 10 Then
+            Application.Wait Now() + TimeValue("0:00:01")
+        End If
         If EmergencyStop("waiting") Then GoTo Terminate
+        WaitCounter = WaitCounter + 1
     Loop
     
     ReturnCode = con.ExitCode
