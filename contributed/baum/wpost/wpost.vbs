@@ -23,7 +23,6 @@ WScript.Quit(Err.Number)
 Sub Main(Opts, Files)
     Dim File, Charset
     Dim ts, Finder
-    'Dim BomIsOnlyForTheFirstOne
     Const adTypeText = 2
     
     Set ts = CreateObject("ADODB.Stream")
@@ -32,15 +31,11 @@ Sub Main(Opts, Files)
     Charset = Opts("e")
     If Charset = "" Then Charset = "utf-8"
     
-    ' bom is harmless for this file format
-    'BomIsOnlyForTheFirstOne = 2   ' 2 is for skipping unicode bom, and only for the 1st file
     For Each File in Files
         ts.Open
-        ts.LoadFromFile File
         ts.Type = adTypeText
         ts.Charset = Charset
-        'ts.Position = BomIsOnlyForTheFirstOne
-        'BomIsOnlyForTheFirstOne = 0
+        ts.LoadFromFile File
         ReadWPost Finder
         ts.Close
     Next
