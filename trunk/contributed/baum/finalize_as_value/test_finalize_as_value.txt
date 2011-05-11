@@ -1,0 +1,74 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;test_finalize_as_value.xls/VBAProject
+
+'book-identity
+
+'require
+
+'worksheet
+'   name;Sheet1
+
+'cells-formula
+'  address;A1:A25
+'         ;=NOW()
+'         ;=RAND()
+'         ;=R[-2]C+R[-1]C
+'         ;1
+'         ;2
+'         ;3
+'         ;=SUM(R[-3]C:R[-1]C)
+'         ;=Sheet2!R[-7]C
+'         ;=[Book2]Sheet1!R1C1
+'         ;={1,2}
+'   repeat;2
+'         ;={1;2}
+'         ;hello
+'         ;=R[-1]C
+'         ;1234
+'         ;=R[-1]C
+'         ;TRUE
+'         ;=R[-1]C
+'         ;=1/0
+'         ;=NA()
+'         ;=a0
+'         ;=RC[1] R[1]C[1]
+'         ;=LOG(0)
+'         ;=INDIRECT("A0")
+'         ;=CHAR(0)
+
+'cells-numberformat
+'  address;A1
+'         ;m/d/yyyy h:mm
+'  address;A3
+'         ;m/d/yyyy h:mm
+'  address;A8
+'         ;m/d/yyyy h:mm
+'  address;A22
+'         ;m/d/yyyy
+
+'cells-width
+'   unit;pt
+'  address;A1
+'         ;90
+
+'worksheet
+'   name;Sheet2
+
+'cells-formula
+'  address;A1
+'         ;=NOW()
+
+'cells-numberformat
+'  address;A1
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;A1
+'         ;90
+
+'ssf-end
+
