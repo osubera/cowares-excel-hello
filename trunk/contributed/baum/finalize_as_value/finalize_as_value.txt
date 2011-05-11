@@ -1,4 +1,4 @@
-'ssf-begin
+О╩©'ssf-begin
 ';
 
 'workbook
@@ -10,57 +10,57 @@
 '       ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
 
 'cells-name
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R15C1
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_ButtonCaption
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R3C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Comment
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R6C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Contributor
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R4C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Copyright
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R5C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_License
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R2C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_LocalComment
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R1C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_PublicName
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R7C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Since
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R10C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Tag
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R9C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Timestamp
-'       ;=┐Z┐▀▄v▌Z▓l┼m▓Х!R8C2
-'       ;┐Z┐▀▄v▌Z▓l┼m▓Х!_Url
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R15C1
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_ButtonCaption
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R3C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Comment
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R6C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Contributor
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R4C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Copyright
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R5C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_License
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R2C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_LocalComment
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R1C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_PublicName
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R7C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Since
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R10C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Tag
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R9C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Timestamp
+'       ;=Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !R8C2
+'       ;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ !_Url
 
 'worksheet
-'   name;┐Z┐▀▄v▌Z▓l┼m▓Х/BaumMain
+'   name;Ц┌╩Ц┐╚Х╗┬Г╝≈Е─╓Г╒╨Е╝ /BaumMain
 
 'cells-formula
 '  address;A1:B10
-'         ;√╪▐л
+'         ;Е░█Г╖╟
 '         ;finalize_as_value
-'         ;┐R┐│┐⌠┐g
-'         ;┐Z┐▀░■▌╝┌л▄v▌Z▓l┌П┼m▓Х┌╥┌И
+'         ;Ц┌ЁЦ┐║Ц┐ЁЦ┐┬
+'         ;Ц┌╩Ц┐╚Ф∙╟Е╪▐Ц│╝Х╗┬Г╝≈Е─╓Ц┌▓Г╒╨Е╝ Ц│≥Ц┌▀
 '         ;comment
 '         ;remove cell formulas to finalize values
-'         ;▓≤█Л▄═
+'         ;Х▒≈Д╫°Ф╗╘
 '         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
-'         ;┐┴┐C┐Z┐⌠┐X
-'         ;▌╘≈╔, ▌╘≈R, ▄Ж░Ё, http://cowares.nobody.jp
-'         ;█Л▌р
+'         ;Ц┐╘Ц┌╓Ц┌╩Ц┐ЁЦ┌╧
+'         ;Х┤╙Е╬▀, Х┤╙Г■╠, Е┘╛Ф╜ё, http://cowares.nobody.jp
+'         ;Д╫°Х─┘
 '         ;Tomizono - kobobau.com
-'         ;▐┴■е
+'         ;Е┬²Г┴┬
 '         ;2011
-'         ;■z∙z▄Ё
+'         ;И┘█Е╦┐Е┘┐
 '         ;http://cowares.blogspot.com/search/label/baum
-'         ;█X░V
+'         ;Ф⌡╢Ф√╟
 '         ;40578.6458333333
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
-'         ;┐{┐^┐⌠┌л∙\▌╕
-'         ;┐{┐^┐⌠┌л▀@■\
+'         ;Ц┐°Ц┌©Ц┐ЁЦ│╝Х║╗Г╓╨
+'         ;Ц┐°Ц┌©Ц┐ЁЦ│╝Ф╘÷Х┐╫
 '         ;Tag
 '         ;Parameter
 '         ;ControlType
@@ -70,8 +70,8 @@
 '         ;Action
 '         ;Initialize ..
 '  address;A15:L19
-'         ;▓l┼m▓Х
-'         ;░■▌╝┌л▄v▌Z▓l┌П┼m▓Х┌╥┌И
+'         ;Е─╓Г╒╨Е╝ 
+'         ;Ф∙╟Е╪▐Ц│╝Х╗┬Г╝≈Е─╓Ц┌▓Г╒╨Е╝ Ц│≥Ц┌▀
 '         ;finalize
 '     skip;1
 '         ;1
@@ -79,26 +79,26 @@
 '     skip;1
 '         ;1
 '     skip;4
-'         ;▒н▐ш■м┬м
-'         ;▌ю█s▒н▐ш┌л■м┬м
+'         ;Е╞╬Х╠║Г╞└Е⌡╡
+'         ;Е╝÷Х║▄Е╞╬Х╠║Ц│╝Г╞└Е⌡╡
 '         ;select
 '     skip;1
 '         ;3
 '     skip;4
-'         ;▒I▒П┐Z┐▀
-'         ;┐V│[┐g
-'         ;┐u┐b┐N
-'         ;▒н▐ш░■▌╝
-'         ;▌ю█s▒н▐ш┌л░■▌╝
+'         ;И│╦Ф┼·Ц┌╩Ц┐╚
+'         ;Ц┌╥Ц┐╪Ц┐┬
+'         ;Ц┐√Ц┐┐Ц┌╞
+'         ;Е╞╬Х╠║Ф∙╟Е╪▐
+'         ;Е╝÷Х║▄Е╞╬Х╠║Ц│╝Ф∙╟Е╪▐
 '         ;external
 '     skip;1
 '         ;3
 '     skip;4
-'         ;┌╥┌в┌д┌л▌╝
-'         ;∙й┐V│[┐g▌Q▐ф
-'         ;┼O∙■┐u┐b┐N▌Q▐ф
-'         ;┐█┐O
-'         ;▌ю█s┐█┐O┌л▐o≈м┌П░ь┌Х▒ж┌╕
+'         ;Ц│≥Ц│╧Ц│╕Ц│╝Е╪▐
+'         ;Е┬╔Ц┌╥Ц┐╪Ц┐┬Е▐┌Г┘╖
+'         ;Е╓√И┐╗Ц┐√Ц┐┐Ц┌╞Е▐┌Г┘╖
+'         ;Ц┐╜Ц┌╟
+'         ;Е╝÷Х║▄Ц┐╜Ц┌╟Ц│╝Е┤╨Е┼⌡Ц┌▓Е┬┤Ц┌┼Ф⌡©Ц│┬
 '         ;verbose
 '     skip;1
 '         ;1
@@ -106,8 +106,8 @@
 '     skip;2
 '         ;BaumMain.OnButtonToggle
 '     skip;3
-'         ;=R1C2 & " ┌и┌б┌╒┌д"
-'         ;┌╠┌л┐V│[┐g┌П∙\▌╕┌╥┌И│B
+'         ;=R1C2 & " Ц│╚Ц│╓Ц│└Ц│╕"
+'         ;Ц│⌠Ц│╝Ц┌╥Ц┐╪Ц┐┬Ц┌▓Х║╗Г╓╨Ц│≥Ц┌▀Ц─┌
 '         ;about
 '     skip;1
 '         ;1
@@ -115,140 +115,140 @@
 '     skip;1
 '         ;1
 '  address;B24
-'         ;┐G┐N┐Z┐▀┐u┐b┐N│A┐▐│[┐h│A┐A┐N┐Z┐X┌л┐J┐X┐^┐─┐│┐C┐h┌Б┐E┐F┐u┐V┐X┐e┐─┌л┼J■╜┌х┌г┌П┐┼│[┐Y┐i┐u┐▀┌х┴©┼i┌е▐Ё┌а┌д┌╗┌Х┌э┌╥│B
+'         ;Ц┌╗Ц┌╞Ц┌╩Ц┐╚Ц┐√Ц┐┐Ц┌╞Ц─│Ц┐╞Ц┐╪Ц┐┴Ц─│Ц┌╒Ц┌╞Ц┌╩Ц┌╧Ц│╝Ц┌╚Ц┌╧Ц┌©Ц┐═Ц┐║Ц┌╓Ц┐┴Ц┌└Ц┌╕Ц┌╖Ц┐√Ц┌╥Ц┌╧Ц┐├Ц┐═Ц│╝И√▀Г≥╨Ц│╙Ц│╘Ц┌▓Ц┐╙Ц┐╪Ц┌╨Ц┐┼Ц┐√Ц┐╚Ц│╙Д╬║Ф═╪Ц│╖Ф┴©Ц│ёЦ│╕Ц│┼Ц┌┼Ц│╬Ц│≥Ц─┌
 '  address;C27:G33
-'         ;⌠╠⌠Э┌╥┌И≈≤⌠_
+'         ;Е╟▌Е┘╔Ц│≥Ц┌▀Е┬╘Г┌╧
 '     skip;1
-'         ;■╜▓█┌и┌б┌╒┌д
+'         ;Г≥╨ФЁ╗Ц│╚Ц│╓Ц│└Ц│╕
 '     skip;2
-'         ;▌√▀ф▌р┌е
+'         ;Д╨▀Ф╔╜Х─┘Ц│╖
 '     skip;1
-'         ;■╜▓█┌╘┌Г▄Ж┼J┌э┌е
+'         ;Г≥╨ФЁ╗Ц│▀Ц┌┴Е┘╛И√▀Ц│╬Ц│╖
 '     skip;1
-'         ;┐v┐┴┐C┐o┐V│[
-'         ;▒Е┼И▀ф┌е
+'         ;Ц┐≈Ц┐╘Ц┌╓Ц┐░Ц┌╥Ц┐╪
+'         ;Е╓╖Д╪│Ф╔╜Ц│╖
 '     skip;1
-'         ;≈©▀Ю
+'         ;Ф√≥И┤▒
 '     skip;1
-'         ;▌Ф┬Ь▐Ц┌л▓█┬с
-'         ;▄Ж┴v√@░l┌е
+'         ;Е▐√Е╪∙Д╦┼Ц│╝ФЁ╗Ф└▐
+'         ;Е┘╛Г⌡┼ФЁ∙Д╨╨Ц│╖
 '     skip;1
-'         ;▄Ж┼J│i■[∙i│j
+'         ;Е┘╛И√▀О╪┬Г╢█Е⌠│О╪┴
 '     skip;2
-'         ;▄б░l┌е
+'         ;Е─▀Д╨╨Ц│╖
 '     skip;1
-'         ;┼Н√{⌠I┌х┐▀│[┐▀
+'         ;Е÷╨Ф°╛Г └Ц│╙Ц┐╚Ц┐╪Ц┐╚
 '     skip;2
-'         ;IT┼И▀ф┌е
+'         ;ITД╪│Ф╔╜Ц│╖
 '     skip;1
-'         ;█в┌╘┌╒┐▀│[┐▀
+'         ;Г╢╟Ц│▀Ц│└Ц┐╚Ц┐╪Ц┐╚
 '     skip;4
-'         ;┌х┌╨√Ё≈©┐\┐t┐g┌П■┐┌╓│H
+'         ;Ц│╙Ц│°Г└║Ф√≥Ц┌╫Ц┐∙Ц┐┬Ц┌▓Х╡╥Ц│├О╪÷
 '  address;C35
-'         ;┌╥┌╝┌и▓█∙╤┌╥┌И
+'         ;Ц│≥Ц│░Ц│╚ФЁ╗Ф√┤Ц│≥Ц┌▀
 '  address;B39
-'         ;┼х▓P┌х▌w▌╕│A┬ю┌╒≈©▀Ю│A▒│┌╒▄▀┴й
+'         ;Г╟║Е█≤Ц│╙Ф▄┤Г╓╨Ц─│Е╝┴Ц│└Ф√≥И┤▒Ц─│Ф≈╘Ц│└Г╣░Ф·°
 '  address;B41
-'         ;≈©▀Ю - ┐R│E┐E┐F┐A│E┐┴┐C┐Z┐⌠┐X┌л┐V┐X┐e┐─┼J■╜
+'         ;Ф√≥И┤▒ - Ц┌ЁЦ┐╩Ц┌╕Ц┌╖Ц┌╒Ц┐╩Ц┐╘Ц┌╓Ц┌╩Ц┐ЁЦ┌╧Ц│╝Ц┌╥Ц┌╧Ц┐├Ц┐═И√▀Г≥╨
 '  address;B43
-'         ;┼Н√{≈©▀Ю∙\
+'         ;Е÷╨Ф°╛Ф√≥И┤▒Х║╗
 '  address;B45:B46
-'         ;┌R┌б┌л┐T┐C┐Y┌╘┌Г▒I┌т┌╬┌╞┌е┼х▓P│B
-'         ;▒O∙╔┌╒┌╙▄╢▒╔│B
+'         ;О╪⌠Ц│╓Ц│╝Ц┌╣Ц┌╓Ц┌╨Ц│▀Ц┌┴И│╦Ц│╤Ц│═Ц│▒Ц│╖Г╟║Е█≤Ц─┌
+'         ;Е┴█Ф┴∙Ц│└Ц│▄Е▌÷Е┴┤Ц─┌
 '  address;B48:D50
-'         ;S┐T┐C┐Y
-'         ;1,000┴~
-'         ;│i░е█· 1,050┴~│j
-'         ;M┐T┐C┐Y
-'         ;10,000┴~
-'         ;│i░е█· 10,500┴~│j
-'         ;L┐T┐C┐Y
-'         ;100,000┴~
-'         ;│i░е█· 105,000┴~│j
+'         ;SЦ┌╣Ц┌╓Ц┌╨
+'         ;1,000Е├├
+'         ;О╪┬Г╗▌Х╬╪ 1,050Е├├О╪┴
+'         ;MЦ┌╣Ц┌╓Ц┌╨
+'         ;10,000Е├├
+'         ;О╪┬Г╗▌Х╬╪ 10,500Е├├О╪┴
+'         ;LЦ┌╣Ц┌╓Ц┌╨
+'         ;100,000Е├├
+'         ;О╪┬Г╗▌Х╬╪ 105,000Е├├О╪┴
 '  address;B52
-'         ;┐T┐C┐Y┌ф┌м
+'         ;Ц┌╣Ц┌╓Ц┌╨Ц│╗Ц│╞
 '  address;B54
-'         ;┼J■╜┌и┌╘┌╘┌И▌·┼т┌Б⌠О┬у⌠x┌П│A┌╗┌╗┌э┌╘┌и┌R┌б┌л┐T┐C┐Y┌е∙╙≈ч┌╣┌э┌╥│B
+'         ;И√▀Г≥╨Ц│╚Ц│▀Ц│▀Ц┌▀Ф≥┌И√⌠Ц┌└И⌡ёФ≤⌠Е╨╕Ц┌▓Ц─│Ц│┼Ц│┼Ц│╬Ц│▀Ц│╚О╪⌠Ц│╓Ц│╝Ц┌╣Ц┌╓Ц┌╨Ц│╖Е┬├И║·Ц│≈Ц│╬Ц│≥Ц─┌
 '  address;B56
-'         ;S┐T┐C┐Y
+'         ;SЦ┌╣Ц┌╓Ц┌╨
 '  address;B58:C62
-'         ;1. ▐╛▄^│A Small │A partial
+'         ;1. Е╟▐Е·▀Ц─│ Small Ц─│ partial
 '     skip;1
-'         ;2. ┌©┌Е┌а┌ф┌╣┌╫┐R│[┐h▒f∙п┌Б│A┐▐│[┐N┐V│[┐g┌л┬Й∙■∙╙┌х┌г│B
+'         ;2. Ц│║Ц┌┤Ц│ёЦ│╗Ц│≈Ц│÷Ц┌ЁЦ┐╪Ц┐┴Г╢═Г┴┤Ц┌└Ц─│Ц┐╞Ц┐╪Ц┌╞Ц┌╥Ц┐╪Ц┐┬Ц│╝Д╦─И┐╗Е┬├Ц│╙Ц│╘Ц─┌
 '     skip;1
-'         ;3. ▌Х┌и∙┴┌╕┌х┌╒│A▐▒┌╚∙Ш┌л┌М┌╘┌Г┌х┌╒┐R│[┐h┌╬┌╞┌П▓m┌Х┌╫┌╒┌ф┌╚┌и│B
+'         ;3. Ф┴▀Ц│╚Х╡═Ц│┬Ц│╙Ц│└Ц─│Ф⌡╦Ц│█Ф√╧Ц│╝Ц┌▐Ц│▀Ц┌┴Ц│╙Ц│└Ц┌ЁЦ┐╪Ц┐┴Ц│═Ц│▒Ц┌▓Г÷╔Ц┌┼Ц│÷Ц│└Ц│╗Ц│█Ц│╚Ц─┌
 '     skip;1
-'         ;4. ≈А│j░■█s┌л VBA ┐R│[┐h│B▌÷┌л┐┼┐⌠┐N░Ф┌л┌P┌б√з┌л┐R│[┐h
+'         ;4. Д╬▀О╪┴Ф∙╟Х║▄Ц│╝ VBA Ц┌ЁЦ┐╪Ц┐┴Ц─┌Ф╛║Ц│╝Ц┐╙Ц┐ЁЦ┌╞Е┘┬Ц│╝О╪▒Ц│╓Г⌡╝Ц│╝Ц┌ЁЦ┐╪Ц┐┴
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/hello_key_value
 '  address;B64
-'         ;M┐T┐C┐Y
+'         ;MЦ┌╣Ц┌╓Ц┌╨
 '  address;B66:C70
-'         ;1. ▓├▄^│A Medium │A functional
+'         ;1. Д╦╜Е·▀Ц─│ Medium Ц─│ functional
 '     skip;1
-'         ;2. ┼╝░╛┌╣┌╫┼ж░■┌Б┐▐│[┐N┐V│[┐g│B
+'         ;2. Е╝▄Ф┬░Ц│≈Ц│÷И√╒Ф∙╟Ц┌└Ц┐╞Ц┐╪Ц┌╞Ц┌╥Ц┐╪Ц┐┬Ц─┌
 '     skip;1
-'         ;3. ▓P┬Й┌л▀@■\┌╙│A┌ф┌Х┌═┌╕┌╦⌠╝┌╜┐▄┐x┐▀┌л┌Ю┌л┌╙≈~┌╣┌╒┌ф┌╚┌и│B
+'         ;3. Е█≤Д╦─Ц│╝Ф╘÷Х┐╫Ц│▄Ц─│Ц│╗Ц┌┼Ц│┌Ц│┬Ц│ Е▀∙Ц│▐Ц┐╛Ц┐≥Ц┐╚Ц│╝Ц┌┌Ц│╝Ц│▄Ф╛╡Ц│≈Ц│└Ц│╗Ц│█Ц│╚Ц─┌
 '     skip;1
-'         ;4. ≈А│j┐}┐N┐█┌П▌ю█s┌╥┌Й┌н┬Й┌б┌л⌠╝█Л┌П█s┌╓ VBA ┐R│[┐h│B
+'         ;4. Д╬▀О╪┴Ц┐·Ц┌╞Ц┐╜Ц┌▓Е╝÷Х║▄Ц│≥Ц┌▄Ц│╟Д╦─Ц│╓Ц│╝Е▀∙Д╫°Ц┌▓Х║▄Ц│├ VBA Ц┌ЁЦ┐╪Ц┐┴Ц─┌
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
 '  address;B72
-'         ;L┐T┐C┐Y
+'         ;LЦ┌╣Ц┌╓Ц┌╨
 '  address;B74:B77
-'         ;1. ▒Е▄^│A Large │A integrated
-'         ;2. ▌ю≈p⌠I┌х┐A┐v┐┼┐P│[┐V┐┤┐⌠│B
-'         ;3. ∙║░■┌л▀@■\┌Б│A▐П▄▐░щ▓Х┌и┌Ф┌И⌠╝█Л░ь┌Х▒ж┌╕┌Б┴Ф√й▒J┬з┌Ю┼э┌ч┌ф┌╚┌и│B
-'         ;4. ≈А│j┐├│[┐U│[┐C┐⌠┐^│[┐t┐F│[┐X┌П▌²┌©│A┐c│[┐▀┌ф┌╣┌д≈≤≈p┌е┌╚┌И│B
+'         ;1. Е╓╖Е·▀Ц─│ Large Ц─│ integrated
+'         ;2. Е╝÷Г■╗Г └Ц│╙Ц┌╒Ц┐≈Ц┐╙Ц┌╠Ц┐╪Ц┌╥Ц┐╖Ц┐ЁЦ─┌
+'         ;3. Х╓┤Ф∙╟Ц│╝Ф╘÷Х┐╫Ц┌└Ц─│Ф²║Д╩╤Х╗╜Е╝ Ц│╚Ц┌┬Ц┌▀Е▀∙Д╫°Е┬┤Ц┌┼Ф⌡©Ц│┬Ц┌└Г■╩И²╒И│╥Г╖╩Ц┌┌Е░╚Ц┌─Ц│╗Ц│█Ц│╚Ц─┌
+'         ;4. Д╬▀О╪┴Ц┐╕Ц┐╪Ц┌╤Ц┐╪Ц┌╓Ц┐ЁЦ┌©Ц┐╪Ц┐∙Ц┌╖Ц┐╪Ц┌╧Ц┌▓Ф▄│Ц│║Ц─│Ц┐└Ц┐╪Ц┐╚Ц│╗Ц│≈Ц│╕Е┬╘Г■╗Ц│╖Ц│█Ц┌▀Ц─┌
 '  address;B81
-'         ;▄Ж┼J - ┐R│E┐E┐F┐A│E┐┴┐C┐Z┐⌠┐X┌л┐V┐X┐e┐─┼J■╜
+'         ;Е┘╛И√▀ - Ц┌ЁЦ┐╩Ц┌╕Ц┌╖Ц┌╒Ц┐╩Ц┐╘Ц┌╓Ц┌╩Ц┐ЁЦ┌╧Ц│╝Ц┌╥Ц┌╧Ц┐├Ц┐═И√▀Г≥╨
 '  address;B83
-'         ;▄Ж┼J┌╙■[∙i┌е┌╥
+'         ;Е┘╛И√▀Ц│▄Г╢█Е⌠│Ц│╖Ц│≥
 '  address;B85:B92
-'         ;▐┼▓Х┌л▄Ж┼J▐Й▐┼┌и░╛┴й∙╗┌П┐A┐b┐v┐█│[┐h┌╥┌И∙Ш√@┌П█л┌Х┌э┌╥│B
-'         ;▌d≈l┌П▄┬┌ъ┌И▓i┼K┌╘┌Г▄Ж┼JURL┌П▌g┌╒┌э┌╥│B
-'         ;▄Ж┼J┌л┐^┐C┐~┐⌠┐O┌е≤A≈█┌м┌╣┌э┌╥┌╙│A┐t┐@┐C┐▀⌠Y∙t┌х┌г┌м┌╣┌э┌╧┌Я│B
-'         ;▄Ж┼J░Ф┌╘┌Г┌л┐Z┐▀┐t┐_┐E┐⌠┐█│[┐h┌е┌╗┼Х┌╒┌╣┌э┌╥│B
-'         ;√{░l┌м┌Ю┌©┌К┌Я│A⌠╞≈╩┌Б≈F▓B│A┌╩┌л▒╪▒Е░╗┌л░l┌╙┐_┐E┐⌠┐█│[┐h┌╣┌д≈≤≈p┌е┌╚┌э┌╥│B
-'         ;┐}┐N┐█┐R│[┐h┌П┐e┐L┐X┐g┌е▄Ж┼J┌╥┌И┌л┌е│A┐Z┐L┐┘┐┼┐e┐B┌л▀╜┌╒░E▐Й┌е│A┐}┐N┐█∙t┌╚┐u┐b┐N┌л┐_┐E┐⌠┐█│[┐h▀K░╖┌╙┌═┌И┼б▀╚┌е┌Ю░S■z┌═┌Х┌э┌╧┌Я│B
-'         ;▄Ж┼J▄Ц┌л┐R│[┐h▐C░Ё⌠≥│A▓г┴а▐Н∙Я┌Ю⌠√┼YURL┌╘┌Г■h░╤┌╣┌д┌╒┌╚┌э┌╥│B
-'         ;URL┌м┴i▀v┌и∙о┌М┌Г┌х┌╒┌Ю┌л┌е┌м┌═┌Х┌э┌╧┌Я│B
+'         ;Ф┴─Е╝ Ц│╝Е┘╛И√▀Е═╢Ф┴─Ц│╚Ф┬░Ф·°Г┴╘Ц┌▓Ц┌╒Ц┐┐Ц┐≈Ц┐╜Ц┐╪Ц┐┴Ц│≥Ц┌▀Ф√╧ФЁ∙Ц┌▓Ф▌║Ц┌┼Ц│╬Ц│≥Ц─┌
+'         ;Д╩∙Ф╖≤Ц┌▓Ф╠╨Ц┌│Ц┌▀Ф╝╣И ▌Ц│▀Ц┌┴Е┘╛И√▀URLЦ┌▓Д╫©Ц│└Ц│╬Ц│≥Ц─┌
+'         ;Е┘╛И√▀Ц│╝Ц┌©Ц┌╓Ц┐÷Ц┐ЁЦ┌╟Ц│╖И─ёГ╣║Ц│╞Ц│≈Ц│╬Ц│≥Ц│▄Ц─│Ц┐∙Ц┌║Ц┌╓Ц┐╚Ф╥╩Д╩≤Ц│╙Ц│╘Ц│╞Ц│≈Ц│╬Ц│⌡Ц┌⌠Ц─┌
+'         ;Е┘╛И√▀Е┘┬Ц│▀Ц┌┴Ц│╝Ц┌╩Ц┐╚Ц┐∙Ц┐─Ц┌╕Ц┐ЁЦ┐╜Ц┐╪Ц┐┴Ц│╖Ц│┼И║≤Ц│└Ц│≈Ц│╬Ц│≥Ц─┌
+'         ;Ф°╛Д╨╨Ц│╞Ц┌┌Ц│║Ц┌█Ц┌⌠Ц─│Е░▄Е┐ Ц┌└Е▐▀И│■Ц─│Ц│²Ц│╝Д╩√Е╓╖Е▀╒Ц│╝Д╨╨Ц│▄Ц┐─Ц┌╕Ц┐ЁЦ┐╜Ц┐╪Ц┐┴Ц│≈Ц│╕Е┬╘Г■╗Ц│╖Ц│█Ц│╬Ц│≥Ц─┌
+'         ;Ц┐·Ц┌╞Ц┐╜Ц┌ЁЦ┐╪Ц┐┴Ц┌▓Ц┐├Ц┌╜Ц┌╧Ц┐┬Ц│╖Е┘╛И√▀Ц│≥Ц┌▀Ц│╝Ц│╖Ц─│Ц┌╩Ц┌╜Ц┐╔Ц┐╙Ц┐├Ц┌ёЦ│╝Е╪╥Ц│└Х│╥Е═╢Ц│╖Ц─│Ц┐·Ц┌╞Ц┐╜Д╩≤Ц│█Ц┐√Ц┐┐Ц┌╞Ц│╝Ц┐─Ц┌╕Ц┐ЁЦ┐╜Ц┐╪Ц┐┴Х╕▐Е┬╤Ц│▄Ц│┌Ц┌▀Г▓╟Е╒┐Ц│╖Ц┌┌Е©┐И┘█Ц│┌Ц┌┼Ц│╬Ц│⌡Ц┌⌠Ц─┌
+'         ;Е┘╛И√▀Е╬▄Ц│╝Ц┌ЁЦ┐╪Ц┐┴Д©╝Ф╜ёГ╜┴Ц─│Х©╫Е┼═Ф┐┘Е═╠Ц┌┌Е╫⌠Х╘╡URLЦ│▀Ц┌┴Ф╢╬Г■÷Ц│≈Ц│╕Ц│└Ц│█Ц│╬Ц│≥Ц─┌
+'         ;URLЦ│╞Ф╟╦Д╧┘Ц│╚Е╓┴Ц┌▐Ц┌┴Ц│╙Ц│└Ц┌┌Ц│╝Ц│╖Ц│╞Ц│┌Ц┌┼Ц│╬Ц│⌡Ц┌⌠Ц─┌
 '  address;B94
-'         ;▌Е┌х▄Ж┼J░ФURL
+'         ;Д╦╩Ц│╙Е┘╛И√▀Е┘┬URL
 '  address;B96:B97
 '         ;http://cowares.blogspot.com
 '         ;http://code.google.com/p/cowares-excel-hello/
 '  address;B101
-'         ;┌х┌╨√Ё≈©┐\┐t┐g┌П■┐┌╓┌л┌╘│H - ┐R│E┐E┐F┐A│E┐┴┐C┐Z┐⌠┐X┌л┐V┐X┐e┐─┼J■╜
+'         ;Ц│╙Ц│°Г└║Ф√≥Ц┌╫Ц┐∙Ц┐┬Ц┌▓Х╡╥Ц│├Ц│╝Ц│▀О╪÷ - Ц┌ЁЦ┐╩Ц┌╕Ц┌╖Ц┌╒Ц┐╩Ц┐╘Ц┌╓Ц┌╩Ц┐ЁЦ┌╧Ц│╝Ц┌╥Ц┌╧Ц┐├Ц┐═И√▀Г≥╨
 '  address;B103
-'         ;┌╩┌л┌╗▀Ю┌м┴╫┌и∙╔┌а┌д┌╒┌И┌л┌е┌╣┌Е┌╓┌╘
+'         ;Ц│²Ц│╝Ц│┼И┤▒Ц│╞Д╫∙Ц│╚Ф┴∙Ц│ёЦ│╕Ц│└Ц┌▀Ц│╝Ц│╖Ц│≈Ц┌┤Ц│├Ц│▀
 '  address;B105:G105
-'         ;√Ё≈©┌л┌Ю┌л
+'         ;Г└║Ф√≥Ц│╝Ц┌┌Ц│╝
 '     skip;1
-'         ;■┐┌╓┌Ю┌л
+'         ;Х╡╥Ц│├Ц┌┌Ц│╝
 '     skip;2
-'         ;■┐┌М┌х┌╒┌Ю┌л
+'         ;Х╡╥Ц┌▐Ц│╙Ц│└Ц┌┌Ц│╝
 '  address;B107:G110
-'         ;┐┴┐C┐Z┐⌠┐X
+'         ;Ц┐╘Ц┌╓Ц┌╩Ц┐ЁЦ┌╧
 '     skip;1
-'         ;┐G┐⌠┐W┐j┐A┌л⌠╜┌╚
+'         ;Ц┌╗Ц┐ЁЦ┌╦Ц┐▀Ц┌╒Ц│╝Е┐█Ц│█
 '     skip;2
-'         ;∙ш▐ь
-'         ;┐R┐s│[
+'         ;Д©²Х╗╪
+'         ;Ц┌ЁЦ┐■Ц┐╪
 '     skip;1
-'         ;░╒┼E┌ж┌л█v▄ё
+'         ;Д╦√Г∙▄Ц│╦Ц│╝Х╡╒Г▄╝
 '     skip;2
-'         ;√П┬У┌л⌠╜┌╚
+'         ;Е╫╧Е⌠║Ц│╝Е┐█Ц│█
 '     skip;5
-'         ;▌√√╠┬У┌л⌠╜┌╚
+'         ;Д╨▀Е▀≥Е⌠║Ц│╝Е┐█Ц│█
 '     skip;5
-'         ;┴c▀ф┐X┐}┐C┐▀
+'         ;Е√╤Ф╔╜Ц┌╧Ц┐·Ц┌╓Ц┐╚
 '  address;C112:D113
 '     skip;1
-'         ;┐R│E┐E┐F┐A┌л≈©▀Ю
-'         ;▓й▐М┌л┐V┐X┐e┐─┼J■╜┌е∙╔┌╓┌╗▀Ю
+'         ;Ц┌ЁЦ┐╩Ц┌╕Ц┌╖Ц┌╒Ц│╝Ф√≥И┤▒
+'         ;И─ Е╦╦Ц│╝Ц┌╥Ц┌╧Ц┐├Ц┐═И√▀Г≥╨Ц│╖Ф┴∙Ц│├Ц│┼И┤▒
 '  address;C117
-'         ;┌╥┌╝┌и▓█∙╤┌╥┌И
+'         ;Ц│≥Ц│░Ц│╚ФЁ╗Ф√┤Ц│≥Ц┌▀
 
 'cells-numberformat
 '  address;B9
@@ -1309,7 +1309,7 @@ End Function
 Public Sub BarMain(Optional oWho As Object = Nothing)
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "┐c│[┐▀┐o│[┌П▐C∙°┌╣┌э┌╣┌╫│B┌Ю┌╓┬Й⌠x▒─█Л┌╣┌д┌╜┌╬┌Ё┌╒│B", vbExclamation, BaumMain.Name
+        MsgBox "Ц┐└Ц┐╪Ц┐╚Ц┐░Ц┐╪Ц┌▓Д©╝Е╬╘Ц│≈Ц│╬Ц│≈Ц│÷Ц─┌Ц┌┌Ц│├Д╦─Е╨╕Ф⌠█Д╫°Ц│≈Ц│╕Ц│▐Ц│═Ц│∙Ц│└Ц─┌", vbExclamation, BaumMain.Name
     Else
         Helper.BarMain Me
     End If
@@ -1318,7 +1318,7 @@ End Sub
 Public Sub OnButtonToggle()
     If Helper Is Nothing Then
         BarInitialize
-        MsgBox "┐c│[┐▀┐o│[┌П▐C∙°┌╣┌э┌╣┌╫│B┌Ю┌╓┬Й⌠x▒─█Л┌╣┌д┌╜┌╬┌Ё┌╒│B", vbExclamation, BaumMain.Name
+        MsgBox "Ц┐└Ц┐╪Ц┐╚Ц┐░Ц┐╪Ц┌▓Д©╝Е╬╘Ц│≈Ц│╬Ц│≈Ц│÷Ц─┌Ц┌┌Ц│├Д╦─Е╨╕Ф⌠█Д╫°Ц│≈Ц│╕Ц│▐Ц│═Ц│∙Ц│└Ц─┌", vbExclamation, BaumMain.Name
     Else
         Helper.OnButtonToggle
     End If
@@ -1782,7 +1782,7 @@ Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal
 Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
 Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌л√╒∙ш▒╤┐t┐┴┐O┌П┐N┐┼┐A┌╥┌И│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ│╝Ф°╙Д©²Е╜≤Ц┐∙Ц┐╘Ц┌╟Ц┌▓Ц┌╞Ц┐╙Ц┌╒Ц│≥Ц┌▀Ц─┌
 ' clear the save me flag
 Public Function SetSavedNotepad(hWnd As Long) As Long
     Dim i As Long
@@ -1791,14 +1791,14 @@ Public Function SetSavedNotepad(hWnd As Long) As Long
     SetSavedNotepad = i
 End Function
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌П∙б┌╤┌И│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ┌▓И√┴Ц│≤Ц┌▀Ц─┌
 ' close the notepad
 Public Sub CloseNotepad(hWnd As Long)
     SetSavedNotepad hWnd
     SendMessage hWnd, WM_CLOSE, 0, 0
 End Sub
  
-' ┐│┐┌▓═┌П░V┌╣┌╜▀N⌠╝┌╣│AhWnd┌П∙т┌╥│B
+' Ц┐║Ц┐╒Е╦ЁЦ┌▓Ф√╟Ц│≈Ц│▐Х╣╥Е▀∙Ц│≈Ц─│hWndЦ┌▓Х©■Ц│≥Ц─┌
 ' kick up a new notepad process, return the hWnd
 Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
             Optional NameMe As String = "") As Long
@@ -1811,7 +1811,7 @@ Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
     On Error GoTo Err1
     
     TitleText = " - notepad - meets VBA"
-    'TitleText = "√Ё▒Х - рс▓═"
+    'TitleText = "Г└║И║▄ - О╬▓О╬⌠Е╦Ё"
     ExePath = "notepad.exe"
     
     ProcID = Shell(ExePath, iWindowState)
@@ -1823,16 +1823,16 @@ Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
     TitleText = IIf(NameMe = "", ProcID, NameMe) & TitleText
     i = SetWindowText(hWnd, TitleText)
     'MoveWindow hWnd, 0, 50, 300, 200, 1
-    ' Z-order ┌Ю∙о┌╕┌И┌х┌Г SetWindowPos
+    ' Z-order Ц┌┌Е╓┴Ц│┬Ц┌▀Ц│╙Ц┌┴ SetWindowPos
     'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
     OpenNotepad = hWnd
     Exit Function
 Err1:
-    MsgBox "┐│┐┌▓═┌л▀N⌠╝┌и▌╦■s┌╣┌э┌╣┌╫│B", , "failed to start a notepad"
+    MsgBox "Ц┐║Ц┐╒Е╦ЁЦ│╝Х╣╥Е▀∙Ц│╚Е╓╠Ф∙≈Ц│≈Ц│╬Ц│≈Ц│÷Ц─┌", , "failed to start a notepad"
     OpenNotepad = 0
 End Function
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌л⌠Ю≈e┌П│A▌w▓Х┌╣┌╫∙╤▌ ┌е▓u┌╚┼╥┌╕┌И│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ│╝Е├┘Е╝╧Ц┌▓Ц─│Ф▄┤Е╝ Ц│≈Ц│÷Ф√┤Е╜≈Ц│╖Г╫╝Ц│█Ф▐⌡Ц│┬Ц┌▀Ц─┌
 ' repalce text at the notepad
 Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
     Dim i As Long
@@ -1841,20 +1841,20 @@ Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
         (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
 End Function
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌и│A▌w▓Х┌╣┌╫∙╤▌ ┌П▓г┴а┌╥┌И│B┴Э█s┌б┌╚│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ│╚Ц─│Ф▄┤Е╝ Ц│≈Ц│÷Ф√┤Е╜≈Ц┌▓Х©╫Е┼═Ц│≥Ц┌▀Ц─┌Ф■╧Х║▄Ц│╓Ц│█Ц─┌
 ' push text into the notepad with a linefeed
-' iPos=0: ▄╩█щ┌л┐J│[┐\┐▀┬й▓u / at a cursor position
-'     -1: ░Ф⌠╙              / at the first
-'      1: █е▄Ц              / at the last
+' iPos=0: Г▐╬Е°╗Ц│╝Ц┌╚Ц┐╪Ц┌╫Ц┐╚Д╫█Г╫╝ / at a cursor position
+'     -1: Е┘┬И═╜              / at the first
+'      1: Ф°─Е╬▄              / at the last
 Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
     WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
 End Function
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌и│A▌w▓Х┌╣┌╫∙╤▌ ┌П▓г┴а┌╥┌И│B┴Э█s√Ё┌╣│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ│╚Ц─│Ф▄┤Е╝ Ц│≈Ц│÷Ф√┤Е╜≈Ц┌▓Х©╫Е┼═Ц│≥Ц┌▀Ц─┌Ф■╧Х║▄Г└║Ц│≈Ц─┌
 ' push text into the notepad without a linefeed
-' iPos=0: ▄╩█щ┌л┐J│[┐\┐▀┬й▓u / at a cursor position
-'     -1: ░Ф⌠╙              / at the first
-'      1: █е▄Ц              / at the last
+' iPos=0: Г▐╬Е°╗Ц│╝Ц┌╚Ц┐╪Ц┌╫Ц┐╚Д╫█Г╫╝ / at a cursor position
+'     -1: Е┘┬И═╜              / at the first
+'      1: Ф°─Е╬▄              / at the last
 Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
     Dim i As Long
     i = GetWindow(hWnd, GW_CHILD)
@@ -1862,14 +1862,14 @@ Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos 
     Case -1
         SendMessage i, EM_SETSEL, 0, 0
     Case 1
-        SendMessage i, EM_SETSEL, 0, -1     ' ▒S∙■▒I▒П
-        SendMessage i, EM_SETSEL, -1, 0     ' ▒I▒П┴П▐° (┐J│[┐\┐▀┌╙▒I▒П≈л┬Ф┌л█е▄Ц┌и┬з⌠╝)
+        SendMessage i, EM_SETSEL, 0, -1     ' Е┘╗И┐╗И│╦Ф┼·
+        SendMessage i, EM_SETSEL, -1, 0     ' И│╦Ф┼·Х╖ёИ≥╓ (Ц┌╚Ц┐╪Ц┌╫Ц┐╚Ц│▄И│╦Ф┼·И═≤Е÷÷Ц│╝Ф°─Е╬▄Ц│╚Г╖╩Е▀∙)
     End Select
     WriteTextNotepad = _
         (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
 End Function
  
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌л⌠Ю≈e┌П│A∙╤▌ ┌ф┌╣┌д▌Ф⌠╬┌╥┌И│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ│╝Е├┘Е╝╧Ц┌▓Ц─│Ф√┤Е╜≈Ц│╗Ц│≈Ц│╕Е▐√Е╬≈Ц│≥Ц┌▀Ц─┌
 ' get text from the notepad
 Public Function ReadNotepad(hWnd As Long) As String
     Dim i As Long
@@ -1882,7 +1882,7 @@ Public Function ReadNotepad(hWnd As Long) As String
     ReadNotepad = x
 End Function
 
-' hWnd ┌╘┌Г ProcessID ┌П▌Ф⌠╬┌╥┌И│B
+' hWnd Ц│▀Ц┌┴ ProcessID Ц┌▓Е▐√Е╬≈Ц│≥Ц┌▀Ц─┌
 Public Function GetWindowProcessId(hWnd As Long) As Long
     Dim ProcID As Long
     Dim ThreadID As Long
@@ -1890,7 +1890,7 @@ Public Function GetWindowProcessId(hWnd As Long) As Long
     GetWindowProcessId = ProcID
 End Function
 
-' ProcessID ┌╘┌Г hWnd ┌П▌Ф⌠╬┌╥┌И│B(┐│┐┌▓═)
+' ProcessID Ц│▀Ц┌┴ hWnd Ц┌▓Е▐√Е╬≈Ц│≥Ц┌▀Ц─┌(Ц┐║Ц┐╒Е╦Ё)
 Public Function GetWindowByProcessId(ProcessId As Long, _
         Optional TaskName As String = "Notepad", _
         Optional TitleText As String = vbNullString) As Long
@@ -1908,7 +1908,7 @@ Public Function GetWindowByProcessId(ProcessId As Long, _
     GetWindowByProcessId = hWnd
 End Function
 
-' hWnd┌е▌w▓Х┌╣┌╫┐│┐┌▓═┌П│A┐├│[┐U│[┌и▌▀┼o┌е▓й▓m┌╥┌И│B
+' hWndЦ│╖Ф▄┤Е╝ Ц│≈Ц│÷Ц┐║Ц┐╒Е╦ЁЦ┌▓Ц─│Ц┐╕Ц┐╪Ц┌╤Ц┐╪Ц│╚Х╕√Х╕ Ц│╖И─ Г÷╔Ц│≥Ц┌▀Ц─┌
 Public Function ShowNotepad(hWnd As Long) As Boolean
     Dim Result As Long
     Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
