@@ -87,6 +87,7 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ�
  <table>
  <tr><th>type.vbs</th><td>エンコードされたファイルを標準出力に表示するツール。</td></tr>
  <tr><th>text.vbs</th><td>標準入力をエンコードしてファイルに保存するツール。</td></tr>
+ <tr><th>textc.vbs</th><td>ファイルを別ファイルに、エンコード変換するツール。</td></tr>
  <tr><th>xtype.bat</th><td>ファイルを読むときのバッチの見本。</td></tr>
  <tr><th>xtext.bat</th><td>ファイルを保存するときのバッチの見本。</td></tr>
  <tr><th>etype.bat etext.bat</th><td>euc-jp 専用にするときのバッチの見本。</td></tr>
@@ -107,12 +108,18 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ�
 <ol>
 <li>ファイルを読むときは、 CScript //NoLogo type.vbs /e:文字コード名 読みたいファイル名</li>
 <li>ファイルに書くときは、 CScript //NoLogo text.vbs /e:文字コード名 保存するファイル名</li>
+<li>ファイル変換は、 CScript //NoLogo textc.vbs /in:入力文字コード名 /out:出力文字コード名 /n:改行変換 読みたいファイル名 保存するファイル名</li>
 <li>文字コードを指定しないときは utf-8 になります。</li>
 <li>指定できる文字コードの名称と動作は、使用中のウィンドウズに依存します。</li>
 <li>utf-8 指定の場合のみ、ウィンドウズの標準動作と異なり、世界標準のBOM無し保存をします。 ただし、これは "utf-8" 指定の場合に限り、別名の unicode-2-0-utf-8 などを使えば、 BOM 付き保存になります。</li>
 <li>日本語を使う人に関係しそうな、主な文字コード名
 <ul>
 <li>utf-8 shift_jis euc-jp iso-2022-jp unicode</li>
+</ul>
+</li>
+<li>改行として指定できるコード名
+<ul>
+<li>crlf cr lf c br</li>
 </ul>
 </li>
 <li>とりあえず使ってみる。
@@ -122,6 +129,8 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ�
 <li>上のとおり入力し、エンターを押すと、jis.txt が変換されて画面に表示されます。</li>
 <li>CScript //NoLogo text.vbs /e:euc-jp &lt; sjis.txt euc.txt</li>
 <li>上のとおり入力し、エンターを押すと、sjis.txt が変換されて euc.txt に保存されます。</li>
+<li>同じことが、次のように、ファイル変換ツールでもできます。こちらは改行コードを変換することもできます。</li>
+<li>CScript //NoLogo textc.vbs /in:shift_jis /out:euc-jp /n:lf sjis.txt euc.txt</li>
 </ol>
 </li>
 </ol>
@@ -251,7 +260,7 @@ VBScript だけで書かれているので、ほとんどのウィンドウズ�
 
 <div class="copyright"><a href="http://kobobau.mocvba.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.mocvba.com</a></div>
 
-<div class="lastupdate">2011.5.10 更新</div>
+<div class="lastupdate">2011.5.11 更新</div>
 
 <script type="text/javascript" src="vba2.js"></script>
 </body>
