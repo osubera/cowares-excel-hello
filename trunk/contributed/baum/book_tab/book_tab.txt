@@ -1,69 +1,69 @@
-'ssf-begin
+ï»¿'ssf-begin
 ';
 
 'workbook
 '   name;book_tab_2k.xls/VBAProject
 
 'book-identity
-'  title;™
+'  title;â˜†
 
 'require
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
 
 'cells-name
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R15C1
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_ButtonCaption
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R3C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Comment
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R6C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Contributor
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R4C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Copyright
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R17C1:R22C10
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_FileButtons
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R5C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_License
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R2C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_LocalComment
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R1C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_PublicName
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R7C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Since
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R10C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Tag
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R9C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Timestamp
-'       ;=ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!R8C2
-'       ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È!_Url
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R15C1
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_ButtonCaption
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R3C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Comment
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R6C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Contributor
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R4C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Copyright
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R17C1:R22C10
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_FileButtons
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R5C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_License
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R2C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_LocalComment
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R1C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_PublicName
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R7C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Since
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R10C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Tag
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R9C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Timestamp
+'       ;=ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!R8C2
+'       ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª!_Url
 
 'worksheet
-'   name;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È/BaumMain
+'   name;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª/BaumMain
 
 'cells-formula
 '  address;A1:B10
-'         ;–¼Ì
+'         ;åç§°
 '         ;book_tab
-'         ;ƒRƒƒ“ƒg
-'         ;ƒuƒbƒNƒ^ƒu‚Ý‚½‚¢‚È
+'         ;ã‚³ãƒ¡ãƒ³ãƒˆ
+'         ;ãƒ–ãƒƒã‚¯ã‚¿ãƒ–ã¿ãŸã„ãª
 '         ;comment
 '         ;something like book tabs
-'         ;’˜ìŒ 
+'         ;è‘—ä½œæ¨©
 '         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
-'         ;ƒ‰ƒCƒZƒ“ƒX
-'         ;Ž©—¥, Ž©—R, Œö³, http://cowares.nobody.jp
-'         ;ìŽÒ
+'         ;ãƒ©ã‚¤ã‚»ãƒ³ã‚¹
+'         ;è‡ªå¾‹, è‡ªç”±, å…¬æ­£, http://cowares.nobody.jp
+'         ;ä½œè€…
 '         ;Tomizono - kobobau.com
-'         ;‰”Å
+'         ;åˆç‰ˆ
 '         ;2011
-'         ;”z•zŒ³
+'         ;é…å¸ƒå…ƒ
 '         ;http://cowares.blogspot.com/search/label/baum
-'         ;XV
+'         ;æ›´æ–°
 '         ;40611.6463541667
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
-'         ;ƒ{ƒ^ƒ“‚Ì•\Ž¦
-'         ;ƒ{ƒ^ƒ“‚Ì‹@”\
+'         ;ãƒœã‚¿ãƒ³ã®è¡¨ç¤º
+'         ;ãƒœã‚¿ãƒ³ã®æ©Ÿèƒ½
 '         ;Tag
 '         ;Parameter
 '         ;ControlType
@@ -73,30 +73,30 @@
 '         ;Action
 '         ;Initialize ..
 '  address;A15:E15
-'         ;?
-'         ;‘S‘Ì‚Ì‘€ì
+'         ;â¤
+'         ;å…¨ä½“ã®æ“ä½œ
 '         ;file
 '     skip;1
 '         ;10
 '  address;A17:J22
-'         ;“¯Šú
-'         ;ƒuƒbƒNˆê——‚ðÄŠm”F‚·‚éB
+'         ;åŒæœŸ
+'         ;ãƒ–ãƒƒã‚¯ä¸€è¦§ã‚’å†ç¢ºèªã™ã‚‹ã€‚
 '         ;sync
 '     skip;1
 '         ;1
 '     skip;5
-'         ;•Û‘¶Ï‚Ý‚ð•Â‚¶‚é
-'         ;–¢•Û‘¶‚ðœ‚«AƒuƒbƒN‚ð•Â‚¶‚éB
+'         ;ä¿å­˜æ¸ˆã¿ã‚’é–‰ã˜ã‚‹
+'         ;æœªä¿å­˜ã‚’é™¤ãã€ãƒ–ãƒƒã‚¯ã‚’é–‰ã˜ã‚‹ã€‚
 '         ;close_saved
 '     skip;4
 '         ;1
 '     skip;2
-'         ;ƒAƒNƒeƒBƒuˆÈŠO”jŠü
-'         ;ƒAƒNƒeƒBƒuƒuƒbƒN‚ðœ‚«A–¢•Û‘¶‚Ìî•ñ‚ð”jŠü‚µ‚Ä•Â‚¶‚éB
+'         ;ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ä»¥å¤–ç ´æ£„
+'         ;ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãƒ–ãƒƒã‚¯ã‚’é™¤ãã€æœªä¿å­˜ã®æƒ…å ±ã‚’ç ´æ£„ã—ã¦é–‰ã˜ã‚‹ã€‚
 '         ;close_unactives
 '     skip;7
-'         ;ƒ^ƒCƒgƒ‹—Dæ
-'         ;Å‰‚Éƒ^ƒu‚ðŠJ‚¢‚½‚Æ‚«Aƒtƒ@ƒCƒ‹–¼‚Å‚È‚­ƒ^ƒCƒgƒ‹‚ð•\Ž¦‚·‚éB
+'         ;ã‚¿ã‚¤ãƒˆãƒ«å„ªå…ˆ
+'         ;æœ€åˆã«ã‚¿ãƒ–ã‚’é–‹ã„ãŸã¨ãã€ãƒ•ã‚¡ã‚¤ãƒ«åã§ãªãã‚¿ã‚¤ãƒˆãƒ«ã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 '         ;prefer_title
 '     skip;1
 '         ;1
@@ -104,15 +104,15 @@
 '         ;1
 '     skip;1
 '         ;1
-'         ;ƒ^ƒCƒgƒ‹“ü—Í
-'         ;ƒ^ƒCƒgƒ‹‚ª–³‚¢ƒuƒbƒN‚Éƒ^ƒCƒgƒ‹‚ð“ü‚ê‚é‚æ‚¤‘£‚·B
+'         ;ã‚¿ã‚¤ãƒˆãƒ«å…¥åŠ›
+'         ;ã‚¿ã‚¤ãƒˆãƒ«ãŒç„¡ã„ãƒ–ãƒƒã‚¯ã«ã‚¿ã‚¤ãƒˆãƒ«ã‚’å…¥ã‚Œã‚‹ã‚ˆã†ä¿ƒã™ã€‚
 '         ;input_title
 '     skip;1
 '         ;1
 '     skip;4
 '         ;1
-'         ;=R1C2 & " ‚É‚Â‚¢‚Ä"
-'         ;‚±‚ÌƒV[ƒg‚ð•\Ž¦‚·‚éB
+'         ;=R1C2 & " ã«ã¤ã„ã¦"
+'         ;ã“ã®ã‚·ãƒ¼ãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 '         ;about
 '     skip;1
 '         ;1
@@ -120,140 +120,140 @@
 '     skip;1
 '         ;1
 '  address;B27
-'         ;ƒGƒNƒZƒ‹ƒuƒbƒNAƒ[ƒhAƒAƒNƒZƒX‚ÌƒJƒXƒ^ƒ€ƒƒCƒh‚âƒEƒFƒuƒVƒXƒeƒ€‚ÌŠJ”­‚È‚Ç‚ðƒŠ[ƒYƒiƒuƒ‹‚È‰¿Ši‚Å³‚Á‚Ä‚¨‚è‚Ü‚·B
+'         ;ã‚¨ã‚¯ã‚»ãƒ«ãƒ–ãƒƒã‚¯ã€ãƒ¯ãƒ¼ãƒ‰ã€ã‚¢ã‚¯ã‚»ã‚¹ã®ã‚«ã‚¹ã‚¿ãƒ ãƒ¡ã‚¤ãƒ‰ã‚„ã‚¦ã‚§ãƒ–ã‚·ã‚¹ãƒ†ãƒ ã®é–‹ç™ºãªã©ã‚’ãƒªãƒ¼ã‚ºãƒŠãƒ–ãƒ«ãªä¾¡æ ¼ã§æ‰¿ã£ã¦ãŠã‚Šã¾ã™ã€‚
 '  address;C30:G36
-'         ;“±“ü‚·‚é—˜“_
+'         ;å°Žå…¥ã™ã‚‹åˆ©ç‚¹
 '     skip;1
-'         ;”­’‚É‚Â‚¢‚Ä
+'         ;ç™ºæ³¨ã«ã¤ã„ã¦
 '     skip;2
-'         ;Ž–‹ÆŽÒ‚Å
+'         ;äº‹æ¥­è€…ã§
 '     skip;1
-'         ;”­’‚©‚çŒöŠJ‚Ü‚Å
+'         ;ç™ºæ³¨ã‹ã‚‰å…¬é–‹ã¾ã§
 '     skip;1
-'         ;ƒvƒ‰ƒCƒoƒV[
-'         ;‘åŠé‹Æ‚Å
+'         ;ãƒ—ãƒ©ã‚¤ãƒã‚·ãƒ¼
+'         ;å¤§ä¼æ¥­ã§
 '     skip;1
-'         ;—¿‹à
+'         ;æ–™é‡‘
 '     skip;1
-'         ;Žæˆøã‚Ì’ˆÓ
-'         ;Œö‰v–@l‚Å
+'         ;å–å¼•ä¸Šã®æ³¨æ„
+'         ;å…¬ç›Šæ³•äººã§
 '     skip;1
-'         ;ŒöŠJi”[•ij
+'         ;å…¬é–‹ï¼ˆç´å“ï¼‰
 '     skip;2
-'         ;ŒÂl‚Å
+'         ;å€‹äººã§
 '     skip;1
-'         ;Šî–{“I‚Èƒ‹[ƒ‹
+'         ;åŸºæœ¬çš„ãªãƒ«ãƒ¼ãƒ«
 '     skip;2
-'         ;ITŠé‹Æ‚Å
+'         ;ITä¼æ¥­ã§
 '     skip;1
-'         ;×‚©‚¢ƒ‹[ƒ‹
+'         ;ç´°ã‹ã„ãƒ«ãƒ¼ãƒ«
 '     skip;4
-'         ;‚È‚º–³—¿ƒ\ƒtƒg‚ð”ƒ‚¤H
+'         ;ãªãœç„¡æ–™ã‚½ãƒ•ãƒˆã‚’è²·ã†ï¼Ÿ
 '  address;C38
-'         ;‚·‚®‚É’•¶‚·‚é
+'         ;ã™ãã«æ³¨æ–‡ã™ã‚‹
 '  address;B42
-'         ;ŠÈ’P‚ÈŽwŽ¦AˆÀ‚¢—¿‹àA‘‚¢Œ‹‰Ê
+'         ;ç°¡å˜ãªæŒ‡ç¤ºã€å®‰ã„æ–™é‡‘ã€æ—©ã„çµæžœ
 '  address;B44
-'         ;—¿‹à - ƒREƒEƒFƒAEƒ‰ƒCƒZƒ“ƒX‚ÌƒVƒXƒeƒ€ŠJ”­
+'         ;æ–™é‡‘ - ã‚³ãƒ»ã‚¦ã‚§ã‚¢ãƒ»ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã®ã‚·ã‚¹ãƒ†ãƒ é–‹ç™º
 '  address;B46
-'         ;Šî–{—¿‹à•\
+'         ;åŸºæœ¬æ–™é‡‘è¡¨
 '  address;B48:B49
-'         ;‚R‚Â‚ÌƒTƒCƒY‚©‚ç‘I‚Ô‚¾‚¯‚ÅŠÈ’PB
-'         ;‘O•¥‚¢‚ªŒ´‘¥B
+'         ;ï¼“ã¤ã®ã‚µã‚¤ã‚ºã‹ã‚‰é¸ã¶ã ã‘ã§ç°¡å˜ã€‚
+'         ;å‰æ‰•ã„ãŒåŽŸå‰‡ã€‚
 '  address;B51:D53
-'         ;SƒTƒCƒY
-'         ;1,000‰~
-'         ;iÅž 1,050‰~j
-'         ;MƒTƒCƒY
-'         ;10,000‰~
-'         ;iÅž 10,500‰~j
-'         ;LƒTƒCƒY
-'         ;100,000‰~
-'         ;iÅž 105,000‰~j
+'         ;Sã‚µã‚¤ã‚º
+'         ;1,000å††
+'         ;ï¼ˆç¨Žè¾¼ 1,050å††ï¼‰
+'         ;Mã‚µã‚¤ã‚º
+'         ;10,000å††
+'         ;ï¼ˆç¨Žè¾¼ 10,500å††ï¼‰
+'         ;Lã‚µã‚¤ã‚º
+'         ;100,000å††
+'         ;ï¼ˆç¨Žè¾¼ 105,000å††ï¼‰
 '  address;B55
-'         ;ƒTƒCƒY‚Æ‚Í
+'         ;ã‚µã‚¤ã‚ºã¨ã¯
 '  address;B57
-'         ;ŠJ”­‚É‚©‚©‚éŽžŠÔ‚â“ïˆÕ“x‚ðA‚¨‚¨‚Ü‚©‚É‚R‚Â‚ÌƒTƒCƒY‚Å•ª—Þ‚µ‚Ü‚·B
+'         ;é–‹ç™ºã«ã‹ã‹ã‚‹æ™‚é–“ã‚„é›£æ˜“åº¦ã‚’ã€ãŠãŠã¾ã‹ã«ï¼“ã¤ã®ã‚µã‚¤ã‚ºã§åˆ†é¡žã—ã¾ã™ã€‚
 '  address;B59
-'         ;SƒTƒCƒY
+'         ;Sã‚µã‚¤ã‚º
 '  address;B61:C65
-'         ;1. ¬Œ^A Small A partial
+'         ;1. å°åž‹ã€ Small ã€ partial
 '     skip;1
-'         ;2. ‚¿‚å‚Á‚Æ‚µ‚½ƒR[ƒh‘f•Ð‚âAƒ[ƒNƒV[ƒg‚Ìˆê•”•ª‚È‚ÇB
+'         ;2. ã¡ã‚‡ã£ã¨ã—ãŸã‚³ãƒ¼ãƒ‰ç´ ç‰‡ã‚„ã€ãƒ¯ãƒ¼ã‚¯ã‚·ãƒ¼ãƒˆã®ä¸€éƒ¨åˆ†ãªã©ã€‚
 '     skip;1
-'         ;3. Žè‚É•‰‚¦‚È‚¢A‘‚«•û‚Ì‚í‚©‚ç‚È‚¢ƒR[ƒh‚¾‚¯‚ð’m‚è‚½‚¢‚Æ‚«‚ÉB
+'         ;3. æ‰‹ã«è² ãˆãªã„ã€æ›¸ãæ–¹ã®ã‚ã‹ã‚‰ãªã„ã‚³ãƒ¼ãƒ‰ã ã‘ã‚’çŸ¥ã‚ŠãŸã„ã¨ãã«ã€‚
 '     skip;1
-'         ;4. —áj”s‚Ì VBA ƒR[ƒhBŽŸ‚ÌƒŠƒ“ƒNæ‚Ì‚P‚Â–Ú‚ÌƒR[ƒh
+'         ;4. ä¾‹ï¼‰æ•°è¡Œã® VBA ã‚³ãƒ¼ãƒ‰ã€‚æ¬¡ã®ãƒªãƒ³ã‚¯å…ˆã®ï¼‘ã¤ç›®ã®ã‚³ãƒ¼ãƒ‰
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/hello_key_value
 '  address;B67
-'         ;MƒTƒCƒY
+'         ;Mã‚µã‚¤ã‚º
 '  address;B69:C73
-'         ;1. ’†Œ^A Medium A functional
+'         ;1. ä¸­åž‹ã€ Medium ã€ functional
 '     skip;1
-'         ;2. Š®¬‚µ‚½ŠÖ”‚âƒ[ƒNƒV[ƒgB
+'         ;2. å®Œæˆã—ãŸé–¢æ•°ã‚„ãƒ¯ãƒ¼ã‚¯ã‚·ãƒ¼ãƒˆã€‚
 '     skip;1
-'         ;3. ’Pˆê‚Ì‹@”\‚ªA‚Æ‚è‚ ‚¦‚¸“®‚­ƒŒƒxƒ‹‚Ì‚à‚Ì‚ª—~‚µ‚¢‚Æ‚«‚ÉB
+'         ;3. å˜ä¸€ã®æ©Ÿèƒ½ãŒã€ã¨ã‚Šã‚ãˆãšå‹•ããƒ¬ãƒ™ãƒ«ã®ã‚‚ã®ãŒæ¬²ã—ã„ã¨ãã«ã€‚
 '     skip;1
-'         ;4. —ájƒ}ƒNƒ‚ðŽÀs‚·‚ê‚Îˆê‚Â‚Ì“®ì‚ðs‚¤ VBA ƒR[ƒhB
+'         ;4. ä¾‹ï¼‰ãƒžã‚¯ãƒ­ã‚’å®Ÿè¡Œã™ã‚Œã°ä¸€ã¤ã®å‹•ä½œã‚’è¡Œã† VBA ã‚³ãƒ¼ãƒ‰ã€‚
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
 '  address;B75
-'         ;LƒTƒCƒY
+'         ;Lã‚µã‚¤ã‚º
 '  address;B77:B80
-'         ;1. ‘åŒ^A Large A integrated
-'         ;2. ŽÀ—p“I‚ÈƒAƒvƒŠƒP[ƒVƒ‡ƒ“B
-'         ;3. •¡”‚Ì‹@”\‚âAðŒÝ’è‚É‚æ‚é“®ìØ‚è‘Ö‚¦‚â‰æ–Ê‘JˆÚ‚àŠÜ‚Þ‚Æ‚«‚ÉB
-'         ;4. —ájƒ†[ƒU[ƒCƒ“ƒ^[ƒtƒF[ƒX‚ðŽ‚¿Aƒc[ƒ‹‚Æ‚µ‚Ä—˜—p‚Å‚«‚éB
+'         ;1. å¤§åž‹ã€ Large ã€ integrated
+'         ;2. å®Ÿç”¨çš„ãªã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã€‚
+'         ;3. è¤‡æ•°ã®æ©Ÿèƒ½ã‚„ã€æ¡ä»¶è¨­å®šã«ã‚ˆã‚‹å‹•ä½œåˆ‡ã‚Šæ›¿ãˆã‚„ç”»é¢é·ç§»ã‚‚å«ã‚€ã¨ãã«ã€‚
+'         ;4. ä¾‹ï¼‰ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã‚’æŒã¡ã€ãƒ„ãƒ¼ãƒ«ã¨ã—ã¦åˆ©ç”¨ã§ãã‚‹ã€‚
 '  address;B84
-'         ;ŒöŠJ - ƒREƒEƒFƒAEƒ‰ƒCƒZƒ“ƒX‚ÌƒVƒXƒeƒ€ŠJ”­
+'         ;å…¬é–‹ - ã‚³ãƒ»ã‚¦ã‚§ã‚¢ãƒ»ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã®ã‚·ã‚¹ãƒ†ãƒ é–‹ç™º
 '  address;B86
-'         ;ŒöŠJ‚ª”[•i‚Å‚·
+'         ;å…¬é–‹ãŒç´å“ã§ã™
 '  address;B88:B95
-'         ;Š’è‚ÌŒöŠJêŠ‚É¬‰Ê•¨‚ðƒAƒbƒvƒ[ƒh‚·‚é•û–@‚ðÌ‚è‚Ü‚·B
-'         ;Žd—l‚ðŒˆ‚ß‚é’iŠK‚©‚çŒöŠJURL‚ðŽg‚¢‚Ü‚·B
-'         ;ŒöŠJ‚Ìƒ^ƒCƒ~ƒ“ƒO‚Å˜A—‚Í‚µ‚Ü‚·‚ªAƒtƒ@ƒCƒ‹“Y•t‚È‚Ç‚Í‚µ‚Ü‚¹‚ñB
-'         ;ŒöŠJæ‚©‚ç‚ÌƒZƒ‹ƒtƒ_ƒEƒ“ƒ[ƒh‚Å‚¨Šè‚¢‚µ‚Ü‚·B
-'         ;–{l‚Í‚à‚¿‚ë‚ñA“¯—»‚â—F’BA‚»‚Ì‘¼‘å¨‚Ìl‚ªƒ_ƒEƒ“ƒ[ƒh‚µ‚Ä—˜—p‚Å‚«‚Ü‚·B
-'         ;ƒ}ƒNƒƒR[ƒh‚ðƒeƒLƒXƒg‚ÅŒöŠJ‚·‚é‚Ì‚ÅAƒZƒLƒ…ƒŠƒeƒB‚Ì‹­‚¢Eê‚ÅAƒ}ƒNƒ•t‚«ƒuƒbƒN‚Ìƒ_ƒEƒ“ƒ[ƒh‹K§‚ª‚ ‚éŠÂ‹«‚Å‚àS”z‚ ‚è‚Ü‚¹‚ñB
-'         ;ŒöŠJŒã‚ÌƒR[ƒhC³“™A’Ç‰Áî•ñ‚à“–ŠYURL‚©‚ç”h¶‚µ‚Ä‚¢‚«‚Ü‚·B
-'         ;URL‚Í‰i‹v‚É•Ï‚í‚ç‚È‚¢‚à‚Ì‚Å‚Í‚ ‚è‚Ü‚¹‚ñB
+'         ;æ‰€å®šã®å…¬é–‹å ´æ‰€ã«æˆæžœç‰©ã‚’ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰ã™ã‚‹æ–¹æ³•ã‚’æŽ¡ã‚Šã¾ã™ã€‚
+'         ;ä»•æ§˜ã‚’æ±ºã‚ã‚‹æ®µéšŽã‹ã‚‰å…¬é–‹URLã‚’ä½¿ã„ã¾ã™ã€‚
+'         ;å…¬é–‹ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§é€£çµ¡ã¯ã—ã¾ã™ãŒã€ãƒ•ã‚¡ã‚¤ãƒ«æ·»ä»˜ãªã©ã¯ã—ã¾ã›ã‚“ã€‚
+'         ;å…¬é–‹å…ˆã‹ã‚‰ã®ã‚»ãƒ«ãƒ•ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã§ãŠé¡˜ã„ã—ã¾ã™ã€‚
+'         ;æœ¬äººã¯ã‚‚ã¡ã‚ã‚“ã€åŒåƒšã‚„å‹é”ã€ãã®ä»–å¤§å‹¢ã®äººãŒãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã—ã¦åˆ©ç”¨ã§ãã¾ã™ã€‚
+'         ;ãƒžã‚¯ãƒ­ã‚³ãƒ¼ãƒ‰ã‚’ãƒ†ã‚­ã‚¹ãƒˆã§å…¬é–‹ã™ã‚‹ã®ã§ã€ã‚»ã‚­ãƒ¥ãƒªãƒ†ã‚£ã®å¼·ã„è·å ´ã§ã€ãƒžã‚¯ãƒ­ä»˜ããƒ–ãƒƒã‚¯ã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰è¦åˆ¶ãŒã‚ã‚‹ç’°å¢ƒã§ã‚‚å¿ƒé…ã‚ã‚Šã¾ã›ã‚“ã€‚
+'         ;å…¬é–‹å¾Œã®ã‚³ãƒ¼ãƒ‰ä¿®æ­£ç­‰ã€è¿½åŠ æƒ…å ±ã‚‚å½“è©²URLã‹ã‚‰æ´¾ç”Ÿã—ã¦ã„ãã¾ã™ã€‚
+'         ;URLã¯æ°¸ä¹…ã«å¤‰ã‚ã‚‰ãªã„ã‚‚ã®ã§ã¯ã‚ã‚Šã¾ã›ã‚“ã€‚
 '  address;B97
-'         ;Žå‚ÈŒöŠJæURL
+'         ;ä¸»ãªå…¬é–‹å…ˆURL
 '  address;B99:B100
 '         ;http://cowares.blogspot.com
 '         ;http://code.google.com/p/cowares-excel-hello/
 '  address;B104
-'         ;‚È‚º–³—¿ƒ\ƒtƒg‚ð”ƒ‚¤‚Ì‚©H - ƒREƒEƒFƒAEƒ‰ƒCƒZƒ“ƒX‚ÌƒVƒXƒeƒ€ŠJ”­
+'         ;ãªãœç„¡æ–™ã‚½ãƒ•ãƒˆã‚’è²·ã†ã®ã‹ï¼Ÿ - ã‚³ãƒ»ã‚¦ã‚§ã‚¢ãƒ»ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã®ã‚·ã‚¹ãƒ†ãƒ é–‹ç™º
 '  address;B106
-'         ;‚»‚Ì‚¨‹à‚Í‰½‚É•¥‚Á‚Ä‚¢‚é‚Ì‚Å‚µ‚å‚¤‚©
+'         ;ãã®ãŠé‡‘ã¯ä½•ã«æ‰•ã£ã¦ã„ã‚‹ã®ã§ã—ã‚‡ã†ã‹
 '  address;B108:G108
-'         ;–³—¿‚Ì‚à‚Ì
+'         ;ç„¡æ–™ã®ã‚‚ã®
 '     skip;1
-'         ;”ƒ‚¤‚à‚Ì
+'         ;è²·ã†ã‚‚ã®
 '     skip;2
-'         ;”ƒ‚í‚È‚¢‚à‚Ì
+'         ;è²·ã‚ãªã„ã‚‚ã®
 '  address;B110:G113
-'         ;ƒ‰ƒCƒZƒ“ƒX
+'         ;ãƒ©ã‚¤ã‚»ãƒ³ã‚¹
 '     skip;1
-'         ;ƒGƒ“ƒWƒjƒA‚Ì“­‚«
+'         ;ã‚¨ãƒ³ã‚¸ãƒ‹ã‚¢ã®åƒã
 '     skip;2
-'         ;•ÛØ
-'         ;ƒRƒs[
+'         ;ä¿è¨¼
+'         ;ã‚³ãƒ”ãƒ¼
 '     skip;1
-'         ;¢ŠE‚Ö‚ÌvŒ£
+'         ;ä¸–ç•Œã¸ã®è²¢çŒ®
 '     skip;2
-'         ;–ðˆõ‚Ì“­‚«
+'         ;å½¹å“¡ã®åƒã
 '     skip;5
-'         ;Ž––±ˆõ‚Ì“­‚«
+'         ;äº‹å‹™å“¡ã®åƒã
 '     skip;5
-'         ;‰c‹ÆƒXƒ}ƒCƒ‹
+'         ;å–¶æ¥­ã‚¹ãƒžã‚¤ãƒ«
 '  address;C115:D116
 '     skip;1
-'         ;ƒREƒEƒFƒA‚Ì—¿‹à
-'         ;’Êí‚ÌƒVƒXƒeƒ€ŠJ”­‚Å•¥‚¤‚¨‹à
+'         ;ã‚³ãƒ»ã‚¦ã‚§ã‚¢ã®æ–™é‡‘
+'         ;é€šå¸¸ã®ã‚·ã‚¹ãƒ†ãƒ é–‹ç™ºã§æ‰•ã†ãŠé‡‘
 '  address;C120
-'         ;‚·‚®‚É’•¶‚·‚é
+'         ;ã™ãã«æ³¨æ–‡ã™ã‚‹
 
 'cells-numberformat
 '  address;B9
@@ -1316,7 +1316,7 @@ Public Sub BarMain(Optional oWho As Object = Nothing)
     If Helper Is Nothing Then
         BarInitialize
         BarCustomize
-        MsgBox "ƒc[ƒ‹ƒo[‚ðC•œ‚µ‚Ü‚µ‚½B‚à‚¤ˆê“x‘€ì‚µ‚Ä‚­‚¾‚³‚¢B", vbExclamation, BaumMain.Name
+        MsgBox "ãƒ„ãƒ¼ãƒ«ãƒãƒ¼ã‚’ä¿®å¾©ã—ã¾ã—ãŸã€‚ã‚‚ã†ä¸€åº¦æ“ä½œã—ã¦ãã ã•ã„ã€‚", vbExclamation, BaumMain.Name
     Else
         Main
     End If
@@ -1553,7 +1553,7 @@ Public Sub SetBookTitle()
     
     On Error Resume Next
     NewTitle = ActiveCell.Text
-    NewTitle = InputBox("ƒuƒbƒNƒ^ƒCƒgƒ‹‚ðÝ’è‚·‚é", "Book Property Title", NewTitle)
+    NewTitle = InputBox("ãƒ–ãƒƒã‚¯ã‚¿ã‚¤ãƒˆãƒ«ã‚’è¨­å®šã™ã‚‹", "Book Property Title", NewTitle)
     If NewTitle <> "" Then
         BookTitle = NewTitle
         Set Wb = GetBook(BookName)
