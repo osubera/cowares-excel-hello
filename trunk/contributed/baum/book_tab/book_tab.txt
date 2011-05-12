@@ -2,10 +2,11 @@
 ';
 
 'workbook
-'   name;book_tab_2k.xls/VBAProject
+'   name;book_tab_2k.xls/F3BookTab
 
 'book-identity
 '  title;☆
+'  description;ブックタブみたいな
 
 'require
 '       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
@@ -19,7 +20,7 @@
 '       ;ブックタブみたいな!_Contributor
 '       ;=ブックタブみたいな!R4C2
 '       ;ブックタブみたいな!_Copyright
-'       ;=ブックタブみたいな!R17C1:R22C10
+'       ;=ブックタブみたいな!R17C1:R24C10
 '       ;ブックタブみたいな!_FileButtons
 '       ;=ブックタブみたいな!R5C2
 '       ;ブックタブみたいな!_License
@@ -58,7 +59,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;40611.6463541667
+'         ;40642.5833333333
 '         ;keyword
 '         ;vba,excel
 '  address;A13:J13
@@ -78,23 +79,33 @@
 '         ;file
 '     skip;1
 '         ;10
-'  address;A17:J22
+'  address;A17:J24
 '         ;同期
 '         ;ブック一覧を再確認する。
 '         ;sync
 '     skip;1
 '         ;1
 '     skip;5
+'         ;タイマー同期
+'         ;時々、ブック一覧を勝手に再確認する。
+'         ;autosync
+'         ;60
+'         ;1
+'     skip;5
 '         ;保存済みを閉じる
 '         ;未保存を除き、ブックを閉じる。
 '         ;close_saved
-'     skip;4
+'     skip;1
+'         ;1
+'     skip;2
 '         ;1
 '     skip;2
 '         ;アクティブ以外破棄
 '         ;アクティブブックを除き、未保存の情報を破棄して閉じる。
 '         ;close_unactives
-'     skip;7
+'     skip;1
+'         ;1
+'     skip;5
 '         ;タイトル優先
 '         ;最初にタブを開いたとき、ファイル名でなくタイトルを表示する。
 '         ;prefer_title
@@ -111,6 +122,14 @@
 '         ;1
 '     skip;4
 '         ;1
+'         ;タスクバー表示
+'         ;ウィンドウをタスクバーに表示する。
+'         ;taskbar_windows
+'     skip;1
+'         ;1
+'     skip;2
+'         ;1
+'     skip;2
 '         ;=R1C2 & " について"
 '         ;このシートを表示する。
 '         ;about
@@ -119,9 +138,9 @@
 '         ;2
 '     skip;1
 '         ;1
-'  address;B27
+'  address;B29
 '         ;エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。
-'  address;C30:G36
+'  address;C32:G38
 '         ;導入する利点
 '     skip;1
 '         ;発注について
@@ -149,18 +168,18 @@
 '         ;細かいルール
 '     skip;4
 '         ;なぜ無料ソフトを買う？
-'  address;C38
+'  address;C40
 '         ;すぐに注文する
-'  address;B42
-'         ;簡単な指示、安い料金、早い結果
 '  address;B44
-'         ;料金 - コ・ウェア・ライセンスのシステム開発
+'         ;簡単な指示、安い料金、早い結果
 '  address;B46
+'         ;料金 - コ・ウェア・ライセンスのシステム開発
+'  address;B48
 '         ;基本料金表
-'  address;B48:B49
+'  address;B50:B51
 '         ;３つのサイズから選ぶだけで簡単。
 '         ;前払いが原則。
-'  address;B51:D53
+'  address;B53:D55
 '         ;Sサイズ
 '         ;1,000円
 '         ;（税込 1,050円）
@@ -170,13 +189,13 @@
 '         ;Lサイズ
 '         ;100,000円
 '         ;（税込 105,000円）
-'  address;B55
-'         ;サイズとは
 '  address;B57
-'         ;開発にかかる時間や難易度を、おおまかに３つのサイズで分類します。
+'         ;サイズとは
 '  address;B59
+'         ;開発にかかる時間や難易度を、おおまかに３つのサイズで分類します。
+'  address;B61
 '         ;Sサイズ
-'  address;B61:C65
+'  address;B63:C67
 '         ;1. 小型、 Small 、 partial
 '     skip;1
 '         ;2. ちょっとしたコード素片や、ワークシートの一部分など。
@@ -186,9 +205,9 @@
 '         ;4. 例）数行の VBA コード。次のリンク先の１つ目のコード
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/hello_key_value
-'  address;B67
+'  address;B69
 '         ;Mサイズ
-'  address;B69:C73
+'  address;B71:C75
 '         ;1. 中型、 Medium 、 functional
 '     skip;1
 '         ;2. 完成した関数やワークシート。
@@ -198,18 +217,18 @@
 '         ;4. 例）マクロを実行すれば一つの動作を行う VBA コード。
 '     skip;2
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
-'  address;B75
+'  address;B77
 '         ;Lサイズ
-'  address;B77:B80
+'  address;B79:B82
 '         ;1. 大型、 Large 、 integrated
 '         ;2. 実用的なアプリケーション。
 '         ;3. 複数の機能や、条件設定による動作切り替えや画面遷移も含むときに。
 '         ;4. 例）ユーザーインターフェースを持ち、ツールとして利用できる。
-'  address;B84
-'         ;公開 - コ・ウェア・ライセンスのシステム開発
 '  address;B86
+'         ;公開 - コ・ウェア・ライセンスのシステム開発
+'  address;B88
 '         ;公開が納品です
-'  address;B88:B95
+'  address;B90:B97
 '         ;所定の公開場所に成果物をアップロードする方法を採ります。
 '         ;仕様を決める段階から公開URLを使います。
 '         ;公開のタイミングで連絡はしますが、ファイル添付などはしません。
@@ -218,22 +237,22 @@
 '         ;マクロコードをテキストで公開するので、セキュリティの強い職場で、マクロ付きブックのダウンロード規制がある環境でも心配ありません。
 '         ;公開後のコード修正等、追加情報も当該URLから派生していきます。
 '         ;URLは永久に変わらないものではありません。
-'  address;B97
+'  address;B99
 '         ;主な公開先URL
-'  address;B99:B100
+'  address;B101:B102
 '         ;http://cowares.blogspot.com
 '         ;http://code.google.com/p/cowares-excel-hello/
-'  address;B104
-'         ;なぜ無料ソフトを買うのか？ - コ・ウェア・ライセンスのシステム開発
 '  address;B106
+'         ;なぜ無料ソフトを買うのか？ - コ・ウェア・ライセンスのシステム開発
+'  address;B108
 '         ;そのお金は何に払っているのでしょうか
-'  address;B108:G108
+'  address;B110:G110
 '         ;無料のもの
 '     skip;1
 '         ;買うもの
 '     skip;2
 '         ;買わないもの
-'  address;B110:G113
+'  address;B112:G115
 '         ;ライセンス
 '     skip;1
 '         ;エンジニアの働き
@@ -248,11 +267,11 @@
 '         ;事務員の働き
 '     skip;5
 '         ;営業スマイル
-'  address;C115:D116
+'  address;C117:D118
 '     skip;1
 '         ;コ・ウェアの料金
 '         ;通常のシステム開発で払うお金
-'  address;C120
+'  address;C122
 '         ;すぐに注文する
 
 'cells-numberformat
@@ -266,84 +285,84 @@
 
 'cells-height
 '   unit;pt
-'  address;A27
+'  address;A29
 '         ;14.25
-'  address;A38
+'  address;A40
 '         ;24.75
-'  address;A44
-'         ;21
 '  address;A46
+'         ;21
+'  address;A48
 '         ;14.25
-'  address;A50:A51
+'  address;A52:A53
 '   repeat;2
 '         ;14.25
-'  address;A53:A55
+'  address;A55:A57
 '   repeat;3
 '         ;14.25
-'  address;A84
-'         ;21
 '  address;A86
-'         ;14.25
-'  address;A97
-'         ;14.25
-'  address;A104
 '         ;21
-'  address;A106
+'  address;A88
 '         ;14.25
-'  address;A120
+'  address;A99
+'         ;14.25
+'  address;A106
+'         ;21
+'  address;A108
+'         ;14.25
+'  address;A122
 '         ;24.75
 
 'cells-background-color
-'  address;A27:M27
+'  address;A29:M29
 '   repeat;13
 '         ;#FF6600
-'  address;C30:H30
+'  address;C32:H32
 '   repeat;2
 '         ;#FFCC99
 '   repeat;4
 '         ;#CCFFCC
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
 '         ;#99CC00
-'  address;B44:L44
+'  address;B46:L46
 '   repeat;11
 '         ;#333399
-'  address;B51:B53
+'  address;B53:B55
 '         ;#CCFFCC
 '         ;#FFFF99
 '         ;#FFCC99
-'  address;B59
+'  address;B61
 '         ;#CCFFCC
-'  address;B67
+'  address;B69
 '         ;#FFFF99
-'  address;B75
+'  address;B77
 '         ;#FFCC99
-'  address;B84:L84
+'  address;B86:L86
 '   repeat;11
 '         ;#333399
-'  address;B104:L104
+'  address;B106:L106
 '   repeat;11
 '         ;#333399
-'  address;B108:H108
+'  address;B110:H110
 '   repeat;2
 '         ;#FF99CC
 '   repeat;2
 '         ;#CCFFCC
 '   repeat;3
 '         ;#FF99CC
-'  address;B115:H116
+'  address;B117:H118
 '     skip;2
 '   repeat;2
 '         ;#00FF00
 '     skip;3
 '   repeat;7
 '         ;#FF00FF
-'  address;C120:F120
+'  address;C122:F122
 '   repeat;4
 '         ;#99CC00
 
 'cells-color
-'  address;C31:G36
+'  address;C33:G38
 '         ;#0000FF
 '     skip;1
 '         ;#0000FF
@@ -367,134 +386,134 @@
 '         ;#0000FF
 '     skip;4
 '         ;#0000FF
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
 '         ;#0000FF
-'  address;B42
+'  address;B44
 '         ;#FF00FF
-'  address;B44:L44
+'  address;B46:L46
 '   repeat;11
 '         ;#FFCC00
-'  address;C64:J65
+'  address;C66:J67
 '     skip;2
 '   repeat;14
 '         ;#0000FF
-'  address;C73:H73
+'  address;C75:H75
 '   repeat;6
 '         ;#0000FF
-'  address;B84:L84
+'  address;B86:L86
 '   repeat;11
 '         ;#FFCC00
-'  address;B99:B100
+'  address;B101:B102
 '   repeat;2
 '         ;#0000FF
-'  address;B104:L104
+'  address;B106:L106
 '   repeat;11
 '         ;#FFCC00
-'  address;C120:F120
+'  address;C122:F122
 '   repeat;4
 '         ;#0000FF
 
 'cells-font-size
-'  address;B27
+'  address;B29
 '         ;12
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
 '         ;12
-'  address;B44
-'         ;18
 '  address;B46
-'         ;12
-'  address;B55
-'         ;12
-'  address;B84
 '         ;18
+'  address;B48
+'         ;12
+'  address;B57
+'         ;12
 '  address;B86
-'         ;12
-'  address;B97
-'         ;12
-'  address;B104
 '         ;18
-'  address;B106
+'  address;B88
 '         ;12
-'  address;C120:F120
+'  address;B99
+'         ;12
+'  address;B106
+'         ;18
+'  address;B108
+'         ;12
+'  address;C122:F122
 '   repeat;4
 '         ;12
 
 'cells-font-bold
-'  address;B27
+'  address;B29
 '         ;yes
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
-'         ;yes
-'  address;B44
 '         ;yes
 '  address;B46
 '         ;yes
-'  address;B51:B53
+'  address;B48
+'         ;yes
+'  address;B53:B55
 '   repeat;3
 '         ;yes
-'  address;B55
+'  address;B57
 '         ;yes
-'  address;B59
+'  address;B61
 '         ;yes
-'  address;B67
+'  address;B69
 '         ;yes
-'  address;B75
-'         ;yes
-'  address;B84
+'  address;B77
 '         ;yes
 '  address;B86
 '         ;yes
-'  address;B97
+'  address;B88
 '         ;yes
-'  address;B104
+'  address;B99
 '         ;yes
 '  address;B106
 '         ;yes
-'  address;B108:G108
+'  address;B108
+'         ;yes
+'  address;B110:G110
 '         ;yes
 '     skip;1
 '   repeat;2
 '         ;yes
 '     skip;1
 '         ;yes
-'  address;C120:F120
+'  address;C122:F122
 '   repeat;4
 '         ;yes
 
 'cells-h-align
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
 '         ;center
-'  address;C51:C53
+'  address;C53:C55
 '   repeat;3
 '         ;right
-'  address;C64:J65
+'  address;C66:J67
 '     skip;2
 '   repeat;6
 '         ;center
 '   repeat;7
 '         ;left
 '         ;center
-'  address;C73:H73
+'  address;C75:H75
 '   repeat;6
 '         ;left
-'  address;D108:E108
+'  address;D110:E110
 '   repeat;2
 '         ;center
-'  address;D115:E115
+'  address;D117:E117
 '   repeat;2
 '         ;center
-'  address;C120:F120
+'  address;C122:F122
 '   repeat;4
 '         ;center
 
 'cells-v-align
-'  address;C38:F38
+'  address;C40:F40
 '   repeat;4
 '         ;center
-'  address;B46:J80
+'  address;B48:J82
 '   repeat;6
 '         ;center
 '     skip;3
@@ -598,13 +617,13 @@
 '     skip;3
 '   repeat;6
 '         ;center
-'  address;B84:G100
+'  address;B86:G102
 '   repeat;102
 '         ;center
-'  address;B104:B106
+'  address;B106:B108
 '   repeat;3
 '         ;center
-'  address;B108:G116
+'  address;B110:G118
 '   repeat;11
 '         ;center
 '     skip;1
@@ -616,7 +635,7 @@
 '     skip;2
 '   repeat;4
 '         ;center
-'  address;C120:F120
+'  address;C122:F122
 '   repeat;4
 '         ;center
 
@@ -1304,6 +1323,11 @@ Private Helper As ToolBarV2
 'Public Helper As ToolBarV2
 ' we cannot have a public variable in Excel Worksheet
 
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3BookTab"
+End Function
+
 Friend Function GetHelper() As ToolBarV2
     Set GetHelper = Helper
 End Function
@@ -1329,10 +1353,12 @@ Private Sub Main()
     ' switch to a main menu procedure
     Select Case oAC.Tag
     Case "file"
-        ' nop for popup
+        Menu_before_file oAC
     Case "about"
-        Menu_about
-    Case "sync", "prefer_title", "input_title", "close_saved", "close_unactives"
+        Menu_about oAC
+    Case "taskbar_windows"
+        Menu_taskbar oAC
+    Case "sync", "autosync", "prefer_title", "input_title", "close_saved", "close_unactives"
         Menu_file oAC
     Case Else
         Menu_book oAC
@@ -1348,8 +1374,30 @@ Private Sub Menu_file(oAC As Object)
     Tabs.OnClickFile oAC
 End Sub
 
-Private Sub Menu_about()
-    Me.Activate
+Private Sub Menu_before_file(oAC As Object)
+    If Application.ShowWindowsInTaskbar Then
+        Helper.ButtonSwitchOn Helper.ButtonFindByTag(oAC.CommandBar, "taskbar_windows")
+    Else
+        Helper.ButtonSwitchOff Helper.ButtonFindByTag(oAC.CommandBar, "taskbar_windows")
+    End If
+End Sub
+
+Private Sub Menu_taskbar(oAC As Object)
+    Dim NewState As Boolean
+    NewState = Helper.ButtonSwitchToggle(oAC)
+    Application.ShowWindowsInTaskbar = NewState
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    If ThisWorkbook.IsAddin Then
+        Dim Wb As Workbook
+        Set Wb = Workbooks.Add
+        Me.Copy Before:=Wb.Sheets(1)
+        Wb.Saved = True
+        Set Wb = Nothing
+    Else
+        Me.Activate
+    End If
     Tabs.Sync
 End Sub
 
@@ -1376,15 +1424,27 @@ Public Sub BarCustomize()
         Tabs.SetToolBar Helper
         Tabs.PreferTitle = (FilePopUp.CommandBar.FindControl(Tag:="prefer_title").State = msoButtonDown)
         Tabs.InputTitle = (FilePopUp.CommandBar.FindControl(Tag:="input_title").State = msoButtonDown)
+        If FilePopUp.CommandBar.FindControl(Tag:="autosync").State = msoButtonDown Then
+            Tabs.AutoSyncInterval = Val(FilePopUp.CommandBar.FindControl(Tag:="autosync").Parameter)
+        Else
+            Tabs.AutoSyncInterval = 0
+        End If
     End If
     Tabs.Sync
     
-    Application.OnWindow = "BaumMain.OnWindow"
+    Application.OnWindow = ProcNameOnWindow
 End Sub
 
+Public Function ProcNameOnWindow() As String
+    ProcNameOnWindow = BaumMain.VBProjectName & "." & Me.CodeName & ".OnWindow"
+End Function
+
 Public Sub OnWindow()
+    Const MinimumInterval = 3
     On Error GoTo NoTabs
     Tabs.Sync
+    If Tabs.AutoSyncInterval <= MinimumInterval Then Exit Sub
+    DelaySync CLng(Tabs.AutoSyncInterval)
     Exit Sub
     
 NoTabs:
@@ -1392,18 +1452,17 @@ NoTabs:
 End Sub
 
 Public Sub DelaySync(WaitSeconds As Long)
-    Const ProcName = "BaumMain.OnWindow"
     Static EarlyTime As Date
     Static LastTime As Date
     
     On Error Resume Next
     
-    If LastTime >= Now() Then Application.OnTime EarlyTime, ProcName, LastTime, False
+    If LastTime >= Now() Then Application.OnTime EarlyTime, ProcNameOnWindow, LastTime, False
     If WaitSeconds <= 0 Then Exit Sub
     
     EarlyTime = Now() + TimeSerial(0, 0, WaitSeconds)
     LastTime = EarlyTime + TimeValue("0:00:01")
-    Application.OnTime EarlyTime, ProcName, LastTime
+    Application.OnTime EarlyTime, ProcNameOnWindow, LastTime
 End Sub
 
 
@@ -1415,7 +1474,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array(Me.CodeName)
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
 End Property
 
 ' above simple property codes are supported by the following range helpers
@@ -1506,7 +1565,7 @@ Public Property Get ButtonData() As Variant
 End Property
 
 Public Property Get ButtonParent() As Variant
-    ButtonParent = Array("BaumMain")
+    ButtonParent = Array(BaumMain.VBProjectName & ".BaumMain")
 End Property
 
 Public Sub SetBook(Wb As Workbook)
@@ -1540,11 +1599,16 @@ Public Sub ToggleCaption(InputTitle As Boolean)
     If MyButton Is Nothing Then Exit Sub
     
     If InputTitle And (BookName = BookTitle) Then SetBookTitle
-    If MyButton.Caption = BookName Then
-        MyButton.Caption = BookTitle
-    Else
-        MyButton.Caption = BookName
-    End If
+    
+    With MyButton
+        If .Caption = BookName Then
+            .Caption = BookTitle
+            .TooltipText = BookName
+        Else
+            .Caption = BookName
+            .TooltipText = BookTitle
+        End If
+    End With
 End Sub
 
 Public Sub SetBookTitle()
@@ -1599,6 +1663,7 @@ BookIsGone:
     Err.Clear
     Set GetBook = Nothing
     MyButton.Enabled = False
+    MyButton.Visible = False
 End Function
 
 Private Sub SetButton(Bar As ToolBarV2)
@@ -1642,6 +1707,7 @@ Private LastSync As Single
 
 Public InputTitle As Boolean
 Public PreferTitle As Boolean
+Public AutoSyncInterval As Single
 
 Private Sub Class_Initialize()
     Set Buttons = New Scripting.Dictionary
@@ -1662,7 +1728,7 @@ Public Sub Sync()
     Dim ActiveKey As String
     
     LastSync = Timer()
-    ActiveKey = ActiveWindow.Parent.Name
+    If Not ActiveWindow Is Nothing Then ActiveKey = ActiveWindow.Parent.Name
     Set Keys = New Collection
     
     For Each Key In Buttons.Keys
@@ -1718,6 +1784,13 @@ Public Sub OnClickFile(oAC As Office.CommandBarControl)
     Select Case oAC.Tag
     Case "sync"
         Sync
+    Case "autosync"
+        If ToolBar.ButtonSwitchToggle(oAC) Then
+            AutoSyncInterval = Val(oAC.Parameter)
+            BaumMain.OnWindow
+        Else
+            AutoSyncInterval = 0
+        End If
     Case "prefer_title"
         PreferTitle = ToolBar.ButtonSwitchToggle(oAC)
     Case "input_title"
@@ -1746,6 +1819,8 @@ End Sub
 Private Sub CloseUnactives()
     Dim Wb As Workbook
     Dim ActiveName As String
+    
+    If Application.Windows.Count = 0 Then Exit Sub
     
     ActiveName = ActiveWorkbook.Name
     For Each Wb In Application.Workbooks
