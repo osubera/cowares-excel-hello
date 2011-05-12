@@ -26,10 +26,12 @@
 = Snapshots =
 
  * Excel 2000 toolbar
-
+    http://3.bp.blogspot.com/-vo2ocWsnUCI/TctyoS5bgPI/AAAAAAAAAFg/dpVYZEcg_aE/s1600/shot1.png
  * Excel 2007 ribbon
-
+    http://4.bp.blogspot.com/-efBtkV4OvUM/Tctyo9OOijI/AAAAAAAAAFk/HlsImQaSmZY/s1600/shot2.png
  * result sheet
+    http://4.bp.blogspot.com/-A6J-pqO1xF0/TctypdYkeAI/AAAAAAAAAFo/K8NqHUclU8A/s1600/shot3.png
+
 
 
 = How to use =
