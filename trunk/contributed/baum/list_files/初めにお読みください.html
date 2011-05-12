@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<title>初めにお読みください - ファイル一覧表</title>
+<link rel="stylesheet" href="std.css" type="text/css" />
+<link rel="copyright" href="http://kobobau.mocvba.com/copy.html" />
+</head>
+<body>
+<div class="productid">ファイル一覧表 list_files</div>
+<h1>初めにお読みください</h1>
+
+<h2 onclick="smr1(this)">このソフトにできること</h2>
+<div class="tree">
+
+<p>
+フォルダ内のファイル一覧表を作成する。
+</p>
+
+<div>
+<img src="shot3.png" alt="worksheet generated" />
+</div>
+
+</div>
+<h2 onclick="smr1(this)">以下に同意した上でご使用ください</h2>
+<div class="tree">
+
+<div>
+<h3>
+1. 保証はありません。 (自律)
+</h3>
+<p>
+既知の欠陥も未知の欠陥も含めたまま公開されています。 
+品質や正確さはご自身で判断してください。 
+使用により生じた損失など、すべての責任はあなたが負います。
+</p>
+</div>
+
+<div>
+<h3>
+2. フリーです。 (自由)
+</h3>
+<p>
+どなたでも目的によらず無料で無期限に使えます。 
+登録や承諾は不要です。 
+商用も可です。
+自由な加工を含む再利用も再配布もできます。
+</p>
+</div>
+
+<div>
+<h3>
+3. 公正であれ。 (公正)
+</h3>
+<p>
+オリジナルが、あなたの作品と無関係に利用できることを明示する。 
+オリジナルの仕事とあなたの仕事を、正直に区別する。 
+オリジナルの著作権とライセンスを尊重する。
+</p>
+</div>
+
+<div>
+<span>
+コ・ウェア・ライセンス（自律、自由、公正）の詳細は <a href="http://cowares.nobody.jp/license/">http://cowares.nobody.jp/license/</a> で公開されています。
+</span>
+</div>
+
+<div>
+<p>
+このソフトは、2002年から2011年までシェアウェアとして公開していた、「うちらのファイル(一覧表)1」をオープンソースに移行したものです。
+</p>
+</div>
+
+</div>
+<h2 onclick="smr1(this)">動作環境</h2>
+<div class="tree">
+
+<ul>
+<li>Excel 97以降すべて。</li>
+<li>Windows 95 以降すべて。</li>
+<li>Macintosh での動作は未確認。</li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">配布しているファイルについて</h2>
+<div class="tree">
+
+<ol>
+<li>ZIP形式で圧縮しています。 Windows 2000 以前では、この形式を解凍できるソフトウェアが別途必要です。</li>
+<li>圧縮ファイルには以下のファイルが含まれます。
+ <table>
+ <tr><th>list_files.xlsm</th><td>Excel 2007 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
+ <tr><th>list_files_2k.xls</th><td>Excel 2000 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
+ <tr><th>list_files.xlam</th><td>Excel 2007 形式のソフトウェア本体です。アドインとして使います。</td></tr>
+ <tr><th>list_files_2k.xla</th><td>Excel 2000 形式のソフトウェア本体です。アドインとして使います。</td></tr>
+ <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
+ <tr><th>初めにお読みください.html</th><td>この解説書です。</td></tr>
+ <tr><th>その他</th><td>解説書の使う画像ファイルなど。</td></tr>
+ </table>
+</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - とりあえず使ってみる</h2>
+<div class="tree">
+
+<div>エクセル2007 以降はアドインリボンで操作</div>
+<img src="shot2.png" alt="Excel 2007 ribbon" />
+<div>エクセル2003 以前はツールバーで操作</div>
+<img src="shot1.png" alt="Excel 2000 toolbar" />
+
+<ol>
+<li>このソフトウェアを開きます。</li>
+<li>ツールバーの３番目のフォルダボタンを押し、一覧作成したいフォルダを選びます。</li>
+<li>ツールバー先頭の一覧作成ボタンを押します。</li>
+<li>サブフォルダも含んだファイル一覧シートができました。</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - 詳しく知りたい</h2>
+<div class="tree">
+
+<ol>
+<li>このソフトウェアを開きます。</li>
+<li>ツールバーで必要な項目を設定してから、実行します。
+ <table>
+ <tr><th>2. 一覧からフォルダを選ぶ</th>
+ <td>C:\Program Files\ のように入力します。ここで指定したフォルダのファイル一覧を作成します。ドロップダウンで以前のものを拾ったり、「フォルダ」ボタンでダイアログを出すなど、直接入力せずに指定することもできます。</td></tr>
+ <tr><th>4. フォルダを掘り下げる深さ<br />
+ 「全部」または数字</th>
+ <td>指定したフォルダだけでなく、その下にあるフォルダも含めて検索します。この動作を制御したい場合、掘り下げる深さを指定します。一覧から選ぶだけでなく直接数字を入れることもできます。 0 は、掘り下げず、指定したフォルダだけを検索します。</td></tr>
+ <tr><th>5. ドットフォルダ</th>
+ <td>これを押して有効にすると、先頭が 「.(ピリオド)」で始まるフォルダも出力対象にします。既定では、これらを隠しフォルダと認識して出力しません。</td></tr>
+ <tr><th>6. 詳細</th>
+ <td>これを押して有効にすると、ファイル属性などの情報も一覧にします。無効にすると、ファイル名だけを一覧にします。</td></tr>
+ <tr><th>7. リンク</th>
+ <td>これを押して有効にすると、ファイル名をハイパーリンクにします。</td></tr>
+ <tr><th>1. 一覧作成</th>
+ <td>「一覧作成」ボタンを押せば、指定した条件による、ファイル一覧を作成します。</td></tr>
+ </table>
+</li>
+<li>一覧表は、なるべく一つのブックに新規シートを追加する方針で作成します。ただし、次の場合には、別途、新規ブックが作成されます。
+ <ul>
+ <li>このソフトウェアを立ち上げて、最初の検索の時。</li>
+ <li>このソフトウェアの設定情報などを保存するために、ブックの保存を行った直後の検索の時。</li>
+ <li>一覧表を作成していたブックを、保存した直後の検索の時。</li>
+ </ul>
+</li>
+<li>「安全装置」のチェックについて
+ <ul>
+ <li>誤って、ドライブの全ファイルを対象にした検索などを始めた場合のために、このソフトウェアには安全機構が備わっています。おおよそ 1,000 件を越えるデータを抽出したごとに、確認のためにダイアログを出して、作業の継続や中断の指示を待ちます。大量の抽出を無人で行いたい場合には、「安全装置」のチェックをはずせば、ダイアログが出なくなります。</li>
+ <li>ダイアログには次の選択肢があります。
+  <table>
+  <tr><th>はい</th><td>検索を続行し、次の約1,000件で、再び、このダイアログを出す。</td></tr>
+  <tr><th>いいえ</th><td>検索を続行し、検索が終了するまで、このダイアログはもう出さない。</td></tr>
+  <tr><th>キャンセル</th><td>検索を中断する。</td></tr>
+  </table>
+ </li>
+ </ul>
+</li>
+<li>このソフトウェアには次の制約があります。
+ <ul>
+ <li>ファイル名がエクセルのセルに格納できない文字を含む場合、正しく動作しません。</li>
+ <li>エクセルのシート行数を超えて、リストを作成することはできません。</li>
+ <li>自動作成するハイパーリンクは、ファイル名欄とフルパス欄に、それぞれ相対パスおよび絶対パスとなります。抽出項目がファイル名のみの場合には、サブフォルダー以下の相対パスは不正確なものとなります。</li>
+ </ul>
+</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - 便利な使い方</h2>
+<div class="tree">
+
+<ol>
+<li>実行中は F1 セルに「検索中」と表示されます。実行終了の時点で、このセルはファイル件数に置き換わります。</li>
+<li>ツールバー９番目のボタンには、一覧表を出力したブック名が表示されます。</li>
+<li>よく検索するフォルダが決まっている場合、あらかじめ J16 セルから右に一覧を入れたブックを保存しておくと、便利です。</li>
+<li>印刷時にDOS名が不要な場合、この欄を削除すると、フルパス欄が広く使えます。</li>
+<li>エクセルの利点を生かせば、文書やデータベースへの変換も簡単です。
+ <ul>
+ <li>ファイル一覧表のヘッダー行以降(3行目以降)の範囲を選択してコピーし、ワードで張り付ければ、すぐに文書として再利用できます。</li>
+ <li>同じく、3行目以降の範囲をコピーし、アクセスで張り付ければ、そのままデータベースのテーブルとなります。</li>
+ </ul>
+</li>
+<li>エクセルのセル上で、ファイル名を上手に加工すれば、活用範囲が広がります。
+ <ul>
+ <li>H4セルに、=LEFT(B4,LEN(B4)-LEN(A4)) と入力してコピーすれば、フォルダー名の部分だけをすぐに取り出せます。</li>
+ <li>H4セルに、=RIGHT(B4,LEN(B4)-LEN($A$1)-1) と入力してコピーすれば、相対パス名だけをすぐに取り出せます。</li>
+ </ul>
+</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ダウンロードしたマクロが動かないとき</h2>
+<div class="tree">
+
+<ul>
+<li>助けを求める前に、セルフチェックで確認しましょう。</li>
+<li><a href="http://xlsm.web.fc2.com/">エクセルマクロが動かない人のセルフチェッカー</a></li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">連絡先</h2>
+<div class="tree">
+
+<p>動作報告、不動作報告、要望などは、<a href="http://cowares.blogspot.com/search/label/baum">ブログ</a>にコメントしてください。</p>
+
+<table>
+<tr><th>作者</th><td>Tomizono (工房ばう)</td></tr>
+<tr><th>メール</th><td><a href="mailto:cowares@gmail.com">cowares@gmail.com</a></td></tr>
+<tr><th>ブログ</th><td><a href="http://cowares.blogspot.com/">http://cowares.blogspot.com</a></td></tr>
+<tr><th>ホームページ</th><td><a href="http://kobobau.mocvba.com/xls/">http://kobobau.mocvba.com/xls/</a></td></tr>
+<tr><th>ダウンロード</th><td><a href="http://www.vector.co.jp/vpack/browse/person/an030389.html">http://www.vector.co.jp</a></td></tr>
+<tr><th>オープンソース</th><td><a href="http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=baum">オリジナルソースは cowares-excel-hello プロジェクトが配布しています。</a></td></tr>
+</table>
+
+</div>
+<div class="pr">
+<h2 onclick="smr1(this)">低価格のシステム開発</h2>
+<div class="tree">
+
+<p>エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。</p>
+
+<div class="shop">
+<h3>
+そのマクロ、部下が１時間残業して作ってませんか？
+</h3>
+<div class="cell">
+<h4>
+あなたの部下は時給1,000円以下ですか？
+</h4>
+<ul>
+<li>
+エクセル、アクセスのデータ、マクロが1,000円から発注できます。
+</li>
+<li>
+使用制限の無いオープンで安心なコ・ウェア・ライセンス。
+</li>
+<li>
+コ・ウェアなら、部下に命令するより安上がりです。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="shop">
+<h3>
+業者との会議に10万円以上の人件費が飛んでませんか？
+</h3>
+<div class="cell">
+<h4>
+仕様の決定に過大な時間とコストをかけていませんか？
+</h4>
+<ul>
+<li>
+その費用で、たたき台となるプロトタイプを作れます。
+</li>
+<li>
+初号機に不満が無ければ、そのまま完成品として現場に投入できます。
+</li>
+<li>
+完全オープンなコードなので、続きを別の業者に発注してもよいのです。
+</li>
+<li>
+コ・ウェアなら、大きな失敗を防げます。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="compact">
+
+<ul class="sectionlist">
+<li>導入する利点</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/business.html">事業者で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/enterprise.html">大企業で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/public.html">公益法人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/personal.html">個人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/it.html">IT企業で</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li>発注について</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/service.html">発注から公開まで</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/price.html">料金</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/publish.html">公開（納品）</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/must.html">基本的なルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/may.html">細かいルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/why.html">なぜ無料ソフトを買う？</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/policy.html">プライバシー</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/contract.html">取引上の注意</a></li>
+</ul>
+
+<div class="sectionlistr">
+<a href="http://cowares.nobody.jp/ja/shop/order.html"><img src="shop.png" alt="http://cowares.nobody.jp/ja/shop/order.html" /></a>
+</div>
+
+</div>
+<div class="compact">
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/order.html">すぐに注文する</a></li>
+</ul>
+
+</div>
+
+<div class="compact">
+</div>
+
+</div>
+</div>
+
+<div class="copyright"><a href="http://kobobau.mocvba.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.mocvba.com</a></div>
+
+<div class="lastupdate">2011.5.12 更新</div>
+
+<script type="text/javascript" src="vba2.js"></script>
+</body>
+</html>
