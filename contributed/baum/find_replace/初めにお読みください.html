@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<title>初めにお読みください - 検索して置換</title>
+<link rel="stylesheet" href="std.css" type="text/css" />
+<link rel="copyright" href="http://kobobau.mocvba.com/copy.html" />
+</head>
+<body>
+<div class="productid">検索して置換 find_replace</div>
+<h1>初めにお読みください</h1>
+
+<h2 onclick="smr1(this)">このソフトにできること</h2>
+<div class="tree">
+
+<p>
+エクセルシートで指定したファイルから文字検索し、置換する。
+</p>
+
+<p>
+シート上のファイルリストから、文字検索し、合致した部分の周辺を抜き出し、置換用シートを新たに作成します。
+置換用シートは、ファイル置換の指示書になっており、そのまま実行して単純な置換ができます。
+置換用シートを修正してから置換実行すれば、ケースバイケースで置換文字列を変えるなどの特殊な置換ができます。
+正規表現で検索を行うので、柔軟な抽出ができます。
+</p>
+
+</div>
+<h2 onclick="smr1(this)">以下に同意した上でご使用ください</h2>
+<div class="tree">
+
+<div>
+<h3>
+1. 保証はありません。 (自律)
+</h3>
+<p>
+既知の欠陥も未知の欠陥も含めたまま公開されています。 
+品質や正確さはご自身で判断してください。 
+使用により生じた損失など、すべての責任はあなたが負います。
+</p>
+</div>
+
+<div>
+<h3>
+2. フリーです。 (自由)
+</h3>
+<p>
+どなたでも目的によらず無料で無期限に使えます。 
+登録や承諾は不要です。 
+商用も可です。
+自由な加工を含む再利用も再配布もできます。
+</p>
+</div>
+
+<div>
+<h3>
+3. 公正であれ。 (公正)
+</h3>
+<p>
+オリジナルが、あなたの作品と無関係に利用できることを明示する。 
+オリジナルの仕事とあなたの仕事を、正直に区別する。 
+オリジナルの著作権とライセンスを尊重する。
+</p>
+</div>
+
+<div>
+<span>
+コ・ウェア・ライセンス（自律、自由、公正）の詳細は <a href="http://cowares.nobody.jp/license/">http://cowares.nobody.jp/license/</a> で公開されています。
+</span>
+</div>
+
+</div>
+<h2 onclick="smr1(this)">動作環境</h2>
+<div class="tree">
+
+<ul>
+<li>Excel 97以降すべて。</li>
+<li>Windows 95 以降すべて。</li>
+<li>Macintosh での動作は未確認。</li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">配布しているファイルについて</h2>
+<div class="tree">
+
+<ol>
+<li>ZIP形式で圧縮しています。 Windows 2000 以前では、この形式を解凍できるソフトウェアが別途必要です。</li>
+<li>圧縮ファイルには以下のファイルが含まれます。
+ <table>
+ <tr><th>find_replace.xlsm</th><td>Excel 2007 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
+ <tr><th>find_replace_2k.xls</th><td>Excel 2000 形式のソフトウェア本体です。これをエクセルで開けば使えます。</td></tr>
+ <tr><th>find_replace.xlam</th><td>Excel 2007 形式のソフトウェア本体です。アドインとして使います。</td></tr>
+ <tr><th>find_replace_2k.xla</th><td>Excel 2000 形式のソフトウェア本体です。アドインとして使います。</td></tr>
+ <tr><th>ライセンス.txt</th><td>このソフトウェアのライセンスです。</td></tr>
+ <tr><th>初めにお読みください.html</th><td>この解説書です。</td></tr>
+ <tr><th>その他</th><td>解説書の使う画像ファイルなど。</td></tr>
+ </table>
+</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - とりあえず使ってみる</h2>
+<div class="tree">
+
+<div>エクセル2007 以降はアドインリボンで操作</div>
+<img src="shot2.png" alt="Excel 2007 ribbon" />
+<div>エクセル2003 以前はツールバーで操作</div>
+<img src="shot1.png" alt="Excel 2000 toolbar" />
+
+<ol>
+<li>このソフトウェアを開きます。</li>
+<li>検索対象欄に、検索したい文字を指定します。</li>
+<li>置換候補欄に、置換先の文字を指定します。</li>
+<li>ファイルリストのあるセル範囲を選択します。</li>
+<li>ツールバーの「検索」ボタンを押します。</li>
+<li>新規ブックに置換用シートが作成され、検索結果が書き込まれます。</li>
+<li>ツールバーの「置換」ボタンを押すと、ファイルが上書き置換されます。</li>
+</ol>
+
+<img src="shot3.png" alt="検索するファイルリスト" />
+<img src="shot4.png" alt="置換用シートが作成された" />
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - 詳しく知りたい</h2>
+<div class="tree">
+
+<ol>
+<li>検索の実行結果は、新しい置換用シートを作成し、そこに記録されます。</li>
+<li>置換は、置換用シートを読み込んで実行され、結果は同じシートに追記されます。</li>
+<li>検索動作は、可視セルのみを対象とするので、オートフィルタなどで対象を絞り込んで実行できます。
+</li>
+<li>複数セルが選ばれている場合は、それが対象となり、単一セルが選ばれている場合は、そこを始点として下方向に連続した範囲を対象とします。
+</li>
+<li>置換動作は、可視セルのみを対象とするので、検索されたが置換したくない行を非表示にすると置換されません。 既知の不具合があり、 B列が 0 の行は非表示にできない。そのファイル全部が置換対象外となるようだ。
+</li>
+<li>検索だけが必要なら、置換候補文字を指定する必要はありません。</li>
+<li>検索文字は正規表現なので、 [\d]+ のような指示で柔軟な検索ができます。</li>
+<li>[Aa] ボタンを押せば、大文字と小文字を区別しない検索になります。</li>
+<li>プレビュー文字数を、既定の32文字から変更すれば、検索にヒットした文字の前後情報を加減できます。</li>
+</ol>
+
+</div>
+<h2 onclick="smr1(this)">ご使用の手引き - 置換用シート</h2>
+<div class="tree">
+
+<table>
+ <tr><th>A1</th><td>FindReplace と必ず記載されている</td></tr>
+ <tr><th>C1</th><td>検索パターン</td></tr>
+ <tr><th>D1</th><td>検索対象となったファイルリストの記載場所</td></tr>
+ <tr><th>B列</th><td>システムが行判定に使う情報。<br/>0はファイルを開き、-1はファイルに書き込む。数字のある行が置換対象。</td></tr>
+ <tr><th>A列</th><td>ファイルのフルパス</td></tr>
+ <tr><th>C:D列</th><td>置換前の文字列の開始位置と長さ。置換の際は、位置情報だけで対象を特定する。</td></tr>
+ <tr><th>G列</th><td>置換後となる文字列。C,Dで示される対象を、この文字で置き換える。</td></tr>
+ <tr><th>H列</th><td>ファイル読み書きで使う文字エンコード。</td></tr>
+ <tr><th>E列</th><td>検索された文字を含む、周辺情報。</td></tr>
+ <tr><th>F列</th><td>検索された文字</td></tr>
+ <tr><th>I列</th><td>置換の結果が書き込まれる。○は成功。≡は変更せず。×はエラー。</td></tr>
+ <tr><th>J列</th><td>エラーメッセージ。</td></tr>
+</table>
+
+<img src="shot5.png" alt="置換実行の結果が書き込まれた" />
+
+</div>
+<h2 onclick="smr1(this)">ダウンロードしたマクロが動かないとき</h2>
+<div class="tree">
+
+<ul>
+<li>助けを求める前に、セルフチェックで確認しましょう。</li>
+<li><a href="http://xlsm.web.fc2.com/">エクセルマクロが動かない人のセルフチェッカー</a></li>
+</ul>
+
+</div>
+<h2 onclick="smr1(this)">連絡先</h2>
+<div class="tree">
+
+<p>動作報告、不動作報告、要望などは、<a href="http://cowares.blogspot.com/search/label/baum">ブログ</a>にコメントしてください。</p>
+
+<table>
+<tr><th>作者</th><td>Tomizono (工房ばう)</td></tr>
+<tr><th>メール</th><td><a href="mailto:cowares@gmail.com">cowares@gmail.com</a></td></tr>
+<tr><th>ブログ</th><td><a href="http://cowares.blogspot.com/">http://cowares.blogspot.com</a></td></tr>
+<tr><th>ホームページ</th><td><a href="http://kobobau.mocvba.com/xls/">http://kobobau.mocvba.com/xls/</a></td></tr>
+<tr><th>ダウンロード</th><td><a href="http://www.vector.co.jp/vpack/browse/person/an030389.html">http://www.vector.co.jp</a></td></tr>
+<tr><th>オープンソース</th><td><a href="http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=baum">オリジナルソースは cowares-excel-hello プロジェクトが配布しています。</a></td></tr>
+</table>
+
+</div>
+<div class="pr">
+<h2 onclick="smr1(this)">低価格のシステム開発</h2>
+<div class="tree">
+
+<p>エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。</p>
+
+<div class="shop">
+<h3>
+そのマクロ、部下が１時間残業して作ってませんか？
+</h3>
+<div class="cell">
+<h4>
+あなたの部下は時給1,000円以下ですか？
+</h4>
+<ul>
+<li>
+エクセル、アクセスのデータ、マクロが1,000円から発注できます。
+</li>
+<li>
+使用制限の無いオープンで安心なコ・ウェア・ライセンス。
+</li>
+<li>
+コ・ウェアなら、部下に命令するより安上がりです。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="shop">
+<h3>
+業者との会議に10万円以上の人件費が飛んでませんか？
+</h3>
+<div class="cell">
+<h4>
+仕様の決定に過大な時間とコストをかけていませんか？
+</h4>
+<ul>
+<li>
+その費用で、たたき台となるプロトタイプを作れます。
+</li>
+<li>
+初号機に不満が無ければ、そのまま完成品として現場に投入できます。
+</li>
+<li>
+完全オープンなコードなので、続きを別の業者に発注してもよいのです。
+</li>
+<li>
+コ・ウェアなら、大きな失敗を防げます。
+</li>
+</ul>
+</div>
+</div>
+
+<div class="compact">
+
+<ul class="sectionlist">
+<li>導入する利点</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/business.html">事業者で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/enterprise.html">大企業で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/public.html">公益法人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/personal.html">個人で</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/it.html">IT企業で</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li>発注について</li>
+<li><a href="http://cowares.nobody.jp/ja/shop/service.html">発注から公開まで</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/price.html">料金</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/publish.html">公開（納品）</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/must.html">基本的なルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/may.html">細かいルール</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/why.html">なぜ無料ソフトを買う？</a></li>
+</ul>
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/policy.html">プライバシー</a></li>
+<li><a href="http://cowares.nobody.jp/ja/shop/contract.html">取引上の注意</a></li>
+</ul>
+
+<div class="sectionlistr">
+<a href="http://cowares.nobody.jp/ja/shop/order.html"><img src="shop.png" alt="http://cowares.nobody.jp/ja/shop/order.html" /></a>
+</div>
+
+</div>
+<div class="compact">
+
+<ul class="sectionlist">
+<li><a href="http://cowares.nobody.jp/ja/shop/order.html">すぐに注文する</a></li>
+</ul>
+
+</div>
+
+<div class="compact">
+</div>
+
+</div>
+</div>
+
+<div class="copyright"><a href="http://kobobau.mocvba.com/copy.html">Copyright (c) 2011 Tomizono - kobobau.mocvba.com</a></div>
+
+<div class="lastupdate">2011.5.13 更新</div>
+
+<script type="text/javascript" src="vba2.js"></script>
+</body>
+</html>
