@@ -21,7 +21,7 @@
 
 = Downloads =
 
- * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=head_files downloads / ダウンロード]
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=find_replace downloads / ダウンロード]
 
 
 = Snapshots =
