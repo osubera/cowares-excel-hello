@@ -27,9 +27,15 @@
 = Snapshots =
 
  * Excel 2000 toolbar
+    http://1.bp.blogspot.com/-N_snzG_WsXI/Tc4gogK3_jI/AAAAAAAAAGM/c-DCIaih2Z8/s1600/shot1.png
  * Excel 2007 ribbon
- * result sheet
-
+    http://3.bp.blogspot.com/-ERke9SmU2YY/Tc4gpF-IIII/AAAAAAAAAGQ/yMR3SGX2epo/s1600/shot2.png
+ * file list to search
+    http://3.bp.blogspot.com/-VPUDVpAjZUw/Tc4gphdYzoI/AAAAAAAAAGU/UvJuOrDImEc/s1600/shot3.png
+ * find in files by regular expression
+    http://2.bp.blogspot.com/-NYc35BXgHL0/Tc4gqOchJyI/AAAAAAAAAGY/4SmjyElkSPc/s1600/shot4.png
+ * managed repalce by cells
+    http://3.bp.blogspot.com/-eUjb9G034LA/Tc4gqoyfMEI/AAAAAAAAAGc/bFw1YqaMwek/s1600/shot5.png
 
 
 = How to use =
