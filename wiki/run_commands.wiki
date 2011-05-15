@@ -26,9 +26,15 @@
 = Snapshots =
 
  * Excel 2000 toolbar
+    http://4.bp.blogspot.com/-vZkmYvRqUUY/Tc4fK4nLYpI/AAAAAAAAAF4/daKZfBRWMz4/s1600/shot1.png
  * Excel 2007 ribbon
- * result sheet
-
+    http://3.bp.blogspot.com/-rw5Kp0Q5afM/Tc4fLh_sxDI/AAAAAAAAAF8/EzFTdR8Eheo/s1600/shot2.png
+ * get command result in cells
+    http://1.bp.blogspot.com/-SeeCbJ2PWMk/Tc4fL1rY83I/AAAAAAAAAGA/RSIKq1_TfRg/s1600/shot3.png
+ * using cell functions to generate commands
+    http://4.bp.blogspot.com/-bHGbG7JP8_s/Tc4fMb05L6I/AAAAAAAAAGE/mrsGRSuxWO0/s1600/shot4.png
+ * a notepad indicator with an emergency stop function
+    http://1.bp.blogspot.com/-i3Qw9CZBDdw/Tc4fMxh0CrI/AAAAAAAAAGI/ANwAFnW2Z20/s1600/shot5.png
 
 
 = How to use =
