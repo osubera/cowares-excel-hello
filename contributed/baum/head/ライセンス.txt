@@ -1,3 +1,5 @@
+utf-8 encoded Japanese License.  Content-Type: text/plain; charset=utf-8
+
 コ・ウェア・ライセンス - 自律、自由、公正
 
 1. 保証はありません。 (自律)
