@@ -1,0 +1,5875 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;notepads_2k.xls/F3Notepads
+
+'book-identity
+'  title;メモ帳っす
+'  description;メモ帳に足りない機能を追加する
+
+'require
+'       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+'       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'       ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
+'       ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+'       ;{F5078F18-C551-11D3-89B9-0000F81FE221} 6 0 Microsoft XML, v6.0
+'       ;{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B} 1 0 Windows Script Host Object Model
+
+'cells-name
+'       ;=メモ帳っす!R15C1
+'       ;メモ帳っす!_ButtonCaption
+'       ;=メモ帳っす!R3C2
+'       ;メモ帳っす!_Comment
+'       ;=メモ帳っす!R6C2
+'       ;メモ帳っす!_Contributor
+'       ;=メモ帳っす!R4C2
+'       ;メモ帳っす!_Copyright
+'       ;=メモ帳っす!R49C1:R67C10
+'       ;メモ帳っす!_EditChildren
+'       ;=メモ帳っす!R33C1:R34C2
+'       ;メモ帳っす!_ExtendPopup
+'       ;=メモ帳っす!R37C1:R46C10
+'       ;メモ帳っす!_FileChildren
+'       ;=メモ帳っす!R5C2
+'       ;メモ帳っす!_License
+'       ;=メモ帳っす!R2C2
+'       ;メモ帳っす!_LocalComment
+'       ;=メモ帳っす!R1C2
+'       ;メモ帳っす!_PublicName
+'       ;=メモ帳っす!R7C2
+'       ;メモ帳っす!_Since
+'       ;=メモ帳っす!R10C2
+'       ;メモ帳っす!_Tag
+'       ;=メモ帳っす!R9C2
+'       ;メモ帳っす!_Timestamp
+'       ;=メモ帳っす!R8C2
+'       ;メモ帳っす!_Url
+
+'worksheet
+'   name;メモ帳っす/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;notepads
+'         ;コメント
+'         ;メモ帳に足りない機能を追加する
+'         ;comment
+'         ;improve your notepad
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - mocvba.com
+'         ;初版
+'         ;2011
+'         ;配布元
+'         ;http://cowares.blogspot.com/search/label/baum
+'         ;更新
+'         ;40696.2471643519
+'         ;keyword
+'         ;vba,excel,notepad
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:X30
+'         ;操
+'         ;ファイル操作メニュー
+'         ;file
+'     skip;1
+'         ;10
+'     skip;2
+'         ;1
+'     skip;16
+'         ;編
+'         ;編集メニュー
+'         ;edit
+'     skip;1
+'         ;10
+'     skip;19
+'         ;メモ帳
+'         ;接続するメモ帳を選択する
+'         ;notepad
+'     skip;1
+'         ;3
+'     skip;1
+'         ;2
+'         ;1
+'     skip;16
+'         ;コ
+'         ;メモ帳からクリップボードへ
+'         ;copy
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;16
+'         ;入
+'         ;メモ帳からエクセルへ
+'         ;in
+'     skip;1
+'         ;1
+'         ;2
+'     skip;18
+'         ;出
+'         ;エクセルからメモ帳へ
+'         ;out
+'     skip;1
+'         ;1
+'         ;2
+'     skip;18
+'         ;消
+'         ;メモ帳消去
+'         ;clear
+'     skip;1
+'         ;1
+'         ;2
+'     skip;18
+'         ;文字コード
+'         ;入出力の文字コード
+'         ;charset
+'     skip;1
+'         ;4
+'     skip;2
+'         ;1
+'     skip;1
+'         ;utf-8
+'         ;shift_jis
+'         ;euc-jp
+'         ;iso-2022-jp
+'         ;unicode
+'         ;ascii
+'         ;binary
+'     skip;8
+'         ;改行変換
+'         ;改行コードを変更する
+'         ;linefeed
+'     skip;1
+'         ;4
+'     skip;1
+'         ;2
+'     skip;2
+'         ;CrLf
+'         ;Lf
+'         ;Cr
+'         ;Tab
+'         ;Null
+'         ;<BR>
+'         ;<DIV>
+'         ;<P>
+'         ;<TABLE>
+'         ;<LI>
+'         ;\n
+'         ;\r\n
+'         ;,
+'         ;;
+'         ;↵
+'         ;検索
+'         ;正規表現による検索
+'         ;find
+'     skip;1
+'         ;4
+'     skip;1
+'         ;3
+'         ;1
+'     skip;1
+'         ;^
+'         ;$
+'     skip;13
+'         ;次
+'         ;次を検索
+'         ;find_next
+'     skip;1
+'         ;1
+'         ;2
+'     skip;18
+'         ;[Aa]
+'         ;大文字小文字を区別しない
+'         ;ignore_case
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;F3Notepads.BaumMain.OnButtonToggle
+'         ;1
+'     skip;14
+'         ;置換
+'         ;検索結果を置換
+'         ;replace
+'     skip;1
+'         ;4
+'     skip;1
+'         ;3
+'     skip;17
+'         ;置
+'         ;置換する
+'         ;replace_this
+'     skip;1
+'         ;1
+'         ;2
+'     skip;18
+'         ;全
+'         ;すべて置換
+'         ;replace_all
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;F3Notepads.BaumMain.OnButtonToggle
+'         ;1
+'     skip;14
+'         ;?
+'         ;このシートを表示する。
+'         ;about
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'  address;A33:C34
+'         ;file
+'         ;_FileChildren
+'         ;=INDEX(INDIRECT(RC[-1]),1,1) & " - " & INDEX(INDIRECT(RC[-1]),ROWS(INDIRECT(RC[-1])),1)
+'         ;edit
+'         ;_EditChildren
+'         ;=INDEX(INDIRECT(RC[-1]),1,1) & " - " & INDEX(INDIRECT(RC[-1]),ROWS(INDIRECT(RC[-1])),1)
+'  address;A37:I46
+'         ;新規
+'         ;空のメモ帳を開く
+'         ;file_new
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;1
+'         ;開く
+'         ;新しくファイルを開く
+'         ;file_open
+'     skip;1
+'         ;1
+'         ;2
+'     skip;3
+'         ;上書き保存
+'         ;保存する
+'         ;file_save
+'     skip;1
+'         ;1
+'         ;2
+'     skip;3
+'         ;名前を付けて保存
+'         ;ダイアログを開いて保存する
+'         ;file_save_as
+'     skip;1
+'         ;1
+'         ;2
+'     skip;3
+'         ;複製
+'         ;新しいメモ帳で複製を開く
+'         ;file_clone
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;1
+'         ;増殖
+'         ;編集結果を新しいメモ帳に書き出す
+'         ;file_spawn
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3Notepads.BaumMain.OnButtonToggle
+'         ;未保存
+'         ;保存フラグを有効にする
+'         ;file_saved
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;F3Notepads.BaumMain.OnButtonToggle
+'         ;メモ帳を閉じる
+'         ;１つのメモ帳を閉じる
+'         ;file_close
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;1
+'         ;メモ帳を全て閉じる
+'         ;メモ帳をすべて閉じる
+'         ;file_close_all
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;1
+'         ;メモ帳を全て破棄する
+'         ;保存確認をせず、すべてのメモ帳を閉じる
+'         ;file_abandon
+'     skip;1
+'         ;1
+'         ;2
+'  address;A49:H67
+'         ;長文折り返し
+'         ;行の文字数を指定して折り返す
+'         ;edit_wrap
+'         ;48
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;改行CrLfへ変換
+'         ;通常の改行記号に変換する
+'         ;edit_to_crlf
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;改行CrLfから変換
+'         ;特殊な改行記号に変換する
+'         ;edit_from_crlf
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;一致削除
+'         ;検索結果に合致するものを削除する
+'         ;edit_del_found
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;不一致削除
+'         ;検索結果に合致しないものを削除する
+'         ;edit_del_not_found
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;インデント可視化
+'         ;インデントを文字に置換する
+'         ;edit_visible_indent
+'         ;⇀ 
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;可視インデント戻し
+'         ;文字置換したインデントを戻す
+'         ;edit_invisible_indent
+'         ;4
+'         ;1
+'         ;2
+'     skip;2
+'         ;HTMLへ
+'         ;HTML向けのエスケープを行う
+'         ;edit_to_html
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;HTMLから
+'         ;HTMLのエスケープを戻す
+'         ;edit_from_html
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;URLへ
+'         ;URL向けのエスケープをする
+'         ;edit_to_url
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;URLから
+'         ;URLのエスケープを戻す
+'         ;edit_from_url
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;Web
+'         ;記載のURLからダウンロードする
+'         ;edit_http_get
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;cache消去
+'         ;ブラウザキャッシュを消去する
+'         ;edit_http_clear_cache
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;HTMLタグ除去
+'         ;HTMLを平文に変換する
+'         ;edit_remove_html
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;Form抽出
+'         ;HTMLからForm記述だけを抜き出す
+'         ;edit_only_form
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;JavaScript抽出
+'         ;HTMLからJavaScript記述だけを抜き出す
+'         ;edit_only_javascript
+'     skip;1
+'         ;1
+'         ;2
+'     skip;2
+'         ;簡易SSF
+'         ;SSFに変換する
+'         ;edit_to_ssf
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;郵便番号
+'         ;郵便番号検索を行う
+'         ;edit_yubin
+'         ;C:\tmp\yubin.vbs
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;テンプレ
+'         ;最小限の雛型
+'         ;edit_template
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'  address;B72
+'         ;エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。
+'  address;C75:G81
+'         ;導入する利点
+'     skip;1
+'         ;発注について
+'     skip;2
+'         ;事業者で
+'     skip;1
+'         ;発注から公開まで
+'     skip;1
+'         ;プライバシー
+'         ;大企業で
+'     skip;1
+'         ;料金
+'     skip;1
+'         ;取引上の注意
+'         ;公益法人で
+'     skip;1
+'         ;公開（納品）
+'     skip;2
+'         ;個人で
+'     skip;1
+'         ;基本的なルール
+'     skip;2
+'         ;IT企業で
+'     skip;1
+'         ;細かいルール
+'     skip;4
+'         ;なぜ無料ソフトを買う？
+'  address;C83
+'         ;すぐに注文する
+'  address;B87
+'         ;簡単な指示、安い料金、早い結果
+'  address;B89
+'         ;料金 - コ・ウェア・ライセンスのシステム開発
+'  address;B91
+'         ;基本料金表
+'  address;B93:B94
+'         ;３つのサイズから選ぶだけで簡単。
+'         ;前払いが原則。
+'  address;B96:D98
+'         ;Sサイズ
+'         ;1,000円
+'         ;（税込 1,050円）
+'         ;Mサイズ
+'         ;10,000円
+'         ;（税込 10,500円）
+'         ;Lサイズ
+'         ;100,000円
+'         ;（税込 105,000円）
+'  address;B100
+'         ;サイズとは
+'  address;B102
+'         ;開発にかかる時間や難易度を、おおまかに３つのサイズで分類します。
+'  address;B104
+'         ;Sサイズ
+'  address;B106:C110
+'         ;1. 小型、 Small 、 partial
+'     skip;1
+'         ;2. ちょっとしたコード素片や、ワークシートの一部分など。
+'     skip;1
+'         ;3. 手に負えない、書き方のわからないコードだけを知りたいときに。
+'     skip;1
+'         ;4. 例）数行の VBA コード。次のリンク先の１つ目のコード
+'     skip;2
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/hello_key_value
+'  address;B112
+'         ;Mサイズ
+'  address;B114:C118
+'         ;1. 中型、 Medium 、 functional
+'     skip;1
+'         ;2. 完成した関数やワークシート。
+'     skip;1
+'         ;3. 単一の機能が、とりあえず動くレベルのものが欲しいときに。
+'     skip;1
+'         ;4. 例）マクロを実行すれば一つの動作を行う VBA コード。
+'     skip;2
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
+'  address;B120
+'         ;Lサイズ
+'  address;B122:B125
+'         ;1. 大型、 Large 、 integrated
+'         ;2. 実用的なアプリケーション。
+'         ;3. 複数の機能や、条件設定による動作切り替えや画面遷移も含むときに。
+'         ;4. 例）ユーザーインターフェースを持ち、ツールとして利用できる。
+'  address;B129
+'         ;公開 - コ・ウェア・ライセンスのシステム開発
+'  address;B131
+'         ;公開が納品です
+'  address;B133:B140
+'         ;所定の公開場所に成果物をアップロードする方法を採ります。
+'         ;仕様を決める段階から公開URLを使います。
+'         ;公開のタイミングで連絡はしますが、ファイル添付などはしません。
+'         ;公開先からのセルフダウンロードでお願いします。
+'         ;本人はもちろん、同僚や友達、その他大勢の人がダウンロードして利用できます。
+'         ;マクロコードをテキストで公開するので、セキュリティの強い職場で、マクロ付きブックのダウンロード規制がある環境でも心配ありません。
+'         ;公開後のコード修正等、追加情報も当該URLから派生していきます。
+'         ;URLは永久に変わらないものではありません。
+'  address;B142
+'         ;主な公開先URL
+'  address;B144:B145
+'         ;http://cowares.blogspot.com
+'         ;http://code.google.com/p/cowares-excel-hello/
+'  address;B149
+'         ;なぜ無料ソフトを買うのか？ - コ・ウェア・ライセンスのシステム開発
+'  address;B151
+'         ;そのお金は何に払っているのでしょうか
+'  address;B153:G153
+'         ;無料のもの
+'     skip;1
+'         ;買うもの
+'     skip;2
+'         ;買わないもの
+'  address;B155:G158
+'         ;ライセンス
+'     skip;1
+'         ;エンジニアの働き
+'     skip;2
+'         ;保証
+'         ;コピー
+'     skip;1
+'         ;世界への貢献
+'     skip;2
+'         ;役員の働き
+'     skip;5
+'         ;事務員の働き
+'     skip;5
+'         ;営業スマイル
+'  address;C160:D161
+'     skip;1
+'         ;コ・ウェアの料金
+'         ;通常のシステム開発で払うお金
+'  address;C165
+'         ;すぐに注文する
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'cells-height
+'   unit;pt
+'  address;A72
+'         ;14.25
+'  address;A83
+'         ;24.75
+'  address;A89
+'         ;21
+'  address;A91
+'         ;14.25
+'  address;A95:A96
+'   repeat;2
+'         ;14.25
+'  address;A98:A100
+'   repeat;3
+'         ;14.25
+'  address;A129
+'         ;21
+'  address;A131
+'         ;14.25
+'  address;A142
+'         ;14.25
+'  address;A149
+'         ;21
+'  address;A151
+'         ;14.25
+'  address;A165
+'         ;24.75
+
+'cells-background-color
+'  address;A72:M72
+'   repeat;13
+'         ;#FF6600
+'  address;C75:H75
+'   repeat;2
+'         ;#FFCC99
+'   repeat;4
+'         ;#CCFFCC
+'  address;C83:F83
+'   repeat;4
+'         ;#99CC00
+'  address;B89:L89
+'   repeat;11
+'         ;#333399
+'  address;B96:B98
+'         ;#CCFFCC
+'         ;#FFFF99
+'         ;#FFCC99
+'  address;B104
+'         ;#CCFFCC
+'  address;B112
+'         ;#FFFF99
+'  address;B120
+'         ;#FFCC99
+'  address;B129:L129
+'   repeat;11
+'         ;#333399
+'  address;B149:L149
+'   repeat;11
+'         ;#333399
+'  address;B153:H153
+'   repeat;2
+'         ;#FF99CC
+'   repeat;2
+'         ;#CCFFCC
+'   repeat;3
+'         ;#FF99CC
+'  address;B160:H161
+'     skip;2
+'   repeat;2
+'         ;#00FF00
+'     skip;3
+'   repeat;7
+'         ;#FF00FF
+'  address;C165:F165
+'   repeat;4
+'         ;#99CC00
+
+'cells-color
+'  address;C76:G81
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;1
+'   repeat;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;1
+'   repeat;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;4
+'         ;#0000FF
+'  address;C83:F83
+'   repeat;4
+'         ;#0000FF
+'  address;B87
+'         ;#FF00FF
+'  address;B89:L89
+'   repeat;11
+'         ;#FFCC00
+'  address;C109:J110
+'     skip;2
+'   repeat;14
+'         ;#0000FF
+'  address;C118:H118
+'   repeat;6
+'         ;#0000FF
+'  address;B129:L129
+'   repeat;11
+'         ;#FFCC00
+'  address;B144:B145
+'   repeat;2
+'         ;#0000FF
+'  address;B149:L149
+'   repeat;11
+'         ;#FFCC00
+'  address;C165:F165
+'   repeat;4
+'         ;#0000FF
+
+'cells-font-size
+'  address;B72
+'         ;12
+'  address;C83:F83
+'   repeat;4
+'         ;12
+'  address;B89
+'         ;18
+'  address;B91
+'         ;12
+'  address;B100
+'         ;12
+'  address;B129
+'         ;18
+'  address;B131
+'         ;12
+'  address;B142
+'         ;12
+'  address;B149
+'         ;18
+'  address;B151
+'         ;12
+'  address;C165:F165
+'   repeat;4
+'         ;12
+
+'cells-font-bold
+'  address;B72
+'         ;yes
+'  address;C83:F83
+'   repeat;4
+'         ;yes
+'  address;B89
+'         ;yes
+'  address;B91
+'         ;yes
+'  address;B96:B98
+'   repeat;3
+'         ;yes
+'  address;B100
+'         ;yes
+'  address;B104
+'         ;yes
+'  address;B112
+'         ;yes
+'  address;B120
+'         ;yes
+'  address;B129
+'         ;yes
+'  address;B131
+'         ;yes
+'  address;B142
+'         ;yes
+'  address;B149
+'         ;yes
+'  address;B151
+'         ;yes
+'  address;B153:G153
+'         ;yes
+'     skip;1
+'   repeat;2
+'         ;yes
+'     skip;1
+'         ;yes
+'  address;C165:F165
+'   repeat;4
+'         ;yes
+
+'cells-h-align
+'  address;C83:F83
+'   repeat;4
+'         ;center
+'  address;C96:C98
+'   repeat;3
+'         ;right
+'  address;C109:J110
+'     skip;2
+'   repeat;6
+'         ;center
+'   repeat;7
+'         ;left
+'         ;center
+'  address;C118:H118
+'   repeat;6
+'         ;left
+'  address;D153:E153
+'   repeat;2
+'         ;center
+'  address;D160:E160
+'   repeat;2
+'         ;center
+'  address;C165:F165
+'   repeat;4
+'         ;center
+
+'cells-v-align
+'  address;C83:F83
+'   repeat;4
+'         ;center
+'  address;B91:J125
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;4
+'         ;center
+'     skip;1
+'   repeat;6
+'         ;center
+'     skip;1
+'   repeat;14
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;4
+'   repeat;5
+'         ;center
+'     skip;4
+'   repeat;6
+'         ;center
+'     skip;2
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'  address;B129:G145
+'   repeat;102
+'         ;center
+'  address;B149:B151
+'   repeat;3
+'         ;center
+'  address;B153:G161
+'   repeat;11
+'         ;center
+'     skip;1
+'   repeat;28
+'         ;center
+'     skip;2
+'   repeat;4
+'         ;center
+'     skip;2
+'   repeat;4
+'         ;center
+'  address;C165:F165
+'   repeat;4
+'         ;center
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3Notepads"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.OnButtonToggle
+    End If
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_file(oAC As Object)
+End Sub
+
+Public Sub Menu_edit(oAC As Object)
+End Sub
+
+Public Sub Menu_notepad(oAC As Object)
+    SwitchNotepad
+End Sub
+
+Public Sub Menu_copy(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    Notepads.Clipboard_copy hWnd
+End Sub
+
+Public Sub Menu_in(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    Notepads.Office_in hWnd
+End Sub
+
+Public Sub Menu_out(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then hWnd = NewNotepad
+    If hWnd = 0 Then Exit Sub
+    
+    Notepads.Office_out hWnd
+    DoNotepad.ShowNotepad hWnd
+End Sub
+
+Public Sub Menu_clear(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    DoNotepad.WriteNotepad hWnd, ""
+End Sub
+
+Public Sub Menu_charset(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+End Sub
+
+Public Sub Menu_linefeed(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+End Sub
+
+Public Sub Menu_find(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+    
+    Menu_find_next oAC
+End Sub
+
+Public Sub Menu_find_next(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    NotepadsEdit.FindNext hWndR, Helper.GetControlText("find"), Helper.GetControlState("ignore_case")
+End Sub
+
+Public Sub Menu_ignore_case(oAC As Object)
+End Sub
+
+Public Sub Menu_replace(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+    
+    Menu_replace_this oAC
+End Sub
+
+Public Sub Menu_replace_this(oAC As Object)
+    Dim ReplaceEach As Boolean
+    ReplaceEach = Not Helper.GetControlState("replace_all")
+    
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    ' clone with copy for replace_each
+    hWndW = EditorWriteTo(hWndR, ReplaceEach)
+    If hWndW = 0 Then Exit Sub
+    
+    If ReplaceEach Then
+        NotepadsEdit.ReplaceNext hWndW, Helper.GetControlText("find"), Helper.GetControlState("ignore_case"), Helper.GetControlText("replace")
+    Else
+        NotepadsEdit.ReplaceAll hWndR, hWndW, Helper.GetControlText("find"), Helper.GetControlState("ignore_case"), Helper.GetControlText("replace")
+    End If
+    
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_replace_all(oAC As Object)
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    If ThisWorkbook.IsAddin Then
+        Dim Wb As Workbook
+        Set Wb = Workbooks.Add
+        Me.Copy Before:=Wb.Sheets(1)
+        Wb.Saved = True
+        Set Wb = Nothing
+    Else
+        Me.Activate
+    End If
+End Sub
+
+' file menu
+Public Sub Menu_file_new(oAC As Object)
+    NewNotepad
+End Sub
+
+Public Sub Menu_file_open(oAC As Object)
+    Notepads.File_open Helper.GetControlText("charset")
+End Sub
+
+Public Sub Menu_file_save(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    Notepads.File_save hWnd, GetNotepadFileName, Helper.GetControlText("charset"), False
+End Sub
+
+Public Sub Menu_file_save_as(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    Notepads.File_save hWnd, GetNotepadFileName, Helper.GetControlText("charset"), True
+End Sub
+
+Public Sub Menu_file_clone(oAC As Object)
+    Dim hWnd As Long
+    Dim ClonedHWnd As Long
+    
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    ClonedHWnd = NewNotepad("", DoNotepad.ReadNotepad(hWnd))
+    DoNotepad.SetSelNotepad ClonedHWnd, DoNotepad.GetSelNotepad(hWnd)
+End Sub
+
+Public Sub Menu_file_spawn(oAC As Object)
+End Sub
+
+Public Sub Menu_file_saved(oAC As Object)
+End Sub
+
+Public Sub Menu_file_close(oAC As Object)
+    Dim hWnd As Long
+    hWnd = NotepadHWnd
+    If hWnd = 0 Then Exit Sub
+    
+    DoNotepad.CloseNotepad hWnd, False
+    RemoveNotepadItem
+End Sub
+
+Public Sub Menu_file_close_all(oAC As Object)
+    CloseAllNotepad False
+End Sub
+
+Public Sub Menu_file_abandon(oAC As Object)
+    CloseAllNotepad True
+End Sub
+
+' edit menu
+Public Sub Menu_edit_wrap(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim WrapLength As Long
+    WrapLength = Val(InputBox("指定した文字数で全文を折り返します。", "Wrap by length", Val(oAC.Parameter)))
+    If WrapLength <= 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.WrapByLength hWndR, hWndW, WrapLength
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_to_crlf(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.ToCrLf hWndR, hWndW, GetLineFeed
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_from_crlf(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.FromCrLf hWndR, hWndW, GetLineFeed
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_del_found(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.DelFound hWndR, hWndW, Helper.GetControlText("find"), Helper.GetControlState("ignore_case")
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_del_not_found(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.DelNotFound hWndR, hWndW, Helper.GetControlText("find"), Helper.GetControlState("ignore_case")
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_visible_indent(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim IndentLength As Long
+    Dim IndentMark As String
+    IndentLength = Val(GetChildButton("edit_invisible_indent").Parameter)
+    IndentMark = GetChildButton("edit_visible_indent").Parameter
+    IndentLength = Val(InputBox("インデント可視文字に置き換える単位を指示します。", "Indent mark length", IndentLength))
+    If IndentLength <= 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.VisibleIndent hWndR, hWndW, IndentLength, IndentMark
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_invisible_indent(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim IndentLength As Long
+    Dim IndentMark As String
+    IndentLength = Val(GetChildButton("edit_invisible_indent").Parameter)
+    IndentMark = GetChildButton("edit_visible_indent").Parameter
+    IndentLength = Val(InputBox("インデント可視文字から置き換えるスペースの数を指示します。", "Indent mark length", IndentLength))
+    If IndentLength <= 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.InvisibleIndent hWndR, hWndW, IndentLength, IndentMark
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_to_html(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.ToHtml hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_from_html(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.FromHtml hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_to_url(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.ToUrl hWndR, hWndW, Helper.GetControlText("charset")
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_from_url(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.FromUrl hWndR, hWndW, Helper.GetControlText("charset")
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_http_get(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim Charset As String
+    Dim FileName As String
+    Charset = Helper.GetControlText("charset")
+    If Charset = "binary" Then
+        FileName = Notepads.GetFileNameDialog("savebin")
+        If FileName = "" Then Exit Sub
+    Else
+        FileName = ""
+    End If
+    
+    Dim hWndW As Long
+    ' always spawn a new one
+    hWndW = NewNotepad
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.HttpGet hWndR, hWndW, Charset, FileName
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_http_clear_cache(oAC As Object)
+    IECacheClear.ClearCache
+End Sub
+
+Public Sub Menu_edit_remove_html(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    ' always spawn a new one
+    hWndW = NewNotepad
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.HtmlToPlain hWndR, hWndW, -1
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_only_form(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    ' always spawn a new one
+    hWndW = NewNotepad
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.HtmlToForm hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_only_javascript(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    ' always spawn a new one
+    hWndW = NewNotepad
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.HtmlToScript hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_to_ssf(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.ToEasySsf hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_yubin(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim ScriptLocation As String
+    Dim fs As Scripting.FileSystemObject
+    ScriptLocation = oAC.Parameter
+    If ScriptLocation = "" Then
+        MsgBox "郵便番号検索 yubin スクリプトのパスを登録すれば、この機能が使えます。", _
+            vbOKOnly, "http://www.vector.co.jp/soft/win95/personal/se489007.html"
+        Exit Sub
+    Else
+        Set fs = New Scripting.FileSystemObject
+        If Not fs.FileExists(ScriptLocation) Then
+            MsgBox "郵便番号検索 yubin スクリプトのパスを登録すれば、この機能が使えます。" & vbCrLf & _
+                ScriptLocation & " が見つかりません。", _
+                vbOKOnly Or vbExclamation, "http://www.vector.co.jp/soft/win95/personal/se489007.html"
+            Exit Sub
+        End If
+        Set fs = Nothing
+    End If
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.Yubin hWndR, hWndW, ScriptLocation
+    SetSaved hWndW
+End Sub
+
+Public Sub Menu_edit_template(oAC As Object)
+    Dim hWndR As Long
+    hWndR = NotepadHWnd
+    If hWndR = 0 Then Exit Sub
+    
+    Dim hWndW As Long
+    hWndW = EditorWriteTo(hWndR)
+    If hWndW = 0 Then Exit Sub
+    
+    NotepadsEdit.Template hWndR, hWndW
+    SetSaved hWndW
+End Sub
+
+' helper
+Private Function ItemDelimiter() As String
+    ItemDelimiter = "; "
+End Function
+
+Public Sub SetNotepadItem(ByVal hWnd As Long, ByVal ProcId As Long, Optional ByVal FileName As String = "")
+    Helper.ListAddHistory Helper.GetButton("notepad"), hWnd & ItemDelimiter & ProcId & ItemDelimiter & FileName
+End Sub
+
+Public Sub SetNotepadFileName(ByVal FileName As String)
+    Dim NotepadItem As Variant
+    Dim hWnd As Long
+    Dim ProcId As Long
+    
+    NotepadItem = Split(Helper.GetControlText("notepad"), ItemDelimiter)
+    hWnd = Val(NotepadItem(0))
+    If UBound(NotepadItem) >= 1 Then
+        ProcId = Val(NotepadItem(1))
+    Else
+        ProcId = 0
+    End If
+    
+    With Helper.GetButton("notepad")
+        .List(.ListIndex) = hWnd & ItemDelimiter & ProcId & ItemDelimiter & FileName
+    End With
+    
+    DoNotepad.SetTitleNotepad hWnd, FileName
+End Sub
+
+Public Function RemoveNotepadItem() As Long
+    With Helper.GetButton("notepad")
+        If .ListCount = 0 Then Exit Function
+        .RemoveItem .ListIndex
+        If .ListCount > 0 Then .ListIndex = 1
+        RemoveNotepadItem = .ListCount
+    End With
+End Function
+
+Public Function GetNotepadHWnd() As Long
+    Dim NotepadItem As Variant
+    NotepadItem = Split(Helper.GetControlText("notepad"), ItemDelimiter)
+    If UBound(NotepadItem) = -1 Then
+        GetNotepadHWnd = 0
+    Else
+        GetNotepadHWnd = Val(NotepadItem(0))
+    End If
+End Function
+
+Public Function GetNotepadProcId() As Long
+    Dim NotepadItem As Variant
+    NotepadItem = Split(Helper.GetControlText("notepad"), ItemDelimiter)
+    If UBound(NotepadItem) >= 1 Then
+        GetNotepadProcId = Val(NotepadItem(1))
+    Else
+        GetNotepadProcId = 0
+    End If
+End Function
+
+Public Function GetNotepadFileName() As String
+    Dim NotepadItem As Variant
+    NotepadItem = Split(Helper.GetControlText("notepad"), ItemDelimiter)
+    If UBound(NotepadItem) >= 2 Then
+        GetNotepadFileName = NotepadItem(2)
+    Else
+        GetNotepadFileName = ""
+    End If
+End Function
+
+Private Function NotepadHWnd(Optional BeSure As Boolean = True) As Long
+    Dim hWnd As Long
+    hWnd = GetNotepadHWnd
+    
+    If BeSure And (hWnd <> 0) Then
+        If DoNotepad.GetWindowProcessId(hWnd) = 0 Then
+            hWnd = 0
+            RemoveNotepadItem
+        End If
+    End If
+    
+    NotepadHWnd = hWnd
+End Function
+
+Public Function SwitchNotepad() As Boolean
+    Dim hWnd As Long
+    hWnd = GetNotepadHWnd
+    If DoNotepad.ShowNotepad(hWnd) Then
+        SwitchNotepad = True
+    Else
+        RemoveNotepadItem
+        SwitchNotepad = False
+    End If
+End Function
+
+Public Function NewNotepad(Optional FileName As String = "", Optional Data As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcId As Long
+    
+    hWnd = DoNotepad.OpenNotepad()
+    If hWnd = 0 Then
+        MsgBox "メモ帳が起動できません", vbCritical Or vbOKOnly
+    Else
+        ProcId = DoNotepad.GetWindowProcessId(hWnd)
+        SetNotepadItem hWnd, ProcId, FileName
+        
+        If Data <> "" Then DoNotepad.WriteNotepad hWnd, Data
+        If FileName <> "" Then DoNotepad.SetTitleNotepad hWnd, FileName
+    End If
+    
+    NewNotepad = hWnd
+End Function
+
+Private Sub CloseAllNotepad(Abandon As Boolean)
+    Dim hWnd As Long
+    
+    With Helper.GetButton("notepad")
+        Do While .ListCount > 0
+            hWnd = GetNotepadHWnd
+            If hWnd <> 0 Then
+                DoNotepad.CloseNotepad hWnd, Abandon
+                RemoveNotepadItem
+            End If
+        Loop
+    End With
+End Sub
+
+Private Function EnableSpawn() As Boolean
+    EnableSpawn = GetChildButtonState("file_spawn")
+End Function
+
+Private Function EditorWriteTo(hWnd As Long, Optional DoClone As Boolean = False) As Long
+    Dim ClonedHWnd As Long
+    
+    If EnableSpawn Then
+        If DoClone Then
+            ClonedHWnd = NewNotepad("", DoNotepad.ReadNotepad(hWnd))
+            DoNotepad.SetSelNotepad ClonedHWnd, DoNotepad.GetSelNotepad(hWnd)
+            EditorWriteTo = ClonedHWnd
+        Else
+            EditorWriteTo = NewNotepad()
+        End If
+    Else
+        EditorWriteTo = hWnd
+    End If
+End Function
+
+Private Function EnableUnSaved() As Boolean
+    EnableUnSaved = GetChildButtonState("file_saved")
+End Function
+
+Private Sub SetSaved(hWnd As Long)
+    If Not EnableUnSaved Then DoNotepad.SetSavedNotepad hWnd
+End Sub
+
+Private Function GetLineFeed() As String
+    Dim Lf As String
+    
+    Lf = Helper.GetControlText("linefeed")
+    Select Case Lf
+    Case "CrLf"
+        Lf = vbCrLf
+    Case "Cr"
+        Lf = vbCr
+    Case "Lf"
+        Lf = vbLf
+    Case "Tab"
+        Lf = vbTab
+    Case "Null"
+        Lf = ""
+    End Select
+    
+    GetLineFeed = Lf
+End Function
+
+Private Function GetChildButtonState(Tag As String) As Boolean
+    GetChildButtonState = Helper.IsButtonStateOn(GetChildButton(Tag))
+End Function
+
+Private Function GetChildButton(Tag As String) As Office.CommandBarControl
+    Dim ParentName As String
+    ParentName = Split(Tag, "_", 2)(0)
+    Set GetChildButton = Helper.ButtonFindByTag(Helper.GetButton(ParentName).CommandBar, Tag)
+End Function
+
+
+'=== default main procedures end ===
+'=== bar extension begin ===
+
+
+Private Sub ExtendBar()
+    InsertChildren Me.Range("_ExtendPopup")
+End Sub
+
+Private Sub InsertChildren(ExtendRegion As Range)
+    Dim ExtendRow As Range
+    Dim ParentName As String
+    Dim ParentPopUp As Office.CommandBarPopup
+    Dim OldControl As Office.CommandBarControl
+    Dim Data As Variant
+    
+    For Each ExtendRow In ExtendRegion.Rows
+        ParentName = ExtendRow.Cells(1).Value
+        If ParentName <> "" Then
+            Set ParentPopUp = Helper.GetButton(ParentName)
+            If Not ParentPopUp Is Nothing Then
+                For Each OldControl In ParentPopUp.CommandBar.Controls
+                    OldControl.Delete
+                Next
+                Data = ConvertRangeToArray(Me.Range(ExtendRow.Cells(2).Value))
+                Helper.AddButtons ParentPopUp.CommandBar, Data, ButtonParent
+            End If
+        End If
+    Next
+End Sub
+
+
+'=== bar extension end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+    ExtendBar
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'class
+'   name;StringStreamFile
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public FileName As String
+Public Charset As String
+
+Private FileStream As Object
+Private CanRead As Boolean
+Private CanWrite As Boolean
+Private SpawnCount As Long
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+    If Not CanRead Then Exit Sub
+    
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanRead = False
+End Sub
+
+Public Sub FlushWrite()
+    If Not CanWrite Then Exit Sub
+    
+    FileStream.WriteText Dequeue(-1)
+    If Charset = "utf-8" Then
+        SaveToFileNoBom
+    Else
+        SaveToFile
+    End If
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanWrite = False
+End Sub
+
+Private Sub SaveToFile()
+    Const adSaveCreateOverWrite = 2
+    If FileName = "" Then Exit Sub
+    
+    FileStream.SaveToFile FileName, adSaveCreateOverWrite
+End Sub
+
+Private Sub SaveToFileNoBom()
+    ' expect Charset="utf-8"
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    Dim outSt As Object
+    
+    If FileName = "" Then Exit Sub
+    
+    ' skip 3 bytes BOM
+    FileStream.Position = 0
+    FileStream.Type = adTypeBinary
+    FileStream.Position = 3
+    
+    ' save as binary
+    Set outSt = CreateObject("ADODB.Stream")
+    outSt.Open
+    outSt.Type = adTypeBinary
+    outSt.Write FileStream.Read
+    outSt.SaveToFile FileName, adSaveCreateOverWrite
+    
+    outSt.Close
+    Set outSt = Nothing
+End Sub
+
+Public Function OpenRead()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    If FileName = "" Then Exit Function
+    
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeText
+        .Charset = Charset
+        .LoadFromFile FileName
+    End With
+    
+    CanRead = True
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    Const adTypeText = 2
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeText
+        .Charset = Charset
+    End With
+    
+    CanWrite = True
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Const SsfExt = ".txt"
+    
+    If CanWrite Then
+        Set OpenSpawn = New StringStreamFile
+        SpawnCount = SpawnCount + 1
+        With OpenSpawn
+            .LineFeed = LineFeed
+            .Charset = Charset
+            If SpawnName = "" Then
+                .FileName = FileName & "." & CStr(SpawnCount) & SsfExt
+            Else
+                .FileName = FileName & "." & SpawnName & SsfExt
+            End If
+            .OpenWrite
+        End With
+    Else
+        Set OpenSpawn = Nothing
+    End If
+End Function
+
+Public Function CloseSpawn()
+    If CanWrite Then CloseWrite
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    FileName = ""
+    Charset = "utf-8"
+    CanRead = False
+    CanWrite = False
+    SpawnCount = 0
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    
+    If Not FileStream Is Nothing Then
+        FileStream.Close
+        Set FileStream = Nothing
+    End If
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    If CanWrite Then
+        FileStream.WriteText Dequeue(-1) & Data
+    Else
+        Text = Text & Data
+    End If
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        If CanRead Then
+            If Len(Text) < Size Then
+                Text = Text & FileStream.ReadText(Size)
+            End If
+        End If
+        
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+        
+        If CanRead Then
+            Dequeue = Dequeue & FileStream.ReadText(-1)
+        End If
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = ((Text = "") And FileStream.EOS)
+End Function
+
+'}}}
+
+'class
+'   name;StringStreamClipboard
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    CopyToClipboard Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue CopyFromClipboard
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+' get text from clipboard
+Private Function CopyFromClipboard() As String
+    Const CFText As Long = 1
+    Dim Data As String
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.GetFromClipboard
+    If Clip.GetFormat(CFText) Then
+        Data = Clip.GetText()
+    Else
+        Data = ""
+    End If
+    CopyFromClipboard = Data
+End Function
+ 
+' put text into clipboard
+Private Sub CopyToClipboard(Data As String)
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Data
+    Clip.PutInClipboard
+End Sub
+
+'}}}
+
+'class
+'   name;StringStream
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+
+'module
+'   name;DoNotepad
+'{{{
+Option Explicit
+
+' unicode api
+
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const WM_COPY = &H301
+Private Const EM_GETSEL = &HB0
+Private Const EM_SETSEL = &HB1
+Private Const EM_SCROLLCARET = &HB7
+Private Const EM_GETMODIFY = &HB8
+Private Const EM_SETMODIFY = &HB9
+Private Const EM_GETLINECOUNT = &HBA
+Private Const EM_LINEINDEX = &HBB
+Private Const EM_LINELENGTH = &HC1
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_GETLINE = &HC4
+Private Const EM_LINEFROMCHAR = &HC9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExW" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As Long, ByVal lpsz2 As Long) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextW" (ByVal hWnd As Long, ByVal lpString As Long) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageW" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long, Optional ByVal Abandon As Boolean = True)
+    If Abandon Then
+        SetSavedNotepad hWnd
+    Else
+        ShowNotepad hWnd
+    End If
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
+            Optional NameMe As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcId As Long
+    Dim i As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    
+    On Error GoTo Err1
+    
+    TitleText = " - notepad - meets VBA"
+    ExePath = "notepad.exe"
+    
+    ProcId = Shell(ExePath, iWindowState)
+    If ProcId = 0 Then GoTo Err1
+    
+    hWnd = GetWindowByProcessId(ProcId)
+    If hWnd = 0 Then GoTo Err1
+    
+    TitleText = IIf(NameMe = "", ProcId, NameMe) & TitleText
+    i = SetWindowText(hWnd, StrPtr(TitleText))
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' SetWindowPos can be used to change Z-order
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "failed to start a notepad", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+    OpenNotepad = 0
+End Function
+
+' set window title
+Public Function SetTitleNotepad(hWnd As Long, Optional ByVal NewName As String = "") As Long
+    Dim i As Long
+    Dim ProcId As Long
+    Dim TitleText As String
+    
+    ProcId = GetWindowProcessId(hWnd)
+    TitleText = ProcId & " - " & NewName & " - notepad - meets VBA"
+    i = SetWindowText(hWnd, StrPtr(TitleText))
+    SetTitleNotepad = i
+End Function
+ 
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessage(i, WM_SETTEXT, 0, StrPtr(strTextAll)))
+End Function
+ 
+' push text into the notepad with a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+'     -2: at the line start
+'      2: at the line end
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' push text into the notepad without a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+'     -2: at the line start
+'      2: at the line end
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    Dim At As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' select all
+        SendMessage i, EM_SETSEL, -1, 0     ' unselect (let the cursor move to the end of the selection)
+    Case -2
+        At = CurrentLineHomeNotepad(hWnd)
+        SendMessage i, EM_SETSEL, At, At
+    Case 2
+        At = CurrentLineEndNotepad(hWnd)
+        SendMessage i, EM_SETSEL, At, At
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessage(i, EM_REPLACESEL, 0, StrPtr(strText)))
+End Function
+ 
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim At As Long
+    Dim x As String
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, vbNullChar)
+    SendMessage i, WM_GETTEXT, j, StrPtr(x)
+    ' remove unused ChrW(0)
+    At = InStr(1, x, vbNullChar, vbBinaryCompare)
+    If At > 0 Then
+        ReadNotepad = Left(x, At - 1)
+    Else
+        ReadNotepad = x
+    End If
+End Function
+
+' get text length from the notepad
+Public Function ReadNotepadLength(hWnd As Long) As Long
+    Dim i As Long
+    Dim j As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    j = SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    ReadNotepadLength = j
+End Function
+
+' get a ProcessID from hWnd
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcId As Long
+    Dim ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcId)
+    GetWindowProcessId = ProcId
+End Function
+
+' get an hWnd from ProcessID (Notepad only)
+Public Function GetWindowByProcessId(ProcessId As Long, _
+        Optional TaskName As String = "Notepad", _
+        Optional TitleText As String = vbNullString) As Long
+    Dim ProcId As Long
+    Dim ThreadID As Long
+    Dim hWnd As Long
+
+    hWnd = 0
+    Do
+        hWnd = FindWindowEx(0, hWnd, StrPtr(TaskName), StrPtr(TitleText))
+        If hWnd = 0 Then Exit Do
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcId)
+    Loop Until ProcessId = ProcId
+    
+    GetWindowByProcessId = hWnd
+End Function
+
+' notify user to see the notepad described with the hWnd
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+
+' get current cursor position
+Public Function GetSelNotepad(hWnd As Long) As Variant
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_GETSEL, VarPtr(SelStart), VarPtr(SelEnd)
+    GetSelNotepad = Array(SelStart, SelEnd)
+End Function
+
+' set current cursor position
+Public Sub SetSelNotepad(hWnd As Long, ByVal Cursor As Variant)
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    Dim i As Long
+    
+    If IsArray(Cursor) Then
+        SelStart = Cursor(0)
+        SelEnd = Cursor(1)
+    Else
+        SelStart = Cursor
+        SelEnd = SelStart
+    End If
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    ' this api requires the window is focused, if it has a selection carret
+    SendMessage i, EM_SETSEL, SelStart, SelEnd
+    SendMessage i, EM_SCROLLCARET, 0, 0
+End Sub
+
+' copy selection to clipboard
+Public Sub CopySelectedTextNotepad(hWnd As Long)
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, WM_COPY, 0, 0
+End Sub
+
+' get selection text
+Public Function GetSelectedTextNotepad(hWnd As Long) As String
+    Dim Cursor As Variant
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    Dim TextAll As String
+    
+    Cursor = GetSelNotepad(hWnd)
+    SelStart = Cursor(0)
+    SelEnd = Cursor(1)
+    If SelStart = SelEnd Then
+        GetSelectedTextNotepad = ""
+    Else
+        TextAll = ReadNotepad(hWnd)
+        GetSelectedTextNotepad = Mid(TextAll, SelStart + 1, SelEnd - SelStart)
+    End If
+End Function
+
+' get a total lines count
+Public Function CountLinesNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    CountLinesNotepad = SendMessage(i, EM_GETLINECOUNT, 0, 0)
+End Function
+
+' get current line number
+Public Function CurrentLineNotepad(hWnd As Long, Optional Position As Long = -1) As Long
+    ' Position = -1 for the current cursor (always choose the top end for selection)
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    CurrentLineNotepad = SendMessage(i, EM_LINEFROMCHAR, Position, 0)
+End Function
+
+' get current (caret) line number
+Public Function CaretLineNotepad(hWnd As Long) As Long
+    ' detect the caret is on the top end or on the bottom end
+    Dim Caret As Long
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    Caret = SendMessage(i, EM_LINEINDEX, -1, 0)
+    CaretLineNotepad = SendMessage(i, EM_LINEFROMCHAR, Caret, 0)
+End Function
+
+' get current (caret) line beginning point
+Public Function CaretLineHomeNotepad(hWnd As Long) As Long
+    ' detect the caret is on the top end or on the bottom end
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    CaretLineHomeNotepad = SendMessage(i, EM_LINEINDEX, -1, 0)
+End Function
+
+' get current line beginning point
+Public Function CurrentLineHomeNotepad(hWnd As Long, Optional ByVal LineNumber As Long = -1) As Long
+    ' LineNumber = -1 for the current cursor, always the top end of selection
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    If LineNumber = -1 Then LineNumber = SendMessage(i, EM_LINEFROMCHAR, -1, 0)
+    CurrentLineHomeNotepad = SendMessage(i, EM_LINEINDEX, LineNumber, 0)
+End Function
+
+' get a line length
+Public Function LineLengthNotepad(hWnd As Long, Optional ByVal Position As Long = -2) As Long
+    ' Position = -2 is for the current cursor (caret)
+    ' Position = -1 is not only for the current cursor, it includes whole the selection
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    Dim Length As Long
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_GETSEL, VarPtr(SelStart), VarPtr(SelEnd)
+    If Position = -2 Then Position = SelStart
+    Length = SendMessage(i, EM_LINELENGTH, Position, 0)
+    If Position = -1 Then Length = Length + SelEnd - SelStart
+    
+    LineLengthNotepad = Length
+End Function
+
+' get current line ending point
+Public Function CurrentLineEndNotepad(hWnd As Long, Optional ByVal LineNumber As Long = -1) As Long
+    ' LineNumber = -1 for the current cursor, always the bottom end of selection
+    Dim StartAt As Long
+    Dim LineLength As Long
+    
+    'If LineNumber = -1 Then LineNumber = CurrentLineNotepad(hWnd)
+    StartAt = CurrentLineHomeNotepad(hWnd, LineNumber)
+    If StartAt = -1 Then
+        CurrentLineEndNotepad = -1
+    Else
+        LineLength = LineLengthNotepad(hWnd, -1)
+        CurrentLineEndNotepad = StartAt + LineLength
+    End If
+End Function
+
+' get current (caret) line ending point
+Public Function CaretLineEndNotepad(hWnd As Long) As Long
+    ' detect the caret is on the top end or on the bottom end
+    Dim StartAt As Long
+    Dim LineLength As Long
+    Dim i As Long
+    
+    i = GetWindow(hWnd, GW_CHILD)
+    StartAt = SendMessage(i, EM_LINEINDEX, -1, 0)
+    If StartAt = -1 Then
+        CaretLineEndNotepad = -1
+    Else
+        LineLength = SendMessage(i, EM_LINELENGTH, StartAt, 0)
+        CaretLineEndNotepad = StartAt + LineLength
+    End If
+End Function
+
+' get current line text
+Public Function ReadLineNotepad(hWnd As Long, Optional ByVal LineNumber As Long = -2) As String
+    ' LineNumber = -1 for the current selection
+    ' LineNumber = -2 for the current cursor (caret)
+    Dim StartAt As Long
+    Dim LineLength As Long
+    Dim Text As String
+    
+    Select Case LineNumber
+    Case -2
+        StartAt = CaretLineHomeNotepad(hWnd)
+        LineLength = LineLengthNotepad(hWnd, -2)
+    Case -1
+        StartAt = CurrentLineHomeNotepad(hWnd, -1)
+        LineLength = LineLengthNotepad(hWnd, -1)
+    Case Else
+        StartAt = CurrentLineHomeNotepad(hWnd, LineNumber)
+        LineLength = LineLengthNotepad(hWnd, StartAt)
+    End Select
+    
+    If StartAt = -1 Or LineLength = 0 Then
+        ReadLineNotepad = ""
+    Else
+        Text = ReadNotepad(hWnd)
+        ReadLineNotepad = Mid(Text, StartAt + 1, LineLength)
+    End If
+End Function
+
+'}}}
+
+'module
+'   name;Notepads
+'{{{
+Option Explicit
+
+Public Sub Clipboard_copy(hWnd As Long)
+    Dim Stream As StringStreamClipboard
+    Set Stream = New StringStreamClipboard
+    
+    Stream.OpenWrite
+    Stream.WriteText DoNotepad.ReadNotepad(hWnd)
+    Stream.CloseWrite
+    Set Stream = Nothing
+End Sub
+
+Public Sub Office_in(hWnd As Long)
+    HandleToExcel ToLf(DoNotepad.ReadNotepad(hWnd))
+End Sub
+
+Public Sub Office_out(hWnd As Long)
+    DoNotepad.WriteTextNotepad hWnd, FromLf(HandleFromExcel)
+End Sub
+
+Private Function ToLf(Data As String) As String
+    ToLf = Replace(Data, vbCrLf, vbLf)
+End Function
+
+Private Function FromLf(Data As Variant) As String
+    Dim Stream As StringStream
+    Dim x As Variant
+    
+    If IsArray(Data) Then
+        Set Stream = New StringStream
+        For Each x In Data
+            If x <> "" Then Stream.WriteLine FromLf(x)
+        Next
+        FromLf = Stream.Text
+        Set Stream = Nothing
+    Else
+        FromLf = Replace(CStr(Data), vbLf, vbCrLf)
+    End If
+End Function
+
+Private Sub HandleToExcel(Data As Variant)
+    On Error Resume Next
+    
+    Selection.Value = Data
+    If Err.Number = 0 Then Exit Sub
+    
+    Err.Clear
+    Selection.Text = Data
+    If Err.Number = 0 Then Exit Sub
+    
+    Err.Clear
+    Selection.Characters.Text = Data
+End Sub
+
+Private Function HandleFromExcel() As Variant
+    On Error Resume Next
+    
+    HandleFromExcel = CropByUsedRange(Selection).Formula
+    If Err.Number = 0 Then Exit Function
+    
+    Err.Clear
+    HandleFromExcel = CropByUsedRange(Selection).Value
+    If Err.Number = 0 Then Exit Function
+    
+    Err.Clear
+    HandleFromExcel = Selection.Text
+    If Err.Number = 0 Then Exit Function
+    
+    Err.Clear
+    HandleFromExcel = Selection.Characters.Text
+End Function
+
+Private Function CropByUsedRange(Ra As Range) As Range
+    Set CropByUsedRange = Application.Intersect(Ra, Ra.Worksheet.UsedRange)
+End Function
+
+Public Sub File_open(Charset As String)
+    Dim inSt As Object
+    Dim BinaryMode As Boolean
+    Dim Text As String
+    
+    BinaryMode = (Charset = "binary")
+    If BinaryMode Then
+        Set inSt = New BinaryStreamFile
+    Else
+        Set inSt = New StringStreamFile
+        inSt.Charset = Charset
+    End If
+    
+    inSt.FileName = GetFileNameDialog("open")
+    
+    If inSt.FileName <> "" Then
+        inSt.OpenRead
+        If BinaryMode Then
+            Text = inSt.GetHexText(16, " ", vbCrLf, True, 0, -1)
+        Else
+            Text = inSt.ReadAll
+        End If
+        BaumMain.NewNotepad inSt.FileName, Text
+        inSt.CloseRead
+    End If
+    
+    Set inSt = Nothing
+End Sub
+
+Public Sub File_save(hWnd As Long, ByVal FileName As String, Charset As String, AlwaysAsk As Boolean)
+    Dim outSt As Object
+    Dim BinaryMode As Boolean
+    Dim Text As String
+    
+    BinaryMode = (Charset = "binary")
+    If BinaryMode Then
+        Set outSt = New BinaryStreamFile
+    Else
+        Set outSt = New StringStreamFile
+        outSt.Charset = Charset
+    End If
+    
+    If AlwaysAsk Or (FileName = "") Then
+        outSt.FileName = GetFileNameDialog("save", FileName)
+    Else
+        outSt.FileName = FileName
+    End If
+    
+    If outSt.FileName <> "" Then
+        BaumMain.SetNotepadFileName outSt.FileName
+        outSt.OpenWrite
+        Text = DoNotepad.ReadNotepad(hWnd)
+        If BinaryMode Then
+            outSt.SetHexText Text
+        Else
+            outSt.WriteText Text
+        End If
+        outSt.CloseWrite
+        DoNotepad.SetSavedNotepad hWnd
+    End If
+    
+    Set outSt = Nothing
+End Sub
+
+Public Function GetFileNameDialog(Optional Style As String = "open", Optional FileName As String = "") As Variant
+    Const FileFilter = "text file (*.txt;*.csv),*.txt;*.csv," & _
+                        "html file (*.htm;*.html;*.css;*.js),*.htm;*.html;*.css;*.js," & _
+                        "script file (*.vbs;*.bat),*.vbs;*.bat," & _
+                        "all (*.*),*.*"
+    Const OpenTitle = "Read from file"
+    Const SaveTitle = "Write to file"
+    
+    Dim InitName As String
+    Dim Result As Variant
+    Dim out As Variant
+    
+    Select Case Style
+    Case "open"
+        Result = Application.GetOpenFilename(FileFilter:=FileFilter, Title:=OpenTitle)
+    Case "save"
+        InitName = FileName
+        Result = Application.GetSaveAsFilename(InitialFilename:=InitName, FileFilter:=FileFilter, Title:=SaveTitle)
+    Case "savebin"
+        InitName = FileName
+        Result = Application.GetSaveAsFilename(InitialFilename:=InitName, FileFilter:=FileFilter, Title:=SaveTitle, FilterIndex:=4)
+    End Select
+    
+    If IsArray(Result) Then
+        out = Result
+    ElseIf TypeName(Result) = "Boolean" Then
+        out = Empty
+    Else
+        out = CStr(Result)
+    End If
+    
+    GetFileNameDialog = out
+End Function
+
+'}}}
+
+'module
+'   name;NotepadsEdit
+'{{{
+Option Explicit
+
+Private Function ReadNotepad(hWnd As Long) As String
+    Dim Text As String
+    Dim At As Long
+    'Dim Stream As StringStreamClipboard
+    
+    If NotepadHasSelection(hWnd) Then
+        ' Selection
+'        DoNotepad.CopySelectedTextNotepad (hWnd)
+'        Set Stream = New StringStreamClipboard
+'        Stream.OpenRead
+'        ReadNotepad = Stream.ReadAll
+'        Stream.CloseRead
+'        Set Stream = Nothing
+        ReadNotepad = DoNotepad.GetSelectedTextNotepad(hWnd)
+    Else
+        ' Whole
+        ReadNotepad = DoNotepad.ReadNotepad(hWnd)
+    End If
+End Function
+
+Private Function ReadLineNotepad(hWnd As Long, Optional LineNumber As Long = -2) As String
+    ReadLineNotepad = DoNotepad.ReadLineNotepad(hWnd, LineNumber)
+End Function
+
+Private Sub WriteNotepad(hWnd As Long, Text As String)
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    
+    ' this is important to enable cursor control
+    DoNotepad.ShowNotepad hWnd
+    DoEvents
+    
+    If GetNotepadSelection(hWnd, SelStart, SelEnd) > 0 Then
+        ' Replace Selection
+        DoNotepad.WriteTextNotepad hWnd, Text
+        DoNotepad.SetSelNotepad hWnd, Array(SelStart, SelStart + Len(Text))
+    Else
+        ' Replace Whole
+        DoNotepad.WriteNotepad hWnd, Text
+    End If
+End Sub
+
+Private Sub WriteLineNotepad(hWnd As Long, Text As String)
+    ' this is important to enable cursor control
+    DoNotepad.ShowNotepad hWnd
+    DoEvents
+    DoNotepad.WriteLineNotepad hWnd, vbCrLf & Text, 2
+End Sub
+
+Private Function NotepadHasSelection(hWnd As Long) As Boolean
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    NotepadHasSelection = (GetNotepadSelection(hWnd, SelStart, SelEnd) > 0)
+End Function
+
+Private Function GetNotepadSelection(hWnd As Long, ByRef SelStart As Long, ByRef SelEnd As Long) As Long
+    Dim Cursor As Variant
+    
+    Cursor = DoNotepad.GetSelNotepad(hWnd)
+    SelStart = Cursor(0)
+    SelEnd = Cursor(1)
+    ' they are byte numbers of the internal buffer on ANSI api.
+    
+    GetNotepadSelection = SelEnd - SelStart
+End Function
+
+Private Function RegFind(Pattern As String, IgnoreCase As Boolean) As VBScript_RegExp_55.RegExp
+    Dim R As VBScript_RegExp_55.RegExp
+    
+    Set R = New VBScript_RegExp_55.RegExp
+    R.Global = True
+    R.IgnoreCase = IgnoreCase
+    R.MultiLine = True
+    R.Pattern = Pattern
+    
+    Set RegFind = R
+End Function
+
+Private Function RegFindWhole(Pattern As String, IgnoreCase As Boolean) As VBScript_RegExp_55.RegExp
+    Dim R As VBScript_RegExp_55.RegExp
+    
+    Set R = New VBScript_RegExp_55.RegExp
+    R.Global = True
+    R.IgnoreCase = IgnoreCase
+    R.MultiLine = False
+    R.Pattern = Pattern
+    
+    Set RegFindWhole = R
+End Function
+
+Public Sub WrapByLength(hR As Long, hW As Long, Length As Long)
+    Dim Text As String
+    Dim TextLength As Long
+    Dim Cursor As Long
+    Dim At As Long
+    Dim NextLength As Long
+    Dim NextText As String
+    Dim Stream As StringStream
+    
+    Text = ReadNotepad(hR)
+    TextLength = Len(Text)
+    Set Stream = New StringStream
+    Stream.OpenWrite
+    
+    Cursor = 1
+    NextLength = Length
+    Do While Cursor <= TextLength
+        NextText = Mid(Text, Cursor, NextLength)
+        Stream.WriteText NextText
+        Cursor = Cursor + NextLength
+        
+        At = InStrRev(NextText, vbCrLf)
+        If At > 0 Then
+            NextLength = Length - NextLength + At + 1
+        ElseIf Right(NextText, 1) = vbCr Then
+            If Mid(Text, Cursor, 1) = vbLf Then
+                NextLength = Length + 1
+            Else
+                Stream.WriteText vbCrLf
+                NextLength = Length
+            End If
+        Else
+            Stream.WriteText vbCrLf
+            NextLength = Length
+        End If
+    Loop
+    
+    WriteNotepad hW, Stream.Text
+    Stream.CloseWrite
+    Set Stream = Nothing
+End Sub
+
+Public Sub ToCrLf(hR As Long, hW As Long, FromLineFeed As String)
+    Dim Text As String
+    Dim NewText As String
+    Dim HtmlTag As String
+    Dim R As RegExp
+    
+    Text = ReadNotepad(hR)
+    If TheLineFeedIsHtmlTag(FromLineFeed) Then
+        HtmlTag = LCase(Mid(FromLineFeed, 2, Len(FromLineFeed) - 2))
+        Select Case HtmlTag
+        Case "table"
+            Set R = RegFindWhole("</t(d|r)( +[^>]*)*>", True)
+            NewText = R.Replace(Text, vbCrLf)
+            R.Pattern = "</?(td|tr|table)( +[^>]*)*>"
+            NewText = R.Replace(NewText, "")
+            Set R = Nothing
+        Case "br"
+            Set R = RegFindWhole("<" & HtmlTag & "( +[^>]*)*>", True)
+            NewText = R.Replace(Text, vbCrLf)
+            Set R = Nothing
+        Case Else
+            Set R = RegFindWhole("</" & HtmlTag & "( +[^>]*)*>", True)
+            NewText = R.Replace(Text, vbCrLf)
+            R.Pattern = "<" & HtmlTag & "( +[^>]*)*>"
+            NewText = R.Replace(NewText, "")
+            Set R = Nothing
+        End Select
+    Else
+        NewText = Replace(Text, FromLineFeed, vbCrLf)
+    End If
+    WriteNotepad hW, NewText
+End Sub
+
+Public Sub FromCrLf(hR As Long, hW As Long, ToLineFeed As String)
+    Dim Text As String
+    Dim NewText As String
+    Dim ModifiedLf As String
+    Dim Head As String
+    Dim Foot As String
+    Dim HtmlTag As String
+    Dim R As RegExp
+    
+    Text = ReadNotepad(hR)
+    Head = ""
+    Foot = ""
+    HtmlTag = ""
+    
+    If TheLineFeedIsHtmlTag(ToLineFeed) Then
+        HtmlTag = LCase(Mid(ToLineFeed, 2, Len(ToLineFeed) - 2))
+        Select Case HtmlTag
+        Case "br"
+            ModifiedLf = "<" & HtmlTag & " />"
+        Case "table"
+            ' use regexp
+        Case Else
+            ModifiedLf = "</" & HtmlTag & "><" & HtmlTag & ">"
+            Head = "<" & HtmlTag & ">"
+            Foot = "</" & HtmlTag & ">"
+        End Select
+    Else
+        ModifiedLf = ToLineFeed
+    End If
+    
+    Select Case HtmlTag
+    Case "table"
+        Set R = RegFindWhole("(\r\n){2,}", False)
+        NewText = R.Replace(Text, "</td></tr><tr><td>")
+        R.Pattern = "\r\n"
+        NewText = "<table><tr><td>" & R.Replace(NewText, "</td><td>") & "</td></tr></table>"
+        Set R = Nothing
+    Case Else
+        NewText = Head & Replace(Text, vbCrLf, ModifiedLf) & Foot
+    End Select
+    
+    WriteNotepad hW, NewText
+End Sub
+
+Private Function TheLineFeedIsHtmlTag(LineFeed As String) As Boolean
+    TheLineFeedIsHtmlTag = Left(LineFeed, 1) = "<" And Right(LineFeed, 1) = ">" _
+                            And UCase(LineFeed) = LineFeed And Len(LineFeed) > 2
+End Function
+
+Public Function FindNext(hR As Long, FindWhat As String, IgnoreCase As Boolean) As Boolean
+    Dim Text As String
+    Dim Cursor As Variant
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    Dim FoundStart As Long
+    Dim FoundEnd As Long
+    Dim R As RegExp
+    Dim Ms As MatchCollection
+    Dim M As Match
+    Dim RegOffset As Long
+    Dim Found As Boolean
+    
+    DoNotepad.ShowNotepad hR
+    Cursor = DoNotepad.GetSelNotepad(hR)
+    SelStart = Cursor(0)
+    SelEnd = Cursor(1)
+    
+    ' always read all
+    Text = DoNotepad.ReadNotepad(hR)
+    
+    ' work around a bug of vbregexp, a CrLf is divided
+    Text = Replace(Text, vbCrLf, vbLf & vbNullChar)
+    If Left(FindWhat, 1) = "^" Then
+        FindWhat = "^" & vbNullChar & Mid(FindWhat, 2)
+        RegOffset = 1
+    Else
+        RegOffset = 0
+    End If
+    
+    Set R = RegFind(FindWhat, IgnoreCase)
+    Set Ms = R.Execute(Text)
+    If Ms.Count = 0 Then
+        AppActivate ActiveWindow.Caption
+        MsgBox "Not Found: " & Replace(FindWhat, vbNullChar, ""), vbInformation Or vbOKOnly, "FindNext"
+        Found = False
+    Else
+        For Each M In Ms
+            FoundStart = M.FirstIndex + RegOffset
+            FoundEnd = M.FirstIndex + M.Length
+            If FoundEnd > SelEnd Then
+                DoNotepad.SetSelNotepad hR, Array(FoundStart, FoundEnd)
+                Found = True
+                GoTo DONE
+            End If
+        Next
+        AppActivate ActiveWindow.Caption
+        If MsgBox("これより下にはありません。先頭に戻りますか？", vbQuestion Or vbYesNo, "FindNext: " & Ms.Count & "件") = vbYes Then
+            FoundStart = Ms(0).FirstIndex + RegOffset
+            FoundEnd = Ms(0).FirstIndex + Ms(0).Length
+            DoNotepad.ShowNotepad hR
+            DoNotepad.SetSelNotepad hR, Array(FoundStart, FoundEnd)
+            Found = True
+        Else
+            Found = False
+        End If
+    End If
+    
+DONE:
+    Set Ms = Nothing
+    Set R = Nothing
+    
+    FindNext = Found
+End Function
+
+Public Sub ReplaceNext(hR As Long, FindWhat As String, IgnoreCase As Boolean, ReplaceTo As String)
+    Dim Found As Boolean
+    Dim Cursor As Variant
+    Dim SelStart As Long
+    Dim SelEnd As Long
+    
+    DoNotepad.ShowNotepad hR
+    Cursor = DoNotepad.GetSelNotepad(hR)
+    SelStart = Cursor(0)
+    DoNotepad.SetSelNotepad hR, SelStart
+    
+    Found = FindNext(hR, FindWhat, IgnoreCase)
+    If Found Then
+        DoNotepad.ShowNotepad hR
+        Cursor = DoNotepad.GetSelNotepad(hR)
+        SelStart = Cursor(0)
+        SelEnd = Cursor(1)
+        ' always repalce the selection
+        DoNotepad.WriteTextNotepad hR, ReplaceTo
+        DoNotepad.SetSelNotepad hR, Array(SelStart, SelStart + Len(ReplaceTo))
+    End If
+End Sub
+
+Public Sub ReplaceAll(hR As Long, hW As Long, FindWhat As String, IgnoreCase As Boolean, ReplaceTo As String)
+    Dim Text As String
+    Dim R As RegExp
+    
+    DoNotepad.ShowNotepad hR
+    Text = ReadNotepad(hR)
+    
+    ' work around a bug of vbregexp, a CrLf is divided
+    Text = Replace(Text, vbCrLf, vbCr)
+    
+    Set R = RegFind(FindWhat, IgnoreCase)
+    Text = R.Replace(Text, ReplaceTo)
+    Set R = Nothing
+    
+    WriteNotepad hW, Replace(Text, vbCr, vbCrLf)
+End Sub
+
+Public Sub DelFound(hR As Long, hW As Long, FindWhat As String, IgnoreCase As Boolean)
+    Dim Text As String
+    Dim R As RegExp
+    
+    ' work around a bug of vbregexp, a CrLf is divided
+    Text = Replace(ReadNotepad(hR), vbCrLf, vbLf)
+    Set R = RegFind(FindWhat, IgnoreCase)
+    WriteNotepad hW, Replace(R.Replace(Text, ""), vbLf, vbCrLf)
+    Set R = Nothing
+End Sub
+
+Public Sub DelNotFound(hR As Long, hW As Long, FindWhat As String, IgnoreCase As Boolean)
+    Dim Text As String
+    Dim R As RegExp
+    Dim Ms As MatchCollection
+    Dim M As Match
+    Dim Stream As StringStream
+    
+    Text = ReadNotepad(hR)
+    Set R = RegFind(FindWhat, IgnoreCase)
+    Set Ms = R.Execute(Text)
+    
+    If Ms.Count = 0 Then
+        DoNotepad.WriteNotepad hW, ""
+    Else
+        Set Stream = New StringStream
+        Stream.OpenWrite
+        
+        For Each M In Ms
+            Stream.WriteText M.Value
+            ' work around a bug of vbregexp, a CrLf is divided
+            If Right(M.Value, 1) = vbCr Then Stream.WriteText vbLf
+        Next
+        
+        WriteNotepad hW, Stream.Text
+        Stream.CloseWrite
+        Set Stream = Nothing
+    End If
+    
+    Set Ms = Nothing
+    Set R = Nothing
+End Sub
+
+Public Sub ToHtml(hR As Long, hW As Long)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    Text = Replace(Text, "&", "&amp;")
+    Text = Replace(Text, "<", "&lt;")
+    Text = Replace(Text, ">", "&gt;")
+    Text = Replace(Text, """", "&quot;")
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub FromHtml(hR As Long, hW As Long)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    DecodeHtmlEntityNumber Text
+    Text = Replace(Text, "&quot;", """")
+    Text = Replace(Text, "&gt;", ">")
+    Text = Replace(Text, "&lt;", "<")
+    Text = Replace(Text, "&amp;", "&")
+    WriteNotepad hW, Text
+End Sub
+
+Private Sub DecodeHtmlEntityNumber(ByRef Text As String)
+    Dim R As RegExp
+    Dim Ms As MatchCollection
+    Dim M As Match
+    Dim x As String
+    Dim y As Long
+    
+    Set R = RegFindWhole("&#([0-9a-fA-F]+);", False)
+    ' vbregexp support "$1" but cannot do ChrW($1)
+    Set Ms = R.Execute(Text)
+    
+    For Each M In Ms
+        x = M.Value
+        y = Val("&h" & M.SubMatches(0))
+        If y = 38 Then
+            ' this must be decoded at the end
+            Text = Replace(Text, x, "&amp;")
+        Else
+            Text = Replace(Text, x, ChrW(y))
+        End If
+    Next
+    
+    Set Ms = Nothing
+    Set R = Nothing
+End Sub
+
+Public Sub ToUrl(hR As Long, hW As Long, Charset As String)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    If Text <> "" Then Text = UrlEncode.EncUrlString(Text, Charset)
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub FromUrl(hR As Long, hW As Long, Charset As String)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    If Text <> "" Then Text = UrlEncode.DecUrlString(Text, Charset)
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub VisibleIndent(hR As Long, hW As Long, Length As Long, Mark As String)
+    Dim Text As String
+    Dim R As RegExp
+    
+    Text = ReadNotepad(hR)
+    Set R = RegFind("[ \t]{" & Length & "}", False)
+    Text = R.Replace(Text, Mark)
+    Set R = Nothing
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub InvisibleIndent(hR As Long, hW As Long, Length As Long, Mark As String)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    Text = Replace(Text, Mark, Space(Length))
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub HttpGet(hR As Long, hW As Long, DefaultCharset As String, FileName As String)
+    Dim UrlLine As String
+    Dim Urls As Variant
+    Dim Url As String
+    Dim Method As String
+    Dim TimeOut As Single
+    Dim FixedCharset As String
+    Dim R As RegExp
+    Dim WPost As HttpGet
+    
+    ' url notation: delimited by spaces
+    ' url method timeout charset
+    
+    UrlLine = ReadLineNotepad(hR)
+    Set R = RegFindWhole("\s+", False)
+    Urls = Split(R.Replace(Trim(UrlLine), " ") & Space(3), " ")
+    Set R = Nothing
+    
+    Url = Urls(0)
+    Method = UCase(Urls(1))
+    TimeOut = Val(Urls(2))
+    FixedCharset = Urls(3)
+    If Method = "" Then Method = "GET"
+    If TimeOut = 0 Then TimeOut = IIf(FileName = "", 10, 60)
+    
+    If Left(Url, 4) <> "http" Then Exit Sub
+    
+    Set WPost = New HttpGet
+    WPost.HttpGetNotepad hW, Url, Method, TimeOut, FixedCharset, DefaultCharset, FileName
+    DoNotepad.WriteLineNotepad hW, ""
+    DoNotepad.WriteLineNotepad hW, WPost.Logger.Text
+    Set WPost = Nothing
+    
+    DoNotepad.ShowNotepad hW
+End Sub
+
+Public Sub HtmlToPlain(hR As Long, hW As Long, Optional MaxRule As Long = -1)
+    Dim UrlLine As String
+    Dim Url As String
+    Dim Text As String
+    
+    UrlLine = DoNotepad.ReadLineNotepad(hR, 0)
+    If Left(UrlLine, 9) = "url: http" Then
+        Url = Split(Mid(UrlLine, 6), "?")(0)
+    End If
+    
+    Text = ReadNotepad(hR)
+    Text = HtmlPlain.HtmlPlain(Text, Url, MaxRule)
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub HtmlToForm(hR As Long, hW As Long)
+    Dim UrlLine As String
+    Dim Url As String
+    Dim Text As String
+    
+    UrlLine = DoNotepad.ReadLineNotepad(hR, 0)
+    If Left(UrlLine, 9) = "url: http" Then
+        Url = Split(Mid(UrlLine, 6), "?")(0)
+    End If
+    
+    Text = ReadNotepad(hR)
+    Text = HtmlForm.HtmlForm(Text, Url)
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub HtmlToScript(hR As Long, hW As Long)
+    Dim UrlLine As String
+    Dim Url As String
+    Dim Text As String
+    
+    UrlLine = DoNotepad.ReadLineNotepad(hR, 0)
+    If Left(UrlLine, 9) = "url: http" Then
+        Url = Split(Mid(UrlLine, 6), "?")(0)
+    End If
+    
+    Text = ReadNotepad(hR)
+    Text = HtmlScript.HtmlScript(Text, Url)
+    WriteNotepad hW, Text
+End Sub
+
+Public Sub ToEasySsf(hR As Long, hW As Long)
+    Dim Text As String
+    Dim Lines As Variant
+    Dim Line As Variant
+    Dim Stream As StringStream
+    
+    Text = ReadNotepad(hR)
+    Lines = Split(Text, vbCrLf)
+    
+    Set Stream = New StringStream
+    Stream.OpenWrite
+    
+    Stream.WriteLine "'ssf-begin"
+    Stream.WriteLine "';"
+    Stream.WriteLine ""
+    Stream.WriteLine "'cells-formula"
+    Stream.WriteLine "'  address;A1:A" & UBound(Lines) + 1
+    For Each Line In Lines
+        Stream.WriteLine "'         ;" & CStr(Line)
+    Next
+    Stream.WriteLine ""
+    Stream.WriteLine "'ssf-end"
+    
+    WriteNotepad hW, Stream.Text
+    Stream.CloseWrite
+    Set Stream = Nothing
+End Sub
+
+Public Sub Yubin(hR As Long, hW As Long, Command As String)
+    Const CScriptWithTimeOut = "CScript //NOLOGO //B //T:30 "
+    Dim Text As String
+    Dim Args As String
+    
+    Args = ReadLineNotepad(hR, -1)
+    If Args = "" Then Exit Sub
+    
+    Text = ShowExecution(CScriptWithTimeOut & Command, Args)
+    WriteLineNotepad hW, Text
+End Sub
+
+Private Function ShowExecution(Command As String, StdInText As String) As String
+    Dim wsh As IWshRuntimeLibrary.WshShell
+    Dim con As IWshRuntimeLibrary.WshExec
+    Dim ReturnCode As Long
+    Dim StdOutText As String
+    Dim StdErrText As String
+    
+    If Command = "" Then Exit Function
+    On Error GoTo CommandFailed
+    
+    Set wsh = New WshShell
+    Set con = wsh.Exec(Command)
+    
+    If Not IsMissing(StdInText) Then
+        With con.StdIn
+            .WriteLine StdInText
+            .Close
+        End With
+    End If
+    
+    Do While con.Status = WshRunning
+        DoEvents
+    Loop
+    
+    ReturnCode = con.ExitCode
+    
+    If con.StdOut.AtEndOfStream Then
+        StdOutText = ""
+    Else
+        StdOutText = con.StdOut.ReadAll & vbCrLf
+    End If
+    If con.StdErr.AtEndOfStream Then
+        StdErrText = ""
+    Else
+        StdErrText = con.StdErr.ReadAll & vbCrLf
+    End If
+    
+CommandFailed:
+    If Err.Number <> 0 Then
+        ShowExecution = Err.Number & " " & Err.Description & vbCrLf
+    Else
+        ShowExecution = ReturnCode & vbCrLf & StdErrText & StdOutText
+    End If
+    
+    Set con = Nothing
+    Set wsh = Nothing
+End Function
+
+' minimum template
+Public Sub Template(hR As Long, hW As Long)
+    Dim Text As String
+    
+    Text = ReadNotepad(hR)
+    'Text = ReadLineNotepad(hR)
+    
+    Text = StrConv(Text, vbWide)
+    
+    WriteNotepad hW, Text
+    'WriteLineNotepad hW, Text
+End Sub
+
+'}}}
+
+'class
+'   name;HttpGet
+'{{{
+Option Explicit
+
+' most parts of code in this class come from the wpost project
+' http://code.google.com/p/cowares-wpost/
+
+' wpost
+' post to web form
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+' usage> CScript wpost.vbs /e:CHARSET POSTDATA
+
+' POSTDATA is a text file that contains urls and post parameters
+' CHARSET is an encoding of the postdata file
+' see examples for details
+
+
+Public Logger As StringStream
+Public FileSystem As Scripting.FileSystemObject
+Public Shell As Object
+Public Http As Object
+Public Env As Scripting.Dictionary
+Public Request As Object
+Public Header As Object
+Public Data As Object
+Public Binary As Object
+Public xInput As Object
+Public xOutput As Object
+Public Log As Object
+Public Misc As Object
+
+Public Property Get Bag() As HttpGet
+    Set Bag = Me
+End Property
+
+
+Public Sub HttpGetNotepad(hWnd As Long, Url As String, Method As String, _
+                TimeOut As Single, FixedCharset As String, DefaultCharset As String, _
+                FileName As String)
+    
+    Dim Stream As StringStream
+    
+    Set Stream = New StringStream
+    Stream.OpenWrite
+    
+    Stream.WriteLine "url: " & Url
+    If Method <> "" Then Stream.WriteLine "method: " & Method
+    Stream.WriteLine "timeout: " & TimeOut
+    If FixedCharset <> "" Then Stream.WriteLine "charset: " & FixedCharset
+    If FileName <> "" Then Stream.WriteLine "file: " & FileName
+    Stream.WriteLine ""
+    
+    WriteLineNotepad hWnd, Stream.Text
+    
+    Stream.CloseWrite
+    Set Stream = Nothing
+    
+    If FileName = "" Then
+        SetEnv "output", "text", ""
+    Else
+        SetEnv "output", "file", FileName
+    End If
+    
+    SetEnv "output", "notepad", hWnd
+    SetEnv "request", "url", Url
+    SetEnv "request", "method", Method
+    SetEnv "request", "timeout", TimeOut
+    If FixedCharset <> "" Then SetEnv "request", "charset", FixedCharset
+    SetEnv "misc", "default-charset", DefaultCharset
+    
+    SubmitOne Url
+End Sub
+
+
+'=== act submit begin ===
+
+
+Private Sub ReportResponseNotepad(tp, Url)
+    Dim hWnd As Long
+    Dim AsText As Boolean
+    Dim FileName As String
+    
+    hWnd = Val(Bag.GetEnv("output", "notepad", 0))
+    If hWnd = 0 Then Exit Sub
+    
+    DoNotepad.WriteLineNotepad hWnd, tp.Status & " " & tp.statusText & " " & Url
+    DoNotepad.WriteLineNotepad hWnd, ""
+    
+    If tp.Status = 0 Then
+        DoNotepad.WriteLineNotepad hWnd, Logger.Text
+    Else
+        DoNotepad.WriteLineNotepad hWnd, tp.getAllResponseHeaders
+        AsText = Bag.xOutput.Exists("text")
+        If AsText Then
+            DoNotepad.WriteLineNotepad hWnd, GetResponseText(tp)
+        Else
+            FileName = Bag.PopEnv("output", "file", "")
+            SaveBinaryFile tp.responseBody, FileName
+        End If
+    End If
+End Sub
+
+Private Function WaitCompleteOrTimeOut(tp, TimeOut, ErrorOnTimeOut)
+    Dim BeginAt, EndAt
+    
+    BeginAt = Timer()
+    EndAt = BeginAt + TimeOut
+    WaitCompleteOrTimeOut = True
+    
+    Do
+        DoEvents
+        If tp.readyState = 4 Then Exit Function
+    Loop While Timer() < EndAt And Timer() >= BeginAt
+    
+    tp.abort
+    WaitCompleteOrTimeOut = False
+    If ErrorOnTimeOut Then Err.Raise Number:=513, Description:="タイムアウトです。"
+End Function
+
+Private Sub SetReferer(Url)
+    Bag.Header("Referer") = Url
+End Sub
+
+Private Sub SubmitOne(Url)
+    Dim tp, Method, GetUrl
+    Dim TimeOut, UseASync
+    
+    If Left(Url, 4) <> "http" Then Exit Sub
+    
+    Set tp = Bag.Http
+    Method = UCase(Bag.GetEnv("request", "method", "GET"))
+    TimeOut = Val(Bag.GetEnv("request", "timeout", 0))
+    UseASync = (TimeOut > 0)
+    
+    On Error Resume Next
+    If Method = "POST" Then
+        tp.Open Method, Url, UseASync
+        SetRequestHeaders tp, Method, Url
+        tp.send EncodePostData
+    Else
+        GetUrl = EncodeGetData(Url)
+        tp.Open Method, GetUrl, UseASync
+        SetRequestHeaders tp, Method, Url
+        tp.send
+    End If
+    
+    If UseASync Then WaitCompleteOrTimeOut tp, TimeOut, True
+    
+    If Err.Number <> 0 Then
+        Bag.Logger.WriteLine "Error " & Err.Number & " " & Err.Description & " for " & Url
+        Err.Clear
+    Else
+        ReportResponseNotepad tp, Url
+    End If
+End Sub
+
+Private Sub SetRequestHeaders(tp, Method, Url)
+    Dim h
+    
+    If Bag.xInput.Exists("referer-self") Then
+        Bag.SetEnv "header", "Referer", Url
+    ElseIf Bag.xInput.Exists("referer-clear") Then
+        Bag.SetEnv "header", "Referer", ""
+    End If
+    
+    For Each h In Bag.Header.Keys
+        Bag.Logger.WriteLine "SetRequestHeaders: " & h & " = " & Bag.Header(h)
+        tp.setRequestHeader h, Bag.Header(h)
+    Next
+    
+    If Method = "POST" And Not Bag.Header.Exists("Content-Type") Then
+        tp.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+    End If
+End Sub
+
+Private Function EncodePostData()
+    Dim out, Charset, Key
+    
+    out = ""
+    Charset = LCase(Bag.GetEnv("request", "charset", "utf-8"))
+    For Each Key In Bag.Data.Keys
+        If out <> "" Then out = out & "&"
+        out = out & Key & "=" & EncUrlString(Bag.Data(Key), Charset)
+    Next
+    
+    If out <> "" Then Bag.Logger.WriteLine "DATA: " & out
+    EncodePostData = out
+End Function
+
+Private Function EncodeGetData(Url)
+    Dim EncodedData, out
+    
+    EncodedData = EncodePostData
+    If EncodedData = "" Then
+        out = Url
+    ElseIf InStr(Url, "?") = 0 Then
+        out = Url & "?" & EncodedData
+    Else
+        out = Url & "&" & EncodedData
+    End If
+    
+    Bag.Logger.WriteLine "GET URL: " & out
+    EncodeGetData = out
+End Function
+
+Private Sub SetEnvDataFromFile(FileName)
+    Const TristateFalse = 0
+    Const TristateTrue = -1
+    Const ForReading = 1
+    Dim ts, KeyValue
+    
+    Set ts = Bag.FileSystem.OpenTextFile(FileName, ForReading, False, TristateTrue)
+    ' TristateTrue is required to read a text including non-ANSI characters.
+    Do Until ts.AtEndOfStream
+        KeyValue = Split(ts.ReadLine, " ", 2)
+        If UBound(KeyValue) = 1 Then
+            Bag.SetEnv "data", Trim(KeyValue(0)), KeyValue(1)
+        End If
+    Loop
+    ts.Close
+    Set ts = Nothing
+End Sub
+
+
+'=== act submit end ===
+'=== act report begin ===
+
+
+Private Sub ReportResponse(tp, Url)
+    Dim FileName, AsText, LogHeader, At
+    
+    Bag.Logger.WriteLine tp.Status & " " & tp.statusText & " " & Url
+    LogHeader = True
+    If LogHeader Then Bag.Logger.WriteText tp.getAllResponseHeaders
+    
+    FileName = GetSaveFileName(tp, Url)
+    AsText = Bag.xOutput.Exists("text")
+    If AsText Then
+        Bag.Logger.WriteLine "save text to: " & FileName
+        SaveTextFile GetResponseText(tp), FileName
+    Else
+        Bag.Logger.WriteLine "save raw to: " & FileName
+        SaveBinaryFile tp.responseBody, FileName
+    End If
+    
+    At = InStr(Url, "?")
+    If At = 0 Then
+        Bag.Misc("last-url") = Url
+    Else
+        Bag.Misc("last-url") = Left(Url, At - 1)
+    End If
+    Bag.Misc("last-saved-file") = FileName
+    Bag.Logger.WriteLine Bag.Misc("last-url") & " " & FileName & vbCrLf
+End Sub
+
+Private Function GetSaveFileName(tp, Url)
+    Dim FileName, FolderName
+    
+    FileName = Bag.PopEnv("output", "file", "")
+    If FileName = "" Then
+        FolderName = Bag.GetEnv("output", "folder", "")
+        If FolderName <> "" Then
+            FileName = GetUniquePath(FolderName, GetFileExtByMime(tp))
+        Else
+            FileName = GetTempPathOut
+        End If
+    End If
+    
+    GetSaveFileName = FileName
+End Function
+
+Private Function GetUniquePath(ByVal FolderName, ByVal FileExt)
+    Dim out, Base, fs
+    
+    If Right(FolderName, 1) <> "\" Then FolderName = FolderName & "\"
+    If Left(FileExt, 1) <> "." Then FileExt = "." & FileExt
+    
+    Base = CLng(Bag.Misc("last-file-base"))
+    Set fs = Bag.FileSystem
+    Do
+        Base = Base + 1
+        out = fs.GetAbsolutePathName(FolderName & CStr(Base) & FileExt)
+    Loop While fs.FileExists(out)
+    Set fs = Nothing
+    Bag.Misc("last-file-base") = Base
+    
+    GetUniquePath = out
+End Function
+
+Private Function GetFileExtByMime(tp)
+    Dim out
+    out = Replace(Split(tp.getResponseHeader("Content-Type"), ";")(0), "/", ".")
+    If out = "" Then out = "bin"
+    GetFileExtByMime = out
+End Function
+
+Private Sub SaveBinaryFile(Data, FileName)
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    Dim Stream
+    
+    Set Stream = CreateObject("ADODB.Stream")
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write Data
+    Stream.SaveToFile FileName, adSaveCreateOverWrite
+    Stream.Close
+    Set Stream = Nothing
+End Sub
+
+Private Sub SaveTextFile(Data, FileName)
+    Const TristateFalse = 0
+    Const TristateTrue = -1
+    Const ForWriting = 2
+    Dim Stream
+    
+    Set Stream = Bag.FileSystem.OpenTextFile(FileName, ForWriting, True, TristateTrue)
+    ' TristateTrue is required to save a text including non-ANSI characters.
+    If Stream Is Nothing Then Err.Raise 52    ' invalid file name
+    Stream.Write Data
+    Stream.Close
+    Set Stream = Nothing
+End Sub
+
+Private Function CharsetByResponseHeader(tp)
+    Dim out, ContentType, At
+    
+    out = ""
+    ContentType = Split(tp.getResponseHeader("Content-Type"), ";")
+    If UBound(ContentType) >= 1 Then
+        At = InStr(1, ContentType(1), "charset=", vbTextCompare)
+        If At > 0 Then
+            out = LCase(Trim(Mid(ContentType(1), At + Len("charset="))))
+        End If
+    End If
+    
+    CharsetByResponseHeader = out
+End Function
+
+Private Function CharsetByMeta(tp)
+    Dim out, At
+    
+    out = ""
+    At = InStr(1, tp.responseText, "charset=", vbTextCompare)
+    If At > 0 Then
+        out = LCase(Mid(tp.responseText, At + Len("charset="), 64))
+        out = Left(out, InStr(1, out, """", vbBinaryCompare))
+        If out <> "" Then out = Left(out, Len(out) - 1)   ' remove last "
+    End If
+    
+    CharsetByMeta = out
+End Function
+
+Private Function GetResponseText(tp)
+    Dim AutoCharset, InCharset
+    Dim out
+    Dim DefaultCharset
+    
+    AutoCharset = CharsetByResponseHeader(tp)
+    Bag.Logger.WriteLine "header charset: " & AutoCharset
+    InCharset = LCase(Bag.GetEnv("request", "charset", AutoCharset))
+    Bag.Logger.WriteLine "expected charset: " & InCharset
+    If InCharset = "" Then InCharset = CharsetByMeta(tp)
+    Bag.Logger.WriteLine "charset: " & InCharset
+    
+    DefaultCharset = LCase(Bag.GetEnv("misc", "default-charset", "utf-8"))
+    If InCharset = "" Then InCharset = DefaultCharset
+    Bag.Logger.WriteLine "final charset: " & InCharset
+    
+    If InCharset = AutoCharset Then   ' includes blank
+        out = tp.responseText
+    ElseIf InCharset = "utf-8" And AutoCharset = "" Then
+        out = tp.responseText
+    Else
+        Bag.Logger.WriteLine "convert from raw into: " & InCharset
+        out = DecodeResponseBody(tp, InCharset)
+    End If
+    
+    GetResponseText = out
+End Function
+
+Private Function DecodeResponseBody(tp, Charset)
+    Dim out, Stream
+    Const adTypeBinary = 1
+    Const adTypeText = 2
+    
+    Set Stream = CreateObject("ADODB.Stream")
+    
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write tp.responseBody
+    
+    Stream.Position = 0
+    Stream.Type = adTypeText
+    Stream.Charset = Charset
+    out = Stream.ReadText
+    Stream.Close
+    
+    Set Stream = Nothing
+    DecodeResponseBody = out
+End Function
+
+
+'=== act report end ===
+'=== act run begin ===
+
+
+Private Sub RunScript(Value)
+    Dim rc, cmd
+    
+    If Value = "" Then Exit Sub
+    
+    cmd = "cmd /D /U /C CScript //NoLogo //U " & _
+            GetScriptPath(Value) & " /url:" & Replace(Bag.Misc("last-url"), "%", "%%") & _
+            " < " & GetTempPathIn & " > " & GetTempPathOut
+    rc = Bag.Shell.Run(cmd, 8, True)
+    Bag.Logger.WriteLine "run returns " & rc & " for " & cmd
+End Sub
+
+Private Sub RunCmd(Value)
+    Dim rc, cmd
+    
+    If Value = "" Then Exit Sub
+    
+    cmd = "cmd /D /U /C " & _
+            Value & _
+            " < " & GetTempPathIn & " > " & GetTempPathOut
+    rc = Bag.Shell.Run(cmd, 8, True)
+    Bag.Logger.WriteLine "run-cmd returns " & rc & " for " & cmd
+End Sub
+
+Private Function GetScriptPath(Value)
+    Dim ScriptFolder
+    
+    If Mid(Value, 2, 1) = ":" Then
+        ScriptFolder = ""
+    Else
+        If Bag.Misc.Exists("script-folder") Then
+            ScriptFolder = Bag.Misc("script-folder")
+        Else
+            ScriptFolder = Bag.FileSystem.GetParentFolderName(ThisWorkbook.FullName)
+            Bag.Misc("script-folder") = ScriptFolder
+        End If
+        If Right(ScriptFolder, 1) <> "\" Then ScriptFolder = ScriptFolder & "\"
+    End If
+    
+    GetScriptPath = ScriptFolder & Value
+End Function
+
+
+'=== act run end ===
+'=== temporary files begin ===
+
+
+Private Function GetTempPathOut()
+    Dim Base, out
+    
+    Base = Bag.PopEnv("output", "temp", "")
+    If Base = "" Then
+        Base = CLng(Bag.Misc("temp-last-number")) + 1
+        Bag.Misc("temp-last-number") = Base
+    End If
+    out = MakeTempFileName(Base)
+    
+    Bag.Misc("temp-last-path") = out
+    GetTempPathOut = out
+End Function
+
+Private Function GetTempPathIn()
+    Dim Base, out
+    
+    Base = Bag.PopEnv("input", "temp", "")
+    If Base = "" Then
+        out = GetLastTempPath
+    Else
+        out = MakeTempFileName(Base)
+    End If
+    
+    GetTempPathIn = out
+End Function
+
+Private Function GetLastTempPath()
+    GetLastTempPath = Bag.Misc("temp-last-path")
+End Function
+
+Private Function GetTempFolder()
+    Dim ScriptFolder, out
+    
+    If Bag.Misc.Exists("temp-folder") Then
+        out = Bag.Misc("temp-folder")
+    Else
+        out = Bag.FileSystem.GetParentFolderName(ThisWorkbook.FullName)
+        Bag.Misc("temp-folder") = out
+    End If
+    If Right(out, 1) <> "\" Then out = out & "\"
+    
+    GetTempFolder = out
+End Function
+
+Private Function MakeTempFileName(Base)
+    Dim Temp, out
+    
+    Temp = Bag.GetEnv("misc", "temp-name", "temp")
+    out = GetTempFolder & "w_" & Base & "_" & Temp & ".txt"
+    
+    MakeTempFileName = out
+End Function
+
+
+'=== temporary files end ===
+'=== classes begin ===
+
+
+Public Function PopEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            PopEnv = Env(BlockName)(Key)
+            Env(BlockName).Remove Key
+        Else
+            PopEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Function GetEnv(BlockName, Key, DefaultValue)
+    If Env.Exists(BlockName) Then
+        If Env(BlockName).Exists(Key) Then
+            GetEnv = Env(BlockName)(Key)
+        Else
+            GetEnv = DefaultValue
+        End If
+    End If
+End Function
+
+Public Sub SetEnv(BlockName, Key, Value)
+    If Env.Exists(BlockName) Then
+        If Key = "clear" Then
+            Env(BlockName).RemoveAll
+        Else
+            Env(BlockName)(Key) = Value
+        End If
+    Else
+        Logger.WriteLine "SetEnv: Unknown Block: " & BlockName & ", " & Key & ", " & Value
+    End If
+    Logger.WriteLine "SetEnv: " & BlockName & ", " & Key & ", " & Value
+End Sub
+
+Private Sub Class_Initialize()
+    Dim x
+    Const TextCompare = 1
+    
+    Set Logger = New StringStream
+    Set FileSystem = CreateObject("Scripting.FileSystemObject")
+    Set Shell = CreateObject("WScript.Shell")
+    'Set Http = CreateObject("MSXML2.XMLHTTP")
+    Set Http = CreateObject("MSXML2.XMLHTTP.6.0")
+    Set Env = CreateObject("Scripting.Dictionary")
+    Set Request = CreateObject("Scripting.Dictionary")
+    Set Header = CreateObject("Scripting.Dictionary")
+    Set Data = CreateObject("Scripting.Dictionary")
+    Set Binary = CreateObject("Scripting.Dictionary")
+    Set xInput = CreateObject("Scripting.Dictionary")
+    Set xOutput = CreateObject("Scripting.Dictionary")
+    Set Log = CreateObject("Scripting.Dictionary")
+    Set Misc = CreateObject("Scripting.Dictionary")
+    
+    Set Env("request") = Request
+    Set Env("header") = Header
+    Set Env("data") = Data
+    Set Env("binary") = Binary
+    Set Env("input") = xInput
+    Set Env("output") = xOutput
+    Set Env("log") = Log
+    Set Env("misc") = Misc
+    
+    For Each x In Env.Items
+        x.CompareMode = TextCompare
+    Next
+End Sub
+
+Private Sub Class_Terminate()
+    Env.RemoveAll
+    Set Misc = Nothing
+    Set Log = Nothing
+    Set xOutput = Nothing
+    Set xInput = Nothing
+    Set Binary = Nothing
+    Set Data = Nothing
+    Set Header = Nothing
+    Set Request = Nothing
+    Set Env = Nothing
+    Set Http = Nothing
+    Set Shell = Nothing
+    Set FileSystem = Nothing
+    Set Logger = Nothing
+End Sub
+
+
+'=== classes end ===
+
+'}}}
+
+'module
+'   name;UrlEncode
+'{{{
+Option Explicit
+
+'=== encode/decode url begin ===
+
+
+' unicode string to url string
+Public Function EncUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim bs As Variant
+    Dim Stream As ADODB.Stream
+    Set Stream = New ADODB.Stream
+    
+    Stream.Open
+    Stream.Charset = Charset
+    Stream.WriteText Text
+    
+    Stream.Position = 0
+    Stream.Type = adTypeBinary
+    
+    ' skip 3 bytes BOM
+    If Charset = "utf-8" Then Stream.Position = 3
+    
+    bs = Stream.Read
+    Stream.Close
+    Set Stream = Nothing
+    
+    EncUrlString = EncUrlBytes(bs)
+End Function
+
+' bytes array to url string
+Public Function EncUrlBytes(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        Select Case Data(i)
+        Case &H20   '" "
+            out = out & "+"
+        Case &H30 To &H39, &H41 To &H5A, &H61 To &H7A, &H2E, &H2D, &H5F '"0" To "9", "A" To "Z", "a" To "z", ".", "-", "_"
+            out = out & Chr(Data(i))
+        Case Is < &H10
+            out = out & "%0" & Hex(Data(i))
+        Case Else
+            out = out & "%" & Hex(Data(i))
+        End Select
+    Next
+    
+    EncUrlBytes = out
+End Function
+
+' url string to unicode string
+Public Function DecUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim Stream As ADODB.Stream
+    Set Stream = New ADODB.Stream
+    
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write DecUrlBytes(Text)
+    
+    Stream.Position = 0
+    Stream.Type = adTypeText
+    Stream.Charset = Charset
+    DecUrlString = Stream.ReadText
+    
+    Stream.Close
+    Set Stream = Nothing
+End Function
+
+' url string to bytes array
+Public Function DecUrlBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Ps As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    pan = Empty
+    Counter = 0
+    Ps = Split(Replace(Text, "+", " "), "%")
+    ' Ps(0)   : all raw characters
+    ' Ps(1) - : the first pair bytes make a byte char, the left are raw characters
+    
+    pan = StackPushAscii(pan, CStr(Ps(0)), Counter)
+    For i = 1 To UBound(Ps)
+        If Len(Ps(i)) >= 2 Then
+            pan = Array(CByte("&H" & Left(Ps(i), 2)), pan)
+            Counter = Counter + 1
+            pan = StackPushAscii(pan, Mid(Ps(i), 3), Counter)
+        Else
+            pan = StackPushAscii(pan, CStr(Ps(i)), Counter)
+        End If
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecUrlBytes = out
+End Function
+
+' stack up every unicode character
+Private Function StackPushAscii(Stack As Variant, Text As String, ByRef Counter As Long) As Variant
+    Dim i As Long
+    Dim pan As Variant
+    
+    pan = Stack
+    For i = 1 To Len(Text)
+        pan = Array(AscW(Mid(Text, i, 1)), pan)
+        Counter = Counter + 1
+    Next
+    
+    StackPushAscii = pan
+End Function
+
+
+'=== encode/decode url end ===
+
+'}}}
+
+'module
+'   name;HtmlPlain
+'{{{
+Option Explicit
+
+' most parts of code in this class come from the wpost project
+' http://code.google.com/p/cowares-wpost/
+
+' plain.vbs
+' wpost page analyser for plainize html
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+' usage> CScript //NoLogo nop.vbs /url:URL < in > out
+' /r:6 to select the maximum rules to be applied
+
+
+Public Function HtmlPlain(HtmlSource As String, Url As String, ByVal MaxRule As Long) As String
+    Dim Text, Keep
+    Dim UrlBase, UrlDomain, Title, SafeKey
+    
+    MaxRule = CLng(MaxRule)
+    If MaxRule <= 0 Then MaxRule = 7
+    Set Keep = CreateObject("Scripting.Dictionary")
+    
+    Text = HtmlSource
+    
+    If MaxRule >= 1 Then Rule1 Text, Keep, Url, UrlBase, UrlDomain, Title, SafeKey
+    If MaxRule >= 2 Then Rule2 Text, Keep, SafeKey
+    If MaxRule >= 3 Then Rule3 Text, Keep, SafeKey
+    If MaxRule >= 4 Then Rule4 Text
+    If MaxRule >= 5 Then Rule5 Text, UrlBase, UrlDomain
+    If MaxRule >= 6 Then Rule6 Text
+    If MaxRule >= 7 Then Rule7 Text, Keep, SafeKey
+    
+    Keep.RemoveAll
+    Set Keep = Nothing
+    
+    HtmlPlain = Url & vbCrLf & Title & vbCrLf & Text
+End Function
+    
+' follow the code 2011/2/24 on plain.wiki
+
+Private Sub Rule1(ByRef Text, Keep, Url, ByRef UrlBase, ByRef UrlDomain, ByRef Title, ByRef SafeKey)
+    Dim x, Rblank
+    Dim RootSlash
+    Dim At
+    
+    Set Rblank = RegBlank
+    
+    ' adjust line-feeds
+    Text = Replace(Replace(Text, vbCrLf, vbCr), vbLf, vbCr)
+    
+    ' base
+    Set x = RegTag("base").Execute(Text)
+    If x.Count = 0 Then
+        UrlBase = Url
+    Else
+        Set x = RegAttrib("href").Execute(x(0).SubMatches(1))
+        If x.Count = 0 Then
+            UrlBase = Url
+        Else
+            UrlBase = x(0).SubMatches(0)
+        End If
+    End If
+    If Right(UrlBase, 1) <> "/" Then
+        At = InStrRev(UrlBase, "/")
+        If At > 8 Then
+            UrlBase = Left(UrlBase, At)
+        Else
+            UrlBase = UrlBase & "/"
+        End If
+    End If
+    RootSlash = InStr(Len("http://") + 1, UrlBase, "/", vbBinaryCompare)
+    If RootSlash = 0 Then
+        UrlDomain = ""
+    Else
+        UrlDomain = Left(UrlBase, RootSlash - 1)
+    End If
+    
+    ' title
+    Set x = RegTag("title").Execute(Text)
+    If x.Count = 0 Then
+        Title = ""
+    Else
+        Title = Rblank.Replace(x(0).SubMatches(3), " ")
+    End If
+    
+    ' safekey
+    SafeKey = ""
+    Do While InStr(1, Text, SafeKey, vbBinaryCompare) > 0
+        SafeKey = SafeKey & Mid(CStr(Rnd), 3)
+    Loop
+    
+    Set x = Nothing
+End Sub
+
+Private Sub Rule2(ByRef Text, Keep, SafeKey)
+    Dim x, R, Key, Tag
+    
+    For Each Tag In Array("script", "style")
+        Set R = RegTag(Tag)
+        Do
+            Set x = R.Execute(Text)
+            If x.Count = 0 Then Exit Do
+            Key = "&" & Tag & SafeKey & Keep.Count & ";"
+            Keep.Add Key, x(0).Value
+            Text = Left(Text, x(0).FirstIndex) & vbCr & Key & vbCr & Mid(Text, x(0).FirstIndex + x(0).Length + 1)
+        Loop
+    Next
+    
+    Set x = Nothing
+    Set R = Nothing
+End Sub
+
+Private Sub Rule3(ByRef Text, Keep, SafeKey)
+    Dim x, R, Key, Tag
+    
+    For Each Tag In Array("comment", "pre", "form", "head")
+        If Tag = "comment" Then
+            Set R = RegCOMMENT
+        Else
+            Set R = RegTag(Tag)
+        End If
+        Do
+            Set x = R.Execute(Text)
+            If x.Count = 0 Then Exit Do
+            Key = "&" & Tag & SafeKey & Keep.Count & ";"
+            Keep.Add Key, x(0).Value
+            Text = Left(Text, x(0).FirstIndex) & vbCr & Key & vbCr & Mid(Text, x(0).FirstIndex + x(0).Length + 1)
+        Loop
+    Next
+    
+    Set x = Nothing
+    Set R = Nothing
+End Sub
+
+Private Sub Rule4(ByRef Text)
+    ' blanks
+    Text = RegBlank.Replace(Text, " ")
+    
+    ' clean tag blank
+    Text = Replace(Text, "< ", "<", 1, -1, vbBinaryCompare)
+    Text = Replace(Text, "</ ", "</", 1, -1, vbBinaryCompare)
+    Text = Replace(Text, " >", ">", 1, -1, vbBinaryCompare)
+End Sub
+
+Private Sub Rule5(ByRef Text, UrlBase, UrlDomain)
+    Dim x, R, Key, Tag, y, TagAttrib
+    Dim Rattr, Ralt, Rhref, Rsrc, Description
+    Dim LeftText, RightText, LinkUrl, FoundTag
+    
+    Set Rhref = RegAttrib("href")
+    Set Rsrc = RegAttrib("src")
+    Set Ralt = RegAttrib("alt")
+    For Each Tag In Array("a", "img|embed|frame|iframe")
+        Set R = RegTagStart(Tag)
+        If Tag = "a" Then
+            Set Rattr = Rhref
+        Else
+            Set Rattr = Rsrc
+        End If
+        
+        Do
+            Set x = R.Execute(Text)
+            If x.Count = 0 Then Exit Do
+            
+            LeftText = Left(Text, x(0).FirstIndex)
+            RightText = Mid(Text, x(0).FirstIndex + x(0).Length + 1)
+            FoundTag = LCase(x(0).SubMatches(0))
+            TagAttrib = x(0).SubMatches(1)
+            Set x = Rattr.Execute(TagAttrib)
+            If x.Count = 0 Then Exit Do
+            
+            Select Case FoundTag
+            Case "a"
+                Description = ""
+            Case "img"
+                Set y = Ralt.Execute(TagAttrib)
+                If y.Count = 0 Then
+                    Description = "画 "
+                Else
+                    Description = y(0).SubMatches(1) & " "
+                End If
+            Case "embed"
+                Description = "動 "
+            Case Else
+                Description = "挿 "
+            End Select
+            LinkUrl = x(0).SubMatches(1)
+            If Left(LinkUrl, 7) <> "http://" Then
+                If Left(LinkUrl, 1) = "/" Then
+                    LinkUrl = UrlDomain & LinkUrl
+                Else
+                    LinkUrl = UrlBase & LinkUrl
+                End If
+            End If
+            Text = LeftText & vbCr & Description & LinkUrl & vbCr & RightText
+        Loop
+    Next
+    
+    ' remove attributes
+    Text = RegTagRemoveAttr.Replace(Text, "<$1$4>")
+    
+    Set x = Nothing
+    Set Rattr = Nothing
+    Set Rhref = Nothing
+    Set Rsrc = Nothing
+    Set Ralt = Nothing
+    Set R = Nothing
+End Sub
+
+Private Sub Rule6(ByRef Text)
+    Dim i
+    
+    ' to single line-feed
+    Text = RegTagG("br|div").Replace(Text, vbCr)
+    
+    ' to double line-feed
+    Text = RegTagG("blockquote|p|dl|ol|ul|tr").Replace(Text, vbCr & vbCr)
+    
+    ' to ----
+    Text = RegTagG("hr").Replace(Text, vbCr & "----" & vbCr)
+    
+    ' to list
+    Text = RegTagGS("li|dt|dd|th|td").Replace(Text, vbCr & "- ")
+    
+    ' to header
+    For i = 1 To 6
+        Text = RegTagGS("h" & CStr(i)).Replace(Text, vbCr & vbCr & String(i, "*") & " ")
+    Next
+    Text = RegTagG("h[1-6]").Replace(Text, vbCr & vbCr)
+    
+    ' remove tags
+    Text = RegNoTags.Replace(Text, "")
+    
+    ' remove unused escapes
+    Text = RegEscaped("comment").Replace(Text, "")
+    Text = RegEscaped("head").Replace(Text, "")
+    
+    ' adjust line-feeds
+    Text = RegTooManyCr.Replace(Text, vbCr & vbCr)
+    
+    ' vbCr to vbCrLf
+    Text = Replace(Text, vbCr, vbCrLf, 1, -1, vbBinaryCompare)
+End Sub
+
+Private Sub Rule7(ByRef Text, Keep, SafeKey)
+    Dim x, R, Key, Tag, Escaped
+    
+    ' restore escaped blocks
+    For Each Tag In Array("pre")
+        Set R = RegEscaped(Tag & SafeKey)
+        Do
+            Set x = R.Execute(Text)
+            If x.Count = 0 Then Exit Do
+            Key = x(0).Value
+            Escaped = Keep(Key)
+            Escaped = Replace(Replace(Replace(Escaped, vbCrLf, vbCr), vbLf, vbCr), vbCr, vbCrLf)
+            Text = Left(Text, x(0).FirstIndex) & Escaped & Mid(Text, x(0).FirstIndex + x(0).Length + 1)
+        Loop
+    Next
+    
+    ' special entities
+    Text = Replace(Text, "&lt;", "<")
+    Text = Replace(Text, "&gt;", ">")
+    Text = Replace(Text, "&quot;", """")
+    Text = Replace(Text, "&amp;", "&")
+    
+    Set x = Nothing
+    Set R = Nothing
+End Sub
+
+Private Function RegTag(TagName)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = False
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<\s*(" & TagName & ")((\s+[^>]*)?)>(.*?)<\s*/\s*" & TagName & "\s*>"
+    
+    Set RegTag = R
+End Function
+
+Private Function RegTagStart(TagName)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = False
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<\s*(" & TagName & ")((\s+[^>]*)?)(/?)\s*>"
+    
+    Set RegTagStart = R
+End Function
+
+Private Function RegTagRemoveAttr()
+    Set RegTagRemoveAttr = RegTagStart("[^\s/>]+")
+    RegTagRemoveAttr.Global = True
+    RegTagRemoveAttr.IgnoreCase = False
+End Function
+
+Private Function RegTagGS(TagName)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<\s*(" & TagName & ")\s*/?\s*>"
+    
+    Set RegTagGS = R
+End Function
+
+Private Function RegTagG(TagName)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<\s*/?\s*(" & TagName & ")\s*/?\s*>"
+    
+    Set RegTagG = R
+End Function
+
+Private Function RegAttrib(AttribName)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = False
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "(" & AttribName & ")\s*=\s*""([^""]+)"""
+    
+    Set RegAttrib = R
+End Function
+
+Private Function RegBlank()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "(\s|&nbsp;|　)+"
+    
+    Set RegBlank = R
+End Function
+
+Private Function RegCOMMENT()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = False
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "<!--.*?-->"
+    
+    Set RegCOMMENT = R
+End Function
+
+Private Function RegNoTags()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "<[^>]*>"
+    
+    Set RegNoTags = R
+End Function
+
+Private Function RegTooManyCr()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "(\s*\r\s*){2,}"
+    
+    Set RegTooManyCr = R
+End Function
+
+Private Function RegEscaped(Tag)
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "&" & Tag & "[^;]*;"
+    
+    Set RegEscaped = R
+End Function
+
+'}}}
+
+'module
+'   name;HtmlForm
+'{{{
+Option Explicit
+
+' most parts of code in this class come from the wpost project
+' http://code.google.com/p/cowares-wpost/
+
+' form
+' wpost page analyser for cutting forms
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+' usage> CScript //NoLogo nop.vbs /url:URL < in > out
+
+
+Public Function HtmlForm(HtmlSource As String, Url As String) As String
+    Dim Text, x
+    Dim f
+    Dim Source, Result
+    
+    Source = Replace(HtmlSource, vbLf, " ")
+    ' work arround a bug that vb regexp fails in multi-lilne searching
+    
+    Result = Url & vbCrLf & vbCrLf
+    Set x = RegFORM.Execute(Source)
+    For Each f In x
+        Text = f.Value
+        Text = RegLessTags.Replace(Text, "")
+        Text = RegTooManyBlanks.Replace(Text, " ")
+        Text = RegTagEachLine.Replace(Text, ">" & vbCrLf & "<")
+        Result = Result & Text & vbCrLf & vbCrLf
+    Next
+    Set x = Nothing
+    
+    HtmlForm = Result
+End Function
+
+Private Function RegFORM()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<form.*?</form>"
+    
+    Set RegFORM = R
+End Function
+
+Private Function RegLessTags()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "</?(table|tr|td|div|span|br|font)[^>]*>"
+    
+    Set RegLessTags = R
+End Function
+
+Private Function RegTooManyBlanks()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "(\s|&nbsp;)+"
+    
+    Set RegTooManyBlanks = R
+End Function
+
+Private Function RegTagEachLine()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = ">\s*<"
+    
+    Set RegTagEachLine = R
+End Function
+
+'}}}
+
+'module
+'   name;HtmlScript
+'{{{
+Option Explicit
+
+' script
+
+Public Function HtmlScript(HtmlSource As String, Url As String) As String
+    Dim Text, x
+    Dim f
+    Dim Source, Result
+    
+    Source = Replace(HtmlSource, vbLf, " ")
+    ' work arround a bug that vb regexp fails in multi-lilne searching
+    
+    Result = Url & vbCrLf & vbCrLf
+    Set x = RegSCRIPT.Execute(Source)
+    For Each f In x
+        Text = f.Value
+        Text = RegSemiColonEachLine.Replace(Text, "$1" & vbCr)
+        Text = RegTagEachLine.Replace(Text, "$1" & vbCr)
+        Text = Replace(Text, vbCr, vbCrLf)
+        Result = Result & Text & vbCrLf & vbCrLf
+    Next
+    Set x = Nothing
+    
+    HtmlScript = Result
+End Function
+
+Private Function RegSCRIPT()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "<script.*?</script>"
+    
+    Set RegSCRIPT = R
+End Function
+
+Private Function RegTagEachLine()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = True
+    R.MultiLine = False
+    R.Pattern = "(</?script[^>]*>)\r?"
+    
+    Set RegTagEachLine = R
+End Function
+
+Private Function RegSemiColonEachLine()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "({}?;?|};?|;)\r?"
+    
+    Set RegSemiColonEachLine = R
+End Function
+
+'}}}
+
+'module
+'   name;IECacheClear
+'{{{
+' http://support.microsoft.com/kb/262110/en-us
+'How To Clear Cache When Your Application Hosts a WebBrowser Control
+
+Option Explicit
+
+Private Declare Function FindFirstUrlCacheGroup Lib "wininet.dll" ( _
+    ByVal dwFlags As Long, _
+    ByVal dwFilter As Long, _
+    ByRef lpSearchCondition As Long, _
+    ByVal dwSearchCondition As Long, _
+    ByRef lpGroupId As Date, _
+    ByRef lpReserved As Long) As Long
+
+Private Declare Function FindNextUrlCacheGroup Lib "wininet.dll" ( _
+    ByVal hFind As Long, _
+    ByRef lpGroupId As Date, _
+    ByRef lpReserved As Long) As Long
+    
+Private Declare Function DeleteUrlCacheGroup Lib "wininet.dll" ( _
+    ByVal sGroupID As Date, _
+    ByVal dwFlags As Long, _
+    ByRef lpReserved As Long) As Long
+    
+Private Declare Function FindFirstUrlCacheEntry Lib "wininet.dll" Alias "FindFirstUrlCacheEntryA" ( _
+    ByVal lpszUrlSearchPattern As String, _
+    ByRef lpFirstCacheEntryInfo As INTERNET_CACHE_ENTRY_INFO, _
+    ByRef lpdwFirstCacheEntryInfoBufferSize As Long) As Long
+    
+Private Type INTERNET_CACHE_ENTRY_INFO
+    dwStructSize As Long
+    szRestOfData(1024) As Long
+End Type
+
+Private Declare Function DeleteUrlCacheEntry Lib "wininet.dll" Alias "DeleteUrlCacheEntryA" ( _
+    ByVal lpszUrlName As Long) As Long
+
+Private Declare Function FindNextUrlCacheEntry Lib "wininet.dll" Alias "FindNextUrlCacheEntryA" ( _
+    ByVal hEnumHandle As Long, _
+    ByRef lpNextCacheEntryInfo As INTERNET_CACHE_ENTRY_INFO, _
+    ByRef lpdwNextCacheEntryInfoBufferSize As Long) As Long
+
+Private Const CACHGROUP_SEARCH_ALL = &H0
+Private Const ERROR_NO_MORE_FILES = 18
+Private Const ERROR_NO_MORE_ITEMS = 259
+Private Const CACHEGROUP_FLAG_FLUSHURL_ONDELETE = &H2
+Private Const BUFFERSIZE = 2048
+
+Public Sub ClearCache()
+    Dim sGroupID As Date
+    Dim hGroup As Long
+    Dim hFile As Long
+    Dim sEntryInfo As INTERNET_CACHE_ENTRY_INFO
+    Dim iSize As Long
+        
+    On Error Resume Next
+    
+    ' Delete the groups
+    hGroup = FindFirstUrlCacheGroup(0, 0, 0, 0, sGroupID, 0)
+    
+    ' To avoid error using it with IE4 as FindFirstUrlCacheGroup is not implemented
+    If Err.Number <> 453 Then
+        If (hGroup = 0) And (Err.LastDllError <> 2) Then
+            MsgBox "An error occurred enumerating the cache groups" & Err.LastDllError
+            Exit Sub
+        End If
+    Else
+        Err.Clear
+    End If
+    
+    If (hGroup <> 0) Then
+        'we succeeded in finding the first cache group.. enumerate and
+        'delete
+        Do
+            If (0 = DeleteUrlCacheGroup(sGroupID, CACHEGROUP_FLAG_FLUSHURL_ONDELETE, 0)) Then
+               
+               ' To avoid error using it with IE4 as FindFirstUrlCacheGroup is not implemented
+               If Err.Number <> 453 Then
+                 MsgBox "Error deleting cache group " & Err.LastDllError
+                 Exit Sub
+               Else
+                  Err.Clear
+               End If
+            End If
+            iSize = BUFFERSIZE
+            If (0 = FindNextUrlCacheGroup(hGroup, sGroupID, iSize)) And (Err.LastDllError <> 2) Then
+                MsgBox "Error finding next url cache group! - " & Err.LastDllError
+            End If
+        Loop Until Err.LastDllError = 2
+    End If
+  
+  ' Delete the files
+    sEntryInfo.dwStructSize = 80
+    iSize = BUFFERSIZE
+    hFile = FindFirstUrlCacheEntry(0, sEntryInfo, iSize)
+    If (hFile = 0) Then
+        If (Err.LastDllError = ERROR_NO_MORE_ITEMS) Then
+            GoTo DONE
+        End If
+        MsgBox "ERROR: FindFirstUrlCacheEntry - " & Err.LastDllError
+        Exit Sub
+    End If
+    Do
+        If (0 = DeleteUrlCacheEntry(sEntryInfo.szRestOfData(0))) _
+            And (Err.LastDllError <> 2) Then
+            Err.Clear
+        End If
+        iSize = BUFFERSIZE
+        If (0 = FindNextUrlCacheEntry(hFile, sEntryInfo, iSize)) And (Err.LastDllError <> ERROR_NO_MORE_ITEMS) Then
+            MsgBox "Error:  Unable to find the next cache entry - " & Err.LastDllError
+            Exit Sub
+        End If
+    Loop Until Err.LastDllError = ERROR_NO_MORE_ITEMS
+DONE:
+    Debug.Print "cache cleared"
+    'MsgBox "cache cleared"
+    'Command1.Enabled = True
+End Sub
+
+'}}}
+
+'class
+'   name;BinaryStreamFile
+'{{{
+Option Explicit
+
+Public BinaryData As Collection
+Public FileName As String
+
+Private FileStream As Object
+Private CanRead As Boolean
+Private CanWrite As Boolean
+Private SpawnCount As Long
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+    If Not CanRead Then Exit Sub
+    
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanRead = False
+End Sub
+
+Public Sub FlushWrite()
+    If Not CanWrite Then Exit Sub
+    
+    If BinaryDataCount > 0 Then FileStream.Write Dequeue(-1)
+    SaveToFile
+    FileStream.Close
+    Set FileStream = Nothing
+    FileName = ""
+    CanWrite = False
+End Sub
+
+Private Sub SaveToFile()
+    Const adSaveCreateOverWrite = 2
+    If FileName = "" Then Exit Sub
+    
+    FileStream.SaveToFile FileName, adSaveCreateOverWrite
+End Sub
+
+Public Function OpenRead()
+    Const adTypeBinary = 1
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    If FileName = "" Then Exit Function
+    
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeBinary
+        .LoadFromFile FileName
+    End With
+    
+    CanRead = True
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    Const adTypeBinary = 1
+    
+    If CanWrite Or CanRead Then Err.Raise 55
+    
+    ClearAll
+    Set FileStream = CreateObject("ADODB.Stream")
+    
+    With FileStream
+        .Open
+        .Type = adTypeBinary
+    End With
+    
+    CanWrite = True
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Const SsfExt = ".bin"
+    
+    If CanWrite Then
+        Set OpenSpawn = New StringStreamFile
+        SpawnCount = SpawnCount + 1
+        With OpenSpawn
+            If SpawnName = "" Then
+                .FileName = FileName & "." & CStr(SpawnCount) & SsfExt
+            Else
+                .FileName = FileName & "." & SpawnName & SsfExt
+            End If
+            .OpenWrite
+        End With
+    Else
+        Set OpenSpawn = Nothing
+    End If
+End Function
+
+Public Function CloseSpawn()
+    If CanWrite Then CloseWrite
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    FileName = ""
+    CanRead = False
+    CanWrite = False
+    SpawnCount = 0
+    Set BinaryData = New Collection
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    
+    If Not FileStream Is Nothing Then
+        FileStream.Close
+        Set FileStream = Nothing
+    End If
+    Set BinaryData = Nothing
+End Sub
+
+Private Sub ClearAll()
+    Do While BinaryData.Count > 0
+        BinaryData.Remove 1
+    Loop
+End Sub
+
+Private Sub Enqueue(Data)
+    Dim bs
+    
+    If CanWrite Then
+        If BinaryData.Count > 0 Then
+            bs = Dequeue(-1)
+            If Not IsEmpty(bs) Then FileStream.Write bs
+        End If
+        'If IsEmpty(Data) Then Exit Sub
+        If Not IsArray(Data) Then Exit Sub
+        FileStream.Write Data
+    Else
+        If IsEmpty(Data) Then Exit Sub
+        If Not IsArray(Data) Then Exit Sub
+        BinaryData.Add Data
+    End If
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        If CanRead Then
+            If BinaryDataCount < Size Then
+                BinaryData.Add FileStream.Read(Size)
+            End If
+        End If
+        
+        Dequeue = DequeueBinaryData(Size)
+    Else
+        If CanRead Then
+            BinaryData.Add FileStream.Read(-1)
+        End If
+        
+        Dequeue = DequeueBinaryData(-1)
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = ((BinaryDataCount = 0) And FileStream.EOS)
+End Function
+
+Private Function BinaryDataCount() As Long
+    Dim DataSize As Long
+    Dim i As Long
+    
+    DataSize = 0
+    For i = 1 To BinaryData.Count
+        If IsArray(BinaryData(i)) Then
+            DataSize = DataSize + UBound(BinaryData(i)) - LBound(BinaryData(i)) + 1
+        End If
+    Next
+    
+    BinaryDataCount = DataSize
+End Function
+
+Private Function DequeueBinaryData(Optional ByVal Size As Long = -1) As Variant
+    Dim DataSize As Long
+    Dim i As Long
+    Dim j As Long
+    Dim k As Long
+    Dim Buffer() As Byte
+    Dim Keeper() As Byte
+    Dim KeepCounter As Long
+    Dim pan As Variant
+    
+    DataSize = BinaryDataCount
+    If Size < 0 Or Size > DataSize Then Size = DataSize
+    
+    If Size > 0 Then
+        ReDim Buffer(0 To Size - 1)
+    End If
+    
+    pan = Empty
+    KeepCounter = 0
+    j = 0
+    Do While BinaryData.Count > 0 And j < Size
+        j = j - LBound(BinaryData(1))
+        For i = LBound(BinaryData(1)) To UBound(BinaryData(1))
+            If j + i < Size Then
+                Buffer(j + i) = BinaryData(1)(i)
+            Else
+                pan = Array(BinaryData(1)(i), pan)
+                KeepCounter = KeepCounter + 1
+            End If
+        Next
+        j = j + i
+        BinaryData.Remove 1
+    Loop
+    
+    If KeepCounter > 0 Then
+        ReDim Keeper(0 To KeepCounter - 1)
+        For k = KeepCounter - 1 To 0 Step -1
+            Keeper(k) = pan(0)
+            pan = pan(1)
+        Next
+        BinaryData.Add Keeper, Before:=1
+    End If
+    
+    If Size = 0 Then
+        DequeueBinaryData = Empty
+    Else
+        DequeueBinaryData = Buffer
+    End If
+End Function
+
+Public Function GetHexText(Optional ByVal Wrap As Long = 16, _
+                Optional ByVal Delimiter As String = " ", _
+                Optional ByVal LineFeed As String = vbCrLf, _
+                Optional ByVal CaseLower As Boolean = True, _
+                Optional ByVal Skip As Long = 0, _
+                Optional ByVal Limit As Long = -1) As String
+    Dim Counter As Long
+    Dim out As String
+    Dim bs As Byte
+    Dim i As Long
+    Dim j As Long
+    
+    If CanRead Then
+        BinaryData.Add FileStream.Read(-1)
+    End If
+    
+    out = ""
+    Counter = 0 - Skip
+    For i = 1 To BinaryData.Count
+        If IsArray(BinaryData(i)) Then
+            For j = LBound(BinaryData(i)) To UBound(BinaryData(i))
+                If Counter >= 0 Then
+                    If Limit = Counter Then GoTo DONE
+                    If Counter Mod Wrap = 0 And Counter > 0 Then out = out & LineFeed
+                    bs = BinaryData(i)(j)
+                    If CaseLower Then
+                        out = out & Right("00" & LCase(Hex(bs)), 2) & Delimiter
+                    Else
+                        out = out & Right("00" & UCase(Hex(bs)), 2) & Delimiter
+                    End If
+                End If
+                Counter = Counter + 1
+            Next
+        End If
+    Next
+    
+DONE:
+    GetHexText = out
+End Function
+
+Public Sub SetHexText(Data As String)
+    Dim bs As String
+    Dim ByteData(0 To 0) As Byte
+    Dim R As RegExp
+    Dim M As MatchCollection
+    
+    bs = Replace(Data, vbLf, " ")
+    ' work arround a bug that vb regexp fails in multi-lilne searching
+    
+    Set R = RegNextDelimiter
+    
+    Do Until bs = ""
+        Set M = R.Execute(bs)
+        If M.Count = 0 Then Exit Do
+        ByteData(0) = CByte("&H" & M(0).SubMatches(0))
+        bs = M(0).SubMatches(1)
+        WriteText ByteData
+    Loop
+    
+    Set M = Nothing
+    Set R = Nothing
+End Sub
+
+Private Function RegNextDelimiter()
+    Dim R
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = False
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = "([0-9A-Za-z]+)[^0-9A-Za-z]*(.*)"
+    
+    Set RegNextDelimiter = R
+End Function
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
