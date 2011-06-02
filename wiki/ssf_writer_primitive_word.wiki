@@ -54,8 +54,8 @@
  # モジュールコードの先頭近くにあるファイル名を変更する。
     * !DefaultFileName = "C:\Users\Public\Documents\ssf.txt"
     * ファイルダイアログが出て、ファイルを選べる。
- # この文書をワードテンプレート（dotファイル）、 ssf_reader_primitive.dot として保存する。
- # アドインの ssf_reader_primitive.dot を有効にする。
+ # この文書をワードテンプレート（dotファイル）、 ssf_writer_primitive.dot として保存する。
+ # アドインの ssf_writer_primitive.dot を有効にする。
  # 変換したいワード文書を開く。
  # マクロ "Writer" を実行する。
  # テキストファイルが保存される。
