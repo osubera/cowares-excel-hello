@@ -14,7 +14,7 @@ introduce tools to convert an Excel book to an SSF text
 
 = ssf writer primitive =
 
- * a simple tool, comes with only a single VBA standard module.
+ * a simple tool, comes with only a single VBA module.
  * minimized and essential functions, includes VBA macro, references, cell formulas, cell formats and cell names. put them into a text.
  * [ssf_writer_primitive more>>]
 

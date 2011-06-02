@@ -14,7 +14,7 @@ SSF 形式のテキストをエクセルブックに変換するツールを紹�
 
 = ssf reader primitive =
 
- * a simple tool, comes with only a single VBA standard module.
+ * a simple tool, comes with only a single VBA module.
  * minimized and essential functions, includes VBA macro, references, cell formulas, cell formats and cell names. get them from a text.
  * [ssf_reader_primitive more>>]
 
