@@ -22,7 +22,7 @@
  * このSSF読み込み装置は、 迅速な初動に適した、非常に簡単なものだ。
  * このツールは、 VBA コードだけを扱う。
  * このツールは、たった一つの VBA モジュールで動いている。
- * 対応する書き出し装置として [ssf_writer_primitive_writer] がある。
+ * 対応する書き出し装置として [ssf_writer_primitive_word] がある。
 
 = Downloads =
 
