@@ -6,7 +6,7 @@
 
 = ssf reader =
 
-intoroduce tools to convert an SSF text to an Excel book
+introduce tools to convert an SSF text to an Excel book
 
 == SSF の読み込み ==
 

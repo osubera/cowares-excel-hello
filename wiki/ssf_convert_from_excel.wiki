@@ -6,7 +6,7 @@
 
 = ssf writer =
 
-intoroduce tools to convert an Excel book to an SSF text
+introduce tools to convert an Excel book to an SSF text
 
 == SSF への保存 ==
 
