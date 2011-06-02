@@ -68,7 +68,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;40696.2471643519
+'         ;40696.4166666667
 '         ;keyword
 '         ;vba,excel,notepad
 '  address;A13:J13
@@ -237,13 +237,11 @@
 '         ;2
 '     skip;1
 '         ;1
-'  address;A33:C34
+'  address;A33:B34
 '         ;file
 '         ;_FileChildren
-'         ;=INDEX(INDIRECT(RC[-1]),1,1) & " - " & INDEX(INDIRECT(RC[-1]),ROWS(INDIRECT(RC[-1])),1)
 '         ;edit
 '         ;_EditChildren
-'         ;=INDEX(INDIRECT(RC[-1]),1,1) & " - " & INDEX(INDIRECT(RC[-1]),ROWS(INDIRECT(RC[-1])),1)
 '  address;A37:I46
 '         ;新規
 '         ;空のメモ帳を開く
