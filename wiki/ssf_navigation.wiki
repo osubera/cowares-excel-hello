@@ -3,3 +3,7 @@
  * [ssf_excel with Excel / エクセルで]
  * [ssf_convert_from_excel Excel to SSF / エクセルから変換]
  * [ssf_convert_to_excel SSF to Excel / エクセルへ変換]
+ * [ssf_convert_from_word Word to SSF / ワードから変換]
+ * [ssf_convert_to_word SSF to Word / ワードへ変換]
+ * [ssf_convert_from_access Access to SSF / アクセスから変換]
+ * [ssf_convert_to_access SSF to Access / アクセスへ変換]
