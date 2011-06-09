@@ -4,7 +4,7 @@
 //' Fortitudinous, Free, Fair, http://cowares.nobody.jp
 
 //' usage> CScript //Nologo ssf_to_html.js /t Title /e:Charset FILE
-// arguments do not work because of a bug of WScript.Arguments
+// arguments do not work because of a bug of WScript.Arguments, maybe
 
 var Env;
 var CellStream;
@@ -665,6 +665,7 @@ MatrixCells.prototype = {
 
 function StringStream() {
   this.Text = '';
+  this.EOS = true;
 }
 
 StringStream.prototype = {
@@ -674,8 +675,16 @@ StringStream.prototype = {
   WriteLine: function(Data) {
     this.WriteText(Data + '\n');
   },
+  ReadText: function(Size) {
+    // ignore Size
+    var out = this.Text;
+    this.Text = '';
+    this.EOS = true;
+    return out;
+  },
   Terminate: function() {
     delete this.Text;
+    delete this.EOS;
   }
 };
 
@@ -689,6 +698,11 @@ function Test() {
     x.WriteLine('dog');
     x.WriteLine('cow');
     WScript.echo(x.Text);
+    x.Text = 'reading';
+    x.EOS = false;
+    while (!x.EOS) {
+      WScript.echo(x.ReadText(12345));
+    }
     x.Terminate();
   })(); }
   
@@ -757,8 +771,24 @@ function Test() {
     WScript.echo(x.FindString(1,'cells-formula'));
     WScript.echo(x.Text.substring(120,133));
     
-    
     Stream.Close();
+    delete Stream;
+    x.Terminate();
+  })(); }
+  
+  if (false) { (function () {
+    var x = new StreamParser;
+    var adTypeText = 2;
+    var Stream = new StringStream;
+    Stream.Text = "'cells-formula\r\n'address;A1:B2\r\n';123";
+    Stream.EOS = false;
+    
+    x.Stream = Stream;
+    WScript.echo(x.AtEndOfStream());
+    WScript.echo(x.Text);
+    WScript.echo(x.FindString(1,'cells-formula'));
+    
+    Stream.Terminate();
     delete Stream;
     x.Terminate();
   })(); }
@@ -783,9 +813,9 @@ function Test() {
   })(); }
 }
 
-//Test();
+Test();
 
-
+/*
 var rc = 0;
 Main('C:\\tmp\\test.txt', 'utf-8', 'hoge');
 try {
@@ -796,5 +826,5 @@ try {
 } finally {
   WScript.Quit(rc);
 }
-
+*/
 
