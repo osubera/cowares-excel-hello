@@ -687,6 +687,7 @@ Public Function GetArray()
     
     Cs = ColumnsCount
     If Cs = 0 Then Cs = 1
+    If R < Row2 Then R = Row2
     Rs = R - Row1 + 1
     
     ReDim EachRow(Cs - 1)
@@ -720,6 +721,7 @@ End Function
 Public Function GetRowsHeader()
     Dim Rs, Header()
     Dim i
+    If R < Row2 Then R = Row2
     Rs = R - Row1 + 1
     
     ReDim Header(Rs - 1)
@@ -748,8 +750,8 @@ Public Sub SetRange(Address)
     End If
     
     ColumnsCount = Col2 - Col1 + 1
-    R = Row1
-    C = Col1
+    R = R1
+    C = C1
 End Sub
 
 Public Sub SetCell(Value)
