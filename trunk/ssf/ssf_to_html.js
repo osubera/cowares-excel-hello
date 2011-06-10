@@ -500,7 +500,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
       var HasColor = (this.Color.ColumnsCount > 0);
       var HasBackgroundColor = (this.BackgroundColor.ColumnsCount > 0);
       
-      this.Text.DefaultValue = '&nbsp;';
+      this.Text.DefaultValue = ' ';
       var TextData = this.Text.GetArray();
       var ColumnsHeader = this.Text.GetColumnsHeader();
       var RowsHeader = this.Text.GetRowsHeader();
@@ -529,7 +529,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
           if (CellBackgroundColor != '') { CellStyle = CellStyle + 'background-color:' + CellBackgroundColor + ';'; }
           out.WriteText('  <td');
           if (CellStyle != '') { out.WriteText(' style="' + CellStyle + '"'); }
-          out.WriteLine('>' + TextData[R][C] + '</td>');
+          out.WriteLine('>' + this.SafeString(TextData[R][C]) + '</td>');
         }
         out.WriteLine(' </tr>');
       }
@@ -538,6 +538,9 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
       var outHtml = out.Text;
       delete out;
       return outHtml;
+    },
+    SafeString: function(x) {
+      return x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ /g, '&nbsp;');
     },
     Terminate: function() {
       delete this.Text;
