@@ -13,7 +13,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
   var BlockName;
   var BlockVoid;
   var Bch = "'";
-  var Ech = '\r\n';
+  var Ech = '\n';
   var EchDefault = Ech;
   var EscapeBegin = '{{{';
   var EscapeEnd = '}}}';
@@ -27,18 +27,23 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
     var t = document.getElementById(toId);
     if (!t) { return; }
     if (f) {
-      t.innerHTML = TextReader(f.innerHTML, Caption);
+      t.innerHTML = TextReader(f.value, Caption);
     } else {
       t.innerHtml = '';
     }
   }
 
+  function UnifyLineFeed(Text) {
+    Text = Text.replace(/\r\n?/g, '\n');
+    return Text;
+  }
+  
   function TextReader(Text, Caption) {
     if (Text == '') { return ''; }
     InitializeEnv();
     
     var Stream = new StringStream
-    Stream.Text = Text;
+    Stream.Text = UnifyLineFeed(Text);
     Stream.EOS = false;
     ReadSsf(Stream);
     Stream.Terminate();
@@ -234,7 +239,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
         Key = BeforeTag.substr(0, At);
         Value = BeforeTag.substring(At + 1);
       }
-      Key = Key.substring(1).replace('\t', '').replace(/^ +/, '').replace(/ +$/,'');
+      Key = Key.substring(1).replace(/\t/g, '').replace(/^ +/, '').replace(/ +$/,'');
       
       if (Key == 'void') {
         BlockVoid = true;
