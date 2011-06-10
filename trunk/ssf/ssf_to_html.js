@@ -29,7 +29,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
     if (f) {
       t.innerHTML = TextReader(f.value, Caption);
     } else {
-      t.innerHtml = '';
+      t.innerHTML = '';
     }
   }
 
