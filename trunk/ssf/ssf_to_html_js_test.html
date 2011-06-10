@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>convert ssf to html table</title>
+<script type="text/javascript" src="ssf_to_html.js"></script>
+<style type="text/css">
+p{line-height:160%;text-indent:1em;}
+.copyright{text-align:right;padding-right:1em;font-style:italic;border-style:double;border-width:0px 0px 4px 0px;}
+</style>
+</head>
+<body>
+<h1>SSF to HTML</h1>
+
+<p>
+Because the SSF is a simple text format, we can convert it into an HTML Table easily using JavaScript. 
+This is an example of a dynamic SSF viewer on a web browser.
+</p>
+
+<div id="sheet1">
+</div>
+
+<form>
+<textarea name="ssf" id="ssf" rows="15" cols="80">
+'ssf-begin
+';
+
+'cells-formula
+'  address;B3:E6
+'         ;b3
+'         ;c3
+'     skip;2
+'         ;b4
+'     skip;4
+'         ;c5
+'     skip;5
+'         ;e6
+'  address;G8:G9
+'         ;g8
+
+'cells-background-color
+'  address;C5
+'         ;#FFFF00
+
+'cells-color
+'  address;C3
+'         ;#FF0000
+
+'ssf-end
+
+</textarea>
+<br/><input type="button" onclick="IdReader('ssf', 'sheet1', 'this is the ssf');" name="convert" value="convert SSF to Worksheet View" />
+</form>
+
+<p>
+This is a smart way to publish your Excel Spreadsheet in your web pages and your blogs.
+No painting tools are required.
+No PDF writers are required.
+No plugins are required on the client browser.
+<a href="http://cowares.blogspot.com/search/label/ssf">Everything required is free.</a>
+</p>
+
+<p><a href="ssf_to_html.js">Download the JavaScript</a></p>
+
+<div class="copyright">Copyright (c) 2011 Fortitudinous, Free, Fair, <a href="http://cowares.nobody.jp/license/">cowares.nobody.jp</a></div>
+
+<script type="text/javascript">
+<!-- // <![CDATA[
+IdReader('ssf', 'sheet1', 'this is the ssf');
+// ]]> -->
+</script>
+
+</body>
+</html>
