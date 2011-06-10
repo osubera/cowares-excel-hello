@@ -623,6 +623,8 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
         if (this.Row2 < R2) { this.Row2 = R2; }
       }
       
+      this.CurrentCol1 = C1;
+      this.CurrentCol2 = C2;
       this.ColumnsCount = this.Col2 - this.Col1 + 1;
       this.R = R1;
       this.C = C1;
@@ -645,8 +647,8 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
       }
     },
     NextCell: function() {
-      if (this.C == this.Col2) {
-        this.C = this.Col1;
+      if (this.C == this.CurrentCol2) {
+        this.C = this.CurrentCol1;
         this.R++;
       } else {
         this.C++;
@@ -680,6 +682,8 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
       this.Col1 = 1;
       this.Row2 = 0;
       this.Col2 = 0;
+      this.CurrentCol1 = 1;
+      this.CurrentCol2 = 0;
       this.ColumnsCount = 0;
     },
     Terminate: function() {
@@ -690,6 +694,8 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
       delete this.Row2;
       delete this.Col1;
       delete this.Col2;
+      delete this.CurrentCol1;
+      delete this.CurrentCol2;
       delete this.R;
       delete this.C;
       delete this.RepeatCount;

@@ -677,6 +677,8 @@ Public Row1
 Public Row2
 Public Col1
 Public Col2
+Public CurrentCol1
+Public CurrentCol2
 
 Public R
 Public C
@@ -757,6 +759,8 @@ Public Sub SetRange(Address)
         If Row2 < R2 Then Row2 = R2
     End If
     
+    CurrentCol1 = C1
+    CurrentCol2 = C2
     ColumnsCount = Col2 - Col1 + 1
     R = R1
     C = C1
@@ -783,8 +787,8 @@ Public Sub SkipCell(ByVal Count)
 End Sub
 
 Public Sub NextCell()
-    If C = Col2 Then
-        C = Col1
+    If C = CurrentCol2 Then
+        C = CurrentCol1
         R = R + 1
     Else
         C = C + 1
@@ -821,6 +825,8 @@ Public Sub Clear()
     Col1 = 1
     Row2 = 0
     Col2 = 0
+    CurrentCol1 = 1
+    CurrentCol2 = 0
     ColumnsCount = 0
 End Sub
 
