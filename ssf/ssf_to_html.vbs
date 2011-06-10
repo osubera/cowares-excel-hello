@@ -599,7 +599,7 @@ Public Function ToHtml()
     HasColor = (Color.ColumnsCount > 0)
     HasBackgroundColor = (BackgroundColor.ColumnsCount > 0)
     
-    Text.DefaultValue = "&nbsp;"
+    Text.DefaultValue = " "
     TextData = Text.GetArray
     ColumnsHeader = Text.GetColumnsHeader
     RowsHeader = Text.GetRowsHeader
@@ -628,7 +628,7 @@ Public Function ToHtml()
             If CellBackgroundColor <> "" Then CellStyle = CellStyle & "background-color:" & CellBackgroundColor & ";"
             out.WriteText "  <td"
             If CellStyle <> "" Then out.WriteText " style=""" & CellStyle & """"
-            out.WriteLine ">" & TextData(R)(C) & "</td>"
+            out.WriteLine ">" & SafeString(TextData(R)(C)) & "</td>"
         Next
         out.WriteLine " </tr>"
     Next
@@ -636,6 +636,14 @@ Public Function ToHtml()
     
     ToHtml = out.Text
     Set out = Nothing
+End Function
+
+Private Function SafeString(ByVal x)
+    x = Replace(x, "&", "&amp;")
+    x = Replace(x, "<", "&lt;")
+    x = Replace(x, ">", "&gt;")
+    x = Replace(x, " ", "&nbsp;")
+    SafeString = x
 End Function
 
 Private Function ExtractKeyValue(KeyValue, ByRef Key, ByRef Value)
