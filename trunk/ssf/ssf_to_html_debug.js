@@ -536,6 +536,7 @@ MatrixCells.prototype = {
   GetArray: function() {
     var Cs = this.ColumnsCount;
     if (Cs == 0) { Cs = 1; }
+    if (this.R < this.Row2) { this.R = this.Row2; }
     var Rs = this.R - this.Row1 + 1;
     
     var AllRows = new Array(Rs);
@@ -559,6 +560,7 @@ MatrixCells.prototype = {
     return Header;
   },
   GetRowsHeader: function() {
+    if (this.R < this.Row2) { this.R = this.Row2; }
     var Rs = this.R - this.Row1 + 1;
     
     var Header = new Array(Rs);
@@ -589,8 +591,8 @@ MatrixCells.prototype = {
     }
     
     this.ColumnsCount = this.Col2 - this.Col1 + 1;
-    this.R = this.Row1;
-    this.C = this.Col1;
+    this.R = R1;
+    this.C = C1;
   },
   SetCell: function(Value) {
     while (this.RepeatCount > 0) {
@@ -813,18 +815,18 @@ function Test() {
   })(); }
 }
 
-Test();
+//Test();
 
-/*
+
 var rc = 0;
-Main('C:\\tmp\\test.txt', 'utf-8', 'hoge');
+Main('C:\\tmp\\test.txt', 'utf-8', 'Worksheet Title');
 try {
-  //Main(Args.Named, Args.Unnamed[0]);
+  //Main('C:\\tmp\\test.txt', 'utf-8', 'Worksheet Title');
 } catch (e) {
   rc = e.Number;
   WScript.Echo('Error: ' + e.Description);
 } finally {
   WScript.Quit(rc);
 }
-*/
+
 
