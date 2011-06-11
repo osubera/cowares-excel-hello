@@ -13,13 +13,13 @@
 
 = Details =
 
- * !JavaScript tool for web pages, and !VBScript tool for the desktop.
+ * !JavaScript tool for web pages, and VBScript tool for the desktop.
  * requires no plugins or so.
  * this primitive tool supports only a single worksheet.
  * see [http://xlsm.web.fc2.com/screen/ssf_to_html_js_test.html an example page] for details.
 
 == 説明 ==
- * ウェブページ用の !JavaScript と、デスクトップ向けの !VBScript のツールがある。
+ * ウェブページ用の !JavaScript と、デスクトップ向けの VBScript のツールがある。
  * プラグインなどは一切不要。
  * この原始的なツールは、１枚のワークシートにだけ対応する。
  * [http://xlsm.web.fc2.com/screen/ssf_to_html_js_ja.html サンプルページ] で動作を試すことができる。
@@ -768,7 +768,7 @@ var ssfToHtml201106101111 = (function(fromId, toId, Caption) {
 });
 }}}
 
-=== ssf_to_html.vbs (!VBScript) ===
+=== ssf_to_html.vbs (VBScript) ===
 
 {{{
 ' ssf_to_html
