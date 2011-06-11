@@ -69,6 +69,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "enable-cells-h-align", "true"
     Env.SetEnv "ssf", "enable-cells-v-align", "true"
     
+    Env.SetEnv "ssf", "enable-cells-formula-a1", "false"
+    Env.SetEnv "ssf", "enable-cells-text", "false"
     Env.SetEnv "ssf", "enable-cells-border", "false"
     
     Env.SetEnv "ssf", "cells-writer", "block"

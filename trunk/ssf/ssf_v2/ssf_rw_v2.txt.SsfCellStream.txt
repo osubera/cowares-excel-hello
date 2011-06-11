@@ -32,7 +32,7 @@ Public Property Let PropertyName(NewProperty As String)
     Select Case LCase(NewProperty)
     Case "formula-or-value"
         Set Queue = New SsfCellStreamQueueFormula
-    Case "value", "value2", "text", "formula", "formular1c1"
+    Case "value", "value2", "formula", "formular1c1"
         Set Queue = New SsfCellStreamQueueValue
     Case Else
         Set Queue = New SsfCellStreamQueueRange
