@@ -1,0 +1,25 @@
+#summary convert SSF to HTML Table
+#labels Phase-Design
+#sidebar ssf_navigation
+
+<wiki:toc max_depth="2" />
+
+= ssf reader =
+
+introduces tools to convert an SSF text to an HTML Table
+
+== SSF の読み込み ==
+
+SSF 形式のテキストを HTML Table タグに変換するツールを紹介する
+
+= primitive ssf_to_html =
+
+ * !JavaScript tool for web pages, and VBScript tool for the desktop.
+ * this primitive tool supports only a single worksheet.
+ * [ssf_reader_primitive_html more>>]
+
+== ssf_to_html 試作品 ==
+ * ウェブページ用の !JavaScript と、デスクトップ向けの VBScript のツールがある。
+ * この原始的なツールは、１枚のワークシートにだけ対応する。
+ * [ssf_reader_primitive_html もっと詳しく>>]
+
