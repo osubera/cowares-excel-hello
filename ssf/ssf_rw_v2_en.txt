@@ -59,7 +59,7 @@
 '         ;Url
 '         ;http://cowares.blogspot.com/search/label/ssf
 '         ;Timestamp
-'         ;40665.25
+'         ;40705.5
 '         ;keyword
 '         ;vba,excel,ssf
 '  address;A13:J13
@@ -1098,6 +1098,8 @@ Public Function CreateDefaultEnv() As GlobalResources
     Env.SetEnv "ssf", "enable-cells-h-align", "true"
     Env.SetEnv "ssf", "enable-cells-v-align", "true"
     
+    Env.SetEnv "ssf", "enable-cells-formula-a1", "false"
+    Env.SetEnv "ssf", "enable-cells-text", "false"
     Env.SetEnv "ssf", "enable-cells-border", "false"
     
     Env.SetEnv "ssf", "cells-writer", "block"
@@ -3436,6 +3438,8 @@ Public Sub WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As 
     
     For Each AnArea In Target.Areas
         If Env.GetEnv("ssf", "enable-cells-formula", "true") Then CellsFormulaWriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-formula-a1", "false") Then CellsFormulaA1WriteTo AnArea, Stream, Env
+        If Env.GetEnv("ssf", "enable-cells-text", "false") Then CellsTextWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-numberformat", "true") Then CellsNumberFormatWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-wrap", "true") Then CellsWrapWriteTo AnArea, Stream, Env
         If Env.GetEnv("ssf", "enable-cells-shrink", "true") Then CellsShrinkWriteTo AnArea, Stream, Env
@@ -3499,6 +3503,22 @@ ErrorIsDone:
 NotDone:
     Env.LogWrite "CellsSafeCellTextWriteTo: Error " & Err.Number & " " & Err.Description
     Resume Next
+End Sub
+
+Public Sub CellsFormulaA1WriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-formula-a1"
+    Const LocalProperty = "Formula"
+    Const EmptyValue = vbNullString
+    
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
+End Sub
+
+Public Sub CellsTextWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
+    Const LocalKey = "cells-text"
+    Const LocalProperty = "Text"
+    Const EmptyValue = ""
+    
+    CellsMakeSsfBlocks Target, Stream, Env, LocalKey, LocalProperty, EmptyValue
 End Sub
 
 Public Sub CellsNumberFormatWriteTo(ByVal Target As Object, ByVal Stream As Object, ByVal Env As GlobalResources)
@@ -4097,7 +4117,7 @@ Public Property Let PropertyName(NewProperty As String)
     Select Case LCase(NewProperty)
     Case "formula-or-value"
         Set Queue = New SsfCellStreamQueueFormula
-    Case "value", "value2", "text", "formula", "formular1c1"
+    Case "value", "value2", "formula", "formular1c1"
         Set Queue = New SsfCellStreamQueueValue
     Case Else
         Set Queue = New SsfCellStreamQueueRange
