@@ -12,12 +12,12 @@
 
 = Details =
 
- * this tips has been described well on [http://translate.google.co.jp/translate?sl=ja&tl=en&u=http%3A%2F%2Fkobobau.com%2Fxls%2Fyama%2Fvba%2Frange1.html Range Object - Excel 97] written by kobobau.com .
- * though that page is on the legend Excel 97, the basic design arround the Excel Cells Range Object is not changed in more than a decade.
+ * this tips has been described well on [http://translate.google.co.jp/translate?sl=ja&tl=en&u=http%3A%2F%2Fkobobau.mocvba.com%2Fxls%2Fyama%2Fvba%2Frange1.html Range Object - Excel 97] written by kobobau.com .
+ * though that page is on the legendary Excel 97, the basic design arround the Excel Cells Range Object is not changed in more than a decade.
  * so it still works even for the Excel 2010.
 
 == 説明 ==
- * ここで紹介する技法は、 kobobau.com による [http://kobobau.com/xls/yama/vba/range1.html Range Object - Excel 97] に細かく記載されている。
+ * ここで紹介する技法は、 kobobau.com による [http://kobobau.mocvba.com/xls/yama/vba/range1.html Range Object - Excel 97] に細かく記載されている。
  * そこではもはや伝説的なエクセル97に基づいて書いているが、エクセルのセルの Range オブジェクトの根本的な仕様は、この１０年間以上変わっていない。
  * だから、これはエクセル2010でも効果がある。
 
