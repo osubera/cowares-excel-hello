@@ -7,6 +7,6 @@
 
  * edit excel cell texts with a form
 
-== ŠT—v ==
- * ƒGƒNƒZƒ‹‚ÅAƒtƒH[ƒ€‚ðŽg‚¢ƒZƒ‹‚ð•ÒW‚·‚é
+== æ¦‚è¦ ==
+ * ã‚¨ã‚¯ã‚»ãƒ«ã§ã€ãƒ•ã‚©ãƒ¼ãƒ ã‚’ä½¿ã„ã‚»ãƒ«ã‚’ç·¨é›†ã™ã‚‹
 
