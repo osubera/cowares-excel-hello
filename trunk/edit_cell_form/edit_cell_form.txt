@@ -86,7 +86,10 @@
 '         ;direction
 '     skip;1
 '         ;3
-'     skip;4
+'     skip;1
+'   repeat;2
+'         ;1
+'     skip;1
 '         ;下
 '         ;右
 '         ;上
@@ -109,6 +112,11 @@
 '   unit;pt
 '  address;B1
 '         ;96.75
+
+'cells-font-name
+'  address;A1:N17
+'   repeat;238
+'         ;ＭＳ Ｐゴシック
 
 'class
 '   name;ToolBarV2
