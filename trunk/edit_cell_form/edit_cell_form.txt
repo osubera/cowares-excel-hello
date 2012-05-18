@@ -1,0 +1,1951 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;edit_cell_form.xlsm/F3EditCellForm
+
+'book-identity
+'  title;エクセルエディタ
+'  description;フォームを使いセルを編集する
+
+'require
+'       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+
+'cells-name
+'       ;=edit_cell_form!R15C1
+'       ;edit_cell_form!_ButtonCaption
+'       ;=edit_cell_form!R3C2
+'       ;edit_cell_form!_Comment
+'       ;=edit_cell_form!R6C2
+'       ;edit_cell_form!_Contributor
+'       ;=edit_cell_form!R4C2
+'       ;edit_cell_form!_Copyright
+'       ;=edit_cell_form!R5C2
+'       ;edit_cell_form!_License
+'       ;=edit_cell_form!R2C2
+'       ;edit_cell_form!_LocalComment
+'       ;=edit_cell_form!R1C2
+'       ;edit_cell_form!_PublicName
+'       ;=edit_cell_form!R7C2
+'       ;edit_cell_form!_Since
+'       ;=edit_cell_form!R10C2
+'       ;edit_cell_form!_Tag
+'       ;=edit_cell_form!R9C2
+'       ;edit_cell_form!_Timestamp
+'       ;=edit_cell_form!R8C2
+'       ;edit_cell_form!_Url
+
+'worksheet
+'   name;edit_cell_form/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;edit_cell_form
+'         ;コメント
+'         ;フォームを使いセルを編集する
+'         ;comment
+'         ; edit excel cell texts with a form
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;初版
+'         ;2012
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/edit_cell_form
+'         ;更新
+'         ;41048.1977314815
+'         ;keyword
+'         ;excel,validation,editor,text
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:N17
+'         ;セル編集
+'         ;アクティブセルをフォームで編集する。
+'         ;form
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;6
+'         ;次のセル方向
+'         ;保存時に移動するセル方向
+'         ;direction
+'     skip;1
+'         ;3
+'     skip;4
+'         ;下
+'         ;右
+'         ;上
+'         ;左
+'         ;無
+'         ;リセット
+'         ;フォームを閉じて設定をクリアする。
+'         ;reset
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+Private EditHelper As EditCells
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3EditCellForm"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+Friend Function GetEditHelper() As EditCells
+    Set GetEditHelper = EditHelper
+End Function
+
+Friend Sub InitializeEditHelper()
+    Set EditHelper = New EditCells
+End Sub
+
+Friend Sub TerminateEditHelper()
+    Set EditHelper = Nothing
+End Sub
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        InitializeEditHelper
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        If EditHelper Is Nothing Then InitializeEditHelper
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    Helper.OnButtonToggle
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_form(oAC As Object)
+    EditCellsForm.ShowCellEditorForm
+End Sub
+
+Public Sub Menu_direction(oAC As Object)
+    EditHelper.SetDirection
+End Sub
+
+Public Sub Menu_reset(oAC As Object)
+    EditCellsForm.ResetWindowsInTaskbar
+    
+    If MsgBox("設定を消去して、初期状態にしてよいですか？", vbOKCancel, "解除ボタンが押されました") = vbCancel Then Exit Sub
+    EditCellsForm.CloseCellEditorForm
+    EditHelper.ClearSettings
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'module
+'   name;EditCellsForm
+'{{{
+Option Explicit
+
+Const ShowFormKey = "{F3}"
+
+Private Const WS_MAXIMIZEBOX = &H10000
+Private Const WS_MINIMIZEBOX = &H20000
+Private Const WS_THICKFRAME = &H40000
+Private Const WS_EX_APPWINDOW = &H40000
+Private Const WS_EX_OVERLAPPEDWINDOW = &H300
+Private Const GWL_STYLE = (-16)
+Private Const GWL_EXSTYLE = (-20)
+
+Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function DrawMenuBar Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function WindowFromObject Lib "oleacc" Alias "WindowFromAccessibleObject" (ByVal pacc As Object, phwnd As Long) As Long
+
+Public Sub ShowCellEditorForm()
+    On Error Resume Next
+    If CellEditor.PseudoOpen Then CellEditor.Show vbModeless
+End Sub
+
+Public Sub CloseCellEditorForm()
+    On Error Resume Next
+    Unload CellEditor
+End Sub
+
+Public Sub EnableShortCutKey()
+    Application.OnKey ShowFormKey, BaumMain.VBProjectName & ".EditCellsForm.ShowCellEditorForm"
+End Sub
+
+Public Sub DisableShortCutKey()
+    Application.OnKey ShowFormKey
+End Sub
+
+Public Sub ResetWindowsInTaskbar()
+    If Not Application.ShowWindowsInTaskbar Then Exit Sub
+    
+    Application.ShowWindowsInTaskbar = False
+    Application.ShowWindowsInTaskbar = True
+End Sub
+
+Public Sub MakeFormResizable(form As UserForm)
+    Dim hWnd As Long
+    
+    hWnd = GetHWndOfUserForm(form)
+    If hWnd <> 0 Then MakeWindowResizable hWnd
+End Sub
+
+Private Function GetHWndOfUserForm(form As UserForm) As Long
+    ' Windows 2000 and later can use a new WindowFromObject API
+    Dim hWnd As Long
+    
+    WindowFromObject form, hWnd
+    GetHWndOfUserForm = hWnd
+End Function
+
+Private Sub MakeWindowResizable(hWnd As Long)
+    Dim CurrentStyle As Long
+    
+    CurrentStyle = GetWindowLong(hWnd, GWL_STYLE)
+    SetWindowLong hWnd, GWL_STYLE, CurrentStyle Or WS_THICKFRAME Or WS_MAXIMIZEBOX Or WS_MINIMIZEBOX
+    SetWindowLong hWnd, GWL_EXSTYLE, WS_EX_OVERLAPPEDWINDOW
+    DrawMenuBar hWnd
+End Sub
+
+'}}}
+
+'form
+'   name;CellEditor
+'{{{
+Option Explicit
+
+Const MinWidth = 412
+Const MinHeight = 120
+Const RelativeEditHeight = 0.5
+Const AdjustSize = 9.5  ' maximized window is larger than the screen size
+
+Const ColorEnableEdit = &H80000005  ' system window background
+Const ColorDisableEdit = &H8000000F ' system button surface
+
+Private EditHelper As EditCells
+Private LastWidth As Single
+Private LastHeight As Single
+Private ResizeEnabled As Boolean
+
+
+'== Form Events begin ==
+
+
+Private Sub UserForm_Initialize()
+    ResizeEnabled = False
+    Set EditHelper = BaumMain.GetEditHelper
+    OnFormLoad
+    PseudoOpen
+End Sub
+
+Private Sub UserForm_Layout()
+    If Not ResizeEnabled Then
+        ResizeEnabled = True
+        ' best place to make the form resizable
+        EditCellsForm.MakeFormResizable Me
+    End If
+    With Me
+        OnFormResize .Width, .Height
+    End With
+End Sub
+
+Private Sub UserForm_Terminate()
+    PseudoClose
+    Set EditHelper = Nothing
+End Sub
+
+Private Sub UserForm_Activate()
+    FocusOnEdit
+End Sub
+
+
+'== Form Events end ==
+'== Text Events begin ==
+
+
+Private Sub cEdit_Change()
+    If EditHelper.Saved Then EditHelper.Saved = False
+    UpdateTextLength cEdit
+End Sub
+
+Private Sub cValue_Change()
+    If Not cValue.Visible Then Exit Sub
+    
+    UpdateTextLength cValue
+End Sub
+
+
+'== Text Events end ==
+'== Button Events begin ==
+
+
+Private Sub cWriteClose_Click()
+    OnFormWrite
+    OnFormDone      ' must be placed before Close
+    OnFormClose
+End Sub
+
+Private Sub cWrite_Click()
+    OnFormWrite
+    OnFormDone
+End Sub
+
+Private Sub cClose_Click()
+    OnFormClose
+End Sub
+
+Private Sub cHide_Click()
+    PseudoHide
+End Sub
+
+Private Sub cResetTaskbar_Click()
+    EditCellsForm.ResetWindowsInTaskbar
+End Sub
+
+Private Sub cDown_Click()
+    EditHelper.OnCellMoveTo 1, 0
+End Sub
+
+Private Sub cUp_Click()
+    EditHelper.OnCellMoveTo -1, 0
+End Sub
+
+Private Sub cLeft_Click()
+    EditHelper.OnCellMoveTo 0, -1
+End Sub
+
+Private Sub cRight_Click()
+    EditHelper.OnCellMoveTo 0, 1
+End Sub
+
+Private Sub cSmaller_Click()
+    OnFontResize -1
+End Sub
+
+Private Sub cLarger_Click()
+    OnFontResize 1
+End Sub
+
+Private Sub cDown_Enter()
+    OnButtonFocus cDown
+End Sub
+
+Private Sub cDown_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cDown
+End Sub
+
+Private Sub cUp_Enter()
+    OnButtonFocus cUp
+End Sub
+
+Private Sub cUp_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cUp
+End Sub
+
+Private Sub cLeft_Enter()
+    OnButtonFocus cLeft
+End Sub
+
+Private Sub cLeft_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cLeft
+End Sub
+
+Private Sub cRight_Enter()
+    OnButtonFocus cRight
+End Sub
+
+Private Sub cRight_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cRight
+End Sub
+
+Private Sub cClose_Enter()
+    OnButtonFocus cClose
+End Sub
+
+Private Sub cClose_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cClose
+End Sub
+
+Private Sub cWrite_Enter()
+    OnButtonFocus cWrite
+End Sub
+
+Private Sub cWrite_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cWrite
+End Sub
+
+Private Sub cHide_Enter()
+    OnButtonFocus cHide
+End Sub
+
+Private Sub cHide_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cHide
+End Sub
+
+Private Sub cWriteClose_Enter()
+    OnButtonFocus cWriteClose
+End Sub
+
+Private Sub cWriteClose_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cWriteClose
+End Sub
+
+Private Sub cSmaller_Enter()
+    OnButtonFocus cSmaller
+End Sub
+
+Private Sub cSmaller_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cSmaller
+End Sub
+
+Private Sub cLarger_Enter()
+    OnButtonFocus cLarger
+End Sub
+
+Private Sub cLarger_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cLarger
+End Sub
+
+Private Sub cResetTaskbar_Enter()
+    OnButtonFocus cResetTaskbar
+End Sub
+
+Private Sub cResetTaskbar_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+    OnButtonUnFocus cResetTaskbar
+End Sub
+
+
+'== Button Events end ==
+'== Shortcut Handler begin ==
+
+
+Private Sub cClose_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cDown_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cHide_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cLarger_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cLeft_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cRight_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cSmaller_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cUp_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cWrite_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cWriteClose_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+Private Sub cResetTaskbar_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    OnKeyDown KeyCode, Shift
+End Sub
+
+
+'== Shortcut Handler end ==
+'== Public Methods begin ==
+
+
+Public Function PseudoOpen() As Boolean
+    If EditHelper.Editing Then
+        PseudoOpen = True
+        Exit Function
+    End If
+    
+    If Not EditHelper.BeginEdit Then
+        PseudoOpen = False
+        Exit Function
+    End If
+    
+    OnFormResize GetPreferredWidth, GetPreferredHeight
+    EditHelper.SetStatusOn
+    PseudoOpen = True
+End Function
+
+Public Sub PseudoClose()
+    EditHelper.SetStatusOff
+    EditHelper.EndEdit
+    PseudoHide
+End Sub
+
+Public Sub PseudoHide()
+    RememberFormPosition
+    Me.Hide
+    EditCellsForm.ResetWindowsInTaskbar
+End Sub
+
+Public Sub FocusOnEdit(Optional CursorAt As Long = -1)
+    FocusOnTextBox cEdit, CursorAt
+    
+    If EditHelper.ReadOnly Then
+        FocusOnValue CursorAt
+    End If
+End Sub
+
+Public Sub FocusOnValue(Optional CursorAt As Long = -1)
+    If Not cValue.Visible Then Exit Sub
+    
+    FocusOnTextBox cValue, CursorAt
+End Sub
+
+Private Sub FocusOnTextBox(TargetBox As MSForms.TextBox, CursorAt As Long)
+    ' work arround a bug on form activation, already focused textbox doesn't receive any keys.
+    cHide.SetFocus
+    With TargetBox
+        .SetFocus
+        If CursorAt >= 0 Then .SelStart = CursorAt
+    End With
+End Sub
+
+Public Sub PreferredSelStartOnEdit(CursorAt As Long)
+    Dim TempHeight As Single
+    
+    With cEdit
+        ' shrink the height temporaly, set cursor, and restore the height.
+        ' this will move the cursor near the center of height.
+        ' otherwise, the default cursor position is near the bottom and mess.
+        TempHeight = .Height
+        .Height = .Height / 2
+        .SelStart = CursorAt
+        .Height = TempHeight
+    End With
+End Sub
+
+Public Sub UpdateValueBox(Text As String, Show As Boolean, Editable As Boolean)
+    If Editable Then
+        EnableEditBox
+    Else
+        DisableEditBox
+    End If
+    If Show Then
+        ShowValueBox
+    Else
+        HideValueBox
+    End If
+    cValue.Text = Text
+    UpdateTextLength cValue
+End Sub
+
+Public Sub UpdateEditBox(Address As String, SheetName As String, Text As String)
+    cEditAddress.Caption = Address
+    cEditSheet.Caption = SheetName
+    'SetPreferredFont PreferredFont
+    cEdit.Text = Text
+    UpdateTextLength cEdit
+End Sub
+
+
+'== Public Methods end ==
+'== Helper Functions begin ==
+
+
+Private Sub UpdateTextLength(TargetBox As MSForms.TextBox)
+    cEditCountChar.Caption = EditHelper.GetTextCountFormatted(TargetBox)
+End Sub
+
+Private Sub EnableEditBox()
+    With cEdit
+        .Locked = False
+        .BackColor = ColorEnableEdit
+    End With
+End Sub
+
+Private Sub DisableEditBox()
+    With cEdit
+        .Locked = True
+        .BackColor = ColorDisableEdit
+    End With
+End Sub
+
+Private Sub ShowValueBox()
+    cValue.Visible = True
+    cEdit.Height = cValue.Top - cEdit.Top
+End Sub
+
+Private Sub HideValueBox()
+    cValue.Visible = False
+    cEdit.Height = cValue.Height + cValue.Top - cEdit.Top
+End Sub
+
+Private Sub SetPreferredFont(PreferredFontName As String, PreferredFontSize As Single)
+    On Error Resume Next
+    
+    With cEdit.Font
+        .Name = PreferredFontName
+        .Size = PreferredFontSize
+    End With
+    
+    With cValue.Font
+        .Name = PreferredFontName
+        .Size = PreferredFontSize
+    End With
+End Sub
+
+Private Sub RememberFormPosition()
+    ' remember the position until the form is completely unloaded
+    With Me
+        If .StartUpPosition <> 0 Then .StartUpPosition = 0    ' Manual
+    End With
+End Sub
+
+Private Sub OnButtonFocus(Button As MSForms.CommandButton)
+    Const ColorOnFly = &H3399FF     ' RGB(&HFF, &H99, &H33)
+    Button.BackColor = ColorOnFly
+End Sub
+
+Private Sub OnButtonUnFocus(Button As MSForms.CommandButton)
+    Const ColorDefault = &H8000000F ' system button surface
+    Button.BackColor = ColorDefault
+End Sub
+
+Private Sub OnKeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Const KeyShiftMask = 1
+    Const KeyCtrlMask = 2
+    Const KeyAltMask = 4
+    
+    ' protect accelerators
+    If Shift = KeyAltMask Then Exit Sub
+    
+    Select Case KeyCode
+    Case vbKeyTab, vbKeyReturn, vbKeySpace, vbKeyShift, vbKeyControl, vbKeyMenu
+        ' reserved for buttons
+    Case Else
+        FocusOnEdit
+    End Select
+End Sub
+
+Private Function GetPreferredWidth() As Single
+    Dim Width As Single
+    
+    If LastWidth >= MinWidth Then
+        Width = LastWidth
+    Else
+        Width = Application.Width
+        If Application.WindowState = xlMaximized Then Width = Width - AdjustSize
+        If Width < MinWidth Then Width = MinWidth
+    End If
+    
+    GetPreferredWidth = Width
+End Function
+
+Private Function GetPreferredHeight() As Single
+    Dim Height As Single
+    
+    If LastHeight >= MinHeight Then
+        Height = LastHeight
+    Else
+        Height = Application.Height
+        If Application.WindowState = xlMaximized Then Height = Height - AdjustSize
+        If Height < MinHeight Then Height = MinHeight
+    End If
+    
+    GetPreferredHeight = Height
+End Function
+
+Private Function IsMinimized()
+    With Me
+        IsMinimized = (.Height < .InsideHeight)
+    End With
+End Function
+
+Private Function SetSize(ByVal Width As Single, ByVal Height As Single) As Boolean
+    On Error GoTo MaximizedWillFail
+    SetSize = False
+    If IsMinimized Then Exit Function
+    
+    If Width < MinWidth Then Width = MinWidth
+    If Height < MinHeight Then Height = MinHeight
+    LastWidth = Width
+    LastHeight = Height
+    
+    With Me
+        If .Width <> Width Then
+            .Width = Width
+            SetSize = True
+        End If
+        If .Height <> Height Then
+            .Height = Height
+            SetSize = True
+        End If
+    End With
+    
+    Exit Function
+    
+MaximizedWillFail:
+    
+End Function
+
+Private Sub OnFormResize(ByVal Width As Single, ByVal Height As Single)
+    Dim BoxWidth As Long
+    Dim BoxHeight As Long
+    Dim EditHeight As Long
+    Dim SmallerEditHeight As Long
+    
+    If IsMinimized Then Exit Sub
+    
+    SetSize Width, Height
+    
+    With Me
+        BoxWidth = Int(.InsideWidth)
+        BoxHeight = Int(.InsideHeight)
+    End With
+    
+    EditHeight = BoxHeight - cEdit.Top
+    SmallerEditHeight = Int(EditHeight * RelativeEditHeight)
+    
+    With cValue
+        .Top = cEdit.Top + SmallerEditHeight
+        .Height = BoxHeight - .Top
+        .Width = BoxWidth
+    End With
+    
+    With cEdit
+        If cValue.Visible Then
+            .Height = SmallerEditHeight
+        Else
+            .Height = EditHeight
+        End If
+        BoxWidth = BoxWidth - .Left
+        .Width = BoxWidth
+    End With
+    
+    With cEditSheet
+        .Width = BoxWidth - .Left
+    End With
+    
+End Sub
+
+Private Sub OnFormLoad()
+    With Me
+        .Caption = "エクセルエディタ"
+    End With
+    
+    With cEdit
+        .EnterFieldBehavior = fmEnterFieldBehaviorRecallSelection
+        .EnterKeyBehavior = True
+        .MultiLine = True
+        .ScrollBars = fmScrollBarsVertical
+        .HideSelection = False
+    End With
+    
+    With cValue
+        .EnterFieldBehavior = fmEnterFieldBehaviorRecallSelection
+        .MultiLine = True
+        .ScrollBars = fmScrollBarsVertical
+        .HideSelection = False
+        .Locked = True
+        .BackColor = ColorDisableEdit
+    End With
+    
+    With cSavedFlag
+        .ForeColor = RGB(&HFF, &H0, &H0)
+    End With
+    
+    SetPreferredFont EditHelper.GetPreferredFontName, EditHelper.GetPreferredFontSize
+End Sub
+
+Private Sub OnFormClose()
+    If EditHelper.OnBeforeCellMoveOrClose() Then
+        FocusOnEdit
+    Else
+        PseudoClose
+    End If
+End Sub
+
+Private Sub OnFormWrite()
+    EditHelper.OnWriteText
+End Sub
+
+Private Sub OnFormDone()
+    EditHelper.OnCellMoveToNext
+End Sub
+
+Private Sub OnFontResize(Direction As Long)
+    ' Direction = 1 (Larger), -1 (Smaller)
+    Dim FontSize As Single
+    
+    If Direction = 1 Then
+        FontSize = EditHelper.GetLargerFontSize
+    Else
+        FontSize = EditHelper.GetSmallerFontSize
+    End If
+    
+    cEdit.Font.Size = FontSize
+    cValue.Font.Size = FontSize
+End Sub
+
+
+'== Helper Functions end ==
+
+'}}}
+
+'class
+'   name;EditCells
+'{{{
+Option Explicit
+
+Const StandardFontSize = 12
+Const FontSizeDifference = 2
+Const ReadOnlyFormula = True
+Const ReadOnlyArray = True
+
+Private Helper As ToolBarV2
+Private EditButton As Office.CommandBarButton
+Private DirectionButton As Office.CommandBarComboBox
+
+Private EditSheet As Worksheet
+Private CurrentCell As Range
+Private NextCell As Range
+Private IsSaved As Boolean
+Private IsEditing As Boolean
+Private IsFormula As Boolean
+Private IsArray As Boolean
+
+Private NextVerticalShift As Long
+Private NextHorizontalShift As Long
+Private CurrentFontSize As Single
+Private CurrentFontName As String
+
+
+'== Public Properties begin ==
+
+
+Public Property Get Saved() As Boolean
+    Saved = IsSaved
+End Property
+
+Public Property Let Saved(Flag As Boolean)
+    IsSaved = Flag
+    CellEditor.cSavedFlag.Caption = IIf(IsSaved, "", "*")
+End Property
+
+Public Property Get Cell() As Range
+    Set Cell = CurrentCell
+End Property
+
+Public Property Get Editing() As Boolean
+    Editing = IsEditing
+End Property
+
+Public Property Get FontName() As String
+    FontName = CurrentFontName
+End Property
+
+Public Property Let FontName(NewFontName As String)
+    CurrentFontName = NewFontName
+End Property
+
+Public Property Get FontSize() As Single
+    FontSize = CurrentFontSize
+End Property
+
+Public Property Let FontSize(NewFontSize As Single)
+    CurrentFontSize = NewFontSize
+End Property
+
+Public Property Get ReadOnly() As Boolean
+    ReadOnly = (ReadOnlyArray And IsArray) Or (ReadOnlyFormula And IsFormula)
+End Property
+
+Public Property Get CellIsComplex() As Boolean
+    CellIsComplex = IsArray Or IsFormula
+End Property
+
+
+'== Public Properties end ==
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    SetHelperSettings
+End Sub
+
+Private Sub Class_Terminate()
+    Dim i As Long
+    
+    ' avoid re-initialize the unloaded form
+    For i = UserForms.Count - 1 To 0 Step -1
+        Unload UserForms(i)
+    Next
+    
+    Set Helper = Nothing
+    Set EditButton = Nothing
+    Set DirectionButton = Nothing
+    Set EditSheet = Nothing
+    Set CurrentCell = Nothing
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Function BeginEdit() As Boolean
+    On Error GoTo CloseForm
+    If NextCell Is Nothing Then Set NextCell = ActiveCell
+    SetEditSheet NextCell.Worksheet, EditButton
+    OnCellMoved NextCell
+    Set NextCell = Nothing
+    BeginEdit = True
+    Exit Function
+    
+CloseForm:
+    MsgBox "セルを編集できません", vbCritical Or vbOKOnly, Err.Number & " " & Err.Description
+    BeginEdit = False
+    EditCellsForm.CloseCellEditorForm
+End Function
+
+Public Sub EndEdit()
+    Set CurrentCell = Nothing
+End Sub
+
+Public Sub SetEditSheet(Ws As Worksheet, oAC As Office.CommandBarButton)
+    If Not EditButton Is oAC Then SetHelperSettings
+    Set EditSheet = Ws
+End Sub
+
+Public Sub ClearEditSheet()
+    Set EditSheet = Nothing
+End Sub
+
+Public Sub ClearSettings()
+    ClearEditSheet
+End Sub
+
+Public Sub SetStatusOn()
+    Helper.ButtonSwitchOn Helper.GetButton("form")
+    IsEditing = True
+End Sub
+
+Public Sub SetStatusOff()
+    Helper.ButtonSwitchOff Helper.GetButton("form")
+    IsEditing = False
+End Sub
+
+Public Sub SetDirection()
+    Dim DirectionText As String
+    DirectionText = DirectionButton.Text
+    
+    If DirectionText = "下" Then
+        NextVerticalShift = 1
+    ElseIf DirectionText = "上" Then
+        NextVerticalShift = -1
+    Else
+        NextVerticalShift = 0
+    End If
+    
+    If DirectionText = "右" Then
+        NextHorizontalShift = 1
+    ElseIf DirectionText = "左" Then
+        NextHorizontalShift = -1
+    Else
+        NextHorizontalShift = 0
+    End If
+End Sub
+
+
+'== Public Methods end ==
+'== Helper for toolbar buttons begin ==
+
+
+Private Sub SetHelperSettings()
+    Set Helper = BaumMain.GetHelper
+    Set EditButton = Helper.GetButton("edit")
+    Set DirectionButton = Helper.GetButton("direction")
+    SetDirection
+    GetPreferredFontSize
+    GetPreferredFontName
+End Sub
+
+Private Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+
+'== Helper for toolbar buttons end ==
+'== Helper for CellEditor Form begin ==
+
+
+Private Function AskToSave() As Integer
+    If Saved Then
+        AskToSave = vbNo
+    Else
+        AskToSave = MsgBox("現在のテキストをセルに保存しますか？", vbExclamation Or vbYesNoCancel, "フォームでの変更をセルに保存していません")
+    End If
+End Function
+
+Private Function TextToEdit(Text As String) As String
+    TextToEdit = Replace(Text, vbLf, vbCrLf)
+End Function
+
+Private Function TextToCell(Text As String) As String
+    TextToCell = Replace(Text, vbCrLf, vbLf)
+End Function
+
+Private Function FormulaOrValue(Target As Range) As String
+    ' we must distinguish the Formula and Value,
+    ' because the maximum length allowed is different by the excel design
+    ' for formula and string value.
+    ' this problem occurs on reading cell only.
+    IsArray = Target.HasArray
+    IsFormula = Target.HasFormula
+    If IsArray Then
+        FormulaOrValue = Target.FormulaArray
+    ElseIf IsFormula Then
+        FormulaOrValue = Target.Formula
+    Else
+        FormulaOrValue = Target.Value
+    End If
+End Function
+
+Public Function OnWriteText() As Boolean
+    OnBeginEditText
+
+    On Error GoTo InvalidFormula
+    If IsArray Then
+        CurrentCell.FormulaArray = TextToCell(CellEditor.cEdit.Text)
+    Else
+        CurrentCell.Formula = TextToCell(CellEditor.cEdit.Text)
+    End If
+    Saved = True
+    OnWriteText = True
+    Exit Function
+    
+InvalidFormula:
+    MsgBox "セルに書き込めません。数式が間違っていないか確認してください。", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+    CellEditor.FocusOnEdit 0
+    OnWriteText = False
+End Function
+
+Public Sub OnBeginEditText()
+    CellEditor.FocusOnEdit 0
+End Sub
+
+Private Sub OnBeginEditCell()
+    Dim Editable As Boolean
+    Dim ShowValueBox As Boolean
+    Dim Address As String
+    Dim SheetName As String
+    
+    Address = CurrentCell.Address(False, False, xlA1, False)
+    SheetName = EditSheet.Name & " [" & EditSheet.Parent.Name & "]"
+    CellEditor.UpdateEditBox Address, SheetName, TextToEdit(FormulaOrValue(CurrentCell))
+    Editable = Not ReadOnly
+    ShowValueBox = CellIsComplex
+    CellEditor.UpdateValueBox CurrentCell.Text, ShowValueBox, Editable
+    Saved = True
+    OnBeginEditText
+End Sub
+
+Private Sub OnCellMoved(Target As Range)
+    If Not Target Is ActiveCell Then
+        Application.GoTo Target, False
+    End If
+    Set CurrentCell = Target
+    OnBeginEditCell
+End Sub
+
+Public Sub OnCellMoveTo(RowOffset As Long, ColumnOffset As Long)
+    Dim NewTarget As Range
+    
+    On Error Resume Next
+    Set NewTarget = CurrentCell.Offset(RowOffset, ColumnOffset)
+    On Error GoTo 0
+    If NewTarget Is Nothing Then Exit Sub
+    
+    If OnBeforeCellMoveOrClose() Then
+        CellEditor.FocusOnEdit
+    Else
+        OnCellMoved NewTarget
+    End If
+End Sub
+
+Public Sub OnCellMoveToNext()
+    OnCellMoveTo NextVerticalShift, NextHorizontalShift
+End Sub
+
+Public Function OnBeforeCellMoveOrClose() As Boolean
+    Dim Cancel As Boolean
+    Select Case AskToSave
+    Case vbCancel
+        Cancel = True
+    Case vbYes
+        Cancel = Not OnWriteText
+    Case vbNo
+        Cancel = False
+    End Select
+    
+    OnBeforeCellMoveOrClose = Cancel
+End Function
+
+Public Function GetPreferredFontName() As String
+    On Error Resume Next
+    
+    CurrentFontName = ActiveCell.Font.Name     ' Fail Safe
+    CurrentFontName = ActiveWorkbook.Styles("Normal").Font.Name    ' maybe standard font
+    GetPreferredFontName = CurrentFontName
+End Function
+
+Public Function GetPreferredFontSize() As Single
+    CurrentFontSize = StandardFontSize
+    GetPreferredFontSize = CurrentFontSize
+End Function
+
+Public Function GetLargerFontSize() As Single
+    CurrentFontSize = CurrentFontSize + FontSizeDifference
+    GetLargerFontSize = CurrentFontSize
+End Function
+
+Public Function GetSmallerFontSize() As Single
+    CurrentFontSize = CurrentFontSize - FontSizeDifference
+    If CurrentFontSize < FontSizeDifference Then CurrentFontSize = FontSizeDifference
+    GetSmallerFontSize = CurrentFontSize
+End Function
+
+Public Function GetTextCountFormatted(TargetBox As MSForms.TextBox) As String
+    Dim CharCount As Long
+    
+    CharCount = TargetBox.TextLength
+    GetTextCountFormatted = CharCount & "字"
+End Function
+
+
+'== Helper for CellEditor Form end ==
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+    BaumMain.InitializeEditHelper
+    EnableShortCutKey
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    DisableShortCutKey
+    BaumMain.TerminateEditHelper
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
