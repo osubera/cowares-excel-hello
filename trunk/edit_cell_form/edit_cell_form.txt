@@ -57,7 +57,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/edit_cell_form
 '         ;更新
-'         ;41048.1977314815
+'         ;41048.4273148148
 '         ;keyword
 '         ;excel,validation,editor,text
 '  address;A13:J13
@@ -112,11 +112,6 @@
 '   unit;pt
 '  address;B1
 '         ;96.75
-
-'cells-font-name
-'  address;A1:N17
-'   repeat;238
-'         ;ＭＳ Ｐゴシック
 
 'class
 '   name;ToolBarV2
@@ -1009,7 +1004,7 @@ End Sub
 '{{{
 Option Explicit
 
-Const MinWidth = 412
+Const MinWidth = 256
 Const MinHeight = 120
 Const RelativeEditHeight = 0.5
 Const AdjustSize = 9.5  ' maximized window is larger than the screen size
@@ -1854,7 +1849,7 @@ Private Sub OnBeginEditCell()
     CellEditor.UpdateEditBox Address, SheetName, TextToEdit(FormulaOrValue(CurrentCell))
     Editable = Not ReadOnly
     ShowValueBox = CellIsComplex
-    CellEditor.UpdateValueBox CurrentCell.Text, ShowValueBox, Editable
+    CellEditor.UpdateValueBox CurrentCell.Value, ShowValueBox, Editable
     Saved = True
     OnBeginEditText
 End Sub
