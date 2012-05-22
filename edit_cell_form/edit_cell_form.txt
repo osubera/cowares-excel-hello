@@ -2,7 +2,7 @@
 ';
 
 'workbook
-'   name;edit_cell_form.xlsm/F3EditCellForm
+'   name;edit_cell_form.xls/F3EditCellForm
 
 'book-identity
 '  title;エクセルエディタ
@@ -57,7 +57,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/edit_cell_form
 '         ;更新
-'         ;41048.4273148148
+'         ;41052.2037384259
 '         ;keyword
 '         ;excel,validation,editor,text
 '  address;A13:J13
@@ -1815,6 +1815,46 @@ Private Function FormulaOrValue(Target As Range) As String
     End If
 End Function
 
+Private Function SafeValueString(Ra As Range) As String
+    Dim y As Variant
+    Dim t As String
+    
+    y = Ra.Value
+    If VarType(y) = vbError Then
+        t = TranslateError(y)
+    Else
+        t = y
+    End If
+    
+    SafeValueString = t
+End Function
+
+Private Function TranslateError(x As Variant) As String
+    Dim a As Variant
+    Static Dic As Variant
+    
+    If IsEmpty(Dic) Then
+        Dic = Array( _
+                Array(CVErr(xlErrDiv0), "#DIV/0!"), _
+                Array(CVErr(xlErrNA), "#N/A"), _
+                Array(CVErr(xlErrName), "#NAME?"), _
+                Array(CVErr(xlErrNull), "#NULL!"), _
+                Array(CVErr(xlErrNum), "#NUM!"), _
+                Array(CVErr(xlErrRef), "#REF!"), _
+                Array(CVErr(xlErrValue), "#VALUE!") _
+            )
+    End If
+    
+    For Each a In Dic
+        If x = a(0) Then
+            TranslateError = a(1)
+            Exit Function
+        End If
+    Next
+    
+    TranslateError = "#ERROR!"
+End Function
+
 Public Function OnWriteText() As Boolean
     OnBeginEditText
 
@@ -1849,7 +1889,7 @@ Private Sub OnBeginEditCell()
     CellEditor.UpdateEditBox Address, SheetName, TextToEdit(FormulaOrValue(CurrentCell))
     Editable = Not ReadOnly
     ShowValueBox = CellIsComplex
-    CellEditor.UpdateValueBox CurrentCell.Value, ShowValueBox, Editable
+    CellEditor.UpdateValueBox SafeValueString(CurrentCell), ShowValueBox, Editable
     Saved = True
     OnBeginEditText
 End Sub
