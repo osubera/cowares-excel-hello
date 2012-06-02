@@ -1224,10 +1224,10 @@ Private Sub SetupReports()
     Core.ClearReports
     Core.AddReport ReportSummary
     If Helper.GetControlState("reportcolor") Then
-        Core.AddRule New ReportDifferenceByColor
+        Core.AddReport New ReportDifferenceByColor
     End If
     If Helper.GetControlState("reportbook") Then
-        Core.AddRule New ReportDifferenceByBook
+        Core.AddReport New ReportDifferenceByBook
     End If
 End Sub
 
@@ -1870,6 +1870,106 @@ End Function
 Private Function SmartValue(x As Range) As Variant
     SmartValue = x.Value
 End Function
+
+'}}}
+
+'class
+'   name;IsExactCellFormula
+'{{{
+Option Explicit
+
+' a family of the IsExactCell virtual class
+
+Public Function IsSame(x As Range, y As Range) As Boolean
+    IsSame = StrictEqual(SmartValue(x), SmartValue(y))
+End Function
+
+Private Function StrictEqual(x As Variant, y As Variant) As Boolean
+    ' we impliment the "TooStrictEqual" on http://code.google.com/p/cowares-excel-hello/wiki/bad_empty
+    ' because the cell doesn't return integer nor single type.
+    ' and this let the empty cell be distinguished from 0 and "".
+    Dim Equal As Boolean
+    
+    If VarType(x) <> VarType(y) Then
+        Equal = False
+    ElseIf IsNull(x) Then
+        Equal = True
+    Else
+        ' vbError types are comparable each other if both are vbError types.
+        Equal = (x = y)
+    End If
+    
+    StrictEqual = Equal
+End Function
+
+Private Function SmartValue(x As Range) As Variant
+    ' we must distinguish the Formula and Value,
+    ' because the maximum length allowed is different by the excel design
+    ' for formula and string value.
+    ' this problem occurs on reading cell only.
+    If x.HasFormula Then
+        SmartValue = x.Formula
+    Else
+        SmartValue = x.Value
+    End If
+End Function
+
+'}}}
+
+'class
+'   name;ReportDifferenceByColor
+'{{{
+Option Explicit
+
+' a family of the ReportDifferenceBy virtual class
+
+Const ClearColor = 0    ' white
+Const CellColor = 3     ' red
+Const RowColor = 6      ' yellow
+
+Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+    ClearColors EditDiffer.Worksheet
+    If HasDiffer Then
+        MarkCells EditDiffer
+        MarkRows EditDiffer
+    Else
+        ' validated as good!
+    End If
+End Sub
+
+Private Sub ClearColors(Target As Worksheet)
+    Target.Cells.Interior.ColorIndex = ClearColor
+End Sub
+
+Private Sub MarkCells(Target As Range)
+    Target.Interior.ColorIndex = CellColor
+End Sub
+
+Private Sub MarkRows(Target As Range)
+
+End Sub
+
+'}}}
+
+'class
+'   name;ReportDifferenceByBook
+'{{{
+Option Explicit
+
+' a family of the ReportDifferenceBy virtual class
+
+Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+    Dim x As Range
+    
+    If HasDiffer Then
+        For Each x In EditDiffer
+            ' report me
+            ' x.Address(False, False, xlA1, False)
+        Next
+    Else
+        ' validated as good!
+    End If
+End Sub
 
 '}}}
 
