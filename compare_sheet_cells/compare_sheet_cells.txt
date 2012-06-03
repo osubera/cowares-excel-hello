@@ -103,7 +103,7 @@
 '         ;≏値
 '         ;セル計算値を比較する
 '         ;comparevalue
-'     skip;1
+'         ;=MID(RC[-3],2,LEN(RC[-3])-1)
 '         ;1
 '         ;2
 '     skip;1
@@ -113,7 +113,7 @@
 '         ;≏式
 '         ;セル数式を比較する
 '         ;compareformula
-'     skip;1
+'         ;=MID(RC[-3],2,LEN(RC[-3])-1)
 '         ;1
 '         ;2
 '     skip;4
@@ -1211,12 +1211,18 @@ Private Sub SetHelperSettings()
 End Sub
 
 Private Sub SetupRules()
+    Dim Tag As String
+    
     Core.ClearRules
-    If Helper.GetControlState("comparevalue") Then
-        Core.AddRule New IsExactCellValue
+    
+    Tag = "comparevalue"
+    If Helper.GetControlState(Tag) Then
+        Core.AddRule New IsExactCellValue, Helper.GetButton(Tag).Parameter
     End If
-    If Helper.GetControlState("compareformula") Then
-        Core.AddRule New IsExactCellFormula
+    
+    Tag = "compareformula"
+    If Helper.GetControlState(Tag) Then
+        Core.AddRule New IsExactCellFormula, Helper.GetButton(Tag).Parameter
     End If
 End Sub
 
@@ -1637,14 +1643,15 @@ Private Sub Class_Initialize()
 End Sub
 
 Private Sub Class_Terminate()
+    ClearRules
+    ClearReports
+    
+    On Error Resume Next
     Set DifferCells = Nothing
     Set DifferSheet = Nothing
     DifferBook.Close False
     Set DifferBook = Nothing
         
-    ClearRules
-    ClearReports
-    
     Set Rules = Nothing
     Set Reports = Nothing
     Set EditSheet = Nothing
@@ -1656,8 +1663,9 @@ End Sub
 '== Public Methods begin ==
 
 
-Public Sub AddRule(Rule As Variant)
+Public Sub AddRule(Rule As Variant, Title As String)
     Rules.Add Rule
+    Rules(Rules.Count).Text = Title
 End Sub
 
 Public Sub AddReport(Report As Variant)
@@ -1777,17 +1785,19 @@ Private Sub DoReport()
     Dim Report As Variant
     Dim EditDiffer As Range
     Dim ReferDiffer As Range
+    Dim RuleText As String
     
     If HasDiffer Then
         Set EditDiffer = Refered(DifferCells, EditSheet)
         Set ReferDiffer = Refered(DifferCells, ReferSheet)
     Else
-        Set EditDiffer = Nothing
-        Set ReferDiffer = Nothing
+        Set EditDiffer = EditSheet.Cells
+        Set ReferDiffer = ReferSheet.Cells
     End If
     
+    RuleText = DumpRuleText
     For Each Report In Reports
-        Report.Report HasDiffer, EditDiffer, ReferDiffer
+        Report.Report RuleText, HasDiffer, EditDiffer, ReferDiffer
     Next
     
     Set EditDiffer = Nothing
@@ -1834,6 +1844,20 @@ Private Sub SetupDifferBook()
     HasDiffer = False
 End Sub
 
+' dump rules
+Private Function DumpRuleText(Optional Delimiter As String = " ") As String
+    Dim Text As String
+    Dim Rule As Variant
+    
+    Text = ""
+    For Each Rule In Rules
+        Text = Text & Rule.Text & Delimiter
+    Next
+    
+    DumpRuleText = Text
+End Function
+
+
 '== Compare functions end ==
 
 '}}}
@@ -1844,6 +1868,8 @@ End Sub
 Option Explicit
 
 ' a family of the IsExactCell virtual class
+
+Public Text As String
 
 Public Function IsSame(x As Range, y As Range) As Boolean
     IsSame = StrictEqual(SmartValue(x), SmartValue(y))
@@ -1879,6 +1905,8 @@ End Function
 Option Explicit
 
 ' a family of the IsExactCell virtual class
+
+Public Text As String
 
 Public Function IsSame(x As Range, y As Range) As Boolean
     IsSame = StrictEqual(SmartValue(x), SmartValue(y))
@@ -1927,7 +1955,7 @@ Const ClearColor = 0    ' white
 Const CellColor = 3     ' red
 Const RowColor = 6      ' yellow
 
-Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
     ClearColors EditDiffer.Worksheet
     If HasDiffer Then
         MarkCells EditDiffer
@@ -1935,6 +1963,7 @@ Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Rang
     Else
         ' validated as good!
     End If
+    Application.Goto EditDiffer(1), False
 End Sub
 
 Private Sub ClearColors(Target As Worksheet)
@@ -1946,7 +1975,14 @@ Private Sub MarkCells(Target As Range)
 End Sub
 
 Private Sub MarkRows(Target As Range)
-
+    Dim MarkAt As Long
+    
+    With Target.Worksheet
+        MarkAt = .UsedRange.Column + .UsedRange.Columns.Count
+        If MarkAt > .Columns.Count Then Exit Sub
+        
+        Application.Intersect(.Columns(MarkAt), Target.EntireRow).Interior.ColorIndex = RowColor
+    End With
 End Sub
 
 '}}}
@@ -1958,18 +1994,107 @@ Option Explicit
 
 ' a family of the ReportDifferenceBy virtual class
 
-Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
     Dim x As Range
+    Dim ReportSheet As Worksheet
+    Dim Line As Range
+    
+    Set ReportSheet = CreateBlankReport()
+    Application.ScreenUpdating = False
+    Set Line = MakeHeader(ReportSheet, RuleText, EditDiffer, ReferDiffer)
     
     If HasDiffer Then
+        Line.Range("A1:B1") = Array("差分セル", EditDiffer.Address(False, False, xlA1, False))
+        Set Line = ReportSheet.Rows(8)
         For Each x In EditDiffer
-            ' report me
-            ' x.Address(False, False, xlA1, False)
+            Set Line = MakeDifferLine(Line, x, Refered(x, ReferDiffer))
         Next
     Else
         ' validated as good!
+        Line.Cells(1).Value = "違いはありません。"
     End If
+    
+    Application.ScreenUpdating = True
+    ReportSheet.Parent.Saved = True
+    Set ReportSheet = Nothing
 End Sub
+
+Private Function CreateBlankReport() As Worksheet
+    Dim wB As Workbook
+    
+    Set wB = Application.Workbooks.Add
+    Set CreateBlankReport = wB.Worksheets(1)
+    Set wB = Nothing
+End Function
+
+Private Function MakeHeader(ReportSheet As Worksheet, RuleText As String, EditDiffer As Range, ReferDiffer As Range) As Range
+    With ReportSheet
+        .Rows(1).Range("A1:B1") = Array("編集シート", SheetFullName(EditDiffer.Worksheet))
+        .Rows(2).Range("A1:B1") = Array("参照シート", SheetFullName(ReferDiffer.Worksheet))
+        .Rows(3).Range("A1:B1") = Array("比較", RuleText)
+        .Rows(7).Range("A1:E1") = Array("セル", "編集値", "編集式", "参照値", "参照式")
+        .Rows(7).Font.Bold = True
+        .Columns("B:E").ColumnWidth = 17
+        .Columns("B:E").NumberFormat = "@"
+    End With
+    
+    Set MakeHeader = ReportSheet.Rows(5).Cells(1)
+End Function
+
+Private Function MakeDifferLine(Line As Range, EditCell As Range, ReferCell As Range) As Range
+    Line.Range("A1:E1") = _
+        Array(EditCell.Address(False, False, xlA1, False), _
+            SafeValue(EditCell), EditCell.Formula, _
+            SafeValue(ReferCell), ReferCell.Formula)
+    Set MakeDifferLine = Line.Offset(1, 0)
+End Function
+
+Private Function SheetFullName(Target As Worksheet) As String
+    With Target
+        SheetFullName = "[" & .Parent.Name & "]" & .Name
+    End With
+End Function
+
+Private Function SafeValue(x As Range) As String
+    Dim y As Variant
+    y = x.Value
+    
+    If VarType(y) = vbError Then
+        SafeValue = TranslateError(y)
+    Else
+        SafeValue = y
+    End If
+End Function
+
+Private Function TranslateError(x As Variant) As String
+    Dim a As Variant
+    Static Dic As Variant
+    
+    If IsEmpty(Dic) Then
+        Dic = Array( _
+                Array(CVErr(xlErrDiv0), "#DIV/0!"), _
+                Array(CVErr(xlErrNA), "#N/A"), _
+                Array(CVErr(xlErrName), "#NAME?"), _
+                Array(CVErr(xlErrNull), "#NULL!"), _
+                Array(CVErr(xlErrNum), "#NUM!"), _
+                Array(CVErr(xlErrRef), "#REF!"), _
+                Array(CVErr(xlErrValue), "#VALUE!") _
+            )
+    End If
+    
+    For Each a In Dic
+        If x = a(0) Then
+            TranslateError = a(1)
+            Exit Function
+        End If
+    Next
+    
+    TranslateError = "#ERROR!"
+End Function
+
+Private Function Refered(x As Range, AtRange As Range) As Range
+    Set Refered = AtRange.Worksheet.Range(x.Address(True, True, xlA1, False))
+End Function
 
 '}}}
 
@@ -1991,7 +2116,7 @@ Private Sub Class_Terminate()
     ReleaseHelper
 End Sub
 
-Public Sub Report(HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
     Dim x As Range
     
     ClearSummaries
