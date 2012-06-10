@@ -1,0 +1,675 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;AreaBuilder.xlsm/VBAProject
+
+'book-identity
+
+'require
+
+'worksheet
+'   name;Sheet1
+
+'class
+'   name;AreaBuilder
+'{{{
+Option Explicit
+
+Private Bag As Collection
+Private OptimizationRequired As Boolean
+Private BaseSheet As Worksheet
+Private InternalSheet As Worksheet
+Private AddressCache As String
+Private CellsCountCache As Variant
+
+Public EnableOptimization As Boolean
+Public InternalSheetVisible As Boolean
+
+
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    Set Bag = New Collection
+    EnableOptimization = True
+    InternalSheetVisible = True
+End Sub
+
+Private Sub Class_Terminate()
+    SelectNone
+    Set Bag = Nothing
+    ReleaseInternalSheet
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Property Get HasArea() As Boolean
+    HasArea = (AreasCount > 0)
+End Property
+
+Public Property Get AreasCount() As Variant
+    MayOptimize
+    AreasCount = Bag.Count
+End Property
+
+Public Property Get CellsCount() As Variant
+    Dim x As Variant
+    
+    If Not EnableOptimization Then
+        If IsAlive(BaseSheet) Then
+            CellsCountCache = 0
+            For Each x In Bag
+                CellsCountCache = CellsCountCache + CellsCountLarge(BaseSheet.Range(x))
+            Next
+        Else
+            Err.Raise Number:=1004, Description:="Worksheet is required when EnableOptimization is False."
+        End If
+    End If
+    
+    CellsCount = CellsCountCache
+End Property
+
+Public Property Get AreasCollection() As Collection
+    Set AreasCollection = Bag
+End Property
+
+Public Property Get Address( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    Dim x As Variant
+    
+    MayOptimize
+    AddressCache = ""
+    For Each x In Bag
+        AddressCache = AddressCache & "," & TranslateAddress(x, RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Next
+    If Len(AddressCache) > 1 Then AddressCache = Mid(AddressCache, 2)
+    
+    Address = AddressCache
+End Property
+
+Public Sub SetAddress(ByVal AddressText As String)
+    Dim AddressArray As Variant
+    Dim x As Variant
+    
+    SelectNone
+    AddressArray = Split(AddressText, ",")
+    For Each x In AddressArray
+        PushAddress x
+    Next
+    OptimizationRequired = True
+End Sub
+
+Public Property Get LastArea() As Range
+    Set LastArea = Area(AreasCount)
+End Property
+
+Public Property Get Area(Optional Item As Variant = 1) As Range
+    If BaseSheet Is Nothing Then
+        Set Area = Nothing
+    Else
+        MayOptimize
+        If AreasCount < Item Or Item < 1 Then
+            Set Area = BaseSheet.Cells
+        Else
+            Set Area = BaseSheet.Range(Bag(Item))
+        End If
+    End If
+End Property
+
+Public Property Set Areas(RangeItem As Range)
+    Dim x As Range
+    
+    SelectNone
+    For Each x In RangeItem.Areas
+        PushArea x
+    Next
+    OptimizationRequired = True
+End Property
+
+Public Property Get ParentSheet() As Worksheet
+    Set ParentSheet = BaseSheet
+End Property
+
+Public Property Set ParentSheet(Target As Worksheet)
+    MayUpdateWorksheet Target
+End Property
+
+Public Sub PushArea(RangeItem As Range)
+    Bag.Add RangeItem.Address(False, False, xlA1, False)
+    MayUpdateWorksheet RangeItem.Worksheet
+    OptimizationRequired = True
+End Sub
+
+Public Function PopArea() As Range
+    Set PopArea = LastArea
+    If HasArea Then Bag.Remove AreasCount
+End Function
+
+Public Function ShiftArea() As Range
+    Set ShiftArea = Area(1)
+    If HasArea Then Bag.Remove 1
+End Function
+
+Public Sub PushAddress(ByVal AddressText As String)
+    Bag.Add TranslateAddress(AddressText)
+    OptimizationRequired = True
+End Sub
+
+Public Function PopAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        PopAddress = TranslateAddress(Bag(AreasCount), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove AreasCount
+    Else
+        PopAddress = ""
+    End If
+End Function
+
+Public Function ShiftAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        ShiftAddress = TranslateAddress(Bag(1), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove 1
+    Else
+        ShiftAddress = ""
+    End If
+End Function
+
+Public Sub SelectNone()
+    Do While Bag.Count > 0
+        Bag.Remove 1
+    Loop
+    CellsCountCache = 0
+End Sub
+
+Public Sub SelectAll()
+    On Error GoTo Trap
+    Set Areas = BaseSheet.Cells
+    CellsCountCache = CellsCountLarge(BaseSheet.Cells)
+    Exit Sub
+    
+Trap:
+    ' error should be raised at the no basesheet error
+    Debug.Print Err.Number, Err.Description, TypeName(BaseSheet)
+    Err.Raise Err.Number
+End Sub
+
+Public Sub SelectValues(Target As Range)
+    MayUpdateWorksheet Target.Worksheet
+    SearchBySpecialCells Target
+End Sub
+
+
+'== Public Methods end ==
+'== Helper Functions begin ==
+
+
+Private Sub MayUpdateWorksheet(Target As Worksheet)
+    ' only the worksheet of the lattest range added will survive
+    If BaseSheet Is Target Then Exit Sub
+    
+    Set BaseSheet = Target
+End Sub
+
+Private Sub MayOptimize()
+    If Not EnableOptimization Then Exit Sub
+    
+    If OptimizationRequired Then
+        Optimize
+        OptimizationRequired = False
+    End If
+End Sub
+
+Private Sub Optimize()
+    Dim x As Variant
+    Dim y As Range
+    
+    EnsureInternalSheet
+    InternalSheet.Cells.Clear
+    For Each x In Bag
+        InternalSheet.Range(x).Value = 1
+    Next
+    
+    SearchBySpecialCells InternalSheet.Cells
+    InternalSheet.Parent.Saved = True
+End Sub
+
+Private Sub SearchBySpecialCells(ByVal Target As Range)
+    Dim Counter As Variant
+    Dim FoundArea As Range
+    Dim x As Range
+    
+    SelectNone
+    
+    Counter = SpecialCellsValue(Target, FoundArea)
+    If IsExpectedCellsCount(Target, Counter) Then
+        CellsCountCache = CellsCountCache + Counter
+        For Each x In FoundArea.Areas
+            PushAddress x.Address(False, False, xlA1, False)
+        Next
+    Else
+        ' divide until success
+        For Each x In DivideTwo(Target)
+            SearchBySpecialCells x
+        Next
+    End If
+End Sub
+
+Private Function DivideTwo(x As Range) As Variant
+    Dim r As Long
+    Dim c As Long
+    Dim n As Long
+    Dim D1 As Range
+    Dim D2 As Range
+    
+    r = x.Rows.Count
+    c = x.Columns.Count
+    If r >= c Then
+        n = Int(r / 2)
+        Set D1 = x.Rows("1:" & CStr(n)).Cells
+        Set D2 = x.Rows(CStr(n + 1) & ":" & CStr(r)).Cells
+    Else
+        n = Int(c / 2)
+        Set D1 = x.Columns("1:" & CStr(n)).Cells
+        Set D2 = x.Columns(CStr(n + 1) & ":" & CStr(c)).Cells
+    End If
+    
+    DivideTwo = Array(D1, D2)
+End Function
+
+Private Function IsExpectedCellsCount(Target As Range, Count As Variant) As Boolean
+    Dim Expected As Variant
+    ' expect constant values only
+    Expected = Application.WorksheetFunction.CountA(Target)
+    IsExpectedCellsCount = (Count = Expected)
+End Function
+
+Private Function SpecialCellsValue(Target As Range, ByRef ReturnSpecial As Range) As Variant
+    ' return a count of cells found, that may be a Long or Decimal Variant
+    On Error GoTo NoCellsFound
+    
+    If IsASingleCell(Target) Then
+    ' protect from the single cell issue. http://code.google.com/p/cowares-excel-hello/wiki/bad_special_cells
+        Set ReturnSpecial = Target.Range("A1,A1").SpecialCells(xlCellTypeConstants)
+    Else
+        Set ReturnSpecial = Target.SpecialCells(xlCellTypeConstants)
+    End If
+    SpecialCellsValue = CellsCountLarge(ReturnSpecial)
+    Exit Function
+    
+NoCellsFound:
+    If Err.Number = 1004 Then
+    ' runtime error on no cells found
+        Set ReturnSpecial = Nothing
+        SpecialCellsValue = 0
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Private Sub EnsureInternalSheet()
+    Dim Wb As Workbook
+    
+    If IsAlive(InternalSheet) Then Exit Sub
+    
+    Set Wb = Application.Workbooks.Add
+    Wb.Windows(1).Visible = InternalSheetVisible
+    Wb.Saved = True
+    Set InternalSheet = Wb.Worksheets(1)
+    Set Wb = Nothing
+End Sub
+
+Private Sub ReleaseInternalSheet()
+    On Error Resume Next
+    InternalSheet.Parent.Close False
+    Set InternalSheet = Nothing
+End Sub
+
+Private Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+Private Function TranslateAddress( _
+        ByVal FromAddress As String, _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    ' this function should not trap errors caused by a wrong address
+    ' once trap it, keep precise information, and then throw again would be a good manner.
+    On Error GoTo Trap
+    Dim Ra As Range
+    
+    If Not EnableOptimization Then
+        TranslateAddress = FromAddress
+        Exit Function
+    End If
+    
+    EnsureInternalSheet
+    Set Ra = InternalSheet.Range(FromAddress)
+    TranslateAddress = Ra.Address(RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Exit Function
+    
+Trap:
+    Debug.Print Err.Number, Err.Description, FromAddress
+    Err.Raise Err.Number
+End Function
+
+Private Function CellsCountLarge(Target As Range) As Variant
+    If Application.Version >= 12 Then
+        CellsCountLarge = CDec(Target.Cells.CountLarge)
+    Else
+        CellsCountLarge = Target.Cells.Count
+    End If
+End Function
+
+Private Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+    ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+
+'== Helper Functions end ==
+
+'}}}
+
+'module
+'   name;Module1
+'{{{
+Option Explicit
+
+Sub testall()
+    test1
+    test2
+    test3
+    test4
+    test5
+    test6
+    test7
+    test8
+    test9
+    test10
+    test11
+End Sub
+
+Sub test1()
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    Debug.Assert (a.HasArea = False)
+    Debug.Assert (a.AreasCount = 0)
+    Debug.Assert (a.CellsCount = 0)
+    Debug.Assert (a.Address = "")
+    
+    Set a = Nothing
+End Sub
+
+Sub test2()
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    a.SetAddress "B3:C5,D9"
+    Set a.ParentSheet = Sheet1
+    
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 2)
+    Debug.Assert (a.CellsCount = 7)
+    Debug.Assert (a.Address = "B3:C5,D9")
+    
+    Set a = Nothing
+End Sub
+
+Sub test3()
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    Set a.Areas = Sheet1.Range("B2:C5")
+    
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 1)
+    Debug.Assert (a.CellsCount = 8)
+    Debug.Assert (a.Address = "B2:C5")
+    
+    Set a = Nothing
+End Sub
+
+Sub test4()
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    Set a.Areas = Union(Sheet1.Range("B2:C5"), Sheet1.Range("E7:F8"))
+    
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 2)
+    Debug.Assert (a.CellsCount = 12)
+    Debug.Assert (a.Address = "B2:C5,E7:F8")
+    
+    Set a = Nothing
+End Sub
+
+Sub test5()
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    Set a.ParentSheet = Sheet1
+    
+    a.SelectAll
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 1)
+    Debug.Print a.CellsCount
+    Debug.Print a.Address
+    
+    a.SelectNone
+    Debug.Assert (a.HasArea = False)
+    Debug.Assert (a.AreasCount = 0)
+    Debug.Assert (a.CellsCount = 0)
+    Debug.Assert (a.Address = "")
+    
+    Set a = Nothing
+End Sub
+
+Sub test6()
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    Set a.ParentSheet = Sheet1
+    
+    For Each x In Array("A1", "A2", "A3", "B1", "B2", "B3")
+        a.PushAddress x
+    Next
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 6)
+    Debug.Assert (a.CellsCount = 6)
+    Debug.Assert (a.Address = "A1,A2,A3,B1,B2,B3")
+    
+    Debug.Assert (a.PopAddress = "B3")
+    Debug.Assert (a.ShiftAddress = "A1")
+    Debug.Assert (a.PopAddress = "B2")
+    Debug.Assert (a.PopAddress = "B1")
+    Debug.Assert (a.ShiftAddress = "A2")
+    Debug.Assert (a.PopAddress = "A3")
+    Debug.Assert (a.ShiftAddress = "")
+    Debug.Assert (a.PopAddress = "")
+    
+    Set a = Nothing
+End Sub
+
+Sub test7()
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    
+    For Each x In Array("A1", "A2", "A3", "B1", "B2", "B3")
+        a.PushArea Sheet1.Range(x)
+    Next
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 6)
+    Debug.Assert (a.CellsCount = 6)
+    Debug.Assert (a.Address = "A1,A2,A3,B1,B2,B3")
+    
+    Debug.Assert (a.PopArea.Address(False, False, xlA1, False) = "B3")
+    Debug.Assert (a.ShiftArea.Address(False, False, xlA1, False) = "A1")
+    Debug.Assert (a.LastArea.Address(False, False, xlA1, False) = "B2")
+    Debug.Assert (a.LastArea.Address(False, False, xlA1, False) = "B2")
+    Debug.Assert (a.Area(2).Address(False, False, xlA1, False) = "A3")
+    Debug.Assert (a.PopArea.Address(False, False, xlA1, False) = "B2")
+    Debug.Assert (a.PopArea.Address(False, False, xlA1, False) = "B1")
+    Debug.Assert (a.PopArea.Address(False, False, xlA1, False) = "A3")
+    Debug.Assert (a.PopArea.Address(False, False, xlA1, False) = "A2")
+    Debug.Print a.PopArea.Address(False, False, xlA1, False)
+    
+    Set a = Nothing
+End Sub
+
+Sub test8()
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = False
+    a.InternalSheetVisible = True
+    Set a.ParentSheet = Sheet1
+    
+    For Each x In Array("A1", "A2", "A3", "B1", "B2", "B3")
+        a.PushAddress x
+    Next
+    
+    For Each x In a.AreasCollection
+        Debug.Print x
+    Next
+    
+    For x = 1 To a.AreasCount
+        Debug.Print a.Area(x).Address(False, False, xlA1, False)
+    Next
+    
+    Set a = Nothing
+End Sub
+
+Sub test9()
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = True
+    a.InternalSheetVisible = True
+    Set a.ParentSheet = Sheet1
+    
+    For Each x In Array("A1", "A2", "A3", "B1", "B2", "B3")
+        a.PushAddress x
+    Next
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 1)
+    Debug.Assert (a.CellsCount = 6)
+    Debug.Assert (a.Address = "A1:B3")
+    
+    Debug.Assert (a.PopAddress = "A1:B3")
+    Debug.Assert (a.PopAddress = "")
+    
+    Set a = Nothing
+End Sub
+
+Sub test10()
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.EnableOptimization = True
+    a.InternalSheetVisible = True
+    Set a.ParentSheet = Sheet1
+    
+    For Each x In Array("A1", "A2", "A3", "C1", "C2", "C3")
+        a.PushAddress x
+    Next
+    Debug.Assert (a.HasArea = True)
+    Debug.Assert (a.AreasCount = 2)
+    Debug.Assert (a.CellsCount = 6)
+    Debug.Assert (a.Address = "A1:A3,C1:C3")
+    
+    Debug.Assert (a.PopAddress = "C1:C3")
+    Debug.Assert (a.PopAddress = "A1:A3")
+    
+    Set a = Nothing
+End Sub
+
+Sub test11()
+    Dim Wb As Workbook
+    Dim w As Worksheet
+    Dim x As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    Set Wb = Application.Workbooks.Add
+    Set w = Wb.Worksheets(1)
+    With w
+        .Range("B2:C5").Value = 1
+        .Range("D4:F7").Value = 1
+        .Range("G2:J10").Value = 1
+    End With
+    
+    a.InternalSheetVisible = True
+    a.EnableOptimization = False
+    a.SelectValues w.Cells
+    Debug.Assert (a.Address = "B2:C5,G2:J10,D4:F7")
+    
+    a.EnableOptimization = True
+    Debug.Assert (a.Address = "B2:C5,G2:J10,D4:F7")
+    
+    Wb.Saved = True
+    Set Wb = Nothing
+    Set a = Nothing
+End Sub
+
+'}}}
+
+'ssf-end
+
