@@ -214,11 +214,98 @@ End Sub
 
 Public Sub SelectValues(Target As Range)
     MayUpdateWorksheet Target.Worksheet
+    SelectNone
     SearchBySpecialCells Target
 End Sub
 
 
 '== Public Methods end ==
+'== Public Util Functions begin ==
+
+
+Public Function SpecialCellsValue(Target As Range, ByRef ReturnSpecial As Range) As Variant
+    ' return a count of cells found, that may be a Long or Decimal Variant
+    On Error GoTo NoCellsFound
+    
+    If IsASingleCell(Target) Then
+    ' protect from the single cell issue. http://code.google.com/p/cowares-excel-hello/wiki/bad_special_cells
+        Set ReturnSpecial = Target.Range("A1,A1").SpecialCells(xlCellTypeConstants)
+    Else
+        Set ReturnSpecial = Target.SpecialCells(xlCellTypeConstants)
+    End If
+    SpecialCellsValue = CellsCountLarge(ReturnSpecial)
+    Exit Function
+    
+NoCellsFound:
+    If Err.Number = 1004 Then
+    ' runtime error on no cells found
+        Set ReturnSpecial = Nothing
+        SpecialCellsValue = 0
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+Public Function CellsCountLarge(Target As Range) As Variant
+    If Application.Version >= 12 Then
+        CellsCountLarge = CDec(Target.Cells.CountLarge)
+    Else
+        CellsCountLarge = Target.Cells.Count
+    End If
+End Function
+
+Public Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+    ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function DivideTwo(x As Range) As Variant
+    Dim r As Long
+    Dim c As Long
+    Dim n As Long
+    Dim D1 As Range
+    Dim D2 As Range
+    
+    r = x.Rows.Count
+    c = x.Columns.Count
+    If r >= c Then
+        n = Int(r / 2)
+        Set D1 = x.Rows("1:" & CStr(n)).Cells
+        Set D2 = x.Rows(CStr(n + 1) & ":" & CStr(r)).Cells
+    Else
+        n = Int(c / 2)
+        Set D1 = Range(x.Columns(1), x.Columns(n)).Cells
+        Set D2 = Range(x.Columns(n + 1), x.Columns(c)).Cells
+    End If
+    
+    Debug.Print "DivideTwo: ", x.Address(False, False), "->", D1.Address(False, False), D2.Address(False, False)
+    
+    DivideTwo = Array(D1, D2)
+End Function
+
+
+'== Public Util Functions end ==
 '== Helper Functions begin ==
 
 
@@ -248,7 +335,8 @@ Private Sub Optimize()
         InternalSheet.Range(x).Value = 1
     Next
     
-    SearchBySpecialCells InternalSheet.Cells
+    SelectNone
+    SearchBySpecialCells InternalSheet.UsedRange
     InternalSheet.Parent.Saved = True
 End Sub
 
@@ -256,10 +344,12 @@ Private Sub SearchBySpecialCells(ByVal Target As Range)
     Dim Counter As Variant
     Dim FoundArea As Range
     Dim x As Range
-    
-    SelectNone
+    Dim y As Variant
     
     Counter = SpecialCellsValue(Target, FoundArea)
+    If Counter = 0 Then Exit Sub
+    ' we expect Counter > 0 when division is needed
+    
     If IsExpectedCellsCount(Target, Counter) Then
         CellsCountCache = CellsCountCache + Counter
         For Each x In FoundArea.Areas
@@ -267,63 +357,18 @@ Private Sub SearchBySpecialCells(ByVal Target As Range)
         Next
     Else
         ' divide until success
-        For Each x In DivideTwo(Target)
-            SearchBySpecialCells x
+        For Each y In DivideTwo(Target)
+            SearchBySpecialCells y
         Next
     End If
 End Sub
-
-Private Function DivideTwo(x As Range) As Variant
-    Dim r As Long
-    Dim c As Long
-    Dim n As Long
-    Dim D1 As Range
-    Dim D2 As Range
-    
-    r = x.Rows.Count
-    c = x.Columns.Count
-    If r >= c Then
-        n = Int(r / 2)
-        Set D1 = x.Rows("1:" & CStr(n)).Cells
-        Set D2 = x.Rows(CStr(n + 1) & ":" & CStr(r)).Cells
-    Else
-        n = Int(c / 2)
-        Set D1 = x.Columns("1:" & CStr(n)).Cells
-        Set D2 = x.Columns(CStr(n + 1) & ":" & CStr(c)).Cells
-    End If
-    
-    DivideTwo = Array(D1, D2)
-End Function
 
 Private Function IsExpectedCellsCount(Target As Range, Count As Variant) As Boolean
     Dim Expected As Variant
     ' expect constant values only
     Expected = Application.WorksheetFunction.CountA(Target)
-    IsExpectedCellsCount = (Count = Expected)
-End Function
-
-Private Function SpecialCellsValue(Target As Range, ByRef ReturnSpecial As Range) As Variant
-    ' return a count of cells found, that may be a Long or Decimal Variant
-    On Error GoTo NoCellsFound
-    
-    If IsASingleCell(Target) Then
-    ' protect from the single cell issue. http://code.google.com/p/cowares-excel-hello/wiki/bad_special_cells
-        Set ReturnSpecial = Target.Range("A1,A1").SpecialCells(xlCellTypeConstants)
-    Else
-        Set ReturnSpecial = Target.SpecialCells(xlCellTypeConstants)
-    End If
-    SpecialCellsValue = CellsCountLarge(ReturnSpecial)
-    Exit Function
-    
-NoCellsFound:
-    If Err.Number = 1004 Then
-    ' runtime error on no cells found
-        Set ReturnSpecial = Nothing
-        SpecialCellsValue = 0
-        Exit Function
-    Else
-        Err.Raise Err.Number
-    End If
+    'IsExpectedCellsCount = (Count = Expected)
+    IsExpectedCellsCount = ((Count = Expected) And (Count <= 4))    ' for debug
 End Function
 
 Private Sub EnsureInternalSheet()
@@ -343,15 +388,6 @@ Private Sub ReleaseInternalSheet()
     InternalSheet.Parent.Close False
     Set InternalSheet = Nothing
 End Sub
-
-Private Function IsAlive(Ws As Worksheet) As Boolean
-    If Ws Is Nothing Then Exit Function
-    
-    On Error Resume Next
-    Dim i As Long
-    i = Ws.Index
-    If Err.Number = 0 Then IsAlive = True
-End Function
 
 Private Function TranslateAddress( _
         ByVal FromAddress As String, _
@@ -380,30 +416,6 @@ Trap:
     Err.Raise Err.Number
 End Function
 
-Private Function CellsCountLarge(Target As Range) As Variant
-    If Application.Version >= 12 Then
-        CellsCountLarge = CDec(Target.Cells.CountLarge)
-    Else
-        CellsCountLarge = Target.Cells.Count
-    End If
-End Function
-
-Private Function IsASingleCell(Target As Range) As Boolean
-    On Error GoTo MayFailOnExcel2007
-    
-    IsASingleCell = (Target.Cells.Count = 1)
-    Exit Function
-    
-MayFailOnExcel2007:
-    If Err.Number = 6 Then
-    ' overflowed, means very large, larger than 1, maybe
-        IsASingleCell = False
-        Exit Function
-    Else
-        Err.Raise Err.Number
-    End If
-End Function
-
 
 '== Helper Functions end ==
 
@@ -426,6 +438,7 @@ Sub testall()
     test9
     test10
     test11
+    test12
 End Sub
 
 Sub test1()
@@ -658,7 +671,7 @@ Sub test11()
     
     a.InternalSheetVisible = True
     a.EnableOptimization = False
-    a.SelectValues w.Cells
+    a.SelectValues w.UsedRange
     Debug.Assert (a.Address = "B2:C5,G2:J10,D4:F7")
     
     a.EnableOptimization = True
@@ -666,6 +679,23 @@ Sub test11()
     
     Wb.Saved = True
     Set Wb = Nothing
+    Set a = Nothing
+End Sub
+
+Sub test12()
+    Dim x As Variant
+    Dim y As Variant
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    y = a.DivideTwo(Sheet1.Range("C4:E10"))
+    Debug.Assert (y(0).Address(False, False, xlA1, False) = "C4:E6")
+    Debug.Assert (y(1).Address(False, False, xlA1, False) = "C7:E10")
+    
+    For Each x In y
+        Debug.Print x.Address(False, False, xlA1, False)
+    Next
+    
     Set a = Nothing
 End Sub
 
