@@ -25,6 +25,7 @@ Private CellsCountCache As Variant
 
 Public EnableOptimization As Boolean
 Public InternalSheetVisible As Boolean
+Public Verbose As Boolean
 
 
 '== Class events begin ==
@@ -280,7 +281,7 @@ MayFailOnExcel2007:
     End If
 End Function
 
-Public Function DivideTwo(x As Range) As Variant
+Public Function DivideIntoHalf(x As Range) As Variant
     Dim r As Long
     Dim c As Long
     Dim n As Long
@@ -299,9 +300,9 @@ Public Function DivideTwo(x As Range) As Variant
         Set D2 = Range(x.Columns(n + 1), x.Columns(c)).Cells
     End If
     
-    Debug.Print "DivideTwo: ", x.Address(False, False), "->", D1.Address(False, False), D2.Address(False, False)
+    If Verbose Then Debug.Print "DivideIntoHalf: ", x.Address(False, False), "->", D1.Address(False, False), D2.Address(False, False)
     
-    DivideTwo = Array(D1, D2)
+    DivideIntoHalf = Array(D1, D2)
 End Function
 
 
@@ -357,7 +358,7 @@ Private Sub SearchBySpecialCells(ByVal Target As Range)
         Next
     Else
         ' divide until success
-        For Each y In DivideTwo(Target)
+        For Each y In DivideIntoHalf(Target)
             SearchBySpecialCells y
         Next
     End If
@@ -367,8 +368,8 @@ Private Function IsExpectedCellsCount(Target As Range, Count As Variant) As Bool
     Dim Expected As Variant
     ' expect constant values only
     Expected = Application.WorksheetFunction.CountA(Target)
-    'IsExpectedCellsCount = (Count = Expected)
-    IsExpectedCellsCount = ((Count = Expected) And (Count <= 4))    ' for debug
+    IsExpectedCellsCount = (Count = Expected)
+    'IsExpectedCellsCount = ((Count = Expected) And (Count <= 4))    ' for debug
 End Function
 
 Private Sub EnsureInternalSheet()
@@ -439,6 +440,7 @@ Sub testall()
     test10
     test11
     test12
+    test13
 End Sub
 
 Sub test1()
@@ -688,13 +690,32 @@ Sub test12()
     Dim a As AreaBuilder
     Set a = New AreaBuilder
     
-    y = a.DivideTwo(Sheet1.Range("C4:E10"))
+    a.Verbose = True
+    
+    y = a.DivideIntoHalf(Sheet1.Range("C4:E10"))
     Debug.Assert (y(0).Address(False, False, xlA1, False) = "C4:E6")
     Debug.Assert (y(1).Address(False, False, xlA1, False) = "C7:E10")
     
     For Each x In y
         Debug.Print x.Address(False, False, xlA1, False)
     Next
+    
+    Set a = Nothing
+End Sub
+
+Sub test13()
+    Dim x As Variant
+    Dim y As Range
+    Dim a As AreaBuilder
+    Set a = New AreaBuilder
+    
+    a.Verbose = True
+    
+    Set y = Sheet1.Cells
+    Do
+        x = a.DivideIntoHalf(y)
+        Set y = x(0)
+    Loop While a.CellsCountLarge(y) > 4
     
     Set a = Nothing
 End Sub
