@@ -2,9 +2,10 @@
 ';
 
 'workbook
-'   name;compare_sheet_cells.xlsm/F3CompareSheetCells
+'   name;compare_sheet_cells.xls/F3CompareSheetCells
 
 'book-identity
+'  title;エクセル比較 甲子
 
 'require
 
@@ -54,7 +55,7 @@
 '         ;配布元
 '         ;http://code.google.com/p/cowares-excel-hello/wiki/compare_sheet_cells
 '         ;更新
-'         ;41061.1944444444
+'         ;41076.8503240741
 '         ;keyword
 '         ;excel,validation,difference
 '  address;A13:J13
@@ -142,11 +143,6 @@
 '   unit;pt
 '  address;B1
 '         ;96.75
-
-'cells-font-name
-'  address;A1:M22
-'   repeat;286
-'         ;ＭＳ Ｐゴシック
 
 'cells-v-align
 '  address;A1:M22
@@ -1060,16 +1056,20 @@ Public Sub ClearSettings()
 End Sub
 
 Public Sub DoValidate()
-    EnsureResources
+    If Not EnsureResources Then Exit Sub
+    
     SetupRules
     SetupReports
     With Core
         .Compare
         .PublishReport
+        .ClearDiffer    ' release large results
     End With
 End Sub
 
 Public Sub JumpTo()
+    If Not EnsureResources Then Exit Sub
+    
     With Core
         ReportSummary.JumpTo .GetReferSheet, .GetEditSheet
     End With
@@ -1117,15 +1117,21 @@ Private Sub SetupReports()
     End If
 End Sub
 
-Private Sub EnsureResources()
+Private Function EnsureResources() As Boolean
+    Dim Sure As Boolean
+    Sure = True
+    
     If Not IsAlive(Core.GetReferSheet) Then
         ClearReferSheet
-        Exit Sub
-    ElseIf Not IsAlive(Core.GetEditSheet) Then
-        ClearEditSheet
-        Exit Sub
+        Sure = False
     End If
-End Sub
+    If Not IsAlive(Core.GetEditSheet) Then
+        ClearEditSheet
+        Sure = False
+    End If
+    
+    EnsureResources = Sure
+End Function
 
 Private Sub SetupButton(Button As Office.CommandBarButton, Ws As Worksheet)
     On Error GoTo ButtonFailure
@@ -1169,18 +1175,13 @@ Option Explicit
 
 ' core engine to compare cells
 
-Const DoVerbose = True  ' true expects debugging
+Const DoVerbose = False  ' true expects debugging
 
 Private Rules As Collection
 Private Reports As Collection
-
 Private EditSheet As Worksheet
 Private ReferSheet As Worksheet
-Private DifferSheet As Worksheet
-Private DifferBook As Workbook
-Private DifferCells As Range
-
-Public HasDiffer As Boolean
+Public DifferArea As AreaBuilder
 
 
 '== Class events begin ==
@@ -1189,19 +1190,19 @@ Public HasDiffer As Boolean
 Private Sub Class_Initialize()
     Set Rules = New Collection
     Set Reports = New Collection
-    SetupDifferBook
+    Set DifferArea = New AreaBuilder
+    With DifferArea
+        .InternalSheetVisible = DoVerbose
+        .Verbose = DoVerbose
+        .EnableOptimization = True
+    End With
 End Sub
 
 Private Sub Class_Terminate()
     ClearRules
     ClearReports
     
-    On Error Resume Next
-    Set DifferCells = Nothing
-    Set DifferSheet = Nothing
-    DifferBook.Close False
-    Set DifferBook = Nothing
-        
+    Set DifferArea = Nothing
     Set Rules = Nothing
     Set Reports = Nothing
     Set EditSheet = Nothing
@@ -1212,6 +1213,10 @@ End Sub
 '== Class events end ==
 '== Public Methods begin ==
 
+
+Public Property Get HasDiffer() As Boolean
+    HasDiffer = DifferArea.HasArea
+End Property
 
 Public Sub AddRule(Rule As Variant, Title As String)
     Rules.Add Rule
@@ -1252,30 +1257,32 @@ End Function
 
 Public Function GetDifferCells() As Variant
     If HasDiffer Then
-        Set GetDifferCells = DifferCells
+        Set GetDifferCells = DifferArea.AreasCollection
     Else
-        GetDifferCells = Empty
+        GetDifferCells = Array()
     End If
 End Function
 
 Public Function DifferCellsAddress() As String
     If HasDiffer Then
-        DifferCellsAddress = DifferCells.Address(False, False, xlA1, False)
+        DifferCellsAddress = DifferArea.Address(False, False, xlA1, False)
     Else
         DifferCellsAddress = ""
     End If
 End Function
 
 Public Sub Compare()
-    EnsureDifferBook
     ClearDiffer
     DoVerify
-    SetDiffer
-    DifferBook.Saved = True
 End Sub
 
 Public Sub PublishReport()
     DoReport
+End Sub
+
+' reset differ area
+Public Sub ClearDiffer()
+    DifferArea.SelectNone
 End Sub
 
 
@@ -1306,12 +1313,14 @@ End Sub
 ' verify a single cell
 Private Sub VerifySingleCell(Target As Range)
     If Not IsSame(Target, Refered(Target, ReferSheet)) Then
-        Refered(Target, DifferSheet).Value = 1
+        DifferArea.PushArea Target
     End If
 End Sub
 
 ' get the reference cell against an another sheet
 Private Function Refered(x As Range, AtSheet As Worksheet) As Range
+    ' .Address doesn't return an address longer than 255 chars.
+    ' using this for a single cell would be safe.
     Set Refered = AtSheet.Range(x.Address(True, True, xlA1, False))
 End Function
 
@@ -1333,65 +1342,12 @@ End Function
 ' reporting
 Private Sub DoReport()
     Dim Report As Variant
-    Dim EditDiffer As Range
-    Dim ReferDiffer As Range
     Dim RuleText As String
-    
-    If HasDiffer Then
-        Set EditDiffer = Refered(DifferCells, EditSheet)
-        Set ReferDiffer = Refered(DifferCells, ReferSheet)
-    Else
-        Set EditDiffer = EditSheet.Cells
-        Set ReferDiffer = ReferSheet.Cells
-    End If
     
     RuleText = DumpRuleText
     For Each Report In Reports
-        Report.Report RuleText, HasDiffer, EditDiffer, ReferDiffer
+        Report.Report RuleText, HasDiffer, DifferArea, EditSheet, ReferSheet
     Next
-    
-    Set EditDiffer = Nothing
-    Set ReferDiffer = Nothing
-End Sub
-
-' reset differ sheet
-Private Sub ClearDiffer()
-    HasDiffer = False
-    Set DifferCells = Nothing
-    DifferSheet.Cells.Clear
-End Sub
-
-' set differ sheet
-Private Sub SetDiffer()
-    On Error GoTo NoDiffer
-    
-    ' SpecialCells may raise 1004 runtime error if no cells found.
-    Set DifferCells = DifferSheet.Cells.SpecialCells(xlCellTypeConstants)
-    HasDiffer = True
-    Exit Sub
-    
-NoDiffer:
-    ' we may not have to do below, already False.
-    HasDiffer = False
-End Sub
-
-' differ sheet must be available
-Private Sub EnsureDifferBook()
-    On Error Resume Next
-    
-    Dim i As Long
-    i = DifferSheet.Index
-    If Err.Number <> 0 Then SetupDifferBook
-End Sub
-
-' new differ book
-Private Sub SetupDifferBook()
-    Set DifferBook = Application.Workbooks.Add
-    Set DifferSheet = DifferBook.Worksheets(1)
-    DifferBook.Windows(1).Visible = DoVerbose
-    
-    Set DifferCells = Nothing
-    HasDiffer = False
 End Sub
 
 ' dump rules
@@ -1501,37 +1457,45 @@ Option Explicit
 
 ' a family of the ReportDifferenceBy virtual class
 
-Const ClearColor = 0    ' white
-Const CellColor = 3     ' red
-Const RowColor = 6      ' yellow
+Const ClearColor = -4105    ' automatic (white)
+Const CellColor = 3         ' red
+Const RowColor = 6          ' yellow
 
-Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
-    ClearColors EditDiffer.Worksheet
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
+    ClearColors EditSheet
     If HasDiffer Then
-        MarkCells EditDiffer
-        MarkRows EditDiffer
+        Set DifferArea.ParentSheet = EditSheet
+        MarkCells DifferArea
+        MarkRows DifferArea
+        Application.Goto DifferArea.Area(1), False
     Else
         ' validated as good!
+        Application.Goto EditSheet.Cells(1), False
     End If
-    Application.Goto EditDiffer(1), False
 End Sub
 
 Private Sub ClearColors(Target As Worksheet)
     Target.Cells.Interior.ColorIndex = ClearColor
 End Sub
 
-Private Sub MarkCells(Target As Range)
-    Target.Interior.ColorIndex = CellColor
+Private Sub MarkCells(Target As AreaBuilder)
+    Dim i As Variant
+    For i = 1 To Target.AreasCount
+        Target.Area(i).Interior.ColorIndex = CellColor
+    Next
 End Sub
 
-Private Sub MarkRows(Target As Range)
+Private Sub MarkRows(Target As AreaBuilder)
     Dim MarkAt As Long
+    Dim i As Variant
     
-    With Target.Worksheet
+    With Target.ParentSheet
         MarkAt = .UsedRange.Column + .UsedRange.Columns.Count
         If MarkAt > .Columns.Count Then Exit Sub
         
-        Application.Intersect(.Columns(MarkAt), Target.EntireRow).Interior.ColorIndex = RowColor
+        For i = 1 To Target.AreasCount
+            Application.Intersect(.Columns(MarkAt), Target.Area(i).EntireRow).Interior.ColorIndex = RowColor
+        Next
     End With
 End Sub
 
@@ -1544,20 +1508,24 @@ Option Explicit
 
 ' a family of the ReportDifferenceBy virtual class
 
-Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
     Dim x As Range
     Dim ReportSheet As Worksheet
     Dim Line As Range
+    Dim i As Variant
     
     Set ReportSheet = CreateBlankReport()
     Application.ScreenUpdating = False
-    Set Line = MakeHeader(ReportSheet, RuleText, EditDiffer, ReferDiffer)
+    Set Line = MakeHeader(ReportSheet, RuleText, EditSheet, ReferSheet)
     
     If HasDiffer Then
-        Line.Range("A1:B1") = Array("差分セル", EditDiffer.Address(False, False, xlA1, False))
+        MakeDifferAddressLine Line, DifferArea
         Set Line = ReportSheet.Rows(8)
-        For Each x In EditDiffer
-            Set Line = MakeDifferLine(Line, x, Refered(x, ReferDiffer))
+        Set DifferArea.ParentSheet = EditSheet
+        For i = 1 To DifferArea.AreasCount
+            For Each x In DifferArea.Area(i).Cells
+                Set Line = MakeDifferLine(Line, x, Refered(x, ReferSheet))
+            Next
         Next
     Else
         ' validated as good!
@@ -1570,26 +1538,55 @@ Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range,
 End Sub
 
 Private Function CreateBlankReport() As Worksheet
-    Dim wB As Workbook
+    Dim Wb As Workbook
     
-    Set wB = Application.Workbooks.Add
-    Set CreateBlankReport = wB.Worksheets(1)
-    Set wB = Nothing
+    Set Wb = Application.Workbooks.Add
+    Set CreateBlankReport = Wb.Worksheets(1)
+    Set Wb = Nothing
 End Function
 
-Private Function MakeHeader(ReportSheet As Worksheet, RuleText As String, EditDiffer As Range, ReferDiffer As Range) As Range
+Private Function MakeHeader(ReportSheet As Worksheet, RuleText As String, EditSheet As Worksheet, ReferSheet As Worksheet) As Range
     With ReportSheet
-        .Rows(1).Range("A1:B1") = Array("編集シート", SheetFullName(EditDiffer.Worksheet))
-        .Rows(2).Range("A1:B1") = Array("参照シート", SheetFullName(ReferDiffer.Worksheet))
+        .Rows(1).Range("A1:B1") = Array("編集シート", SheetFullName(EditSheet))
+        .Rows(2).Range("A1:B1") = Array("参照シート", SheetFullName(ReferSheet))
         .Rows(3).Range("A1:B1") = Array("比較", RuleText)
         .Rows(7).Range("A1:E1") = Array("セル", "編集値", "編集式", "参照値", "参照式")
         .Rows(7).Font.Bold = True
         .Columns("B:E").ColumnWidth = 17
         .Columns("B:E").NumberFormat = "@"
+        .Rows(5).NumberFormat = "@"
     End With
     
     Set MakeHeader = ReportSheet.Rows(5).Cells(1)
 End Function
+
+Private Sub MakeDifferAddressLine(Line As Range, DifferArea As AreaBuilder)
+    Const MaxCellStringLength = 32767
+    ' because a cell of excel can't have a string larger than above limit,
+    ' we will divide a very large address string, into consequent cells.
+    Dim CellAt As Long
+    Dim CommaAt As Long
+    Dim x As String
+    
+    CellAt = 0
+    Line.Offset(0, CellAt) = "差分セル"
+    
+    x = DifferArea.Address(False, False, xlA1, False)
+    Do
+        CellAt = CellAt + 1
+        If Len(x) > MaxCellStringLength Then
+            CommaAt = InStrRev(x, ",", MaxCellStringLength, vbBinaryCompare)
+            If CommaAt <= 1 Then CommaAt = MaxCellStringLength  ' safety
+            Line.Offset(0, CellAt) = Left(x, CommaAt)
+            x = Mid(x, CommaAt + 1)
+        Else
+            Line.Offset(0, CellAt) = x
+            x = ""
+            ' above line is required to avoid a vb bug of leaking memory on releasing large string.
+            Exit Do
+        End If
+    Loop
+End Sub
 
 Private Function MakeDifferLine(Line As Range, EditCell As Range, ReferCell As Range) As Range
     Line.Range("A1:E1") = _
@@ -1642,8 +1639,8 @@ Private Function TranslateError(x As Variant) As String
     TranslateError = "#ERROR!"
 End Function
 
-Private Function Refered(x As Range, AtRange As Range) As Range
-    Set Refered = AtRange.Worksheet.Range(x.Address(True, True, xlA1, False))
+Private Function Refered(x As Range, AtSheet As Worksheet) As Range
+    Set Refered = AtSheet.Range(x.Address(True, True, xlA1, False))
 End Function
 
 '}}}
@@ -1666,14 +1663,17 @@ Private Sub Class_Terminate()
     ReleaseHelper
 End Sub
 
-Public Sub Report(RuleText As String, HasDiffer As Boolean, EditDiffer As Range, ReferDiffer As Range)
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
     Dim x As Range
+    Dim i As Variant
     
     ClearSummaries
     
     If HasDiffer Then
-        For Each x In EditDiffer
-            SummaryButton.AddItem x.Address(False, False, xlA1, False)
+        For i = 1 To DifferArea.AreasCount
+            For Each x In DifferArea.Area(i).Cells
+                SummaryButton.AddItem x.Address(False, False, xlA1, False)
+            Next
         Next
         Helper.ListAddHistory SummaryButton, SummaryButton.ListCount & " !"
     Else
@@ -1721,6 +1721,417 @@ Private Sub ReleaseHelper()
     Set Helper = Nothing
     Set SummaryButton = Nothing
 End Sub
+
+'}}}
+
+'class
+'   name;AreaBuilder
+'{{{
+Option Explicit
+
+Private Bag As Collection
+Private OptimizationRequired As Boolean
+Private BaseSheet As Worksheet
+Private InternalSheet As Worksheet
+Private AddressCache As String
+Private CellsCountCache As Variant
+
+Public EnableOptimization As Boolean
+Public InternalSheetVisible As Boolean
+Public Verbose As Boolean
+
+
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    Set Bag = New Collection
+    EnableOptimization = True
+    InternalSheetVisible = True
+End Sub
+
+Private Sub Class_Terminate()
+    SelectNone
+    Set Bag = Nothing
+    ReleaseInternalSheet
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Property Get HasArea() As Boolean
+    HasArea = (AreasCount > 0)
+End Property
+
+Public Property Get AreasCount() As Variant
+    MayOptimize
+    AreasCount = Bag.Count
+End Property
+
+Public Property Get CellsCount() As Variant
+    Dim x As Variant
+    
+    If Not EnableOptimization Then
+        If IsAlive(BaseSheet) Then
+            CellsCountCache = 0
+            For Each x In Bag
+                CellsCountCache = CellsCountCache + CellsCountLarge(BaseSheet.Range(x))
+            Next
+        Else
+            Err.Raise Number:=1004, Description:="Worksheet is required when EnableOptimization is False."
+        End If
+    End If
+    
+    CellsCount = CellsCountCache
+End Property
+
+Public Property Get AreasCollection() As Collection
+    Set AreasCollection = Bag
+End Property
+
+Public Property Get Address( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    Dim x As Variant
+    
+    MayOptimize
+    AddressCache = ""
+    For Each x In Bag
+        AddressCache = AddressCache & "," & TranslateAddress(x, RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Next
+    If Len(AddressCache) > 1 Then AddressCache = Mid(AddressCache, 2)
+    
+    Address = AddressCache
+End Property
+
+Public Sub SetAddress(ByVal AddressText As String)
+    Dim AddressArray As Variant
+    Dim x As Variant
+    
+    SelectNone
+    AddressArray = Split(AddressText, ",")
+    For Each x In AddressArray
+        PushAddress x
+    Next
+    OptimizationRequired = True
+End Sub
+
+Public Property Get LastArea() As Range
+    Set LastArea = Area(AreasCount)
+End Property
+
+Public Property Get Area(Optional Item As Variant = 1) As Range
+    If BaseSheet Is Nothing Then
+        Set Area = Nothing
+    Else
+        MayOptimize
+        If AreasCount < Item Or Item < 1 Then
+            Set Area = BaseSheet.Cells
+        Else
+            Set Area = BaseSheet.Range(Bag(Item))
+        End If
+    End If
+End Property
+
+Public Property Set Areas(RangeItem As Range)
+    Dim x As Range
+    
+    SelectNone
+    For Each x In RangeItem.Areas
+        PushArea x
+    Next
+    OptimizationRequired = True
+End Property
+
+Public Property Get ParentSheet() As Worksheet
+    Set ParentSheet = BaseSheet
+End Property
+
+Public Property Set ParentSheet(Target As Worksheet)
+    MayUpdateWorksheet Target
+End Property
+
+Public Sub PushArea(RangeItem As Range)
+    Bag.Add RangeItem.Address(False, False, xlA1, False)
+    MayUpdateWorksheet RangeItem.Worksheet
+    OptimizationRequired = True
+End Sub
+
+Public Function PopArea() As Range
+    Set PopArea = LastArea
+    If HasArea Then Bag.Remove AreasCount
+End Function
+
+Public Function ShiftArea() As Range
+    Set ShiftArea = Area(1)
+    If HasArea Then Bag.Remove 1
+End Function
+
+Public Sub PushAddress(ByVal AddressText As String)
+    Bag.Add TranslateAddress(AddressText)
+    OptimizationRequired = True
+End Sub
+
+Public Function PopAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        PopAddress = TranslateAddress(Bag(AreasCount), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove AreasCount
+    Else
+        PopAddress = ""
+    End If
+End Function
+
+Public Function ShiftAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        ShiftAddress = TranslateAddress(Bag(1), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove 1
+    Else
+        ShiftAddress = ""
+    End If
+End Function
+
+Public Sub SelectNone()
+    Do While Bag.Count > 0
+        Bag.Remove 1
+    Loop
+    CellsCountCache = 0
+End Sub
+
+Public Sub SelectAll()
+    On Error GoTo Trap
+    Set Areas = BaseSheet.Cells
+    CellsCountCache = CellsCountLarge(BaseSheet.Cells)
+    Exit Sub
+    
+Trap:
+    ' error should be raised at the no basesheet error
+    Debug.Print Err.Number, Err.Description, TypeName(BaseSheet)
+    Err.Raise Err.Number
+End Sub
+
+Public Sub SelectValues(Target As Range)
+    MayUpdateWorksheet Target.Worksheet
+    SelectNone
+    SearchBySpecialCells Target
+End Sub
+
+
+'== Public Methods end ==
+'== Public Util Functions begin ==
+
+
+Public Function SpecialCellsValue(Target As Range, ByRef ReturnSpecial As Range) As Variant
+    ' return a count of cells found, that may be a Long or Decimal Variant
+    On Error GoTo NoCellsFound
+    
+    If IsASingleCell(Target) Then
+    ' protect from the single cell issue. http://code.google.com/p/cowares-excel-hello/wiki/bad_special_cells
+        Set ReturnSpecial = Target.Range("A1,A1").SpecialCells(xlCellTypeConstants)
+    Else
+        Set ReturnSpecial = Target.SpecialCells(xlCellTypeConstants)
+    End If
+    SpecialCellsValue = CellsCountLarge(ReturnSpecial)
+    Exit Function
+    
+NoCellsFound:
+    If Err.Number = 1004 Then
+    ' runtime error on no cells found
+        Set ReturnSpecial = Nothing
+        SpecialCellsValue = 0
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+Public Function CellsCountLarge(Target As Range) As Variant
+    If Application.Version >= 12 Then
+        CellsCountLarge = CDec(Target.Cells.CountLarge)
+    Else
+        CellsCountLarge = Target.Cells.Count
+    End If
+End Function
+
+Public Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+    ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function DivideIntoHalf(x As Range) As Variant
+    Dim r As Long
+    Dim c As Long
+    Dim n As Long
+    Dim D1 As Range
+    Dim D2 As Range
+    
+    r = x.Rows.Count
+    c = x.Columns.Count
+    If r >= c Then
+        n = Int(r / 2)
+        Set D1 = x.Rows("1:" & CStr(n)).Cells
+        Set D2 = x.Rows(CStr(n + 1) & ":" & CStr(r)).Cells
+    Else
+        n = Int(c / 2)
+        Set D1 = Range(x.Columns(1), x.Columns(n)).Cells
+        Set D2 = Range(x.Columns(n + 1), x.Columns(c)).Cells
+    End If
+    
+    If Verbose Then Debug.Print "DivideIntoHalf: ", x.Address(False, False), "->", D1.Address(False, False), D2.Address(False, False)
+    
+    DivideIntoHalf = Array(D1, D2)
+End Function
+
+
+'== Public Util Functions end ==
+'== Helper Functions begin ==
+
+
+Private Sub MayUpdateWorksheet(Target As Worksheet)
+    ' only the worksheet of the lattest range added will survive
+    If BaseSheet Is Target Then Exit Sub
+    
+    Set BaseSheet = Target
+End Sub
+
+Private Sub MayOptimize()
+    If Not EnableOptimization Then Exit Sub
+    
+    If OptimizationRequired Then
+        Optimize
+        OptimizationRequired = False
+    End If
+End Sub
+
+Private Sub Optimize()
+    Dim x As Variant
+    Dim y As Range
+    
+    EnsureInternalSheet
+    InternalSheet.Cells.Clear
+    For Each x In Bag
+        InternalSheet.Range(x).Value = 1
+    Next
+    
+    SelectNone
+    SearchBySpecialCells InternalSheet.UsedRange
+    InternalSheet.Parent.Saved = True
+End Sub
+
+Private Sub SearchBySpecialCells(ByVal Target As Range)
+    Dim Counter As Variant
+    Dim FoundArea As Range
+    Dim x As Range
+    Dim y As Variant
+    
+    Counter = SpecialCellsValue(Target, FoundArea)
+    If Counter = 0 Then Exit Sub
+    ' we expect Counter > 0 when division is needed
+    
+    If IsExpectedCellsCount(Target, Counter) Then
+        CellsCountCache = CellsCountCache + Counter
+        For Each x In FoundArea.Areas
+            PushAddress x.Address(False, False, xlA1, False)
+        Next
+    Else
+        ' divide until success
+        For Each y In DivideIntoHalf(Target)
+            SearchBySpecialCells y
+        Next
+    End If
+End Sub
+
+Private Function IsExpectedCellsCount(Target As Range, Count As Variant) As Boolean
+    Dim Expected As Variant
+    ' expect constant values only
+    Expected = Application.WorksheetFunction.CountA(Target)
+    IsExpectedCellsCount = (Count = Expected)
+    'IsExpectedCellsCount = ((Count = Expected) And (Count <= 4))    ' for debug
+End Function
+
+Private Sub EnsureInternalSheet()
+    Dim Wb As Workbook
+    
+    If IsAlive(InternalSheet) Then Exit Sub
+    
+    Set Wb = Application.Workbooks.Add
+    Wb.Windows(1).Visible = InternalSheetVisible
+    Wb.Saved = True
+    Set InternalSheet = Wb.Worksheets(1)
+    Set Wb = Nothing
+End Sub
+
+Private Sub ReleaseInternalSheet()
+    On Error Resume Next
+    InternalSheet.Parent.Close False
+    Set InternalSheet = Nothing
+End Sub
+
+Private Function TranslateAddress( _
+        ByVal FromAddress As String, _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    ' this function should not trap errors caused by a wrong address
+    ' once trap it, keep precise information, and then throw again would be a good manner.
+    On Error GoTo Trap
+    Dim Ra As Range
+    
+    If Not EnableOptimization Then
+        TranslateAddress = FromAddress
+        Exit Function
+    End If
+    
+    EnsureInternalSheet
+    Set Ra = InternalSheet.Range(FromAddress)
+    TranslateAddress = Ra.Address(RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Exit Function
+    
+Trap:
+    Debug.Print Err.Number, Err.Description, FromAddress
+    Err.Raise Err.Number
+End Function
+
+
+'== Helper Functions end ==
 
 '}}}
 
