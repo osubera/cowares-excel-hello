@@ -96,6 +96,37 @@
 
 = Snapshots =
 
+* エクセル2000 ではツールバーを表示する。
+    http://3.bp.blogspot.com/-j67bnFBozh4/T91CYgfN5iI/AAAAAAAAAJU/4ncjnRP17KQ/s1600/shot12.png
+
+* エクセル2007 ではリボンのアドインタブにボタンを表示する。
+    http://4.bp.blogspot.com/-h3wM1iQVaTY/T91CF5tVNVI/AAAAAAAAAH8/Rq583XBw4XY/s1600/shot1.png
+
+* 一致した場合、ツールバーの結果欄に○が表示される。
+    http://1.bp.blogspot.com/-kqwoy0K4zV4/T91CIdgY2xI/AAAAAAAAAIE/RZWTJL6b5AA/s1600/shot2.png
+
+* 不一致セルがある場合、ツールバーの結果欄に不一致セルの数が表示され、ドロップダウンで該当セルが一覧表示される。
+    http://3.bp.blogspot.com/-2RkmN72mBP4/T91CMeYKi5I/AAAAAAAAAIU/LK4buJKqzVE/s1600/shot4.png
+    http://3.bp.blogspot.com/-uzSCcQkUgyA/T91COd4h5nI/AAAAAAAAAIc/pxxbLHdWXqY/s1600/shot5.png
+
+* 一致した場合の差分シート
+    http://3.bp.blogspot.com/-YHgF2mGfjHQ/T91CKfjc0WI/AAAAAAAAAIM/7kDb1RvIXMQ/s1600/shot3.png
+
+* 不一致セルがある場合の差分シート
+    http://3.bp.blogspot.com/-Dp0zPhCx2vo/T91CQOlAvzI/AAAAAAAAAIk/obmJGI7G37Q/s1600/shot6.png
+
+* 不一致セルがある場合の、編集シートへの色塗り
+    http://1.bp.blogspot.com/-8PB77uqE7TU/T91CRhmn9uI/AAAAAAAAAIs/Px13AKt1iMQ/s1600/shot7.png
+
+* 上記に対応する参照側シートの内容。赤丸が不一致箇所。
+    http://3.bp.blogspot.com/-anrGT9XZc2g/T91CTAl-MYI/AAAAAAAAAI0/tb4kVUPj-bI/s1600/shot8.png
+
+* 値および式による一致の見本に使用した編集および参照シートの値と式
+    http://4.bp.blogspot.com/-KJ9EGqN5-AE/T91CVmRklMI/AAAAAAAAAJE/RSRzV8hObVA/s1600/shot10.png
+    http://3.bp.blogspot.com/-aQC1dpApGiQ/T91CWlYtmDI/AAAAAAAAAJM/fAOM4m2zk3Q/s1600/shot11.png
+
+* 値による一致、式による一致、値と式による一致、の動作の違いを示す差分シート
+    http://3.bp.blogspot.com/-PCmB4u9LpnE/T91CUGUt6FI/AAAAAAAAAI8/Sz3W3I14Q7U/s1600/shot9.png
 
 
 = Code =
