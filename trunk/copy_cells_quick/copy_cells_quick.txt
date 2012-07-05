@@ -1,0 +1,1110 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;copy_cells_quick.xlsm/F3CopyCellsQuick
+
+'book-identity
+'  title;エクセルコピー セル範囲自動
+'  description;指定セルから最後までのコピーを簡単に行う。
+
+'require
+
+'cells-name
+'       ;=copy_cells_quick!R15C1
+'       ;copy_cells_quick!_ButtonCaption
+'       ;=copy_cells_quick!R3C2
+'       ;copy_cells_quick!_Comment
+'       ;=copy_cells_quick!R6C2
+'       ;copy_cells_quick!_Contributor
+'       ;=copy_cells_quick!R4C2
+'       ;copy_cells_quick!_Copyright
+'       ;=copy_cells_quick!R5C2
+'       ;copy_cells_quick!_License
+'       ;=copy_cells_quick!R2C2
+'       ;copy_cells_quick!_LocalComment
+'       ;=copy_cells_quick!R1C2
+'       ;copy_cells_quick!_PublicName
+'       ;=copy_cells_quick!R7C2
+'       ;copy_cells_quick!_Since
+'       ;=copy_cells_quick!R10C2
+'       ;copy_cells_quick!_Tag
+'       ;=copy_cells_quick!R9C2
+'       ;copy_cells_quick!_Timestamp
+'       ;=copy_cells_quick!R8C2
+'       ;copy_cells_quick!_Url
+
+'worksheet
+'   name;copy_cells_quick/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;copy_cells_quick
+'         ;コメント
+'         ;エクセルでセルを簡単操作でコピーする
+'         ;comment
+'         ;copy excel cells quickly
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - mocvba.com
+'         ;初版
+'         ;2012
+'         ;配布元
+'         ;http://cowares.blogspot.com/search/label/baum
+'         ;更新
+'         ;41092.0988657407
+'         ;keyword
+'         ;vba,excel,copy
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:K17
+'         ;コピー元
+'         ;現在のセルをコピー元の基準セルとして記憶する。
+'         ;from
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;3
+'         ;コピー
+'         ;コピーを実行する。
+'         ;copy
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;3
+'         ;範囲の基準
+'         ;基準セルから対象範囲を決める方法を切り替える。
+'         ;direction
+'     skip;1
+'         ;3
+'     skip;2
+'         ;1
+'     skip;1
+'         ;左上
+'         ;最上行
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'cells-font-name
+'  address;A1:K17
+'   repeat;187
+'         ;ＭＳ Ｐゴシック
+
+'cells-v-align
+'  address;A1:K17
+'   repeat;187
+'         ;center
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3CopyCellsQuick"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    helper.OnButtonToggle
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_from(oAC As Object)
+    CopyCellsQuick.DoFrom oAC
+End Sub
+
+Public Sub Menu_copy(oAC As Object)
+    CopyCellsQuick.DoCopy oAC, helper.GetControlText("direction")
+End Sub
+
+Public Sub Menu_direction(oAC As Object)
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set helper = New ToolBarV2
+    helper.SetName BarName
+    helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    helper.DelBar
+    Set helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'module
+'   name;CopyCellsQuick
+'{{{
+Option Explicit
+
+Dim BaseCell As Range
+
+Public Sub DoFrom(oAC As Office.CommandBarControl)
+    Set BaseCell = ActiveCell
+    oAC.Caption = BaseCell.Address(False, False, xlA1, True)
+    BaumMain.GetHelper.ButtonSwitchOn oAC
+End Sub
+
+Public Sub DoCopy(oAC As Office.CommandBarControl, DirectionText As String)
+    Dim Source As Range
+    Dim Destination As Range
+    Dim Direction As Variant
+    Dim DirectionLeftOrNot As Variant
+    
+    If Not BaumMain.GetHelper.GetControlState("from") Then
+        MsgBox "コピー元を指定してください。", vbExclamation Or vbOKOnly, "コピーできません"
+    End If
+    If Not IsExistCell(BaseCell) Then
+        MsgBox "コピー元を指定してください。", vbExclamation Or vbOKOnly, "コピーできません"
+    End If
+    
+    Direction = ParseDirection(DirectionText)
+    DirectionLeftOrNot = MakeDirection(GetRowWise(Direction), True, True)
+    ' destination is the A column in same row, or the current cell
+    
+    Set Source = ExtendRange(BaseCell, Direction)
+    Set Destination = ExtendRange(ActiveCell, DirectionLeftOrNot).Cells(1)
+    'Debug.Print Source.Address, Destination.Address
+    
+    Source.Copy
+    Destination.PasteSpecial xlPasteAll
+End Sub
+
+Private Function ExtendRange(Base As Range, Direction As Variant) As Range
+    ' Direction is a base cell position, not a direction to extend.
+    Const Between = ":"
+    Dim ColumnBegin As String
+    Dim ColumnEnd As String
+    Dim RowBegin As String
+    Dim RowEnd As String
+    
+    If GetVerticalUp(Direction) Then
+        RowBegin = RowString(Base)
+        RowEnd = LastRowUsed(Base)
+    Else
+        RowBegin = FirstRowWorksheet(Base)
+        RowEnd = RowString(Base)
+    End If
+    
+    If GetRowWise(Direction) Then
+        ColumnBegin = FirstColumnWorksheet(Base)
+        ColumnEnd = LastColumnUsed(Base)
+    Else
+        If GetHorizontalLeft(Direction) Then
+            ColumnBegin = ColumnString(Base)
+            ColumnEnd = LastColumnUsed(Base)
+        Else
+            ColumnBegin = FirstColumnWorksheet(Base)
+            ColumnEnd = ColumnString(Base)
+        End If
+    End If
+    
+    If Val(RowBegin) > Val(RowEnd) Then RowEnd = RowBegin
+    Select Case Len(ColumnBegin) - Len(ColumnEnd)
+    Case Is > 0
+        ColumnEnd = ColumnBegin
+    Case Is = 0
+        If ColumnBegin > ColumnEnd Then ColumnEnd = ColumnBegin
+    End Select
+    
+    Set ExtendRange = Base.Worksheet.Columns(ColumnBegin & Between & ColumnEnd).Rows(RowBegin & Between & RowEnd)
+End Function
+
+Private Function RowString(Target As Range) As String
+    RowString = CStr(Target.Cells(1).Row)
+End Function
+
+Private Function ColumnString(Target As Range) As String
+    Dim x As String
+    x = Target.Cells(1).EntireColumn.Address(False, False, xlA1, False)
+    ' the address string might be "AB:AB" or so.
+    x = Split(x, ":")(0)
+    ColumnString = x
+End Function
+
+Private Function FirstRowWorksheet(Target As Range) As String
+    FirstRowWorksheet = "1"
+End Function
+
+Private Function FirstColumnWorksheet(Target As Range) As String
+    FirstColumnWorksheet = "A"
+End Function
+
+Private Function LastRowUsed(Target As Range) As String
+    LastRowUsed = RowString(LastCellInRange(Target.Worksheet.UsedRange))
+End Function
+
+Private Function LastColumnUsed(Target As Range) As String
+    LastColumnUsed = ColumnString(LastCellInRange(Target.Worksheet.UsedRange))
+End Function
+
+Private Function LastCellInRange(Target As Range) As Range
+    Set LastCellInRange = Target.Cells(Target.Cells.Count)
+End Function
+
+Private Function IsExistCell(Target As Range) As Boolean
+    IsExistCell = False
+    On Error GoTo NotExist
+    
+    If Target Is Nothing Then Exit Function
+    If Target.Row <= 0 Then Exit Function
+    ' above checks the target is still open or not
+    
+    IsExistCell = True
+    Exit Function
+    
+NotExist:
+    Exit Function
+End Function
+
+
+'=== direction helper begin ===
+
+
+Private Function MakeDirection(RowWise, VerticalUp, HorizontalLeft) As Variant
+    MakeDirection = Array(RowWise, VerticalUp, HorizontalLeft)
+End Function
+
+Private Function GetRowWise(DirectionArray As Variant) As Boolean
+    GetRowWise = DirectionArray(0)
+End Function
+
+Private Function GetVerticalUp(DirectionArray As Variant) As Boolean
+    GetVerticalUp = DirectionArray(1)
+End Function
+
+Private Function GetHorizontalLeft(DirectionArray As Variant) As Boolean
+    GetHorizontalLeft = DirectionArray(2)
+End Function
+
+Private Function ParseDirection(Direction As String) As Variant
+    Const KeyLeft = "左"
+    Const KeyRight = "右"
+    Const KeyUp = "上"
+    Const KeyDown = "下"
+    
+    Dim HorizontalLeft As Boolean
+    Dim HorizontalRight As Boolean
+    Dim VerticalUp As Boolean
+    Dim VerticalDown As Boolean
+    Dim RowWise As Boolean
+    
+    HorizontalLeft = (InStr(Direction, KeyLeft) > 0)
+    HorizontalRight = (InStr(Direction, KeyRight) > 0)
+    VerticalUp = (InStr(Direction, KeyUp) > 0)
+    VerticalDown = (InStr(Direction, KeyDown) > 0)
+    
+    RowWise = Not (HorizontalLeft Xor HorizontalRight)
+    If Not (VerticalUp Xor VerticalDown) Then
+        VerticalUp = True
+        VerticalDown = False
+    End If
+    
+    ParseDirection = MakeDirection(RowWise, VerticalUp, HorizontalLeft)
+End Function
+
+'=== direction helper end ===
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
