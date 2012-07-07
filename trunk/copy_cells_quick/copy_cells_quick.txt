@@ -56,7 +56,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;41097.2966087963
+'         ;41097.8056365741
 '         ;keyword
 '         ;vba,excel,copy
 '  address;A13:J13
@@ -74,7 +74,7 @@
 '         ;コピー元
 '         ;現在のセルをコピー元の基準セルとして記憶する。
 '         ;from
-'     skip;1
+'         ;=_ButtonCaption
 '         ;1
 '         ;2
 '     skip;1
@@ -918,6 +918,16 @@ Option Explicit
 
 Dim BaseCell As Range
 
+Private Sub ResetFromButton()
+    Const FromButton = "from"
+    
+    Set BaseCell = Nothing
+    With BaumMain.GetHelper.GetButton(FromButton)
+        .Caption = .Parameter
+    End With
+    BaumMain.GetHelper.SetControlState FromButton, False
+End Sub
+
 Public Sub DoFrom(oAC As Office.CommandBarControl)
     Set BaseCell = ActiveCell
     oAC.Caption = BaseCell.Address(False, False, xlA1, True)
@@ -936,6 +946,7 @@ Public Sub DoCopy(oAC As Office.CommandBarControl, DirectionText As String)
         Err.Raise Number:=1004, Description:="コピー元を指定してください。"
     End If
     If Not IsExistCell(BaseCell) Then
+        ResetFromButton
         Err.Raise Number:=1004, Description:="コピー元が見つかりません。"
     End If
     
