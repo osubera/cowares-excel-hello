@@ -56,7 +56,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;41092.0988657407
+'         ;41097.2966087963
 '         ;keyword
 '         ;vba,excel,copy
 '  address;A13:J13
@@ -108,11 +108,6 @@
 '   unit;pt
 '  address;B1
 '         ;96.75
-
-'cells-font-name
-'  address;A1:K17
-'   repeat;187
-'         ;ＭＳ Ｐゴシック
 
 'cells-v-align
 '  address;A1:K17
@@ -935,11 +930,13 @@ Public Sub DoCopy(oAC As Office.CommandBarControl, DirectionText As String)
     Dim Direction As Variant
     Dim DirectionLeftOrNot As Variant
     
+    On Error GoTo AnyErrors
+    
     If Not BaumMain.GetHelper.GetControlState("from") Then
-        MsgBox "コピー元を指定してください。", vbExclamation Or vbOKOnly, "コピーできません"
+        Err.Raise Number:=1004, Description:="コピー元を指定してください。"
     End If
     If Not IsExistCell(BaseCell) Then
-        MsgBox "コピー元を指定してください。", vbExclamation Or vbOKOnly, "コピーできません"
+        Err.Raise Number:=1004, Description:="コピー元が見つかりません。"
     End If
     
     Direction = ParseDirection(DirectionText)
@@ -952,6 +949,10 @@ Public Sub DoCopy(oAC As Office.CommandBarControl, DirectionText As String)
     
     Source.Copy
     Destination.PasteSpecial xlPasteAll
+    Exit Sub
+    
+AnyErrors:
+    MsgBox Err.Description, vbExclamation Or vbOKOnly, Err.Number & " コピーできません"
 End Sub
 
 Private Function ExtendRange(Base As Range, Direction As Variant) As Range
