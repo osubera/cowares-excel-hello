@@ -1,0 +1,75 @@
+#summary create a network graph by excel
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * create a network graph by excel
+
+== 概要 ==
+ * エクセルでネットワークグラフを手軽に描く
+
+= Details =
+
+== 説明 ==
+ * ブックを開くと、操作用のボタンがツールバー（リボン）に追加される。
+    * ❏、➔、↻反転、node TSV、arc TSV、SEM
+ * ツールバーの機能
+ * `❏` ボタンを押すとアクティブシートに囲み図形のノードを追加する。
+ * `➔` ボタンを押すとアクティブシートに矢印の弧を追加する。
+    * あらかじめノードを選べば、選択したノードを結合する。
+    * ノードが選択されていないときは、最後に追加した２つのノードを結ぶ。
+ * `↻反転` ボタンを押すと選択した弧の向きを反転する。
+ * `node TSV` ボタンを押すとノード情報をTSV (タブ区切り) 出力する。
+ * `arc TSV` ボタンを押すと弧の情報をTSV (タブ区切り) 出力する。
+ * `SEM` ボタンを押すとRのsemパッケージ用に出力する。
+
+= Downloads =
+
+<wiki/comment>
+ * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=network_graph_writer downloads / ダウンロード]
+</wiki/comment>
+
+= How to use =
+
+
+== 使い方 ==
+
+ * 用途
+    # ネットワークグラフをエクセルブックに素早く書く。
+    # グラフの状態を再利用可能なテキストとしてエクスポートする。
+
+ # 一般的な手順
+    # 新規ブックを開く。
+    # `❏` ボタンを押し、ノードを追加する。このとき、ノード名をダイアログで指定する。
+    # `❏` ボタンを押し、２つ目のノードを追加する。
+    # `➔` ボタンを押し、弧を追加する。２つのノードが矢印で結合される。
+    # ２つ目のノードをマウスで少し右に動かす。
+    # `❏` ボタンを押し、３つ目のノードを追加する。
+    # `➔` ボタンを押し、弧を追加する。２つのノードが矢印で結合される。
+    # 矢印の先をマウスで動かし、結合先を最初のノードにする。
+    # `SEM` ボタンを押し、メモ帳に出力される情報を確認する。
+ # ノード名とテキスト
+    # ノードの名称は、図形の持つ名称 (アドレス欄で表示・変更) を使用する。
+    # ノード図形内のテキストは、コメント情報なので補助的な情報を追加しても動作は変わらない。
+ 
+
+= Snapshots =
+
+<wiki/comment>
+* エクセル2000 ではツールバーを表示する。
+    http://2.bp.blogspot.com/-Y1Puqzo-4HU/T_jq1704uLI/AAAAAAAAAKQ/dZs3KVy0oS0/s1600/shot2.png
+
+* エクセル2007 ではリボンのアドインタブにボタンを表示する。
+    http://2.bp.blogspot.com/-afktJbuPXBE/T_jOF9qw9fI/AAAAAAAAAKE/2loPnhSI69A/s1600/shot1.png
+</wiki/comment>
+
+
+
+= Code =
+
+{{{
+
+
+}}}
