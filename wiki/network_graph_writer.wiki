@@ -27,9 +27,9 @@
 
 = Downloads =
 
-<wiki/comment>
+<wiki:comment>
  * [http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=network_graph_writer downloads / ダウンロード]
-</wiki/comment>
+</wiki:comment>
 
 = How to use =
 
@@ -57,13 +57,13 @@
 
 = Snapshots =
 
-<wiki/comment>
+<wiki:comment>
 * エクセル2000 ではツールバーを表示する。
     http://2.bp.blogspot.com/-Y1Puqzo-4HU/T_jq1704uLI/AAAAAAAAAKQ/dZs3KVy0oS0/s1600/shot2.png
 
 * エクセル2007 ではリボンのアドインタブにボタンを表示する。
     http://2.bp.blogspot.com/-afktJbuPXBE/T_jOF9qw9fI/AAAAAAAAAKE/2loPnhSI69A/s1600/shot1.png
-</wiki/comment>
+</wiki:comment>
 
 
 
