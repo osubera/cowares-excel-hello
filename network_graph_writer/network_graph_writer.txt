@@ -1130,19 +1130,42 @@ Public Sub DoArc()
 End Sub
 
 Public Sub DoFlip()
-
+    On Error GoTo NoShape
+    FlipArc Selection.ShapeRange
+NoShape:
 End Sub
 
 Public Sub DoNodeTsv()
-
+    Dim St As StringStreamNotepad
+    Set St = New StringStreamNotepad
+    St.NameNotepad = "Node TSV " & Now()
+    St.OpenWrite
+    
+    DumpNodeTsv St, ActiveSheet
+    
+    St.CloseWrite
 End Sub
 
 Public Sub DoArcTsv()
-
+    Dim St As StringStreamNotepad
+    Set St = New StringStreamNotepad
+    St.NameNotepad = "Arc TSV " & Now()
+    St.OpenWrite
+    
+    DumpArcTsv St, ActiveSheet
+    
+    St.CloseWrite
 End Sub
 
 Public Sub DoSem()
-
+    Dim St As StringStreamNotepad
+    Set St = New StringStreamNotepad
+    St.NameNotepad = "Arc TSV " & Now()
+    St.OpenWrite
+    
+    DumpSem St, ActiveSheet
+    
+    St.CloseWrite
 End Sub
 
 
@@ -1202,7 +1225,7 @@ Private Sub AddNewArc(Target As Worksheet, Selected As Object)
     If Not Connection(1) Is Nothing Then
         x.ConnectorFormat.BeginConnect Connection(1), 1
     End If
-    If x.ConnectorFormat.BeginConnected And x.ConnectorFormat.EndConnected Then
+    If x.ConnectorFormat.BeginConnected = msoTrue And x.ConnectorFormat.EndConnected = msoTrue Then
         x.RerouteConnections
     End If
     
@@ -1211,6 +1234,94 @@ Private Sub AddNewArc(Target As Worksheet, Selected As Object)
         .EndArrowheadLength = msoArrowheadLong
         .EndArrowheadWidth = msoArrowheadWide
     End With
+End Sub
+
+Private Sub FlipArc(Target As ShapeRange)
+    On Error GoTo 0
+    Dim x As Shape
+    Dim KeepBegin As Shape
+    Dim KeepBeginSite As Long
+    
+    For Each x In Target
+        If x.Connector = msoTrue Then
+            With x.ConnectorFormat
+                If .BeginConnected = msoTrue And .EndConnected = msoTrue Then
+                    Set KeepBegin = .BeginConnectedShape
+                    KeepBeginSite = .BeginConnectionSite
+                    .BeginConnect .EndConnectedShape, .EndConnectionSite
+                    .EndConnect KeepBegin, KeepBeginSite
+                    Set KeepBegin = Nothing
+                End If
+            End With
+        End If
+    Next
+End Sub
+
+Private Sub DumpNodeTsv(Stream As Object, Target As Worksheet)
+    Const Delimiter = vbTab
+    Dim x As Shape
+    Dim xName As Variant
+    
+    UpdateBags Target
+    Stream.WriteLine "Name" & Delimiter & "Text"
+    
+    For Each xName In NodeBag.Keys
+        Set x = Target.Shapes(xName)
+        Stream.WriteLine x.Name & Delimiter & x.TextFrame2.TextRange.Characters.Text
+    Next
+End Sub
+
+Private Sub DumpArcTsv(Stream As Object, Target As Worksheet)
+    Const Delimiter = vbTab
+    Dim x As Shape
+    Dim xName As Variant
+    Dim BeginName As String
+    Dim EndName As String
+    
+    UpdateBags Target
+    Stream.WriteLine "Name" & Delimiter & "Begin" & Delimiter & "End"
+    
+    For Each xName In ArcBag.Keys
+        Set x = Target.Shapes(xName)
+        With x.ConnectorFormat
+            If .BeginConnected = msoTrue Then
+                BeginName = .BeginConnectedShape.Name
+            Else
+                BeginName = ""
+            End If
+            If .EndConnected = msoTrue Then
+                EndName = .EndConnectedShape.Name
+            Else
+                EndName = ""
+            End If
+        End With
+        Stream.WriteLine x.Name & Delimiter & BeginName & Delimiter & EndName
+    Next
+End Sub
+
+Private Sub DumpSem(Stream As Object, Target As Worksheet)
+    Dim x As Shape
+    Dim xName As Variant
+    Dim BeginName As String
+    Dim EndName As String
+    
+    UpdateBags Target
+    
+    For Each xName In ArcBag.Keys
+        Set x = Target.Shapes(xName)
+        With x.ConnectorFormat
+            If .BeginConnected = msoTrue And .EndConnected = msoTrue Then
+                BeginName = .BeginConnectedShape.Name
+                EndName = .EndConnectedShape.Name
+                Stream.WriteLine BeginName & "->" & EndName & "," & x.Name & ",NA"
+            End If
+        End With
+    Next
+    
+    For Each xName In NodeBag.Keys
+        Set x = Target.Shapes(xName)
+        Stream.WriteLine x.Name & "<->" & x.Name & ",e" & x.Name & ",NA"
+    Next
 End Sub
 
 
@@ -1290,9 +1401,9 @@ Private Function IsShapes(Selected As Object, ByRef First As Shape, Second As Sh
         i = 1
         For Each x In Selected
             If i = 1 Then
-                Set First = x.Parent.Shapes(x.Name)
+                Set First = x.ShapeRange(1)
             ElseIf i = 2 Then
-                Set Second = x.Parent.Shapes(x.Name)
+                Set Second = x.ShapeRange(1)
             Else
                 Exit For
             End If
@@ -1309,7 +1420,7 @@ Private Function IsShape(Selected As Object, ByRef First As Shape) As Boolean
     Select Case TypeName(Selected)
     Case "Rectangle"
         IsSomeShape = True
-        Set First = Selected.Parent.Shapes(Selected.Name)
+        Set First = Selected.ShapeRange(1)
     Case Else
         IsSomeShape = False
     End Select
@@ -1319,7 +1430,7 @@ End Function
 
 Private Function SuggestRectNode(Current As Shape) As Variant
     If Current Is Nothing Then
-        SuggestRectNode = Array(0, 0, 50.25, 23.25)
+        SuggestRectNode = Array(23.25, 23.25, 50.25, 23.25)
     Else
         SuggestRectNode = Array(Current.Left, Current.Top + 2 * Current.Height, Current.Width, Current.Height)
     End If
