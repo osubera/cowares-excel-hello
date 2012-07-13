@@ -56,7 +56,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;41097.2966087963
+'         ;41103.875
 '         ;keyword
 '         ;vba,excel,network,graph
 '  address;A13:J13
@@ -1144,6 +1144,7 @@ Public Sub DoNodeTsv()
     DumpNodeTsv St, ActiveSheet
     
     St.CloseWrite
+    Set St = Nothing
 End Sub
 
 Public Sub DoArcTsv()
@@ -1155,17 +1156,19 @@ Public Sub DoArcTsv()
     DumpArcTsv St, ActiveSheet
     
     St.CloseWrite
+    Set St = Nothing
 End Sub
 
 Public Sub DoSem()
     Dim St As StringStreamNotepad
     Set St = New StringStreamNotepad
-    St.NameNotepad = "Arc TSV " & Now()
+    St.NameNotepad = "SEM " & Now()
     St.OpenWrite
     
     DumpSem St, ActiveSheet
     
     St.CloseWrite
+    Set St = Nothing
 End Sub
 
 
