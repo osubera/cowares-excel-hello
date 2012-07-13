@@ -59,10 +59,10 @@
 <wiki:comment>
 * エクセル2000 ではツールバーを表示する。
     http://2.bp.blogspot.com/-Y1Puqzo-4HU/T_jq1704uLI/AAAAAAAAAKQ/dZs3KVy0oS0/s1600/shot2.png
+</wiki:comment>
 
 * エクセル2007 ではリボンのアドインタブにボタンを表示する。
-    http://2.bp.blogspot.com/-afktJbuPXBE/T_jOF9qw9fI/AAAAAAAAAKE/2loPnhSI69A/s1600/shot1.png
-</wiki:comment>
+    http://2.bp.blogspot.com/-OUhtRdSf6Eg/UAAdwMoCzAI/AAAAAAAAAKc/yo4eirFnUKU/s1600/shot1.png
 
 
 
