@@ -56,7 +56,7 @@
 '         ;配布元
 '         ;http://cowares.blogspot.com/search/label/baum
 '         ;更新
-'         ;41103.875
+'         ;41105.350462963
 '         ;keyword
 '         ;vba,excel,network,graph
 '  address;A13:J13
@@ -1199,7 +1199,7 @@ Private Sub AddNewNode(Target As Worksheet)
     R = SuggestRectNode(Current)
     Set x = Target.Shapes.AddShape(msoShapeRectangle, R(0), R(1), R(2), R(3))
     x.Name = NewName
-    x.TextFrame2.TextRange.Characters.Text = NewName
+    SetShapeText x, NewName
 End Sub
 
 Private Sub AddNewArc(Target As Worksheet, Selected As Object)
@@ -1270,7 +1270,7 @@ Private Sub DumpNodeTsv(Stream As Object, Target As Worksheet)
     
     For Each xName In NodeBag.Keys
         Set x = Target.Shapes(xName)
-        Stream.WriteLine x.Name & Delimiter & x.TextFrame2.TextRange.Characters.Text
+        Stream.WriteLine x.Name & Delimiter & GetShapeText(x)(0)
     Next
 End Sub
 
@@ -1373,6 +1373,21 @@ End Sub
 '=== shape helper begin ===
 
 
+Private Sub SetShapeText(Target As Shape, Text As String)
+    Target.TextFrame.Characters.Text = Text
+End Sub
+
+Private Function GetShapeText(Target As Shape) As Variant
+    On Error Resume Next
+    Dim Text As String
+    
+    Text = ""
+    ' below fails on excel 2000 rectangle without text
+    Text = Target.TextFrame.Characters.Text
+    
+    GetShapeText = Array(Text)
+End Function
+
 Private Function SuggestConnection(Target As Worksheet, Selected As Object) As Variant
     Dim BeginX As Shape
     Dim EndX As Shape
@@ -1421,7 +1436,7 @@ Private Function IsShape(Selected As Object, ByRef First As Shape) As Boolean
     Dim IsSomeShape As Boolean
     
     Select Case TypeName(Selected)
-    Case "Rectangle"
+    Case "Rectangle", "Oval", "TextBox"
         IsSomeShape = True
         Set First = Selected.ShapeRange(1)
     Case Else
@@ -1507,31 +1522,6 @@ Private Function LastArcName() As String
         LastArcName = ArcBag.Keys(Counter - 1)
     End If
 End Function
-
-'Private Function LastNode(Target As Worksheet) As Shape
-'    Dim i As Long
-'
-'    Set LastNode = Nothing
-'    For i = Target.Shapes.Count To 1 Step -1
-'        If Target.Shapes(i).Connector = msoFalse Then
-'            Set LastNode = Target.Shapes(i)
-'            Exit Function
-'        End If
-'    Next
-'End Function
-'
-'Private Function LastArc(Target As Worksheet) As Shape
-'    Dim i As Long
-'
-'    Set LastArc = Nothing
-'    For i = Target.Shapes.Count To 1 Step -1
-'        If Target.Shapes(i).Connector = msoTrue Then
-'            Set LastArc = Target.Shapes(i)
-'            Exit Function
-'        End If
-'    Next
-'End Function
-'
 
 
 '=== shape helper end ===
