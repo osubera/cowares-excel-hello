@@ -1,0 +1,665 @@
+﻿'ssf-begin
+';
+
+'workbook
+'   name;customer_support_mail.xlsm/F3CustomerSupportMail
+
+'book-identity
+
+'require
+'       ;{0D452EE1-E08F-101A-852E-02608C4D0BB4} 2 0 Microsoft Forms 2.0 Object Library
+'       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'       ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
+
+'worksheet
+'   name;顧客/Customer
+
+'worksheet
+'   name;例文/MailBody
+
+'worksheet
+'   name;作成/Work
+
+'code
+'   name;Customer
+'{{{
+Option Explicit
+
+'== Worksheet Events begin ==
+
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    FloatButton Target, "ExecReadClipboard", 0
+End Sub
+
+
+'== Worksheet Events end ==
+'== Floater Functions begin ==
+
+
+Private Sub FloatButton(Target As Range, ButtonName As String, ButtonOffset As Long)
+    Const LeftOffset As Single = 160
+    Dim Button As Shape
+    Dim Margin As Single
+    
+    Set Button = Shapes(ButtonName)
+    With Target
+        Margin = .Height
+        Button.Top = .Top + .Height + Margin
+        Button.Left = .Left + .Width + Margin + LeftOffset * ButtonOffset
+    End With
+    Set Button = Nothing
+End Sub
+
+
+'== Floater Functions end ==
+
+'}}}
+
+'code
+'   name;MailBody
+'{{{
+Option Explicit
+
+'== Worksheet Events begin ==
+
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    FloatButton Target, "ExecWriteMail", 0
+    FloatButton Target, "ExecClearCell", 1
+End Sub
+
+
+'== Worksheet Events end ==
+'== Floater Functions begin ==
+
+
+Private Sub FloatButton(Target As Range, ButtonName As String, ButtonOffset As Long)
+    Const LeftOffset As Single = 160
+    Dim Button As Shape
+    Dim Margin As Single
+    
+    Set Button = Shapes(ButtonName)
+    With Target
+        Margin = .Height
+        Button.Top = .Top + .Height + Margin
+        Button.Left = .Left + .Width + Margin + LeftOffset * ButtonOffset
+    End With
+    Set Button = Nothing
+End Sub
+
+
+'== Floater Functions end ==
+
+'}}}
+
+'module
+'   name;ReadMail
+'{{{
+Option Explicit
+
+Dim Logger As StringStreamNotepad
+
+'== Main Functions begin ==
+
+
+Public Sub StartReadMail()
+    Dim MailBody As String
+    
+    BeginLogger
+    MailBody = ReadClipboard
+    If MailBody <> "" Then
+        WriteCells MailBody
+    Else
+        Logger.WriteLine "クリップボードにテキストがありません。"
+    End If
+    EndLogger
+End Sub
+
+Private Function ReadClipboard() As String
+    Dim St As StringStreamClipboard
+    Set St = New StringStreamClipboard
+    St.OpenRead
+    ReadClipboard = St.ReadAll
+    St.CloseRead
+    Set St = Nothing
+End Function
+
+Private Sub WriteCells(Text As String)
+    Dim ColumnList As Scripting.Dictionary
+    Dim ItemList As Scripting.Dictionary
+    
+    Set ColumnList = GenerateColumnList
+    Set ItemList = ParseToItem(Text)
+    
+    WriteRow GetNewRow, ColumnList, ItemList
+    
+    ColumnList.RemoveAll
+    ItemList.RemoveAll
+    Set ColumnList = Nothing
+    Set ItemList = Nothing
+End Sub
+
+
+'== Main Function end ==
+'== Column Writer Functions begin ==
+
+
+Private Function GenerateColumnList() As Scripting.Dictionary
+    Dim Data As Scripting.Dictionary
+    Dim Locations As Variant
+    Dim Location As Variant
+    
+    Locations = Array(Array("購入日", "B"), Array("名前", "E"), Array("〒", "F"), Array("住所", "G"), _
+                    Array("電話", "H"), Array("メール", "I"), Array("支払い方法", "J"), Array("お客様ID", "K"), _
+                    Array("個数", "M"), Array("備考", "Y"))
+    
+    Set Data = New Scripting.Dictionary
+    
+    For Each Location In Locations
+        Data(Location(0)) = Location(1)
+    Next
+    
+    Set GenerateColumnList = Data
+    Set Data = Nothing
+End Function
+
+
+'== Column Writer Functions end ==
+'== Text Parser Rules begin ==
+
+
+' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
+Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "購入日"
+    Dim R As RegExp
+    Dim x As MatchCollection
+    
+    Set R = New RegExp
+    R.Global = False
+    R.IgnoreCase = False
+    R.Pattern = "【注文日時】：\s*([\d/]+)"
+    
+    Set x = R.Execute(Text)
+    
+    If x.Count = 0 Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = x(0).SubMatches(0)
+    End If
+    
+    Set R = Nothing
+End Sub
+
+' 3.【 名　前 】：最後の「 様」を除外し、E列に入れる。
+' 4.【 住　所 】：〒直後の最初の半角スペースの手前までをF列に、残りをG列に入れる。
+' 5.【 ＴＥＬ 】： H列に入れる。
+' 6.【 メールアドレス 】：I列に入れる。ハイパーリンクは生成しない。
+' 7.【 お支払い方法 】：J列に入れる。
+' 8.【 お客様ID‥半角数字４桁 】：K列に入れる。
+' 9.【 ご希望の個数 】：最初の数字だけ（個の手前まで）をM列に入れる。
+' 10.【 備考 】：Y列に入れる。
+
+
+'== Text Parser Rules end ==
+'== Text Parser Functions begin ==
+
+
+Private Function ParseToItem(Text As String) As Scripting.Dictionary
+    ' returns (Key, Value) = (ItemName, ItemValue),,,
+    Dim Data As Scripting.Dictionary
+    Dim Item As Variant
+    
+    Set Data = New Scripting.Dictionary
+    
+    Rule2 Text, Data
+    
+    Logger.WriteLine vbCrLf & "--------" & vbCrLf
+    Logger.WriteLine Text
+    
+    Set ParseToItem = Data
+    Set Data = Nothing
+End Function
+
+Private Function GetNewRow() As Range
+
+
+' 1.A列は連番で、直前の数字に+1したものを入れる。直前が数字でなければ1とする。
+
+End Function
+
+Private Sub WriteRow(RowAt As Range, ColumnList As Scripting.Dictionary, ItemList As Scripting.Dictionary)
+
+End Sub
+
+
+'== Text Parser Functions end ==
+'== Logger begin ==
+
+Private Sub BeginLogger()
+    Set Logger = New StringStreamNotepad
+    Logger.NameNotepad = "読み込み エクセル顧客管理"
+    Logger.OpenWrite
+End Sub
+
+Private Sub EndLogger()
+    Logger.CloseWrite
+    DoNotepad.SetSavedNotepad Logger.hWndNotepad
+    Set Logger = Nothing
+End Sub
+
+
+'== Logger end ==
+
+'}}}
+
+'module
+'   name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
+            Optional NameMe As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcID As Long
+    Dim i As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    
+    On Error GoTo Err1
+    
+    TitleText = " - notepad - meets VBA"
+    ExePath = "notepad.exe"
+    
+    ProcID = Shell(ExePath, iWindowState)
+    If ProcID = 0 Then GoTo Err1
+    
+    hWnd = GetWindowByProcessId(ProcID)
+    If hWnd = 0 Then GoTo Err1
+    
+    TitleText = IIf(NameMe = "", ProcID, NameMe) & TitleText
+    i = SetWindowText(hWnd, TitleText)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' SetWindowPos can be used to change Z-order
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "failed to start a notepad", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+    OpenNotepad = 0
+End Function
+
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' push text into the notepad with a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' push text into the notepad without a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' select all
+        SendMessage i, EM_SETSEL, -1, 0     ' unselect (let the cursor move to the end of the selection)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+' get text length from the notepad
+Public Function ReadNotepadLength(hWnd As Long) As Long
+    Dim i As Long
+    Dim j As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    j = SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    ReadNotepadLength = j
+End Function
+
+' get a ProcessID from hWnd
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    GetWindowProcessId = ProcID
+End Function
+
+' get an hWnd from ProcessID (Notepad only)
+Public Function GetWindowByProcessId(ProcessId As Long, _
+        Optional TaskName As String = "Notepad", _
+        Optional TitleText As String = vbNullString) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    Dim hWnd As Long
+
+    hWnd = 0
+    Do
+        hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        If hWnd = 0 Then Exit Do
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until ProcessId = ProcID
+    
+    GetWindowByProcessId = hWnd
+End Function
+
+' notify user to see the notepad described with the hWnd
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+
+'}}}
+
+'class
+'   name;StringStreamNotepad
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+Public hWndNotepad As Long
+Public NameNotepad As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    If hWndNotepad = 0 Then Exit Sub
+    WriteNotepad hWndNotepad, Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue ReadNotepad(hWndNotepad)
+    OpenRead = (hWndNotepad <> 0)
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    hWndNotepad = OpenNotepad(1, NameNotepad)
+    OpenWrite = (hWndNotepad <> 0)
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = New StringStreamNotepad
+    With OpenSpawn
+        .LineFeed = LineFeed
+        .NameNotepad = SpawnName
+        If Not .OpenWrite Then Set OpenSpawn = Nothing
+    End With
+End Function
+
+Public Function CloseSpawn()
+    CloseWrite
+    If ReadNotepadLength(hWndNotepad) = 0 Then CloseNotepad (hWndNotepad)
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+    hWndNotepad = 0
+    NameNotepad = ""
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+'}}}
+
+'class
+'   name;StringStreamClipboard
+'{{{
+Option Explicit
+
+Public Text As String
+Public LineFeed As String
+
+Public Property Get AtEndOfStream()
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Property Get EOS()
+    EOS = IsEmpty
+End Property
+
+Public Function ReadAll()
+    ReadAll = Dequeue(-1)
+End Function
+
+Public Function ReadLine()
+    ReadLine = Dequeue(-1)
+End Function
+
+Public Function ReadText(Size)
+    ReadText = Dequeue(Size)
+End Function
+
+Public Sub WriteLine(Data)
+    Enqueue Data
+    Enqueue LineFeed
+End Sub
+
+Public Sub WriteText(Data)
+    Enqueue Data
+End Sub
+
+Public Sub FlushRead()
+End Sub
+
+Public Sub FlushWrite()
+    CopyToClipboard Dequeue(-1)
+End Sub
+
+Public Function OpenRead()
+    ClearAll
+    Enqueue CopyFromClipboard
+    OpenRead = True
+End Function
+
+Public Function OpenWrite()
+    ClearAll
+    OpenWrite = True
+End Function
+
+Public Sub CloseRead()
+    FlushRead
+    ClearAll
+End Sub
+
+Public Sub CloseWrite()
+    FlushWrite
+    ClearAll
+End Sub
+
+Public Function OpenSpawn(SpawnName)
+    Set OpenSpawn = Nothing
+End Function
+
+Public Function CloseSpawn()
+    Set CloseSpawn = Nothing
+End Function
+
+Private Sub Class_Initialize()
+    Text = ""
+    LineFeed = vbCrLf
+End Sub
+
+Private Sub ClearAll()
+    Text = ""
+End Sub
+
+Private Sub Enqueue(Data)
+    Text = Text & Data
+End Sub
+
+Private Function Dequeue(Size)
+    If Size > 0 Then
+        Dequeue = Left(Text, Size)
+        Text = Mid(Text, Size + 1)
+    Else
+        Dequeue = Text
+        Text = ""
+    End If
+End Function
+
+Private Function IsEmpty()
+    IsEmpty = (Text = "")
+End Function
+
+' get text from clipboard
+Private Function CopyFromClipboard() As String
+    Const CFText As Long = 1
+    Dim Data As String
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.GetFromClipboard
+    If Clip.GetFormat(CFText) Then
+        Data = Clip.GetText()
+    Else
+        Data = ""
+    End If
+    CopyFromClipboard = Data
+End Function
+ 
+' put text into clipboard
+Private Sub CopyToClipboard(Data As String)
+    Dim Clip As MSForms.DataObject
+    Set Clip = New MSForms.DataObject
+    Clip.SetText Data
+    Clip.PutInClipboard
+End Sub
+
+'}}}
+
+'ssf-end
+
