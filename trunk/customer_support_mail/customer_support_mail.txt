@@ -134,6 +134,9 @@ Private Sub WriteCells(Text As String)
     
     WriteRow GetNewRow, ColumnList, ItemList
     
+    Logger.WriteLine vbCrLf & "--------" & vbCrLf
+    Logger.WriteLine Text
+    
     ColumnList.RemoveAll
     ItemList.RemoveAll
     Set ColumnList = Nothing
@@ -233,9 +236,6 @@ Private Function ParseToItem(Text As String) As Scripting.Dictionary
     
     Rule2 Text, Data
     
-    Logger.WriteLine vbCrLf & "--------" & vbCrLf
-    Logger.WriteLine Text
-    
     Set ParseToItem = Data
     Set Data = Nothing
 End Function
@@ -252,7 +252,12 @@ Private Function GetNewRow() As Range
     With Rows(RowNumber)
         .Copy
         .Insert Shift:=xlDown
-        .Range("A1").Value = GetNewID(RowNumber - 1)
+    End With
+    Application.CutCopyMode = False
+    
+    With Rows(RowNumber).Range("A1")
+        .Select
+        .Value = GetNewID(RowNumber - 1)
     End With
     
     Set GetNewRow = Rows(RowNumber)
@@ -262,7 +267,7 @@ Private Function GetNewID(LastRow As Long)
 ' 1.A列は連番で、直前の数字に+1したものを入れる。直前が数字でなければ1とする。
     On Error GoTo Done
     GetNewID = 1
-    GetNewID = Range(LastRow, 1).Value + 1
+    GetNewID = Range("A" & LastRow).Value + 1
     Exit Function
     
 Done:
@@ -270,7 +275,22 @@ Done:
 End Function
 
 Private Sub WriteRow(RowAt As Range, ColumnList As Scripting.Dictionary, ItemList As Scripting.Dictionary)
-
+    Dim Key As Variant
+    Dim Data As Variant
+    Dim ColumnName As Variant
+    
+    For Each Key In ItemList.Keys
+        ColumnName = ColumnList(Key)
+        Data = ItemList(Key)
+        If IsEmpty(ColumnName) Then
+            Logger.WriteLine Key & " の格納列が登録されていません。"
+        ElseIf IsEmpty(Data) Then
+            Logger.WriteLine Key & " のデータがブランクです。"
+        Else
+            Logger.WriteLine Key & ": " & ColumnName & RowAt.Row & ": " & Data
+            RowAt.Columns(ColumnName).Value = Data
+        End If
+    Next
 End Sub
 
 
