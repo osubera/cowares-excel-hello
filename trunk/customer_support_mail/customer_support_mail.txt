@@ -199,7 +199,7 @@ Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
     Const Pattern = "【注文日時】：\s*([\d/]+)"
     
     Dim Found As Variant
-    On Error GoTo MayBeInvalidDate
+    On Error GoTo TrapAll
     
     Found = FindPattern(Text, Pattern)
     If IsEmpty(Found) Then
@@ -209,18 +209,180 @@ Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
     End If
     Exit Sub
     
-MayBeInvalidDate:
+TrapAll:
     Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
 End Sub
 
 ' 3.【 名　前 】：最後の「 様」を除外し、E列に入れる。
+Private Sub Rule3(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "名前"
+    Const Pattern = "【 名　前 】：\s*(.*)様?\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 4.【 住　所 】：〒直後の最初の半角スペースの手前までをF列に、残りをG列に入れる。
+Private Sub Rule4(Text As String, ItemList As Scripting.Dictionary)
+    Const Key1 = "〒"
+    Const Key2 = "住所"
+    Const Pattern = "【 住　所 】：\s*〒?(.*)\s*"
+    
+    Dim Found As Variant
+    Dim SpaceAt As Long
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key1 & Key2 & " が見つかりません。"
+    Else
+        SpaceAt = InStr(1, Found, " ", vbBinaryCompare)
+        If SpaceAt = 0 Then
+            Logger.WriteLine Key1 & Key2 & " が分離できません。"
+            ItemList(Key2) = Found
+        Else
+            ItemList(Key1) = Left(Found, SpaceAt - 1)
+            ItemList(Key2) = Mid(Found, SpaceAt + 1)
+        End If
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key1 & Key2 & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 5.【 ＴＥＬ 】： H列に入れる。
+Private Sub Rule5(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "電話"
+    Const Pattern = "【 ＴＥＬ 】：\s*(.*)\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 6.【 メールアドレス 】：I列に入れる。ハイパーリンクは生成しない。
+Private Sub Rule6(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "メール"
+    Const Pattern = "【 メールアドレス 】：\s*(.*)\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 7.【 お支払い方法 】：J列に入れる。
+Private Sub Rule7(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "支払い方法"
+    Const Pattern = "【 お支払い方法 】：\s*(.*)\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 8.【 お客様ID‥半角数字４桁 】：K列に入れる。
+Private Sub Rule8(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "お客様ID"
+    Const Pattern = "【 お客様ID‥半角数字４桁 】：\s*(\d*)\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    ElseIf Found = "" Then
+        Logger.WriteLine Key & " 新規"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 9.【 ご希望の個数 】：最初の数字だけ（個の手前まで）をM列に入れる。
+Private Sub Rule9(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "個数"
+    Const Pattern = "【 ご希望の個数 】：\s*(\d+)個?\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Val(Found)
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
+
 ' 10.【 備考 】：Y列に入れる。
+Private Sub Rule10(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "備考"
+    Const Pattern = "【 備考 】：\s*(.*)\s*"
+    
+    Dim Found As Variant
+    On Error GoTo TrapAll
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = Found
+    End If
+    Exit Sub
+    
+TrapAll:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+End Sub
 
 
 '== Text Parser Rules end ==
@@ -235,6 +397,14 @@ Private Function ParseToItem(Text As String) As Scripting.Dictionary
     Set Data = New Scripting.Dictionary
     
     Rule2 Text, Data
+    Rule3 Text, Data
+    Rule4 Text, Data
+    Rule5 Text, Data
+    Rule6 Text, Data
+    Rule7 Text, Data
+    Rule8 Text, Data
+    Rule9 Text, Data
+    Rule10 Text, Data
     
     Set ParseToItem = Data
     Set Data = Nothing
