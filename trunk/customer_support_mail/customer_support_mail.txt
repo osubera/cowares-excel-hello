@@ -14,6 +14,32 @@
 'worksheet
 '   name;顧客/Customer
 
+'cells-formula
+'  address;A1:Y1
+'         ;伝票番号
+'         ;購入日
+'     skip;2
+'         ;名前
+'         ;〒
+'         ;住所
+'         ;電話
+'         ;メール
+'         ;支払い方法
+'         ;お客様ID
+'     skip;1
+'         ;個数
+'     skip;11
+'         ;備考
+
+'cells-numberformat
+'  address;B1
+'         ;m/d/yyyy
+
+'cells-v-align
+'  address;A1:Y1
+'   repeat;25
+'         ;center
+
 'worksheet
 '   name;例文/MailBody
 
@@ -216,7 +242,7 @@ End Sub
 ' 3.【 名　前 】：最後の「 様」を除外し、E列に入れる。
 Private Sub Rule3(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "名前"
-    Const Pattern = "【 名　前 】：\s*(.*)様?\s*"
+    Const Pattern = "【 名　前 】：\s*(.*)様\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -225,7 +251,7 @@ Private Sub Rule3(Text As String, ItemList As Scripting.Dictionary)
     If IsEmpty(Found) Then
         Logger.WriteLine Key & " が見つかりません。"
     Else
-        ItemList(Key) = Found
+        ItemList(Key) = Trim(Found)
     End If
     Exit Sub
     
