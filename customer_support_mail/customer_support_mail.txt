@@ -169,26 +169,45 @@ End Function
 '== Text Parser Rules begin ==
 
 
-' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
-Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
-    Const Key = "購入日"
+Private Function FindPattern(Text As String, Pattern As String) As Variant
     Dim R As RegExp
     Dim x As MatchCollection
     
     Set R = New RegExp
     R.Global = False
     R.IgnoreCase = False
-    R.Pattern = "【注文日時】：\s*([\d/]+)"
+    R.Pattern = Pattern
     
     Set x = R.Execute(Text)
     
     If x.Count = 0 Then
-        Logger.WriteLine Key & " が見つかりません。"
+        FindPattern = Empty
     Else
-        ItemList(Key) = x(0).SubMatches(0)
+        FindPattern = x(0).SubMatches(0)
     End If
     
+    Set x = Nothing
     Set R = Nothing
+End Function
+
+' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
+Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
+    Const Key = "購入日"
+    Const Pattern = "【注文日時】：\s*([\d/]+)"
+    
+    Dim Found As Variant
+    On Error GoTo MayBeInvalidDate
+    
+    Found = FindPattern(Text, Pattern)
+    If IsEmpty(Found) Then
+        Logger.WriteLine Key & " が見つかりません。"
+    Else
+        ItemList(Key) = DateValue(Found)
+    End If
+    Exit Sub
+    
+MayBeInvalidDate:
+    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
 End Sub
 
 ' 3.【 名　前 】：最後の「 様」を除外し、E列に入れる。
@@ -222,10 +241,32 @@ Private Function ParseToItem(Text As String) As Scripting.Dictionary
 End Function
 
 Private Function GetNewRow() As Range
+    Dim RowNumber As Long
+    
+' A列最初の空白箇所に、新しい行のテンプレートがあるのでコピーして使う。
+    RowNumber = 0
+    Do
+        RowNumber = RowNumber + 1
+    Loop Until IsEmpty(Range("A" & RowNumber))
+    
+    With Rows(RowNumber)
+        .Copy
+        .Insert Shift:=xlDown
+        .Range("A1").Value = GetNewID(RowNumber - 1)
+    End With
+    
+    Set GetNewRow = Rows(RowNumber)
+End Function
 
-
+Private Function GetNewID(LastRow As Long)
 ' 1.A列は連番で、直前の数字に+1したものを入れる。直前が数字でなければ1とする。
-
+    On Error GoTo Done
+    GetNewID = 1
+    GetNewID = Range(LastRow, 1).Value + 1
+    Exit Function
+    
+Done:
+    Exit Function
 End Function
 
 Private Sub WriteRow(RowAt As Range, ColumnList As Scripting.Dictionary, ItemList As Scripting.Dictionary)
