@@ -625,7 +625,6 @@ Private Sub BuildMail()
     For Each x In GetTemplateCells
         Pad.WriteText LineFeedOrSkip(x.Value)
     Next
-    Pad.WriteLine ""
 End Sub
 
 Private Function GetTemplateCells() As Range
@@ -645,10 +644,29 @@ Private Sub BeginPad()
 End Sub
 
 Private Sub EndPad()
+    Pad.Text = ChopLastBlanks(Pad.Text)
     Pad.CloseWrite
     DoNotepad.SetSavedNotepad Pad.hWndNotepad
     Set Pad = Nothing
 End Sub
+
+Private Function ChopLastBlanks(Text As String) As String
+    ' 文末の不要な改行群を取り除く。
+    Dim TextLength As Long
+    Dim TrueLast As Long
+    Dim i As Long
+    
+    TextLength = Len(Text)
+    TrueLast = 0
+    For i = TextLength - 1 To 1 Step -2
+        If Mid(Text, i, 2) <> vbCrLf Then
+            TrueLast = i + 1
+            Exit For
+        End If
+    Next
+    
+    ChopLastBlanks = Left(Text, TrueLast) & vbCrLf & vbCrLf
+End Function
 
 
 '== Pad end ==
