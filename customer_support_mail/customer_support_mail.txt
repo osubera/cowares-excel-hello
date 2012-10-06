@@ -31,10 +31,6 @@
 '     skip;11
 '         ;備考
 
-'cells-numberformat
-'  address;B1
-'         ;m/d/yyyy
-
 'cells-v-align
 '  address;A1:Y1
 '   repeat;25
@@ -222,7 +218,7 @@ End Function
 ' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
 Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "購入日"
-    Const Pattern = "【注文日時】：\s*([\d/]+)"
+    Const Pattern = "【注文日時】： *([\d/]+)"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -242,7 +238,7 @@ End Sub
 ' 3.【 名　前 】：最後の「 様」を除外し、E列に入れる。
 Private Sub Rule3(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "名前"
-    Const Pattern = "【 名　前 】：\s*(.*)様\s*"
+    Const Pattern = "【 名　前 】： *(.*)様\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -263,7 +259,7 @@ End Sub
 Private Sub Rule4(Text As String, ItemList As Scripting.Dictionary)
     Const Key1 = "〒"
     Const Key2 = "住所"
-    Const Pattern = "【 住　所 】：\s*〒?(.*)\s*"
+    Const Pattern = "【 住　所 】： *〒?(.*)\s*"
     
     Dim Found As Variant
     Dim SpaceAt As Long
@@ -291,7 +287,7 @@ End Sub
 ' 5.【 ＴＥＬ 】： H列に入れる。
 Private Sub Rule5(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "電話"
-    Const Pattern = "【 ＴＥＬ 】：\s*(.*)\s*"
+    Const Pattern = "【 ＴＥＬ 】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -311,7 +307,7 @@ End Sub
 ' 6.【 メールアドレス 】：I列に入れる。ハイパーリンクは生成しない。
 Private Sub Rule6(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "メール"
-    Const Pattern = "【 メールアドレス 】：\s*(.*)\s*"
+    Const Pattern = "【 メールアドレス 】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -331,7 +327,7 @@ End Sub
 ' 7.【 お支払い方法 】：J列に入れる。
 Private Sub Rule7(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "支払い方法"
-    Const Pattern = "【 お支払い方法 】：\s*(.*)\s*"
+    Const Pattern = "【 お支払い方法 】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -351,7 +347,7 @@ End Sub
 ' 8.【 お客様ID‥半角数字４桁 】：K列に入れる。
 Private Sub Rule8(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "お客様ID"
-    Const Pattern = "【 お客様ID‥半角数字４桁 】：\s*(\d*)\s*"
+    Const Pattern = "【 お客様ID‥半角数字４桁 】： *(\d*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -373,7 +369,7 @@ End Sub
 ' 9.【 ご希望の個数 】：最初の数字だけ（個の手前まで）をM列に入れる。
 Private Sub Rule9(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "個数"
-    Const Pattern = "【 ご希望の個数 】：\s*(\d+)個?\s*"
+    Const Pattern = "【 ご希望の個数 】： *(\d+)個?\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -393,7 +389,7 @@ End Sub
 ' 10.【 備考 】：Y列に入れる。
 Private Sub Rule10(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "備考"
-    Const Pattern = "【 備考 】：\s*(.*)\s*"
+    Const Pattern = "【 備考 】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
