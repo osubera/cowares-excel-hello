@@ -39,8 +39,61 @@
 'worksheet
 '   name;例文/MailBody
 
+'cells-formula
+'  address;A1
+'         ;=作成!R1C9
+'  address;A3
+'         ;=作成!R1C5&" 様"
+'  address;A5:A6
+'         ;こんにちは。
+'         ;この度はご注文頂きましてありがとうございます。
+'  address;A8
+'         ;=作成!R1C5&"様の再購入４桁ID番号＝"&作成!R1C11
+'  address;A10:A11
+'         ;………
+'         ;ご注文内容の確認です。
+'  address;A13:A21
+'         ;="【注文日時】：" &作成!R1C2
+'         ;="【 名　前 】："&作成!R1C5&" 様"
+'         ;="【 住　所 】：〒"&作成!R1C6&" "&作成!R1C7
+'         ;="【 ＴＥＬ 】：" &作成!R1C8
+'         ;="【 メールアドレス 】："&作成!R1C9
+'         ;="【 お支払い方法 】："&作成!R1C10
+'         ;="【 お客様ID‥半角数字４桁 】："&作成!R1C11
+'         ;="【 ご希望の個数 】："&作成!R1C13&"個‥"
+'         ;="【 備考 】："&作成!R1C25
+'  address;A23
+'         ;何かご不明な点がございましたら、お気軽にお問い合わせください。
+
+'cells-v-align
+'  address;A1:A23
+'   repeat;23
+'         ;center
+
 'worksheet
 '   name;作成/Work
+
+'cells-formula
+'  address;A1:Y1
+'         ;伝票番号
+'         ;購入日
+'     skip;2
+'         ;名前
+'         ;〒
+'         ;住所
+'         ;電話
+'         ;メール
+'         ;支払い方法
+'         ;お客様ID
+'     skip;1
+'         ;個数
+'     skip;11
+'         ;備考
+
+'cells-v-align
+'  address;A1:Y1
+'   repeat;25
+'         ;center
 
 'code
 '   name;Customer
@@ -503,6 +556,102 @@ End Sub
 
 
 '== Logger end ==
+
+'}}}
+
+'module
+'   name;WriteMail
+'{{{
+Option Explicit
+
+Dim Pad As StringStreamNotepad
+
+'== Main Functions begin ==
+
+
+Public Sub StartWriteMail()
+    BeginPad
+    CopyCustomerToWork
+    BuildMail
+    EndPad
+End Sub
+
+Public Sub StartMarkAsDeleted()
+    Selection.Value = DeletedMark
+End Sub
+
+
+'== Main Functions end ==
+'== Deleted Mark begin ==
+
+
+Private Function DeletedMark() As String
+    ' Unicode Double Exclamation Mark is not included in Shift_JIS
+    DeletedMark = ChrW(&H203C)
+End Function
+
+Private Function LineFeedOrSkip(Text As String) As String
+    If Text = DeletedMark Then
+        LineFeedOrSkip = ""
+    Else
+        LineFeedOrSkip = Text & vbCrLf
+    End If
+End Function
+
+
+'== Deleted Mark end ==
+'== Copy Customer Data begin ==
+
+
+Private Sub CopyCustomerToWork()
+    With Work
+        .Cells.ClearContents
+        Customer.Activate
+        Selection.EntireRow.Copy
+        .Cells(1).PasteSpecial Paste:=xlPasteValues
+    End With
+    
+    Application.CutCopyMode = False
+End Sub
+
+
+'== Copy Customer Data end ==
+'== Mail Builder begin ==
+
+
+Private Sub BuildMail()
+    Dim x As Range
+    
+    For Each x In GetTemplateCells
+        Pad.WriteText LineFeedOrSkip(x.Value)
+    Next
+    Pad.WriteLine ""
+End Sub
+
+Private Function GetTemplateCells() As Range
+    MailBody.Activate
+    Set GetTemplateCells = Intersect(MailBody.UsedRange, ActiveCell.EntireColumn).Cells
+End Function
+
+
+'== Mail Builder end ==
+'== Pad begin ==
+
+
+Private Sub BeginPad()
+    Set Pad = New StringStreamNotepad
+    Pad.NameNotepad = "メール作成 エクセル顧客管理"
+    Pad.OpenWrite
+End Sub
+
+Private Sub EndPad()
+    Pad.CloseWrite
+    DoNotepad.SetSavedNotepad Pad.hWndNotepad
+    Set Pad = Nothing
+End Sub
+
+
+'== Pad end ==
 
 '}}}
 
