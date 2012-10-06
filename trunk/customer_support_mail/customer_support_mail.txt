@@ -15,9 +15,9 @@
 '   name;顧客/Customer
 
 'cells-formula
-'  address;A1:Y1
+'  address;A1:AA1
 '         ;伝票番号
-'         ;購入日
+'         ;購入日時
 '     skip;2
 '         ;名前
 '         ;〒
@@ -26,14 +26,16 @@
 '         ;メール
 '         ;支払い方法
 '         ;お客様ID
+'         ;次回お客様ID
 '     skip;1
 '         ;個数
 '     skip;11
 '         ;備考
+'         ;備考金額
 
 'cells-v-align
-'  address;A1:Y1
-'   repeat;25
+'  address;A1:AA1
+'   repeat;27
 '         ;center
 
 'worksheet
@@ -48,7 +50,7 @@
 '         ;こんにちは。
 '         ;この度はご注文頂きましてありがとうございます。
 '  address;A8
-'         ;=作成!R1C5&"様の再購入４桁ID番号＝"&作成!R1C11
+'         ;=作成!R1C5&"様の再購入４桁ID番号＝"&作成!R1C12
 '  address;A10:A11
 '         ;………
 '         ;ご注文内容の確認です。
@@ -60,8 +62,8 @@
 '         ;="【 メールアドレス 】："&作成!R1C9
 '         ;="【 お支払い方法 】："&作成!R1C10
 '         ;="【 お客様ID‥半角数字４桁 】："&作成!R1C11
-'         ;="【 ご希望の個数 】："&作成!R1C13&"個‥"
-'         ;="【 備考 】："&作成!R1C25
+'         ;="【 ご希望の個数 】："&作成!R1C14&作成!R1C27
+'         ;="【 備考 】："&作成!R1C26
 '  address;A23
 '         ;何かご不明な点がございましたら、お気軽にお問い合わせください。
 
@@ -74,9 +76,9 @@
 '   name;作成/Work
 
 'cells-formula
-'  address;A1:Y1
+'  address;A1:AA1
 '         ;伝票番号
-'         ;購入日
+'         ;購入日時
 '     skip;2
 '         ;名前
 '         ;〒
@@ -85,14 +87,16 @@
 '         ;メール
 '         ;支払い方法
 '         ;お客様ID
+'         ;次回お客様ID
 '     skip;1
 '         ;個数
 '     skip;11
 '         ;備考
+'         ;備考金額
 
 'cells-v-align
-'  address;A1:Y1
-'   repeat;25
+'  address;A1:AA1
+'   repeat;27
 '         ;center
 
 'code
@@ -118,8 +122,8 @@ Private Sub FloatButton(Target As Range, ButtonName As String, ButtonOffset As L
     Dim Margin As Single
     
     Set Button = Shapes(ButtonName)
+    Margin = StandardHeight
     With Target
-        Margin = .Height
         Button.Top = .Top + .Height + Margin
         Button.Left = .Left + .Width + Margin + LeftOffset * ButtonOffset
     End With
@@ -155,8 +159,8 @@ Private Sub FloatButton(Target As Range, ButtonName As String, ButtonOffset As L
     Dim Margin As Single
     
     Set Button = Shapes(ButtonName)
+    Margin = StandardHeight
     With Target
-        Margin = .Height
         Button.Top = .Top + .Height + Margin
         Button.Left = .Left + .Width + Margin + LeftOffset * ButtonOffset
     End With
@@ -228,9 +232,9 @@ Private Function GenerateColumnList() As Scripting.Dictionary
     Dim Locations As Variant
     Dim Location As Variant
     
-    Locations = Array(Array("購入日", "B"), Array("名前", "E"), Array("〒", "F"), Array("住所", "G"), _
+    Locations = Array(Array("購入日時", "B"), Array("名前", "E"), Array("〒", "F"), Array("住所", "G"), _
                     Array("電話", "H"), Array("メール", "I"), Array("支払い方法", "J"), Array("お客様ID", "K"), _
-                    Array("個数", "M"), Array("備考", "Y"))
+                    Array("個数", "N"), Array("備考", "Z"), Array("備考金額", "AA"))
     
     Set Data = New Scripting.Dictionary
     
@@ -270,8 +274,8 @@ End Function
 
 ' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
 Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
-    Const Key = "購入日"
-    Const Pattern = "【注文日時】： *([\d/]+)"
+    Const Key = "購入日時"
+    Const Pattern = "【注文日時】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -280,7 +284,7 @@ Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
     If IsEmpty(Found) Then
         Logger.WriteLine Key & " が見つかりません。"
     Else
-        ItemList(Key) = DateValue(Found)
+        ItemList(Key) = CDate(Replace(Found, "-", " "))
     End If
     Exit Sub
     
@@ -400,7 +404,7 @@ End Sub
 ' 8.【 お客様ID‥半角数字４桁 】：K列に入れる。
 Private Sub Rule8(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "お客様ID"
-    Const Pattern = "【 お客様ID‥半角数字４桁 】： *(\d*)\s*"
+    Const Pattern = "【 お客様ID‥半角数字４桁 】： *(.*)\s*"
     
     Dim Found As Variant
     On Error GoTo TrapAll
@@ -408,8 +412,6 @@ Private Sub Rule8(Text As String, ItemList As Scripting.Dictionary)
     Found = FindPattern(Text, Pattern)
     If IsEmpty(Found) Then
         Logger.WriteLine Key & " が見つかりません。"
-    ElseIf Found = "" Then
-        Logger.WriteLine Key & " 新規"
     Else
         ItemList(Key) = Found
     End If
@@ -419,27 +421,36 @@ TrapAll:
     Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
 End Sub
 
-' 9.【 ご希望の個数 】：最初の数字だけ（個の手前まで）をM列に入れる。
+' 9.【 ご希望の個数 】：最初の数字だけ（個の手前まで）をN列に入れる。残りをAA列に入れる。
 Private Sub Rule9(Text As String, ItemList As Scripting.Dictionary)
-    Const Key = "個数"
-    Const Pattern = "【 ご希望の個数 】： *(\d+)個?\s*"
+    Const Key1 = "個数"
+    Const Key2 = "備考金額"
+    Const Pattern = "【 ご希望の個数 】： *(.*)\s*"
     
     Dim Found As Variant
+    Dim KoAt As Long
     On Error GoTo TrapAll
     
     Found = FindPattern(Text, Pattern)
     If IsEmpty(Found) Then
-        Logger.WriteLine Key & " が見つかりません。"
+        Logger.WriteLine Key1 & Key2 & " が見つかりません。"
     Else
-        ItemList(Key) = Val(Found)
+        KoAt = InStr(1, Found, "個", vbBinaryCompare)
+        If KoAt = 0 Then
+            Logger.WriteLine Key1 & Key2 & " が分離できません。"
+            ItemList(Key2) = Found
+        Else
+            ItemList(Key1) = Val(Left(Found, KoAt - 1))
+            ItemList(Key2) = Mid(Found, KoAt)
+        End If
     End If
     Exit Sub
     
 TrapAll:
-    Logger.WriteLine Key & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
+    Logger.WriteLine Key1 & Key2 & Pattern & ": " & Found & " : エラー " & Err.Number & ": " & Err.Description
 End Sub
 
-' 10.【 備考 】：Y列に入れる。
+' 10.【 備考 】：Z列に入れる。
 Private Sub Rule10(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "備考"
     Const Pattern = "【 備考 】： *(.*)\s*"
