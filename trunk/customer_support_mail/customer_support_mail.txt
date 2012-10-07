@@ -64,12 +64,16 @@
 '         ;="【 お客様ID‥半角数字４桁 】："&作成!R1C11
 '         ;="【 ご希望の個数 】："&作成!R1C14&作成!R1C27
 '         ;="【 備考 】："&作成!R1C26
-'  address;A23
+'  address;A23:A24
+'         ;‼
 '         ;何かご不明な点がございましたら、お気軽にお問い合わせください。
+'  address;A26:A30
+'   repeat;5
+'         ;‼
 
 'cells-v-align
-'  address;A1:A23
-'   repeat;23
+'  address;A1:A30
+'   repeat;30
 '         ;center
 
 'worksheet
@@ -640,7 +644,7 @@ End Sub
 
 Private Function GetTemplateCells() As Range
     MailBody.Activate
-    Set GetTemplateCells = Intersect(MailBody.UsedRange, ActiveCell.EntireColumn).Cells
+    Set GetTemplateCells = Intersect(MailBody.UsedRange.EntireRow, ActiveCell.EntireColumn).Cells
 End Function
 
 
