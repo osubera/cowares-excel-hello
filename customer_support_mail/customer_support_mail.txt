@@ -55,7 +55,7 @@
 '         ;………
 '         ;ご注文内容の確認です。
 '  address;A13:A21
-'         ;="【注文日時】：" &作成!R1C2
+'         ;="【注文日時】：" &TEXT(作成!R1C2,"yyyy/m/d h:mm")
 '         ;="【 名　前 】："&作成!R1C5&" 様"
 '         ;="【 住　所 】：〒"&作成!R1C6&" "&作成!R1C7
 '         ;="【 ＴＥＬ 】：" &作成!R1C8
@@ -276,7 +276,7 @@ Private Function FindPattern(Text As String, Pattern As String) As Variant
     Set R = Nothing
 End Function
 
-' 2.【注文日時】：時間を除き、日付だけ（先頭１０字）をB列に入れる。
+' 2.【注文日時】：ハイフンをスペースに置き換え、日時をB列に入れる。
 Private Sub Rule2(Text As String, ItemList As Scripting.Dictionary)
     Const Key = "購入日時"
     Const Pattern = "【注文日時】： *(.*)\s*"
