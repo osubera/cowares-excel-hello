@@ -94,14 +94,14 @@
 
 = Snapshots =
 
-<wiki:comment>
-* エクセル2000 ではツールバーを表示する。
-    http://2.bp.blogspot.com/-Y1Puqzo-4HU/T_jq1704uLI/AAAAAAAAAKQ/dZs3KVy0oS0/s1600/shot2.png
 
-* エクセル2007 ではリボンのアドインタブにボタンを表示する。
-    http://2.bp.blogspot.com/-afktJbuPXBE/T_jOF9qw9fI/AAAAAAAAAKE/2loPnhSI69A/s1600/shot1.png
+* 顧客シートにはクリップボードの情報を該当セルに格納する。
+    http://2.bp.blogspot.com/-AGVkXxfJHlc/UHQap8ump7I/AAAAAAAAALQ/omy10bYqm0o/s1600/shot1.png
 
-</wiki:comment>
+* 例文シートにメールの雛形を格納し、顧客シートの情報を差し込んでメール本文を作成する。
+    http://3.bp.blogspot.com/-lNRbcYzROFQ/UHQatPhBYHI/AAAAAAAAALY/A8pc8dV5-QA/s1600/shot2.png
+
+
 
 
 = Code =
