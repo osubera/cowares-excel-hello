@@ -1,142 +1,192 @@
 # double boxplot
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/boxplotdou/
+#
+# Copyright (C) 2013 Tomizono
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+# boxplotdou(cbind(factor, data1), cbind(factor, data2))
 
-# boxplotdou(cbind(factor,data1),cbind(factor,data2))
+boxplotdou <- function(x, ...) UseMethod("boxplotdou")
 
+boxplotdou.default <- 
+function(x, y, 
+         color=NULL, colorSheer=NULL, 
+         boxedWhiskers=FALSE, outliersHasWhiskers=FALSE, nameOnAxis=TRUE, 
+         pars=NULL, verbose=FALSE, plot=TRUE, ...) {
 
-boxplotdou <- function(x,y,col) {
+  # both x and y expect data frame with 2 columns:  factor, observation
 
-levels.xy <- unique(c(unique(as.character(x[,1])),unique(as.character(y[,1]))))
-factor.x <- factor(x[,1],levels=levels.xy)
-factor.y <- factor(y[,1],levels=levels.xy)
-levels.n <- length(levels.xy)
-#print(levels.xy)
-#str(factor.x)
-print(levels.n)
+  data <- list(x=x[,2], y=y[,2])
+  name <- list(x=names(x[2]), y=names(y[2]))
+  stat <- list()
 
-data.x <- x[,2]
-data.y <- y[,2]
-name.x <- names(x[2])
-name.y <- names(y[2])
-name.x <- ifelse(is.null(name.x),"x",name.x)
-name.y <- ifelse(is.null(name.y),"y",name.y)
-str(data.x)
-print(name.x)
-str(data.y)
-print(name.y)
+  # merge and unite the factor levels of x and y
+  factorLevels <- unique(c(unique(as.character(x[,1])),unique(as.character(y[,1]))))
+  factor <- list(x=factor(x[,1],levels=factorLevels), 
+                 y=factor(y[,1],levels=factorLevels))
 
-stats.x <- plot(factor.x,data.x,plot=F)
-stats.y <- plot(factor.y,data.y,plot=F)
+  for(v in c("x","y")) {
+    # delegate the calculation to the standard boxplot
+    stat[[v]] <- boxplot(formula=formula(paste("data$", v, "~factor$", v, sep="")), 
+                         plot=FALSE)
+    if(is.null(name[[v]])) name[[v]]=v
+  }
 
-#factors <- as.factor(unique(c(stats.x$names,stats.y$names)))
-print(stats.x$names)
-print(stats.y$names)
-print(stats.x)
-print(stats.y)
+  if(verbose) {
+    print(name)
+    print(data)
+    print(stat)
+  }
 
-min.x <- min(stats.x$stats,na.rm=T)
-max.x <- max(stats.x$stats,na.rm=T)
-min.y <- min(stats.y$stats,na.rm=T)
-max.y <- max(stats.y$stats,na.rm=T)
-
-levels.col <- rainbow(levels.n)
-#substr(levels.col,8,9) <- "66"
-#print(levels.col)
-#str(levels.col)
-
-plot(NULL,xlim=c(min.x,max.x),ylim=c(min.y,max.y),xlab=name.x,ylab=name.y)
-
-for(i in 1:levels.n) mysinglebox(stats.x,stats.y,i,as.character(levels.xy)[i],levels.col[i])
-
+  if(plot) {
+    bxpdou(stat$x, stat$y, factorLevels,
+           xlab=name$x, ylab=name$y, pars=par(), 
+           color=color, colorSheer=colorSheer, 
+           boxedWhiskers=boxedWhiskers, outliersHasWhiskers=outliersHasWhiskers,
+           nameOnAxis=nameOnAxis, verbose=verbose, ...)
+    invisible(stat)
+  } else {
+    stat
+  }
 }
 
+bxpdou <- 
+function(xStats, yStats, factorLevels, 
+         color=NULL, colorSheer=NULL, 
+         boxedWhiskers=FALSE, outliersHasWhiskers=FALSE, nameOnAxis=TRUE, 
+         pars=NULL, verbose=FALSE, ...) {
+  
+  pars <- c(list(...), pars)
+  # the first overrides the later
+  pars <- pars[unique(names(pars))]
 
-mysinglebox <- function(x,y,column.num,column.char,color) {
+  xMin <- min(xStats$stats, na.rm=TRUE)
+  xMax <- max(xStats$stats, na.rm=TRUE)
+  yMin <- min(yStats$stats, na.rm=TRUE)
+  yMax <- max(yStats$stats, na.rm=TRUE)
 
-xlow  <- x$stats[2,column.num]
-xhigh <- x$stats[4,column.num]
-ylow  <- y$stats[2,column.num]
-yhigh <- y$stats[4,column.num]
+  if(is.null(pars$xlim)) xlim <- c(xMin, xMax)
+  if(is.null(pars$ylim)) ylim <- c(yMin, yMax)
 
-print(column.num)
-print(column.char)
-print(color)
-print(xlow)
-print(xhigh)
-print(ylow)
-print(yhigh)
+  levelsNum <- length(factorLevels)
+  levelsCol <- rainbow(levelsNum)
+  ##FIXME color and colorSheer is not used.
+  
+  # open a plot area and draw axis
+  plot(NULL, xlim=xlim, ylim=ylim, ...)
 
-color.sheer <- paste(substring(color,1,7),"33",sep="")
-print(color.sheer)
-
-rect(xlow,ylow,xhigh,yhigh,col=color.sheer)
-
-xlowend  <- x$stats[1,column.num]
-xhighend <- x$stats[5,column.num]
-ylowend  <- y$stats[1,column.num]
-yhighend <- y$stats[5,column.num]
-
-xcenter  <- x$stats[3,column.num]
-ycenter  <- y$stats[3,column.num]
-
-print(xlowend)
-print(xcenter)
-print(xhighend)
-print(ylowend)
-print(ycenter)
-print(yhighend)
-
-if(F) {
-xbarlow  <- xlow
-xbarhigh <- xhigh
-ybarlow  <- ylow
-ybarhigh <- yhigh
-} else {
-xbarlow  <- xlowend
-xbarhigh <- xhighend
-ybarlow  <- ylowend
-ybarhigh <- yhighend
+  # draw boxes
+  for(i in 1L:levelsNum) {
+    bxpdou.abox(xStats, yStats, 
+                columnNum=i, columnChar=as.character(factorLevels)[i], 
+                color=levelsCol[i], colorSheer=NULL, nameOnAxis=nameOnAxis, 
+                boxedWhiskers=boxedWhiskers, outliersHasWhiskers=outliersHasWhiskers,
+                verbose=verbose)
+  }
 }
 
-segments(xlowend,ybarlow,xlowend,ybarhigh,col=color)
-segments(xhighend,ybarlow,xhighend,ybarhigh,col=color)
-segments(xbarlow,ylowend,xbarhigh,ylowend,col=color)
-segments(xbarlow,yhighend,xbarhigh,yhighend,col=color)
+bxpdou.abox <- 
+function(x, y, columnNum, columnChar, 
+         color, colorSheer=NULL, 
+         boxedWhiskers=FALSE, outliersHasWhiskers=FALSE, nameOnAxis=TRUE, 
+         verbose=FALSE) {
 
-segments(xlowend,ycenter,xhighend,ycenter,col=color)
-segments(xcenter,ylowend,xcenter,yhighend,col=color)
+  # declare five numbers explicitly
 
-out.x <- x$out
-out.x.num <- length(out.x)
-out.x.group <- x$group
-out.y <- y$out
-out.y.num <- length(out.y)
-out.y.group <- y$group
+  xLowest  <- x$stats[1, columnNum]
+  xHighest <- x$stats[5, columnNum]
+  yLowest  <- y$stats[1, columnNum]
+  yHighest <- y$stats[5, columnNum]
+  
+  xLower  <- x$stats[2, columnNum]
+  xHigher <- x$stats[4, columnNum]
+  yLower  <- y$stats[2, columnNum]
+  yHigher <- y$stats[4, columnNum]
+  
+  xCenter  <- x$stats[3, columnNum]
+  yCenter  <- y$stats[3, columnNum]
+  
+  if(is.null(colorSheer)) {
+    colorSheer <- paste(substring(color, 1, 7), "33", sep="")
+  }
+  
+  hasX <- !is.na(xCenter)
+  hasY <- !is.na(yCenter)
 
-print(out.x)
-print(out.x.num)
-print(out.x.group)
-print(out.y)
-print(out.y.num)
-print(out.y.group)
+  if(verbose) {
+    print(c("column", columnNum, columnChar))
+    print(c("color", color, colorSheer))
+    print(c("x", xLowest, xLower, xCenter, xHigher, xHighest))
+    print(c("y", yLowest, yLower, yCenter, yHigher, yHighest))
+    print(c("has data", hasX, hasY))
+  }
 
-for(x in out.x[out.x.group==column.num]) points(x,ycenter,col=color,pch=1,cex=2)
-for(y in out.y[out.y.group==column.num]) points(xcenter,y,col=color,pch=1,cex=2)
+  # draw factor character on top and right axis
+  if(nameOnAxis) {
+    if(hasX) mtext(columnChar,side=3,at=xCenter,col=color)
+    if(hasY) mtext(columnChar,side=4,at=yCenter,col=color)
+  }
 
-if(T) {
-for(x in out.x[out.x.group==column.num]) {
-segments(x,ycenter,xcenter,ycenter,col=color.sheer)
-segments(x,ylow,x,yhigh,col=color.sheer)
-}
-for(y in out.y[out.y.group==column.num]) {
-segments(xcenter,y,xcenter,ycenter,col=color.sheer)
-segments(xlow,y,xhigh,y,col=color.sheer)
-}
-}
+  # both X and Y are required to draw followings
+  if(!hasX || !hasY) return(FALSE)
 
-text(xcenter,ycenter,column.char)
+  # draw a box of 2nd and 3rd quantiles
+  rect(xLower, yLower, xHigher, yHigher, col=colorSheer)
+ 
+  # draw whiskers for 1st and 4th quantiles
+  # bosedWhiskers=TRUE draws a large box as whiskers
 
-if(!is.na(xcenter)) mtext(column.char,side=3,at=xcenter,col=color)
-if(!is.na(ycenter)) mtext(column.char,side=4,at=ycenter,col=color)
+  if(boxedWhiskers) {
+    xBarLow  <- xLowest
+    xBarHigh <- xHighest
+    yBarLow  <- yLowest
+    yBarHigh <- yHighest
+  } else {
+    xBarLow  <- xLower
+    xBarHigh <- xHigher
+    yBarLow  <- yLower
+    yBarHigh <- yHigher
+  }
+  
+  segments(xLowest, yBarLow, xLowest, yBarHigh, col=color)
+  segments(xHighest, yBarLow, xHighest, yBarHigh, col=color)
+  segments(xBarLow, yLowest, xBarHigh, yLowest, col=color)
+  segments(xBarLow, yHighest, xBarHigh, yHighest, col=color)
+  
+  segments(xLowest, yCenter, xHighest, yCenter, col=color)
+  segments(xCenter, yLowest, xCenter, yHighest, col=color)
+ 
+  # draw outliers
 
+  xOut <- x$out
+  xOutGroup <- x$group
+  yOut <- y$out
+  yOutGroup <- y$group
+  
+  if(verbose) {
+    print(c("x out", xOutGroup,xOut))
+    print(c("y out", yOutGroup,yOut))
+  }
+    
+  for(x in xOut[xOutGroup==columnNum]) points(x, yCenter, col=color, pch=1, cex=2)
+  for(y in yOut[yOutGroup==columnNum]) points(xCenter, y, col=color, pch=1, cex=2)
+ 
+  # outliersHasWhiskers=TRUE add whiskers at each outlier
+
+  if(outliersHasWhiskers) {
+    for(x in xOut[xOutGroup==columnNum]) {
+      segments(x, yCenter, xCenter, yCenter, col=colorSheer)
+      segments(x, yLower, x, yHigher, col=colorSheer)
+    }
+    for(y in yOut[yOutGroup==columnNum]) {
+      segments(xCenter, y, xCenter, yCenter, col=colorSheer)
+      segments(xLower, y, xHigher, y, col=colorSheer)
+    }
+  }
+ 
+  # draw the center as factor character
+  text(xCenter, yCenter, columnChar)
+  
+  return(TRUE)
 }
 
