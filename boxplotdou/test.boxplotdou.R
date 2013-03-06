@@ -1,4 +1,4 @@
-test1.normdata <- function() {
+test1.data.independent <- function() {
   nf <- 5
   nx <- 100
   ny <- 50
@@ -11,7 +11,7 @@ test1.normdata <- function() {
   invisible(list(x=x, y=y))
 }
 
-test3.lineardata <- function() {
+test3.data.linear <- function() {
   nf <- 5
   nx <- 100
   datax <- rnorm(nx, mean=10, sd=3)
@@ -22,7 +22,7 @@ test3.lineardata <- function() {
   invisible(list(x=x, y=y))
 }
 
-test4.lineardata <- function() {
+test4.data.linear <- function() {
   nf <- 4
   nx <- 100
   datax <- c(rnorm(nx/2, mean=10, sd=3), rnorm(nx/2, mean=20, sd=2))
@@ -33,7 +33,7 @@ test4.lineardata <- function() {
   invisible(list(x=x, y=y))
 }
 
-test5.normdata <- function() {
+test5.data.independent <- function() {
   nf <- 4
   nx <- 100
   ny <- 40
@@ -47,26 +47,46 @@ test5.normdata <- function() {
 }
 
 test1 <- function() {
-  testdata <- test1.normdata()
+  testdata <- test1.data.independent()
   boxplotdou(testdata$x,testdata$y,plot=F,verbose=T)
 }
 
 test2 <- function() {
-  testdata <- test1.normdata()
+  testdata <- test1.data.independent()
   boxplotdou(testdata$x,testdata$y)
 }
 
 test3 <- function() {
-  testdata <- test3.lineardata()
+  testdata <- test3.data.linear()
   boxplotdou(testdata$x,testdata$y)
 }
 
 test4 <- function() {
-  testdata <- test4.lineardata()
+  testdata <- test4.data.linear()
   boxplotdou(testdata$x,testdata$y)
 }
 
 test5 <- function() {
-  testdata <- test5.normdata()
+  testdata <- test5.data.independent()
   boxplotdou(testdata$x,testdata$y)
+}
+
+test6 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,boxed.whiskers=T)
+}
+
+test7 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,outliers.has.whiskers=T)
+}
+
+test8 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,name.on.axis=F)
+}
+
+test9 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,verbose=T)
 }
