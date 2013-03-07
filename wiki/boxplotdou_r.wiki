@@ -1,0 +1,29 @@
+#summary double boxplot for R
+#labels Phase-Requirements,Phase-Design,Phase-Deploy
+
+<wiki:toc max_depth="3" />
+
+= Introduction =
+
+ * double boxplot (two axes boxplot) for R
+
+== 概要 ==
+ * Rで二重箱ひげ図 (2軸箱ひげ図) を描く
+
+= Details =
+
+== 説明 ==
+
+= Downloads =
+
+= How to use =
+
+== 使い方 ==
+
+= Snapshots =
+
+
+= Code =
+
+{{{
+}}}    
