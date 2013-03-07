@@ -30,6 +30,13 @@ has.overlap.rect <- function(recta, rectb) {
   !is.recta.apart.bottom(recta, rectb)
 }
 
+has.overlap.xory.rect <- function(recta, rectb) {
+  (!is.recta.apart.right(recta, rectb) &&
+  !is.recta.apart.left(recta, rectb)) ||
+  (!is.recta.apart.top(recta, rectb) &&
+  !is.recta.apart.bottom(recta, rectb))
+}
+
 # stats is an output of boxplotdou(...,plot=F)
 # factor is one of column numbers of stats
 # severity is one of,
@@ -57,8 +64,14 @@ as.rect.of.stats <- function(stats, factor, severity="iqr") {
 }
 
 has.overlap.factor <- function(stats, factora, factorb, severity="iqr") {
-  has.overlap.rect(as.rect.of.stats(stats, factora, severity),
-                   as.rect.of.stats(stats, factorb, severity))
+  rules <- strsplit(severity, "\\.")[[1]]
+  switch(rules[2],
+         has.overlap.rect(as.rect.of.stats(stats, factora, rules[1]),
+                          as.rect.of.stats(stats, factorb, rules[1])),
+         "xory"=
+         has.overlap.xory.rect(as.rect.of.stats(stats, factora, rules[1]),
+                               as.rect.of.stats(stats, factorb, rules[1]))
+         )
 }
 
 has.overlap.stat <- function(stats, severity="iqr") {

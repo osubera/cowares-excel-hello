@@ -90,3 +90,26 @@ test9 <- function() {
   testdata <- test5.data.independent()
   boxplotdou(testdata$x,testdata$y,verbose=T)
 }
+
+test10 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,verbose=T,
+             condense=T)
+}
+
+test11 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,verbose=T,
+             condense=T,condense.severity="whisker")
+}
+
+test12 <- function() {
+  testdata <- test4.data.linear()
+  boxplotdou(testdata$x,testdata$y,verbose=T,
+             condense=T,condense.severity="iqr")
+}
+
+test13 <- function() {
+  testdata <- test5.data.independent()
+  boxplotdou(testdata$x,testdata$y,name.on.axis=F)
+}

@@ -244,7 +244,7 @@ bxpdou.check.condense <-
            condense=FALSE, severity="iqr", 
            verbose=FALSE) {
    
-    if(!condense) return(list(result=FALSE))
+    if(!condense || length(stat$x$names)<=1) return(list(result=FALSE))
 
     overlap <- has.overlap.stat(stat, severity=severity)
     if(verbose) print(overlap)
@@ -253,44 +253,49 @@ bxpdou.check.condense <-
 
 bxpdou.exec.condense <- function(x, y, overlap, verbose=FALSE) {
 
-  fs <- list(x=x[,1], y=y[,1])
+  condensed.level <- current.level <- overlap$names
+  level.indexes <- 1L:length(current.level)
 
   for(i in 1L:overlap$n) {
-    pair <- overlap$names[c(overlap$col[i], overlap$row[i])]
-    condensed.char <- paste(pair[1], pair[2], sep="+")
-    #condensed.level <- c(overlap$names, condensed.char)
-    condensed.level <- c(unique(as.character(fs$x)), condensed.char)
+    location <- c(overlap$col[i], overlap$row[i])
+    pair <- condensed.level[location]
+    if(pair[1]==pair[2]) next
+
+    expanded.location <- 
+      level.indexes[!is.na(match(condensed.level, pair))]
+    condensed.char <- paste(pair, collapse="+")
+    condensed.level[expanded.location] <- condensed.char
 
     if(verbose) {
-      print(i)
-      print(pair)
-      print(condensed.char)
-      print(condensed.level)
+      print(list(pair=pair, location=location, expanded=expanded.location))
     }
+  }
 
-    fs <- lapply(fs, 
-                 function(f) {
-                   f <- factor(f, levels=condensed.level)
-                   str(f)
-                   f[!is.na(match(f, pair))] <- condensed.char
-                   str(f)
-                   f
-                 })
-    if(verbose) {
-      str(fs)
-    }
-#    for(f in fs) {
-#      f <- factor(f, levels=condensed.level)
-#      f[!is.na(match(f, pair))] <- condensed.char
-#    }
-#    x[,1] <- factor(x[,1], levels=condensed.level)
-#    x[,1][!is.na(match(x[,1], pair))] <- condensed.char
-#    y[,1] <- factor(y[,1], levels=condensed.level)
-#    y[,1][!is.na(match(y[,1], pair))] <- condensed.char
+  if(verbose) {
+    print(list(current=current.level, condensed=condensed.level))
+  }
+
+  current.fs <- list(x=x[,1], y=y[,1])
+  condensed.fs <- 
+    lapply(current.fs, 
+           function(f) {
+             factor(condensed.level[match(f, current.level)],
+                    levels=unique(condensed.level))
+           })
+  if(verbose) {
+    print(mapply(function(current, condensed) {
+                   cbind(as.character(current), current, 
+                         as.character(condensed), condensed)
+                 }, 
+                 current.fs, condensed.fs))
   }
 
   result <- list(x=x, y=y)
-  result$x[,1] <- fs$x
-  result$y[,1] <- fs$y
+  result$x[,1] <- condensed.fs$x
+  result$y[,1] <- condensed.fs$y
+
+  if(verbose) {
+    print(result)
+  }
   result
 }
