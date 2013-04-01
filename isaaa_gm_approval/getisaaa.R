@@ -38,6 +38,15 @@ level2urls <- c(
 # level2urls.use
 level2urls.use <- level2urls[c(32,4,1)]
 
+# level2urls.crop
+level2urls.crop <- c(
+'http://www.isaaa.org/gmapprovaldatabase/crop/default.asp?CropID=2&Crop=Argentine+Canola',
+'http://www.isaaa.org/gmapprovaldatabase/crop/default.asp?CropID=14&Crop=Polish+canola',
+'http://www.isaaa.org/gmapprovaldatabase/crop/default.asp?CropID=7&Crop=Cotton',
+'http://www.isaaa.org/gmapprovaldatabase/crop/default.asp?CropID=6&Crop=Maize',
+'http://www.isaaa.org/gmapprovaldatabase/crop/default.asp?CropID=19&Crop=Soybean'
+)
+
 # preload()
 preload <- function() {
   library(XML)
@@ -106,8 +115,14 @@ getlevel3 <- function(url) {
 # http://www.isaaa.org/gmapprovaldatabase/approvedeventsin/default.asp?CountryID=EG&Country=Egypt
 #
 getlevel2 <- function(url, id=NULL) {
-  if(is.null(id))
+  singlecrop <- F
+  if(is.null(id)) {
     id <- gsub('\\+',' ',strsplit(tolower(url), 'country=')[[1]][2])
+    if(is.na(id)) {
+      id <- gsub('\\+',' ',strsplit(tolower(url), 'crop=')[[1]][2])
+      singlecrop <- T
+    }
+  }
   time <- as.character(Sys.time())
   src <- getURL(url)
   doc <- htmlParse(src)
@@ -118,7 +133,10 @@ getlevel2 <- function(url, id=NULL) {
   event.url <- readHTMLTable(doc, which=1, stringsAsFactors=F, header=T,
     elFun=function(x) {
       # getHTMLLinks(x, baseURL=url, relative=T)[1]
-      paste(baseurl, xmlAttrs(x[['strong']][['a']])['href'], sep='')
+      # paste(baseurl, xmlAttrs(x[['strong']][['a']])['href'], sep='')
+      sub('(eventid=\\d+)&.*', '\\1',
+        paste(baseurl, xmlAttrs(x[['strong']][['a']])['href'], sep=''),
+        ignore.case=T)
     })
 
   n <- nrow(event.text)
@@ -129,10 +147,14 @@ getlevel2 <- function(url, id=NULL) {
       2, as.character),
     stringsAsFactors=F)
 
-  for(i in 1L:n) 
-    ev[i,'Crop'] <- 
-      ifelse(is.na(ev[i, 'Crop']), ev[i, 'Event'], ev[i-1, 'Crop'])
- 
+  if(singlecrop) {
+    ev[,'Crop'] <- id
+  } else {
+    for(i in 1L:n) 
+      ev[i,'Crop'] <- 
+        ifelse(is.na(ev[i, 'Crop']), ev[i, 'Event'], ev[i-1, 'Crop'])
+  }
+
   event <- ev[!is.na(ev[,'Trade']),]
 
   event[,'EventID'] <- 
