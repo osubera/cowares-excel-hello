@@ -1,3 +1,12 @@
+# download isaaa gm approval database into R
+# http://www.isaaa.org/gmapprovaldatabase/
+# http://code.google.com/p/cowares-excel-hello/
+# http://tomizonor.wordpress.com/
+#
+# Copyright (C) 2013 Tomizono - kobobau.mocvba.com
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+
 # level2urls
 level2urls <- c(
 'http://www.isaaa.org/gmapprovaldatabase/approvedeventsin/default.asp?CountryID=AR&Country=Argentina',
