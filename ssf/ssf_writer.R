@@ -1,5 +1,10 @@
 # ssfwriter for R
 # convert list of data.frame into multiple excel worksheet
+# http://code.google.com/p/cowares-excel-hello/wiki/ssf_writer_primitive_r
+# http://tomizonor.wordpress.com/
+#
+# Copyright (C) 2013 Tomizono - kobobau.mocvba.com
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
 #
 writessf <- function(x, ...) UseMethod('writessf')
 
