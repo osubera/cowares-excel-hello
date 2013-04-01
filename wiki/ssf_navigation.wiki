@@ -8,3 +8,4 @@
  * [ssf_convert_from_access from Access / アクセスから]
  * [ssf_convert_to_access to Access / アクセスへ]
  * [ssf_convert_to_html to HTML / HTMLへ]
+ * [ssf_convert_from_r from R / Rから]

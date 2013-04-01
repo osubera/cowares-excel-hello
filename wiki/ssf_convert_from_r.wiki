@@ -1,0 +1,23 @@
+#summary convert R object to SSF
+#labels Phase-Design
+#sidebar ssf_navigation
+
+<wiki:toc max_depth="2" />
+
+= ssf writer =
+
+introduces tools to convert an R object into an SSF text
+
+== SSF の書き出し ==
+
+Rオブジェクトを SSF 形式のテキストに変換するツールを紹介する
+
+= primitive ssf_writer =
+
+ * this primitive tool expect a list contains multiple data frames, and generate a worksheet for each data frame.
+ * [ssf_writer_primitive_r more>>]
+
+== ssf_writer 試作品 ==
+ * この原始的なツールは、データフレームをリストとして集めたものを、データフレームごとに１枚のワークシートに変換する。
+ * [ssf_writer_primitive_r もっと詳しく>>]
+
