@@ -15,6 +15,8 @@ writessf.default <- function(x, file=stdout(), ...) {
 writessf.list <- function(x, file=stdout(), ...) {
   for(i in 1L:length(x)) {
     key <- names(x[i])
+    if(is.null(key) || key=='')
+      key <- as.character(i)
     value <- x[[i]]
     ssfblock.worksheet(key, file=file)
     writessf(value, file=file)
@@ -24,6 +26,8 @@ writessf.list <- function(x, file=stdout(), ...) {
 writessf.data.frame <- function(x, file=stdout(), ...) {
   ssfblock.cellsformula.data.frame(x, file=file)
 }
+
+writessf.NULL <- function(x, ...) { }
 
 # map 1:26 into A:Z
 AtoZ <- c(chartr('[0-9]', '[A-J]', 0:9), 
