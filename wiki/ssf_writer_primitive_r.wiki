@@ -22,6 +22,10 @@
  * 追加パッケージは不要。
  * この原始的なツールは、データフレームをリストとして集めたものを、データフレームごとに１枚のワークシートに変換する。
 
+= Download =
+
+ * [http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ssf/ssf_writer.R download from developer source tree / 開発用レポジトリの最新のソース]
+
 = Code =
 
 === ssf_writer.R ===
