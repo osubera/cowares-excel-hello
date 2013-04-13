@@ -30,9 +30,7 @@ writessf.data.frame <- function(x, file=stdout(), ...) {
 writessf.NULL <- function(x, ...) { }
 
 # map 1:26 into A:Z
-AtoZ <- c(chartr('[0-9]', '[A-J]', 0:9), 
-          chartr('[0-9]', '[K-T]', 0:9), 
-          chartr('[0-5]','[U-Z]',0:5))
+AtoZ <- LETTERS
 
 num.to.col <- function(number) {
   col <- c()
