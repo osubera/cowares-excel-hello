@@ -1,0 +1,270 @@
+# ellipse plot
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ellipseplot/
+#
+# Copyright (C) 2013 Tomizono
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+# ellipseplot(
+
+ellipseplot <- function(x, y, 
+                   SUMMARY=ninenum, 
+                   plot=TRUE, verbose=FALSE, ...) {
+  stats <- calc.stats(x, y, SUMMARY)
+  axes <- list(x=names(x), y=names(y))
+  
+  if(plot) {
+    many.ellipses(stats, axes, ...)
+    invisible(stats)
+  } else {
+    stats
+  }
+}
+
+ellipseplot.single <- function(x, y, 
+                   SUMMARY=ninenum, 
+                   plot=TRUE, verbose=FALSE, ...) {
+  xd <- data.frame(rep('o',length(x)), x)
+  yd <- data.frame(rep('o',length(y)), y)
+  ellipseplot(xd, yd, SUMMARY, plot, verbose, ...)
+}
+
+# not working !!FIXME or REMOVEME!!
+ellipseplot.vector <- function(x, y, 
+                   SUMMARY=ninenum, 
+                   plot=TRUE, verbose=FALSE, ...) {
+  stat <- calc.stat(x, y, SUMMARY)
+  col <- 'green'
+  
+  if(plot) {
+    ellipses(stat, col)
+    invisible(stat)
+  } else {
+    stat
+  }
+}
+
+# draw multiple ellipses of stat
+# stats is a list of stat
+many.ellipses <- function(stats, axes, ...) {
+  xy <- list('x', 'y')
+  lims <- lapply(xy, function(a) 
+                 c(min=min(sapply(stats, function(stat) min(stat[a]))), 
+                   max=max(sapply(stats, function(stat) max(stat[a]))))
+                 )
+  names(lims) <- paste(xy, 'lim', sep='')
+
+  lims$xlab <- axes$x[2]
+  lims$ylab <- axes$y[2]
+  #lims$main <- axes$x[1]
+
+  pars <- modifyList(lims, c(list(...), x=NA))
+  do.call('plot', pars)
+
+  statnum <- length(stats)
+  col <- ( if(hasArg(col)) list(...)$col
+           else rainbow(statnum) )
+  if(length(col) < statnum) col <- rep(col, statnum)
+  name <- names(stats)
+  if(is.null(name)) name <- as.character(1L:statnum)
+
+  for(i in 1L:statnum) {
+    ellipses(stats[[i]], name[i], col[i])
+  }
+}
+
+# draw ellipses of stat
+# stat must have odd number of rows and ascending order
+ellipses <- function(stat, name, col, SHEER=sheer.color) {
+#ellipses <- function(stat, name, col, sheer=c(1, 1, 1, 0.2)) {
+  xy <- list('x', 'y')
+ 
+  boxes <- calc.abox(stat)
+  boxnumber <- length(boxes)
+  
+  center <- lapply(xy,
+                   function(a) boxes[[1]][a, 'center'])
+  names(center) <- xy
+
+  #coloffset <- sheer / boxnumber
+  #pcol <- adjustcolor(col, alpha.f=0)
+
+  for(i in 1L:boxnumber) {
+    pcol <- SHEER(col, i / boxnumber)
+    anellipse(boxes[[i]], col=pcol, border=pcol)
+  }
+#  for(box in boxes) {
+#    pcol <- adjustcolor(pcol, offset=coloffset)
+#    anellipse(box, col=pcol, border=pcol)
+#  }
+  text(center$x, center$y, name)
+  mtext(name, side=3, at=center$x, col=col)
+  mtext(name, side=4, at=center$y, col=col)
+}
+
+sheer.color <- function(col, level) {
+  #sheer <- cos(level*pi*0.5) * 0.16 + 1e-8
+  #sheer <- (1 - level^4) * 0.16 + 1e-5
+  #sheer <- (1 - level) * 0.16 + 1e-5
+  sheer <- level^2 * 0.5
+  #sheer <- level * 0.16 + 1e-5
+  adjustcolor(col, alpha.f=sheer)
+}
+
+# draw a single inscribed ellipse to the specified box 
+# accepts parameters for polygon()
+anellipse <- function(abox, verbose=FALSE, ...) {
+  #axes <- rbind(rt=abox$high - abox$center, lb=abox$center - abox$low)
+  axes <- rbind(rt=abox[,'high'] - abox[,'center'], 
+                lb=abox[,'center'] - abox[,'low'])
+  colnames(axes) <- c('x', 'y')
+  if(verbose) print(axes)
+  qx <- c('rt','lb','lb','rt')
+  qy <- c('rt','rt','lb','lb')
+  seed.ellipse <- data.frame(
+    quadrant=1:4,
+    startangle=seq(0, 2*pi, length=5)[1:4],
+    endangle=seq(0, 2*pi, length=5)[2:5],
+    xcenter=rep(abox['x', 'center'], 4),
+    ycenter=rep(abox['y', 'center'], 4),
+    xaxis=axes[qx, 'x'],
+    yaxis=axes[qy, 'y']
+  )
+  if(verbose) print(seed.ellipse)
+  x.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.x))
+  y.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.y))
+  if(verbose) { 
+    str(x.ellipse)
+    str(y.ellipse)
+  }
+  polygon(x.ellipse, y.ellipse, ...)
+}
+
+calc.ellipse <- function(center, axis, 
+                         start=0, end=2*pi, length=100, 
+                         FUNC=cos) {
+  theta <- seq(start, end, length=length)
+  axis * FUNC(theta) + center
+}
+
+calc.ellipse.x <- function(seed) {
+  calc.ellipse(seed['xcenter'], seed['xaxis'], 
+               seed['startangle'], seed['endangle'],
+               FUNC=cos)
+}
+
+calc.ellipse.y <- function(seed) {
+  calc.ellipse(seed['ycenter'], seed['yaxis'], 
+               seed['startangle'], seed['endangle'],
+               FUNC=sin)
+}
+
+
+# nine number summary of octiles
+ninenum <- function(x, na.rm=TRUE)
+{
+  xna <- is.na(x)
+  if(na.rm) x <- x[!xna]
+  else if(any(xna)) return(rep.int(NA,9))
+  x <- sort(x)
+  n <- length(x)
+  if(n == 0) {
+    rep.int(NA,9)
+  } else {
+    n2 <- (n+1) / 2
+    n4 <- floor(n2+1) / 2
+    n8 <- floor(n4+1) / 2
+    d <- c(1, n8, n4, n2 + 1 - n8, 
+           n2, 
+           n2 - 1 + n8, n + 1 - n4, n + 1 - n8, n)
+    0.5 * (x[floor(d)] + x[ceiling(d)])
+  }
+}
+
+seventeennum <- function(x, na.rm=TRUE)
+{
+  xna <- is.na(x)
+  if(na.rm) x <- x[!xna]
+  else if(any(xna)) return(rep.int(NA,17))
+  x <- sort(x)
+  n <- length(x)
+  if(n == 0) {
+    rep.int(NA,17)
+  } else {
+    n2 <- (n+1) / 2
+    n4 <- floor(n2+1) / 2
+    n8 <- floor(n4+1) / 2
+    n16 <- floor(n8+1) / 2
+    d <- c(1, n16, n8, n4 + 1 - n16, 
+           n4, 
+           n4 - 1 + n16, n4 -1 + n8, n2 + 1 - n16, 
+           n2, 
+           n2 - 1 + n16, n2 - 1 + n8, n2 - 2 + n8 + n16, 
+           n2 - 1 + n4,
+           n + 2 - n8 - n16, n + 1 - n8, n + 1 - n16, n)
+    0.5 * (x[floor(d)] + x[ceiling(d)])
+  }
+}
+
+# expect a data frame with 1st column factor and 2nd column data,
+# for each x and y
+calc.stats <- function(x, y, SUMMARY=ninenum, na.rm=TRUE) {
+  factors <- sort(union(levels(as.factor(x[,1])), 
+                        levels(as.factor(y[,1]))))
+  stats <- lapply(as.list(factors), function(f) {
+                  calc.stat(x[x[,1]==f,2],
+                            y[y[,1]==f,2],
+                            SUMMARY)
+           })
+  names(stats) <- factors
+  if(na.rm) for(f in factors) if(all(is.na(stats[[f]]))) stats[f] <- NULL
+  stats
+}
+
+calc.stat <- function(x, y, SUMMARY=ninenum) {
+  data.frame(x=SUMMARY(x), y=SUMMARY(y))
+}
+
+calc.abox <- function(stat) {
+  np <- nrow(stat) + 1
+  center <- np / 2
+  lapply(as.list(1L:(center - 1)), 
+         function(i) {
+           box <- rbind(stat[i,], stat[center,], stat[np - i,])
+           rownames(box) <- c('low', 'center', 'high')
+           t(box)
+         })
+}
+
+
+# test functions
+
+testdata.onebox <- data.frame(low=1:0,center=3:4,high=6:5,row.names=c('x','y'))
+
+test.anellipse <- function(x=testdata.onebox, verbose=F) {
+  plot(t(x['x',]), t(x['y',]))
+  anellipse(x, verbose, col='red', border='blue', lty='dotted')
+}
+
+test.ninenum <- function() {
+  print(ninenum(1:9))
+  print(ninenum(1:999))
+  print(ninenum(1:1000))
+  print(ninenum(c(9:1,NA)))
+  print(ninenum(rep(NA,9)))
+  invisible(T)
+}
+
+test.manyellipses <- function(...) {
+  SUMMARY=ninenum
+  stats <- list(
+                data.frame(x=SUMMARY(rnorm(10)), y=SUMMARY(rnorm(10))),
+                data.frame(x=SUMMARY(rnorm(10,1)), y=SUMMARY(rnorm(10))),
+                data.frame(x=SUMMARY(rnorm(10,2)), y=SUMMARY(rnorm(10,1))),
+                data.frame(x=SUMMARY(rnorm(10,3)), y=SUMMARY(rnorm(10,1))),
+                data.frame(x=SUMMARY(rnorm(10,4)), y=SUMMARY(rnorm(10,4)))
+                )
+  many.ellipses(stats, ...) 
+}
+
+#test.anellipse(verbose=T)
+

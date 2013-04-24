@@ -1,0 +1,26 @@
+# midpoints, ninenum, seventeennum
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/midpoints/
+#
+# Copyright (C) 2013 Tomizono
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+
+# return list of divided range of c(min.index, max.index)
+midpoint <- function(x) {
+  n <- (x[1] + x[2]) / 2
+  list(c(x[1], floor(n)), c(ceiling(n), x[2]))
+}
+
+# dig midpoints of array
+midpoints <- function(x, n) {
+  nx <- length(x)
+  pl <- list(c(1, nx))
+  for(i in 1:n) pl <- unlist(lapply(pl, midpoint), recursive=F)
+  pm <- matrix(c(1, simplify2array(pl), nx), ncol=2, byrow=T)
+  apply(pm, 1, function(a) sum(x[a]) / 2)
+}
+
+# derived
+ninenum <- function(x) midpoints(sort(x), 3)
+seventeennum <- function(x) midpoints(sort(x), 4)
+
