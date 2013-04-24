@@ -28,20 +28,6 @@ ellipseplot.single <- function(x, y,
   ellipseplot(xd, yd, SUMMARY, plot, verbose, ...)
 }
 
-# not working !!FIXME or REMOVEME!!
-ellipseplot.vector <- function(x, y, 
-                   SUMMARY=ninenum, 
-                   plot=TRUE, verbose=FALSE, ...) {
-  stat <- calc.stat(x, y, SUMMARY)
-  col <- 'green'
-  
-  if(plot) {
-    ellipses(stat, col)
-    invisible(stat)
-  } else {
-    stat
-  }
-}
 
 # draw multiple ellipses of stat
 # stats is a list of stat
@@ -159,51 +145,6 @@ calc.ellipse.y <- function(seed) {
 }
 
 
-# nine number summary of octiles
-ninenum <- function(x, na.rm=TRUE)
-{
-  xna <- is.na(x)
-  if(na.rm) x <- x[!xna]
-  else if(any(xna)) return(rep.int(NA,9))
-  x <- sort(x)
-  n <- length(x)
-  if(n == 0) {
-    rep.int(NA,9)
-  } else {
-    n2 <- (n+1) / 2
-    n4 <- floor(n2+1) / 2
-    n8 <- floor(n4+1) / 2
-    d <- c(1, n8, n4, n2 + 1 - n8, 
-           n2, 
-           n2 - 1 + n8, n + 1 - n4, n + 1 - n8, n)
-    0.5 * (x[floor(d)] + x[ceiling(d)])
-  }
-}
-
-seventeennum <- function(x, na.rm=TRUE)
-{
-  xna <- is.na(x)
-  if(na.rm) x <- x[!xna]
-  else if(any(xna)) return(rep.int(NA,17))
-  x <- sort(x)
-  n <- length(x)
-  if(n == 0) {
-    rep.int(NA,17)
-  } else {
-    n2 <- (n+1) / 2
-    n4 <- floor(n2+1) / 2
-    n8 <- floor(n4+1) / 2
-    n16 <- floor(n8+1) / 2
-    d <- c(1, n16, n8, n4 + 1 - n16, 
-           n4, 
-           n4 - 1 + n16, n4 -1 + n8, n2 + 1 - n16, 
-           n2, 
-           n2 - 1 + n16, n2 - 1 + n8, n2 - 2 + n8 + n16, 
-           n2 - 1 + n4,
-           n + 2 - n8 - n16, n + 1 - n8, n + 1 - n16, n)
-    0.5 * (x[floor(d)] + x[ceiling(d)])
-  }
-}
 
 # expect a data frame with 1st column factor and 2nd column data,
 # for each x and y
