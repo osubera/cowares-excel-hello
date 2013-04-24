@@ -10,16 +10,15 @@ boxplotdou <- function(x, ...) UseMethod("boxplotdou")
 
 boxplotdou.default <- 
   function(x, y, 
-           color=NULL, color.sheer=NULL, 
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
            name.on.axis=TRUE,
            condense=FALSE, condense.severity="iqr",
            condense.once=FALSE,
-           pars=NULL, verbose=FALSE, plot=TRUE, ...) {
+           COLOR.SHEER=bxpdou.sheer.color, 
+           verbose=FALSE, plot=TRUE, ...) {
 
   # both x and y expect data frame with 2 columns:  factor, observation
 
-  #stat <- bxpdou.stats(x, y, verbose)
   stat <- bxpdou.stats.condense(x, y,
                                 condense=condense, 
                                 severity=condense.severity, 
@@ -29,10 +28,10 @@ boxplotdou.default <-
   if(plot) {
     bxpdou(stat$stat$x, stat$stat$y, stat$level,
            xlab=stat$name$x, ylab=stat$name$y, 
-           pars=par(), color=color, color.sheer=color.sheer, 
            boxed.whiskers=boxed.whiskers, 
            outliers.has.whiskers=outliers.has.whiskers,
            name.on.axis=name.on.axis, 
+           COLOR.SHEER=COLOR.SHEER, 
            verbose=verbose, ...)
     invisible(stat$stat)
   } else {
@@ -42,46 +41,50 @@ boxplotdou.default <-
 
 bxpdou <- 
 function(x.stats, y.stats, factor.levels, 
-         color=NULL, color.sheer=NULL, 
-         boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, name.on.axis=TRUE, 
-         pars=NULL, verbose=FALSE, ...) {
+         boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
+         name.on.axis=TRUE, 
+         COLOR.SHEER=bxpdou.sheer.color,
+         verbose=FALSE, ...) {
   
-  pars <- c(list(...), pars)
-  # the first overrides the later
-  pars <- pars[unique(names(pars))]
+  xlim <- range(x.stats$stats, x.stats$out, na.rm=TRUE)
+  ylim <- range(y.stats$stats, y.stats$out, na.rm=TRUE)
+  lims <- list(xlim=xlim, ylim=ylim)
 
-  x.min <- min(x.stats$stats, x.stats$out, na.rm=TRUE)
-  x.max <- max(x.stats$stats, x.stats$out, na.rm=TRUE)
-  y.min <- min(y.stats$stats, y.stats$out, na.rm=TRUE)
-  y.max <- max(y.stats$stats, y.stats$out, na.rm=TRUE)
-
-  if(is.null(pars$xlim)) xlim <- c(x.min, x.max)
-  if(is.null(pars$ylim)) ylim <- c(y.min, y.max)
+  pars <- modifyList(lims, c(list(...), x=NA))
 
   levels.num <- length(factor.levels)
-  levels.col <- rainbow(levels.num)
-  ##FIXME color and color.sheer is not used.
+  levels.col <- 
+    if(is.null(pars$col)) { rainbow(levels.num)
+    } else { rep(pars$col, levels.num) }
+  levels.col.sheer <- COLOR.SHEER(levels.col)
   
   if(verbose) {
-    print(list(xlim=xlim, ylim=ylim))
+    print(lims)
+    print(pars)
   }
 
   # open a plot area and draw axis
-  plot(NULL, xlim=xlim, ylim=ylim, ...)
+  do.call('plot', pars)
 
   # draw boxes
   for(i in 1L:levels.num) {
     bxpdou.abox(x.stats, y.stats, 
                 column.num=i, column.char=as.character(factor.levels)[i], 
-                color=levels.col[i], color.sheer=NULL, name.on.axis=name.on.axis, 
-                boxed.whiskers=boxed.whiskers, outliers.has.whiskers=outliers.has.whiskers,
+                color=levels.col[i], color.sheer=levels.col.sheer[i],
+                name.on.axis=name.on.axis, 
+                boxed.whiskers=boxed.whiskers, 
+                outliers.has.whiskers=outliers.has.whiskers,
                 verbose=verbose)
   }
 }
 
+bxpdou.sheer.color <- function(col) {
+  adjustcolor(col, alpha.f=0.2)
+}
+
 bxpdou.abox <- 
 function(x, y, column.num, column.char, 
-         color, color.sheer=NULL, 
+         color, color.sheer, 
          boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
          name.on.axis=TRUE, 
          verbose=FALSE) {
@@ -100,10 +103,6 @@ function(x, y, column.num, column.char,
   
   x.center  <- x$stats[3, column.num]
   y.center  <- y$stats[3, column.num]
-  
-  if(is.null(color.sheer)) {
-    color.sheer <- paste(substring(color, 1, 7), "33", sep="")
-  }
   
   has.x <- !is.na(x.center)
   has.y <- !is.na(y.center)
