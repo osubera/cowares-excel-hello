@@ -1,5 +1,5 @@
 # midpoints, ninenum, seventeennum
-# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/midpoints/
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ellipseplot/
 #
 # Copyright (C) 2013 Tomizono
 # Fortitudinous, Free, Fair, http://cowares.nobody.jp
