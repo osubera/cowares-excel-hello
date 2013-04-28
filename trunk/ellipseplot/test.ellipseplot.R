@@ -25,8 +25,23 @@ test.manyellipses <- function(...) {
                 data.frame(x=SUMMARY(rnorm(10,3)), y=SUMMARY(rnorm(10,1))),
                 data.frame(x=SUMMARY(rnorm(10,4)), y=SUMMARY(rnorm(10,4)))
                 )
-  many.ellipses(stats, ...) 
+  many.ellipses(stats, list(x='x', y='y'), ...) 
 }
 
-#test.anellipse(verbose=T)
+test.ellipseplot.single <- function(n=10, SUMMARY=ninenum, 
+                                  plot=T, verbose=F, ...) {
+  x <- rnorm(n)
+  y <- rnorm(n)
+  ellipseplot.single(x, y, SUMMARY=SUMMARY, plot, verbose, ...)
+}
+
+test.ellipseplot <- function(series=7, n=10, SUMMARY=ninenum, 
+                             plot=T, verbose=F, ...) {
+  x <- rnorm(n * series)
+  y <- rnorm(n * series)
+  f <- rep(1:series, each=n)
+  ellipseplot(data.frame(f=LETTERS[f],x=x+f), 
+              data.frame(f=LETTERS[f],y=y+f),
+              SUMMARY=SUMMARY, plot, verbose, ...)
+}
 
