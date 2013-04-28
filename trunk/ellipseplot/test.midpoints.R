@@ -34,7 +34,6 @@ test2 <- function(r=1, n=100) {
 }
 
 # check differences to zarfivenum
-
 test3 <- function(r=1, n=9) {
   myfivenum <- function(x, ...) midpoints(x, 2, ...)
   res <- sapply(as.list(1:r),
@@ -48,7 +47,6 @@ test3 <- function(r=1, n=9) {
 }
 
 # check differences to zarninenum
-
 test4 <- function(r=1, n=9) {
   res <- sapply(as.list(1:r),
                 function(a) {
@@ -61,7 +59,6 @@ test4 <- function(r=1, n=9) {
 }
 
 # bulk test
-
 test5 <- function() {
   print(rowSums(sapply(as.list(1:100), function(a) testninenum(1:a) - ninenum(1:a))))
   print(rowSums(sapply(as.list(1:100), function(a) testseventeennum(1:a) - seventeennum(1:a))))
@@ -74,6 +71,38 @@ test5 <- function() {
   print(rowMeans(sapply(as.list(1:100), function(n) test3(30,n))))
   print(rowMeans(sapply(as.list(1:100), function(n) test4(30,n))))
 }
+
+# visualize differences between ninenum and zarninenum
+test6 <- function(n1=1, n2=25) {
+  d <- data.frame(t(
+         sapply(as.list(n1:n2), function(a) zarninenum(1:a) - ninenum(1:a))
+       ))
+  names(d) <- paste(0:8, c('','st','nd','rd',rep('th',5)), ' O', sep='')
+  names(d)[1] <- 'Min'
+  names(d)[5] <- 'Med'
+  names(d)[9] <- 'Max'
+  parkeeper <- par(c('mfrow','mar'))
+  par(mfrow=c(7,1), mar=c(2,4,1,1))
+  lapply(as.list(c(2:4,6:8)), function(i)
+    plot(d[,i],type='b',ylab='diff',xlab='',main=names(d)[i],
+    ylim=c(-0.5,0.5),yaxp=c(-0.5,0.5,2))
+  )
+  matplot(d[,c(1,5,9)],type='l',ylab='',xlab='length',
+    main='Min, Med, Max',mgp=c(1,1,0),
+    ylim=c(-0.5,0.5),yaxp=c(-0.5,0.5,2))
+  par(parkeeper)
+  d
+}
+
+test7 <- function(n1=1, n2=100) {
+  d <- sweep(t(
+         sapply(as.list(n1:n2), function(a) zarninenum(1:a) - ninenum(1:a))
+       ), 1, (n1:n2)-1, '/')
+  matplot(d,type='l',ylab='diff',xlab='length')
+}
+
+
+### other calculations
 
 # direct calculation
 
