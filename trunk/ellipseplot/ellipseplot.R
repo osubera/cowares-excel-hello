@@ -5,6 +5,21 @@
 # Fortitudinous, Free, Fair, http://cowares.nobody.jp
 #
 # ellipseplot(
+#             x= data frame for x-axis; factors and observations,
+#             y= data frame for y-axis; factors and observations,
+#             SUMMARY= function generating summaries to write contours,
+#             plot= TRUE for chart / FALSE for print summary,
+#             verbose= TRUE for debugging information,
+#             ...= accepts plot parameters
+#            )
+#
+# ellipseplot.single(
+#             x= vector data for x-axis; observations without factor,
+#             y= vector data for y-axis; observations without factor,
+#             # plot single pair of (x,y) data without any factors
+#             # other parameters are same as ellipseplot
+#
+# requires midpoints
 
 ellipseplot <- function(x, y, 
                    SUMMARY=ninenum, 
@@ -41,7 +56,6 @@ many.ellipses <- function(stats, axes, ...) {
 
   lims$xlab <- axes$x[2]
   lims$ylab <- axes$y[2]
-  #lims$main <- axes$x[1]
 
   pars <- modifyList(lims, c(list(...), x=NA))
   do.call('plot', pars)
@@ -61,7 +75,6 @@ many.ellipses <- function(stats, axes, ...) {
 # draw ellipses of stat
 # stat must have odd number of rows and ascending order
 ellipses <- function(stat, name, col, SHEER=sheer.color) {
-#ellipses <- function(stat, name, col, sheer=c(1, 1, 1, 0.2)) {
   xy <- list('x', 'y')
  
   boxes <- calc.abox(stat)
@@ -71,41 +84,32 @@ ellipses <- function(stat, name, col, SHEER=sheer.color) {
                    function(a) boxes[[1]][a, 'center'])
   names(center) <- xy
 
-  #coloffset <- sheer / boxnumber
-  #pcol <- adjustcolor(col, alpha.f=0)
-
   for(i in 1L:boxnumber) {
     pcol <- SHEER(col, i / boxnumber)
     anellipse(boxes[[i]], col=pcol, border=pcol)
   }
-#  for(box in boxes) {
-#    pcol <- adjustcolor(pcol, offset=coloffset)
-#    anellipse(box, col=pcol, border=pcol)
-#  }
+
   text(center$x, center$y, name)
   mtext(name, side=3, at=center$x, col=col)
   mtext(name, side=4, at=center$y, col=col)
 }
 
 sheer.color <- function(col, level) {
-  #sheer <- cos(level*pi*0.5) * 0.16 + 1e-8
-  #sheer <- (1 - level^4) * 0.16 + 1e-5
-  #sheer <- (1 - level) * 0.16 + 1e-5
   sheer <- level^2 * 0.5
-  #sheer <- level * 0.16 + 1e-5
   adjustcolor(col, alpha.f=sheer)
 }
 
 # draw a single inscribed ellipse to the specified box 
 # accepts parameters for polygon()
 anellipse <- function(abox, verbose=FALSE, ...) {
-  #axes <- rbind(rt=abox$high - abox$center, lb=abox$center - abox$low)
   axes <- rbind(rt=abox[,'high'] - abox[,'center'], 
                 lb=abox[,'center'] - abox[,'low'])
   colnames(axes) <- c('x', 'y')
   if(verbose) print(axes)
+
   qx <- c('rt','lb','lb','rt')
   qy <- c('rt','rt','lb','lb')
+
   seed.ellipse <- data.frame(
     quadrant=1:4,
     startangle=seq(0, 2*pi, length=5)[1:4],
@@ -116,12 +120,14 @@ anellipse <- function(abox, verbose=FALSE, ...) {
     yaxis=axes[qy, 'y']
   )
   if(verbose) print(seed.ellipse)
+
   x.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.x))
   y.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.y))
   if(verbose) { 
     str(x.ellipse)
     str(y.ellipse)
   }
+
   polygon(x.ellipse, y.ellipse, ...)
 }
 
@@ -145,7 +151,6 @@ calc.ellipse.y <- function(seed) {
 }
 
 
-
 # expect a data frame with 1st column factor and 2nd column data,
 # for each x and y
 calc.stats <- function(x, y, SUMMARY=ninenum, na.rm=TRUE) {
@@ -157,8 +162,12 @@ calc.stats <- function(x, y, SUMMARY=ninenum, na.rm=TRUE) {
                             SUMMARY)
            })
   names(stats) <- factors
-  if(na.rm) for(f in factors) if(all(is.na(stats[[f]]))) stats[f] <- NULL
-  stats
+  calc.stats.na.rm(stats, na.rm)
+}
+
+calc.stats.na.rm <- function(x, na.rm) {
+  if(na.rm) for(f in names(x)) if(all(is.na(x[[f]]))) x[f] <- NULL
+  x
 }
 
 calc.stat <- function(x, y, SUMMARY=ninenum) {
