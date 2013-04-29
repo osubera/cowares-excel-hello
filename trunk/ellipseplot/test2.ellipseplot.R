@@ -1,7 +1,4 @@
-source("/opt/src/r-dev/beta/midpoints.R")
-source("/opt/src/r-dev/beta/has.overlap.R")
-source("/opt/src/r-dev/beta/ellipseplot.R")
-source("/opt/src/r-dev/beta/boxplotdou.R")
+# more test, to generate figures
 
 random.box <- function(testdata=test1.data.independent(),
               ...) {
