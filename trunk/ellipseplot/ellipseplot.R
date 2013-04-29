@@ -22,13 +22,13 @@
 # requires midpoints
 
 ellipseplot <- function(x, y, 
-                   SUMMARY=ninenum, 
+                   SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
   stats <- calc.stats(x, y, SUMMARY)
   axes <- list(x=names(x), y=names(y))
   
   if(plot) {
-    many.ellipses(stats, axes, ...)
+    many.ellipses(stats, axes, SHEER, ...)
     invisible(stats)
   } else {
     stats
@@ -36,17 +36,17 @@ ellipseplot <- function(x, y,
 }
 
 ellipseplot.single <- function(x, y, 
-                   SUMMARY=ninenum, 
+                   SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
   xd <- data.frame(rep('o',length(x)), x)
   yd <- data.frame(rep('o',length(y)), y)
-  ellipseplot(xd, yd, SUMMARY, plot, verbose, ...)
+  ellipseplot(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
 }
 
 
 # draw multiple ellipses of stat
 # stats is a list of stat
-many.ellipses <- function(stats, axes, ...) {
+many.ellipses <- function(stats, axes, SHEER=sheer.color, ...) {
   xy <- list('x', 'y')
   lims <- lapply(xy, function(a) 
                  c(min=min(sapply(stats, function(stat) min(stat[a]))), 
@@ -68,7 +68,7 @@ many.ellipses <- function(stats, axes, ...) {
   if(is.null(name)) name <- as.character(1L:statnum)
 
   for(i in 1L:statnum) {
-    ellipses(stats[[i]], name[i], col[i])
+    ellipses(stats[[i]], name[i], col[i], SHEER)
   }
 }
 

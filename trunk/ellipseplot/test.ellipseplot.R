@@ -32,7 +32,8 @@ test.ellipseplot.single <- function(n=10, SUMMARY=ninenum,
                                   plot=T, verbose=F, ...) {
   x <- rnorm(n)
   y <- rnorm(n)
-  ellipseplot.single(x, y, SUMMARY=SUMMARY, plot, verbose, ...)
+  ellipseplot.single(x, y, SUMMARY=SUMMARY, 
+              plot=plot, verbose=verbose, ...)
 }
 
 test.ellipseplot <- function(series=7, n=10, SUMMARY=ninenum, 
@@ -42,6 +43,7 @@ test.ellipseplot <- function(series=7, n=10, SUMMARY=ninenum,
   f <- rep(1:series, each=n)
   ellipseplot(data.frame(f=LETTERS[f],x=x+f), 
               data.frame(f=LETTERS[f],y=y+f),
-              SUMMARY=SUMMARY, plot, verbose, ...)
+              SUMMARY=SUMMARY, 
+              plot=plot, verbose=verbose, ...)
 }
 
