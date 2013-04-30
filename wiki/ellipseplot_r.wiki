@@ -21,7 +21,7 @@
 
 = How to use =
 
- * [http://tomizonor.wordpress.com/ comming soon]
+ * [http://tomizonor.wordpress.com/2013/04/29/ellipse-plot/ Draw an Ellipse Summary Plot in R]
 
 == 使い方 ==
 
