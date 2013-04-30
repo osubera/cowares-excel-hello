@@ -8,6 +8,7 @@
 #             x= data frame for x-axis; factors and observations,
 #             y= data frame for y-axis; factors and observations,
 #             SUMMARY= function generating summaries to write contours,
+#             SHEER= function adjusting color levels,
 #             plot= TRUE for chart / FALSE for print summary,
 #             verbose= TRUE for debugging information,
 #             ...= accepts plot parameters
@@ -166,7 +167,10 @@ calc.stats <- function(x, y, SUMMARY=ninenum, na.rm=TRUE) {
 }
 
 calc.stats.na.rm <- function(x, na.rm) {
-  if(na.rm) for(f in names(x)) if(all(is.na(x[[f]]))) x[f] <- NULL
+  if(na.rm) 
+    for(f in names(x))
+      if(any(apply(x[[f]], 2, function(a) all(is.na(a))))) 
+        x[f] <- NULL
   x
 }
 
