@@ -14,36 +14,95 @@
 #             ...= accepts plot parameters
 #            )
 #
-# ellipseplot.single(
-#             x= vector data for x-axis; observations without factor,
-#             y= vector data for y-axis; observations without factor,
-#             # plot single pair of (x,y) data without any factors
-#             # other parameters are same as ellipseplot
+# other data types supported
+#   numeric vector : no factors
+#   matrix : same format as data.frame
+#   list   : list of observation vectors, separated by factors
+#
+# support y=NULL
+#   plot single axis data, separated by horizontal indexes
 #
 # requires midpoints
 
-ellipseplot <- function(x, y, 
+ellipseplot <- function(x, ...) UseMethod("ellipseplot")
+
+ellipseplot.default <- ellipseplot.data.frame
+
+ellipseplot.data.frame <- function(x, y=NULL, 
                    SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
+  xaxt <- par('xaxt')
+  if(is.null(y)) { # generate indexes for single axis plot
+    xaxt <- 'n'
+    y <- x
+    f <- levels(as.factor(y[,1]))
+    fl <- length(f)
+    x <- data.frame(f=rep(f, 2), 
+                    x=rep(1L:fl, 2) + 0.5 * rep(c(-1,1), each=fl))
+    names(x)[2] <- names(y)[1]
+  }
+
   stats <- calc.stats(x, y, SUMMARY)
   axes <- list(x=names(x), y=names(y))
   
   if(plot) {
-    many.ellipses(stats, axes, SHEER, ...)
+    many.ellipses(stats, axes, SHEER, xaxt=xaxt, ...)
     invisible(stats)
   } else {
     stats
   }
 }
 
-ellipseplot.single <- function(x, y, 
+ellipseplot.numeric <- function(x, y=NULL, 
                    SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
-  xd <- data.frame(rep('o',length(x)), x)
-  yd <- data.frame(rep('o',length(y)), y)
-  ellipseplot(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
+  xd <- data.frame(o=rep('o',length(x)), x)
+  yd <- if(is.null(y)) NULL else 
+          data.frame(o=rep('o',length(y)), y)
+  ellipseplot.data.frame(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
 }
 
+ellipseplot.matrix <- function(x, y=NULL, 
+                   SUMMARY=ninenum, SHEER=sheer.color,
+                   plot=TRUE, verbose=FALSE, ...) {
+  xd <- data.frame(x, stringsAsFactors=F)
+  xd[,2] <- as.numeric(xd[,2])
+  yd <- NULL
+  if(!is.null(y)) {
+    yd <- data.frame(y, stringsAsFactors=F)
+    yd[,2] <- as.numeric(yd[,2])
+  }
+  ellipseplot.data.frame(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
+}
+
+ellipseplot.list <- function(x, y=NULL, 
+                   SUMMARY=ninenum, SHEER=sheer.color,
+                   plot=TRUE, verbose=FALSE, ...) {
+  sx <- 1L:length(x)
+  nx <- names(x)
+  if(is.null(nx)) nx <- as.character(sx)
+  xf <- xv <- NULL
+  for(i in sx) {
+    xv <- c(xv, x[[i]])
+    xf <- c(xf, rep(nx[i], length(x[[i]])))
+  }
+  xd <- data.frame(factor=xf, x=xv)
+
+  yd <- NULL
+  if(!is.null(y)) {
+    sy <- 1L:length(y)
+    ny <- names(y)
+    if(is.null(ny)) ny <- as.character(sy)
+    yf <- yv <- NULL
+    for(i in sy) {
+      yv <- c(yv, y[[i]])
+      yf <- c(yf, rep(ny[i], length(y[[i]])))
+    }
+    yd <- data.frame(factor=yf, y=yv)
+  }
+
+  ellipseplot.data.frame(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
+}
 
 # draw multiple ellipses of stat
 # stats is a list of stat
