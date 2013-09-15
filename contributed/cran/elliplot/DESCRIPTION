@@ -1,9 +1,10 @@
 Package: elliplot
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Ellipse Summary Plot of Quantiles
+Version: 1.0.0
 Date: 2013-09-15
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Shinichiro Tomizono
+Maintainer: Tomizono <cowares@gmail.com>
+Description: Correlation chart of two set (x and y) of data. 
+Using Quantiles.  Visualize the effect of factor. 
+License: file LICENSE
