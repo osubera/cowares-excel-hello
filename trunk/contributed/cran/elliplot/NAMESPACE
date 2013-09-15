@@ -1,1 +1,2 @@
-exportPattern("^[[:alpha:]]+")
+export('midpoint','midpoints','ninenum','seventeennum')
+exportPattern('^ellipseplot[.a-z]*')
