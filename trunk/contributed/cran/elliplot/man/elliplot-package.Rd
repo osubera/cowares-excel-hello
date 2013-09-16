@@ -3,40 +3,43 @@
 \alias{elliplot}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Ellipse Summary Plot of Quantiles
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Correlation chart of two set (x and y) of data. 
+Using Quantiles.  Visualize the effect of factor. 
 }
 \details{
 \tabular{ll}{
 Package: \tab elliplot\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 1.0.0\cr
 Date: \tab 2013-09-15\cr
-License: \tab What license is it under?\cr
+License: \tab paid4e license\cr
 }
-~~ An overview of how to use the package, including the most ~~
-~~ important functions ~~
+This package contains quantile functions and ellipse 
+plot functions.  These functions are to calculate 
+quantile summaries and visualize them with ellipses.  
+
+The ellipseplot works both for 1 set and 2 sets of data.  
+When used for 2 sets data, it visualize the correlation 
+of x and y axis.  
 }
 \author{
-Who wrote it
+Shinichiro Tomizono
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer: Shinichiro Tomizono <cowares@gmail.com>
 }
 \references{
-~~ Literature or other references for background information ~~
+Quantiles: \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
+Ellipse Plot: \url{http://tomizonor.wordpress.com/2013/04/29/ellipse-plot/}
 }
-~~ Optionally other standard keywords, one per line, from file ~~
-~~ KEYWORDS in the R documentation directory ~~
 \keyword{ package }
+\keyword{ hplot }
+\keyword{ utilities }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
+ninenum(1:999)
+ellipseplot(iris[c(5,1)], iris[c(5,2)])
 }
