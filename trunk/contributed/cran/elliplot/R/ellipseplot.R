@@ -26,8 +26,6 @@
 
 ellipseplot <- function(x, ...) UseMethod("ellipseplot")
 
-ellipseplot.default <- ellipseplot.data.frame
-
 ellipseplot.data.frame <- function(x, y=NULL, 
                    SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
@@ -103,6 +101,8 @@ ellipseplot.list <- function(x, y=NULL,
 
   ellipseplot.data.frame(xd, yd, SUMMARY, SHEER, plot, verbose, ...)
 }
+
+ellipseplot.default <- ellipseplot.data.frame
 
 # draw multiple ellipses of stat
 # stats is a list of stat
