@@ -29,7 +29,7 @@ ellipseplot <- function(x, ...) UseMethod("ellipseplot")
 ellipseplot.data.frame <- function(x, y=NULL, 
                    SUMMARY=ninenum, SHEER=sheer.color,
                    plot=TRUE, verbose=FALSE, ...) {
-  xaxt <- par('xaxt')
+  if(plot) xaxt <- par('xaxt')
   if(is.null(y)) { # generate indexes for single axis plot
     xaxt <- 'n'
     y <- x
