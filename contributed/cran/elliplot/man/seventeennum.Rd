@@ -1,59 +1,47 @@
 \name{seventeennum}
 \alias{seventeennum}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Seventeen Number Summaries
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Return seventeen number summary (minimum, 1st-7th hexadeciles, median, 9th-15th hexadeciles, maximum) for the input data.
 }
 \usage{
-seventeennum(x, ...)
+seventeennum(x, na.rm=TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+numeric, maybe including \code{NA}s and +/-\code{Inf}s.
 }
-  \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+  \item{na.rm}{
+logical value indicating whether \code{NA}s should be stripped before the computation proceeds.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+This function is similar to \code{\link{fivenum}}.  This returns hexadeciles instead of quartiles of the \code{\link{fivenum}}. 
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A numeric vector of length 17 containing the summary information. 
 }
 \references{
-%% ~put references to the literature/web site here ~
+Quantiles: median, quartiles, octiles, hexadeciles, …
+\url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
 }
 \author{
-%%  ~~who you are~~
+Shinichiro Tomizono
 }
 \note{
-%%  ~~further notes~~
+Internally calling \code{\link{midpoints}} with \code{n=4}.
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  \code{\link{midpoints}},
+  \code{\link{ninenum}},
+  \code{\link{fivenum}},
+  \code{\link{median}}.
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, ...) 
-midpoints(x, 4, ...)
+seventeennum(1:100)
+seventeennum(c(rnorm(100), -Inf, Inf))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }
