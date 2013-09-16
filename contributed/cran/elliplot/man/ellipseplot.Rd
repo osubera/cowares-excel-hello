@@ -1,59 +1,84 @@
 \name{ellipseplot}
 \alias{ellipseplot}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\alias{ellipseplot.default}
+\alias{ellipseplot.data.frame}
+\alias{ellipseplot.numeric}
+\alias{ellipseplot.matrix}
+\alias{ellipseplot.list}
 \title{
-%%  ~~function to do ... ~~
+Draw Ellipse Summary Plot
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Correlation chart of two set (x and y) of data. 
+Using Quantiles.  Visualize the effect of factor. 
 }
 \usage{
-ellipseplot(x, ...)
+ellipseplot(x, y=NULL, SUMMARY=ninenum, SHEER=sheer.color,
+            plot=TRUE, verbose=FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+An x-axis data, such as data frame of factors (1st column) and 
+observations (2nd column).  
+A vector, a matrix or a list is also acceptable.  
+If a vector is given, a single ellipse without factors are 
+drawn. 
+A matrix is as same format as the data frame.  
+A list is formed by factors with observatoin vectors as each item.  
+}
+  \item{y}{
+A y-axis data, such as data frame of factors (1st column) and 
+observations (2nd column).  
+Same types as the x-axis data are also acceptable.  
+It can be a NULL (default), to draw a single axis chart.  
+}
+  \item{SUMMARY}{
+A function generating summaries to write contours of ellipses.  
+The default is ninenum to use nine number summary.  
+}
+  \item{SHEER}{
+A function adjusting color levels of ellipses. 
+The default is sheer.color function shown below.  
+    \preformatted{
+sheer.color <- function(col, level) \{
+  sheer <- level^2 * 0.5
+  adjustcolor(col, alpha.f=sheer)
+\}
+    }
+}
+  \item{plot}{
+If FALSE is given, it disable to plot and print a summary.  
+The default is TRUE.  
+}
+  \item{verbose}{
+If TRUE is given, it print verbose debugging information. 
+The default is FALSE.  
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+Plot parameters are acceptable.  
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A summary list is explicitly printed when plot=FALSE is given, 
+and is invisibly returned when plot=TRUE.  
 }
 \references{
-%% ~put references to the literature/web site here ~
+Ellipse Summary Plot
+\url{http://tomizonor.wordpress.com/2013/04/29/ellipse-plot/}
 }
 \author{
-%%  ~~who you are~~
+Shinichiro Tomizono
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  \code{\link{ninenum}}
+  \code{\link{seventeennum}}
+  \code{\link{midpoints}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, ...) 
-UseMethod("ellipseplot")
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+ellipseplot(iris[c(5,1)], iris[c(5,2)])
+\keyword{ hplot }
