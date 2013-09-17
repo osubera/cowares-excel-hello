@@ -1,5 +1,6 @@
 \name{seventeennum}
 \alias{seventeennum}
+\alias{hexadecile}
 \title{
 Seventeen Number Summaries
 }
