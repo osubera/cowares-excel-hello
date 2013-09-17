@@ -1,5 +1,6 @@
 \name{ninenum}
 \alias{ninenum}
+\alias{octile}
 \title{
 Nine Number Summaries
 }
