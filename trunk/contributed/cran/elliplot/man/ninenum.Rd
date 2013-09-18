@@ -25,7 +25,7 @@ This function is similar to \code{\link{fivenum}}.  This returns octiles instead
 A numeric vector of length 9 containing the summary information. 
 }
 \references{
-Quantiles: median, quartiles, octiles, hexadeciles, …
+Quantiles: median, quartiles, octiles, hexadeciles, ... 
 \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
 }
 \author{
