@@ -13,7 +13,9 @@ Correlation chart of two set (x and y) of data.
 Using Quantiles.  Visualize the effect of factor. 
 }
 \usage{
-ellipseplot(x, y=NULL, SUMMARY=ninenum, SHEER=sheer.color,
+ellipseplot(x, ...)
+
+\method{ellipseplot}{default}(x, y=NULL, SUMMARY=ninenum, SHEER=sheer.color,
             plot=TRUE, verbose=FALSE, ...)
 }
 \arguments{
