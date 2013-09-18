@@ -5,6 +5,5 @@ Version: 1.0.0
 Date: 2013-09-15
 Author: Shinichiro Tomizono
 Maintainer: Tomizono <cowares@gmail.com>
-Description: Correlation chart of two set (x and y) of data. 
-Using Quantiles.  Visualize the effect of factor. 
+Description: Correlation chart of two set (x and y) of data.  Using Quantiles.  Visualize the effect of factor. 
 License: file LICENSE
