@@ -1,59 +1,63 @@
 \name{midpoint}
 \alias{midpoint}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Center of Indexes
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Divide a given range of index into two of exact halves. 
 }
 \usage{
 midpoint(x)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+range of index. \code{c(min.index, max.index)}
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+This function implements the concept of \code{\link{median}}, 
+and is used in the \code{\link{midpoints}} to calculate 
+quantiles. 
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A list of two numeric vectors is returned. 
+\item{1}{a range of index for the lower half}
+\item{2}{a range of index for the higher half}
+Lengths of the two halves are exactly same.
+If the parent range has an odd length, the exact center index 
+is used both at the end of the lower half and at the start of 
+the higher half.
 }
 \references{
-%% ~put references to the literature/web site here ~
+Quantiles: median, quartiles, octiles, hexadeciles, …
+\url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
 }
 \author{
-%%  ~~who you are~~
+Shinichiro Tomizono
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  \code{\link{midpoints}},
+  \code{\link{median}},
+  \code{\link{range}}.
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+midpoint(c(2,8))
+# results are shown below.
+# [[1]]
+# [1] 2 5
+# 
+# [[2]]
+# [1] 5 8
 
-## The function is currently defined as
-function (x) 
-{
-    n <- (x[1] + x[2])/2
-    list(c(x[1], floor(n)), c(ceiling(n), x[2]))
-  }
+midpoint(c(2,9))
+# results are shown below.
+# [[1]]
+# [1] 2 5
+# 
+# [[2]]
+# [1] 6 9
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }
