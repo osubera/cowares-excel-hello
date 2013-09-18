@@ -31,6 +31,6 @@ midpoints <- function(x, n=1, na.rm=TRUE) {
 }
 
 # derived
-ninenum <- function(x, ...) midpoints(x, 3, ...)
-seventeennum <- function(x, ...) midpoints(x, 4, ...)
+ninenum <- function(x, na.rm=TRUE) midpoints(x, 3, na.rm)
+seventeennum <- function(x, na.rm=TRUE) midpoints(x, 4, na.rm)
 
