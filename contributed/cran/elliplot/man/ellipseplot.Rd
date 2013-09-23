@@ -98,7 +98,8 @@ ellipseplot(PlantGrowth[2:1], SUMMARY=fivenum)
 ellipseplot(iris[,1], iris[,2], xlab='Sepal.Length', ylab='Sepal.Width')
 
 # list example
-ellipseplot(list(untreated=rnorm(30,3,1), treated=rnorm(30,5,2)), list(untreated=rnorm(20,6,3), treated=rnorm(20,4,2)))
+ellipseplot(list(untreated=rnorm(30,3,1), treated=rnorm(30,5,2)), 
+            list(untreated=rnorm(20,6,3), treated=rnorm(20,4,2)))
 
 # using cutomized sheer function
 my.sheer.color <- function(col, level) adjustcolor(rainbow(100)[runif(1,1,100)], alpha.f=0.4)
