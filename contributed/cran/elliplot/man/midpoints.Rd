@@ -16,7 +16,7 @@ numeric, maybe including \code{NA}s and +/-\code{Inf}s.
 }
   \item{n}{
 positive integer, to determine which quantiles to calculate.  
-return values are \code{2 ^ n + 1} number summary.
+return values are \eqn{2 ^ n + 1} number summary.
 \code{n=1} (default) is for three number, namely, minimum, median 
 and maximum.  \code{n=2} is for five number, such as quartiles. 
 \code{n=3} is for nine number, such as octiles.  
@@ -26,18 +26,17 @@ logical value indicating whether \code{NA}s should be stripped before the comput
 }
 }
 \details{
+This function is calling \code{\link{midpoint}} with \code{n} depth.
 }
 \value{
-A numeric vector of length \code{2 ^ n + 1} containing the summary information. 
+A numeric vector of length \eqn{2 ^ n + 1} containing the summary information. 
 }
 \references{
-Quantiles: median, quartiles, octiles, hexadeciles, ... 
+Quantiles: median, quartiles, octiles, hexadeciles, \ldots 
 \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
 }
 \author{
 Shinichiro Tomizono
-}
-\note{
 }
 
 \seealso{

@@ -79,8 +79,6 @@ Ellipse Summary Plot
 \author{
 Shinichiro Tomizono
 }
-\note{
-}
 
 \seealso{
   \code{\link{ninenum}},

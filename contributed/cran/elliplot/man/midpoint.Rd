@@ -21,21 +21,19 @@ quantiles.
 }
 \value{
 A list of two numeric vectors is returned. 
-\item{1}{a range of index for the lower half}
-\item{2}{a range of index for the higher half}
+\item{[[1]]}{a range of index for the lower half}
+\item{[[2]]}{a range of index for the higher half}
 Lengths of the two halves are exactly same.
 If the parent range has an odd length, the exact center index 
 is used both at the end of the lower half and at the start of 
 the higher half.
 }
 \references{
-Quantiles: median, quartiles, octiles, hexadeciles, ... 
+Quantiles: median, quartiles, octiles, hexadeciles, \ldots 
 \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
 }
 \author{
 Shinichiro Tomizono
-}
-\note{
 }
 
 \seealso{

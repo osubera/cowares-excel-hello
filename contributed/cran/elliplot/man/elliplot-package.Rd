@@ -15,7 +15,7 @@ Package: \tab elliplot\cr
 Type: \tab Package\cr
 Version: \tab 1.0.0\cr
 Date: \tab 2013-09-15\cr
-License: \tab paid4e license\cr
+License: \tab \href{http://paidforeveryone.wordpress.com}{paid4e license}: Fortitudinous, Free, Fair. \cr
 }
 This package contains quantile functions and ellipse 
 plot functions.  These functions are to calculate 
@@ -31,13 +31,15 @@ Shinichiro Tomizono
 Maintainer: Shinichiro Tomizono <cowares@gmail.com>
 }
 \references{
-Quantiles: \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}
+Quantiles: \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}\cr
 Ellipse Plot: \url{http://tomizonor.wordpress.com/2013/04/29/ellipse-plot/}
 }
 \keyword{ package }
 \keyword{ hplot }
 \keyword{ utilities }
 \seealso{
+  \code{\link{midpoints}},
+  \code{\link{ellipseplot}}.
 }
 \examples{
 ninenum(1:999)
