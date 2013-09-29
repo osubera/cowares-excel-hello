@@ -1,12 +1,12 @@
 Package: elliplot
 Type: Package
 Title: Ellipse Summary Plot of Quantiles
-Version: 1.1.0
-Date: 2013-09-28
+Version: 1.1.1
+Date: 2013-09-29
 Author: Shinichiro Tomizono
 Maintainer: Shinichiro Tomizono <cowares@gmail.com>
 Description: Correlation chart of two set (x and y) of data.  
   Using Quantiles.  Visualize the effect of factor. 
-License: file LICENSE
+License: MIT + file LICENSE
 License_is_FOSS: yes
 License_restricts_use: no
