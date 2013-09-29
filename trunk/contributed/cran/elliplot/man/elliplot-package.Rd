@@ -15,7 +15,7 @@ Package: \tab elliplot\cr
 Type: \tab Package\cr
 Version: \tab 1.0.0\cr
 Date: \tab 2013-09-15\cr
-License: \tab \href{http://paidforeveryone.wordpress.com}{paid4e license}: Fortitudinous, Free, Fair. \cr
+License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
 }
 This package contains quantile functions and ellipse 
 plot functions.  These functions are to calculate 
