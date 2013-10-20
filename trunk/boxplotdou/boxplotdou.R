@@ -3,18 +3,98 @@
 #
 # Copyright (C) 2013 Tomizono
 # Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#                            http://paidforeveryone.wordpress.com/
+
+# boxplotdou : S3 Method
+#  default = data.frame
+#  factor
+
+# boxplotdou.data.frame(cbind(factor1, data1), cbind(factor2, data2))
+# boxplotdou.factor(factor1, data1, factor2, data2)
+
+# boxplotdou.data.frame(
+#  x = data.frame, factor and observation to x-axis
+#  y = data.frame, factor and observation to y-axis
+#  boxed.whiskers = logical, default=FALSE,
+#                   TRUE to draw rectangular range rather than whisker
+#  outliers.has.whiskers = logical, default=FALSE, 
+#                          extend whisker and staple through outliers
+#  name.on.axis = logical, default=TRUE, 
+#                          TRUE to draw group names on axes
+#  factor.labels = control labels on each group on factor
+#                  default=NULL, using factor data
+#                  TRUE to abbreviate by alphabet letters
+#                  FALSE to draw no labels
+#                  character vector to give explicit labels
+#                  single character to use identical character
+#                  NA in vector to exclude any groups
+#  draw.legend = logical, draw legend or not
+#                default=NA, enable legend only when labels abbreviated
+#  condense = logical, default=FALSE, 
+#             TRUE to unify near groups into one box
+#  condense.severity = character, default="iqr",
+#                      one of c('iqr','whisker','iqr.xory','whisker.xory'),
+#                      which is the border to condense or not,
+#                      used only when condense=TRUE
+#  condense.once = logical, default=FALSE,
+#                  TRUE to disable recursive condenses,
+#                  used only when condense=TRUE
+#  col = colors for each group
+#        default=NULL, automatic colors
+#  COLOR.SHEER = function, to convert color to sheer color,
+#                default=bxpdou.sheer.color, internally defined,
+#                sheer colors are used for inside box and outlier-whisker
+#  shading = shading density to draw inside of box,
+#            default=NA is automatic, usually no shadings
+#  shading.angle = shading angle to draw inside of box,
+#                  default=NA is automatic, usually no shadings
+#  blackwhite = logical, default=FALSE,
+#               TRUE to draw black and white chart,
+#               equivalent to set following 3 parameters,
+#                 col='black', shading=TRUE,
+#                 COLOR.SHEER=(function(a) a)
+#  verbose = logical, default=FALSE, TRUE is to show debug information
+#  plot = logical, default=TRUE, to draw a chart
+#  ... = accepts graphical parameters and boxplot color parameters
+
+# boxplotdou.factor(
+#  f.x = factor vector to x-axis
+#  obs.x = observation vector to x-axis
+#  f.y = factor vector to y-axis
+#  obs.y = observation vector to y-axis
+
+# boxplot color parameters
 #
-# boxplotdou(cbind(factor, data1), cbind(factor, data2))
+#  medcol = default=NULL, is black, colors for median labels
+#  whiskcol = default=NULL, is =col, colors for whiskers
+#  staplecol = default=NULL, is =col, colors for staples
+#  boxcol = default=NULL, is black, colors for box borders
+#  outcol = default=NULL, is =col, colors for outliers
+#  outbg = default=NULL, is transparent, colors inside outliers
+#  outcex = default=2, size of outliers
+#  outpch = default=1, is a transparent circle, symbol number of outliers
+
+# dependencies
+#
+# using boxplot to calculate boxplot statistics
+
+# data structure (output values)
+#
+# list of 2 items (x, y)
+# each item is identical to boxplot statistics
+
 
 boxplotdou <- function(x, ...) UseMethod("boxplotdou")
 
-boxplotdou.default <- 
+boxplotdou.data.frame <- 
   function(x, y, 
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-           name.on.axis=TRUE,
+           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
            condense=FALSE, condense.severity="iqr",
            condense.once=FALSE,
+           col=NULL,
            COLOR.SHEER=bxpdou.sheer.color, 
+           shading=NA, shading.angle=NA, blackwhite=FALSE,
            verbose=FALSE, plot=TRUE, ...) {
 
   # both x and y expect data frame with 2 columns:  factor, observation
@@ -26,12 +106,21 @@ boxplotdou.default <-
                                 verbose=verbose)
 
   if(plot) {
+    if(blackwhite) {
+      if(is.null(col)) col <- 'black'
+      COLOR.SHEER <- function(a) a
+      if(is.na(shading) && is.na(shading.angle)) shading=TRUE
+    }
+
     bxpdou(stat$stat$x, stat$stat$y, stat$level,
            xlab=stat$name$x, ylab=stat$name$y, 
            boxed.whiskers=boxed.whiskers, 
            outliers.has.whiskers=outliers.has.whiskers,
-           name.on.axis=name.on.axis, 
+           name.on.axis=name.on.axis,
+           factor.labels=factor.labels, draw.legend=draw.legend,
+           col=col,
            COLOR.SHEER=COLOR.SHEER, 
+           shading.density=shading, shading.angle=shading.angle,
            verbose=verbose, ...)
     invisible(stat$stat)
   } else {
@@ -39,42 +128,151 @@ boxplotdou.default <-
   }
 }
 
+boxplotdou.factor <- 
+  function(f.x, obs.x, f.y, obs.y,  
+           boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
+           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           condense=FALSE, condense.severity="iqr",
+           condense.once=FALSE,
+           col=NULL,
+           COLOR.SHEER=bxpdou.sheer.color, 
+           shading=NA, shading.angle=NA, blackwhite=FALSE,
+           verbose=FALSE, plot=TRUE, ...) {
+
+  # f.x and f.y are factor vectors
+  # obs.x and obs.y are observation vectors
+  x <- data.frame(f=f.x, x=obs.x)
+  y <- data.frame(f=f.y, y=obs.y)
+  boxplotdou.data.frame(x, y,
+           boxed.whiskers=boxed.whiskers,
+           outliers.has.whiskers=outliers.has.whiskers,
+           name.on.axis=name.on.axis, factor.labels=factor.labels,
+           draw.legend=draw.legend, condense=condense,
+           condense.severity=condense.severity, condense.once=condense.once,
+           col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
+           shading.angle=shading.angle, blackwhite=blackwhite,
+           verbose=verbose, plot=plot, ...) 
+}
+
+boxplotdou.default <- boxplotdou.data.frame
+
+
 bxpdou <- 
 function(x.stats, y.stats, factor.levels, 
          boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-         name.on.axis=TRUE, 
+         name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+         col=NULL,
          COLOR.SHEER=bxpdou.sheer.color,
+         shading.density=NA, shading.angle=NA,
          verbose=FALSE, ...) {
   
   xlim <- range(x.stats$stats, x.stats$out, na.rm=TRUE)
   ylim <- range(y.stats$stats, y.stats$out, na.rm=TRUE)
-  lims <- list(xlim=xlim, ylim=ylim)
-
-  pars <- modifyList(lims, c(list(...), x=NA))
 
   levels.num <- length(factor.levels)
   levels.col <- 
-    if(is.null(pars$col)) { rainbow(levels.num)
-    } else { rep(pars$col, levels.num) }
+    if(is.null(col)) { rainbow(levels.num)
+    } else { rep(col, levels.num) }
   levels.col.sheer <- COLOR.SHEER(levels.col)
-  
+
+  levels.shade <- 
+    make.shadings(n=levels.num, density=shading.density, 
+                  angle=shading.angle, verbose=verbose)
+
+  use.strict.factor.labels <- is.null(factor.labels)
+  factor.labels <-
+    if(length(factor.labels) == 1) rep(factor.labels, levels.num) else
+      factor.labels[1L:levels.num]
+
+  abbr.factor.labels <-
+    if(use.strict.factor.labels) {
+      rep('s', levels.num) # strict
+    } else if(is.logical(factor.labels)) {
+      ifelse(factor.labels, 
+             'g',          # generates internally
+             'n')          # no labels
+    } else {
+      ifelse(is.na(factor.labels), 
+             NA,           # ignore, not draw
+             'e')          # specified explicitly
+    }
+  if(levels.num > 26) {
+    abbr.is.g <- abbr.factor.labels %in% 'g'
+    abbr.is.g[1:26] <- FALSE
+    abbr.factor.labels[abbr.is.g] <- 's'
+  }
+
+  column.char <- 
+    sapply(as.list(1L:levels.num),
+           function(i) switch(abbr.factor.labels[i],
+                              s=as.character(factor.levels[i]),
+                              g=letters[i],
+                              e=as.character(factor.labels[i]),
+                              '')
+           )
+
+  if(is.na(draw.legend))
+    draw.legend <- !use.strict.factor.labels
+
+  medcol <- rep(extract.from.dots('medcol', NULL, ...), levels.num)
+  whiskcol <- rep(extract.from.dots('whiskcol', NULL, ...), levels.num)
+  staplecol <- rep(extract.from.dots('staplecol', NULL, ...), levels.num)
+  boxcol <- rep(extract.from.dots('boxcol', NULL, ...), levels.num)
+  outcol <- rep(extract.from.dots('outcol', NULL, ...), levels.num)
+  outbg <- rep(extract.from.dots('outbg', NULL, ...), levels.num)
+  outcex <- rep(extract.from.dots('outcex', 2, ...), levels.num)
+  outpch <- rep(extract.from.dots('outpch', 1, ...), levels.num)
+
+  if(is.null(whiskcol)) whiskcol <- levels.col
+  if(is.null(staplecol)) staplecol <- levels.col
+  if(is.null(outcol)) outcol <- levels.col
+
   if(verbose) {
-    print(lims)
-    print(pars)
+    print(list(factor.labels=factor.labels,
+               abbr.factor.labels=abbr.factor.labels,
+               xlim=xlim, ylim=ylim))
   }
 
   # open a plot area and draw axis
-  do.call('plot', pars)
+  do.call.with.par('plot.default', list(...), x=NA, xlim=xlim, ylim=ylim)
+
+  # legend for abbreviates at top
+  if(draw.legend) {
+    not.na <- !is.na(abbr.factor.labels)
+    abbr <- column.char[not.na]
+    strict <- factor.levels[not.na]
+    legend.col <- levels.col[not.na]
+
+    legend <- paste(abbr, strict, sep=': ')
+
+    n <- length(legend)
+    pt <- seq(from=xlim[1], to=xlim[2], length.out=n)
+    for(i in 1L:n)
+      do.call.with.par('mtext', list(...), dots.win=T,
+                       text=legend[i], side=3, line=1, at=pt[i],
+                       col=legend.col[i])
+  }
 
   # draw boxes
   for(i in 1L:levels.num) {
-    bxpdou.abox(x.stats, y.stats, 
-                column.num=i, column.char=as.character(factor.levels)[i], 
-                color=levels.col[i], color.sheer=levels.col.sheer[i],
-                name.on.axis=name.on.axis, 
-                boxed.whiskers=boxed.whiskers, 
-                outliers.has.whiskers=outliers.has.whiskers,
-                verbose=verbose)
+    if(!is.na(abbr.factor.labels[i]))
+      bxpdou.abox(x.stats, y.stats, 
+                  column.num=i, column.char=column.char[i],
+                  color=levels.col[i], color.sheer=levels.col.sheer[i],
+                  density=levels.shade$density[i],
+                  angle=levels.shade$angle[i],
+                  name.on.axis=name.on.axis, 
+                  boxed.whiskers=boxed.whiskers, 
+                  outliers.has.whiskers=outliers.has.whiskers,
+                  median.color=medcol[i],
+                  whisker.color=whiskcol[i],
+                  staple.color=staplecol[i],
+                  box.color=boxcol[i],
+                  outlier.color=outcol[i],
+                  outlier.bgcolor=outbg[i],
+                  outlier.cex=outcex[i],
+                  outlier.pch=outpch[i],
+                  verbose=verbose, ...)
   }
 }
 
@@ -85,9 +283,18 @@ bxpdou.sheer.color <- function(col) {
 bxpdou.abox <- 
 function(x, y, column.num, column.char, 
          color, color.sheer, 
+         density=NULL, angle=NULL,
          boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
          name.on.axis=TRUE, 
-         verbose=FALSE) {
+         median.color=NULL,
+         whisker.color=NULL,
+         staple.color=NULL,
+         box.color=NULL,
+         outlier.color=NULL,
+         outlier.bgcolor=NULL,
+         outlier.cex=2,
+         outlier.pch=1,
+         verbose=FALSE, ...) {
 
   # declare five numbers explicitly
 
@@ -117,18 +324,22 @@ function(x, y, column.num, column.char,
 
   # draw factor character on top and right axis
   if(name.on.axis) {
-    if(has.x) mtext(column.char,side=3,at=x.center,col=color)
-    if(has.y) mtext(column.char,side=4,at=y.center,col=color)
+    if(has.x) 
+      do.call.with.par('mtext', list(...), dots.win=T, 
+                       text=column.char, side=3, at=x.center, col=color)
+    if(has.y) 
+      do.call.with.par('mtext', list(...), dots.win=T,
+                       text=column.char, side=4, at=y.center, col=color)
   }
 
   # both X and Y are required to draw followings
   if(!has.x || !has.y) return(FALSE)
 
   # draw a box of 2nd and 3rd quantiles
-  rect(x.lower, y.lower, x.higher, y.higher, col=color.sheer)
+  rect(x.lower, y.lower, x.higher, y.higher, col=color.sheer, density=density, angle=angle, border=box.color)
  
   # draw whiskers for 1st and 4th quantiles
-  # bosed.whiskers=TRUE draws a large box as whiskers
+  # boxed.whiskers=TRUE draws a large box as staples
 
   if(boxed.whiskers) {
     x.bar.low  <- x.lowest
@@ -142,13 +353,13 @@ function(x, y, column.num, column.char,
     y.bar.high <- y.higher
   }
   
-  segments(x.lowest, y.bar.low, x.lowest, y.bar.high, col=color)
-  segments(x.highest, y.bar.low, x.highest, y.bar.high, col=color)
-  segments(x.bar.low, y.lowest, x.bar.high, y.lowest, col=color)
-  segments(x.bar.low, y.highest, x.bar.high, y.highest, col=color)
+  segments(x.lowest, y.bar.low, x.lowest, y.bar.high, col=staple.color)
+  segments(x.highest, y.bar.low, x.highest, y.bar.high, col=staple.color)
+  segments(x.bar.low, y.lowest, x.bar.high, y.lowest, col=staple.color)
+  segments(x.bar.low, y.highest, x.bar.high, y.highest, col=staple.color)
   
-  segments(x.lowest, y.center, x.highest, y.center, col=color)
-  segments(x.center, y.lowest, x.center, y.highest, col=color)
+  segments(x.lowest, y.center, x.highest, y.center, col=whisker.color)
+  segments(x.center, y.lowest, x.center, y.highest, col=whisker.color)
  
   # draw outliers
 
@@ -162,8 +373,12 @@ function(x, y, column.num, column.char,
     print(c("y out", y.out.group,y.out))
   }
     
-  for(x in x.out[x.out.group==column.num]) points(x, y.center, col=color, pch=1, cex=2)
-  for(y in y.out[y.out.group==column.num]) points(x.center, y, col=color, pch=1, cex=2)
+  for(x in x.out[x.out.group==column.num]) 
+    points(x, y.center, col=outlier.color, bg=outlier.bgcolor,
+           pch=outlier.pch, cex=outlier.cex)
+  for(y in y.out[y.out.group==column.num]) 
+    points(x.center, y, col=outlier.color, bg=outlier.bgcolor,
+           pch=outlier.pch, cex=outlier.cex)
  
   # outliers.has.whiskers=TRUE add whiskers at each outlier
 
@@ -179,7 +394,9 @@ function(x, y, column.num, column.char,
   }
  
   # draw the center as factor character
-  text(x.center, y.center, column.char)
+  do.call.with.par('text', list(...), dots.win=T,
+                   x=x.center, y=y.center, labels=column.char,
+                   col=median.color)
   
   return(TRUE)
 }
@@ -298,3 +515,76 @@ bxpdou.exec.condense <- function(x, y, overlap, verbose=FALSE) {
   }
   result
 }
+
+make.shadings <- function(n, density=NA, angle=NA, verbose=FALSE) {
+  shadings <- list(density=NULL, angle=NULL)
+
+  if(is.na(density) && is.na(angle)) return(shadings)
+
+  label <- c('density', 'angle')
+  start <- c(12, 10)
+  end <- c(36, 160)
+  shuffling <- c(TRUE, FALSE)
+  par <- list(density, angle)
+
+  for(i in 1:2) {
+    x <- par[[i]]
+
+    if(length(x) >= n) {
+      shadings[[i]] <- x[1L:n]
+    } else {
+      rx <- if(is.numeric(x)) rep(x, 2)[1:2] else rep(NA, 2)
+      if(is.na(rx[1])) rx[1] <- start[i]
+      if(is.na(rx[2])) rx[2] <- end[i]
+
+      sx <- seq(from=rx[1], to=rx[2], length.out=n)
+
+      if(shuffling[i]) {
+        # shuffle by halves
+        # 1, k, 2, k+1, 3, k+2,,, n
+        shuffle <- seq(from=1, to=n, by=2)
+        shuffle <- c(shuffle, shuffle + 1)[1L:n]
+      } else {
+        shuffle <- 1L:n
+      }
+      shadings[[i]] <- sx[order(shuffle)]
+    }
+  }
+
+  if(verbose) {
+    cat('# shading enabled\n')
+    print(shadings)
+  }
+
+  shadings
+}
+
+only.graphic.pars <- function(pars, what='plot.default') {
+  if(length(pars) == 0) return(list())
+
+  gnames <- names(par(no.readonly=T))
+  pnames <- names(formals(args(what)))
+  gpnames <- unique(c(pnames[pnames != '...'], gnames))
+
+  selectgname <- pars[gpnames]
+  to.rm.na <- names(selectgname)
+
+  if(is.null(to.rm.na)) list() else 
+    selectgname[!is.na(to.rm.na)]
+}
+
+do.call.with.par <- function(what, args, dots.win=FALSE, ...) {
+  pars <- 
+    if(dots.win) {
+      modifyList(only.graphic.pars(args, what), list(...))
+    } else {
+      modifyList(list(...), only.graphic.pars(args, what))
+    }
+  do.call(what, pars)
+}
+
+extract.from.dots <- function(which, default=NULL, ...) {
+  x <- list(...)[[which]]
+  if(is.null(x)) default else x
+}
+
