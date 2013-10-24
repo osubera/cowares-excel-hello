@@ -8,9 +8,11 @@
 # boxplotdou : S3 Method
 #  default = data.frame
 #  factor
+#  formula
 
 # boxplotdou.data.frame(cbind(factor1, data1), cbind(factor2, data2))
 # boxplotdou.factor(factor1, data1, factor2, data2)
+# boxplotdou.formula(formula1, data1, formula2, data2)
 
 # boxplotdou.data.frame(
 #  x = data.frame, factor and observation to x-axis
@@ -62,6 +64,12 @@
 #  obs.x = observation vector to x-axis
 #  f.y = factor vector to y-axis
 #  obs.y = observation vector to y-axis
+
+# boxplotdou.formula(
+#  formula.x = model formula to x-axis
+#  data.x = data frame containing variables in formula.x
+#  formula.y = model formula to y-axis
+#  data.y = data frame containing variables in formula.y
 
 # boxplot color parameters
 #
@@ -143,6 +151,34 @@ boxplotdou.factor <-
   # obs.x and obs.y are observation vectors
   x <- data.frame(f=f.x, x=obs.x)
   y <- data.frame(f=f.y, y=obs.y)
+
+  boxplotdou.data.frame(x, y,
+           boxed.whiskers=boxed.whiskers,
+           outliers.has.whiskers=outliers.has.whiskers,
+           name.on.axis=name.on.axis, factor.labels=factor.labels,
+           draw.legend=draw.legend, condense=condense,
+           condense.severity=condense.severity, condense.once=condense.once,
+           col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
+           shading.angle=shading.angle, blackwhite=blackwhite,
+           verbose=verbose, plot=plot, ...) 
+}
+
+boxplotdou.formula <- 
+  function(formula.x, data.x, formula.y, data.y,  
+           boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
+           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           condense=FALSE, condense.severity="iqr",
+           condense.once=FALSE,
+           col=NULL,
+           COLOR.SHEER=bxpdou.sheer.color, 
+           shading=NA, shading.angle=NA, blackwhite=FALSE,
+           verbose=FALSE, plot=TRUE, ...) {
+
+  # generate a model data frame,
+  # with the 1st column as factor, and the 2nd as observations
+  x <- model.frame(formula.x, data=data.x)[2:1]
+  y <- model.frame(formula.y, data=data.y)[2:1]
+
   boxplotdou.data.frame(x, y,
            boxed.whiskers=boxed.whiskers,
            outliers.has.whiskers=outliers.has.whiskers,
