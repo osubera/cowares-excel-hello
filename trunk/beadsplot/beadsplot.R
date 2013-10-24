@@ -9,6 +9,7 @@
 #  default = data.frame
 #  numeric
 #  character
+#  formula
 
 # beadsplot.data.frame(
 #   x = data.frame, observations
@@ -58,6 +59,10 @@
 # beadsplot.character(
 #   index = character, single observations
 #   x = data.frame, contains a factor and observations
+
+# beadsplot.formula(
+#   formula = formula, a model formula, ex. factor~obs1+obs2+obs3
+#   data = data.frame, contains variables in formula
 
 # scale parameters
 #
@@ -150,6 +155,24 @@ beadsplot.character <- function(index, x, horizontal=FALSE,
   
   beadsplot.data.frame(x[- column],
     x[,column], horizontal, col, sheer, shading, shading.angle,
+    bw, lwd, lwd.center, legend, label.factor, label.range,
+    drift.label.factor, drift.label.range, S, E, N, summary.labels,
+    plot, verbose)
+}
+
+beadsplot.formula <- function(formula, data, horizontal=FALSE,
+               col=NULL, sheer=NULL, shading=NA, shading.angle=NA,
+               bw=0.2, lwd=1, lwd.center=lwd, 
+               legend=TRUE, label.factor=TRUE, label.range=TRUE, 
+               drift.label.factor=c(0.2,2), drift.label.range=c(0,0),
+               S=min, E=mean, N=max, summary.labels=NULL,
+               plot=TRUE, verbose=FALSE, ...) {
+  # generate a model data frame,
+  # with the 1st column as factor, and the 2nd- as observations
+  x <- model.frame(formula, data=data)
+  
+  beadsplot.data.frame(x[-1],
+    x[1], horizontal, col, sheer, shading, shading.angle,
     bw, lwd, lwd.center, legend, label.factor, label.range,
     drift.label.factor, drift.label.range, S, E, N, summary.labels,
     plot, verbose)
