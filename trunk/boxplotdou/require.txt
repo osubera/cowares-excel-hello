@@ -1,0 +1,2 @@
+http://code.google.com/p/cowares-excel-hello/source/browse/trunk/util_r/make.shadings.R
+http://code.google.com/p/cowares-excel-hello/source/browse/trunk/util_r/do.call.with.par.R
