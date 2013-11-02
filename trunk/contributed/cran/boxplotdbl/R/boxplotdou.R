@@ -8,9 +8,11 @@
 # boxplotdou : S3 Method
 #  default = data.frame
 #  factor
+#  formula
 
 # boxplotdou.data.frame(cbind(factor1, data1), cbind(factor2, data2))
 # boxplotdou.factor(factor1, data1, factor2, data2)
+# boxplotdou.formula(formula1, data1, formula2, data2)
 
 # boxplotdou.data.frame(
 #  x = data.frame, factor and observation to x-axis
@@ -62,6 +64,12 @@
 #  obs.x = observation vector to x-axis
 #  f.y = factor vector to y-axis
 #  obs.y = observation vector to y-axis
+
+# boxplotdou.formula(
+#  formula.x = model formula to x-axis
+#  data.x = data frame containing variables in formula.x
+#  formula.y = model formula to y-axis
+#  data.y = data frame containing variables in formula.y
 
 # boxplot color parameters
 #
@@ -143,6 +151,34 @@ boxplotdou.factor <-
   # obs.x and obs.y are observation vectors
   x <- data.frame(f=f.x, x=obs.x)
   y <- data.frame(f=f.y, y=obs.y)
+
+  boxplotdou.data.frame(x, y,
+           boxed.whiskers=boxed.whiskers,
+           outliers.has.whiskers=outliers.has.whiskers,
+           name.on.axis=name.on.axis, factor.labels=factor.labels,
+           draw.legend=draw.legend, condense=condense,
+           condense.severity=condense.severity, condense.once=condense.once,
+           col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
+           shading.angle=shading.angle, blackwhite=blackwhite,
+           verbose=verbose, plot=plot, ...) 
+}
+
+boxplotdou.formula <- 
+  function(formula.x, data.x, formula.y, data.y,  
+           boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
+           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           condense=FALSE, condense.severity="iqr",
+           condense.once=FALSE,
+           col=NULL,
+           COLOR.SHEER=bxpdou.sheer.color, 
+           shading=NA, shading.angle=NA, blackwhite=FALSE,
+           verbose=FALSE, plot=TRUE, ...) {
+
+  # generate a model data frame,
+  # with the 1st column as factor, and the 2nd as observations
+  x <- model.frame(formula.x, data=data.x)[2:1]
+  y <- model.frame(formula.y, data=data.y)[2:1]
+
   boxplotdou.data.frame(x, y,
            boxed.whiskers=boxed.whiskers,
            outliers.has.whiskers=outliers.has.whiskers,
@@ -514,77 +550,5 @@ bxpdou.exec.condense <- function(x, y, overlap, verbose=FALSE) {
     print(result)
   }
   result
-}
-
-make.shadings <- function(n, density=NA, angle=NA, verbose=FALSE) {
-  shadings <- list(density=NULL, angle=NULL)
-
-  if(is.na(density) && is.na(angle)) return(shadings)
-
-  label <- c('density', 'angle')
-  start <- c(12, 10)
-  end <- c(36, 160)
-  shuffling <- c(TRUE, FALSE)
-  par <- list(density, angle)
-
-  for(i in 1:2) {
-    x <- par[[i]]
-
-    if(length(x) >= n) {
-      shadings[[i]] <- x[1L:n]
-    } else {
-      rx <- if(is.numeric(x)) rep(x, 2)[1:2] else rep(NA, 2)
-      if(is.na(rx[1])) rx[1] <- start[i]
-      if(is.na(rx[2])) rx[2] <- end[i]
-
-      sx <- seq(from=rx[1], to=rx[2], length.out=n)
-
-      if(shuffling[i]) {
-        # shuffle by halves
-        # 1, k, 2, k+1, 3, k+2,,, n
-        shuffle <- seq(from=1, to=n, by=2)
-        shuffle <- c(shuffle, shuffle + 1)[1L:n]
-      } else {
-        shuffle <- 1L:n
-      }
-      shadings[[i]] <- sx[order(shuffle)]
-    }
-  }
-
-  if(verbose) {
-    cat('# shading enabled\n')
-    print(shadings)
-  }
-
-  shadings
-}
-
-only.graphic.pars <- function(pars, what='plot.default') {
-  if(length(pars) == 0) return(list())
-
-  gnames <- names(par(no.readonly=T))
-  pnames <- names(formals(args(what)))
-  gpnames <- unique(c(pnames[pnames != '...'], gnames))
-
-  selectgname <- pars[gpnames]
-  to.rm.na <- names(selectgname)
-
-  if(is.null(to.rm.na)) list() else 
-    selectgname[!is.na(to.rm.na)]
-}
-
-do.call.with.par <- function(what, args, dots.win=FALSE, ...) {
-  pars <- 
-    if(dots.win) {
-      modifyList(only.graphic.pars(args, what), list(...))
-    } else {
-      modifyList(list(...), only.graphic.pars(args, what))
-    }
-  do.call(what, pars)
-}
-
-extract.from.dots <- function(which, default=NULL, ...) {
-  x <- list(...)[[which]]
-  if(is.null(x)) default else x
 }
 
