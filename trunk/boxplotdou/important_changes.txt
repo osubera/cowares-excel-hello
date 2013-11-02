@@ -1,0 +1,11 @@
+Changes that will affect to existing users
+
+r985 (2013/11/2)
+
+name.on.axis=TRUE is to show lables by abbreviation (a, b, c, ...).
+  Previsously, the value was to show labels by full name.
+  To do the same, name.on.axis=NULL or =factor.labels must be specified.
+  The default action is unchanged, showing full names.
+  The roll of FALSE is unchanged.
+  This change is to make the action compatible to factor.labels.
+
