@@ -21,8 +21,13 @@
 #                   TRUE to draw rectangular range rather than whisker
 #  outliers.has.whiskers = logical, default=FALSE, 
 #                          extend whisker and staple through outliers
-#  name.on.axis = logical, default=TRUE, 
-#                          TRUE to draw group names on axes
+#  name.on.axis = control labels on each group on axes
+#                 default=factor.labels
+#                 NULL to use factor data
+#                 TRUE to abbreviate by alphabet letters
+#                 FALSE to draw no labels
+#                 character vector to give explicit labels
+#                 single character to use identical character
 #  factor.labels = control labels on each group on factor
 #                  default=NULL, using factor data
 #                  TRUE to abbreviate by alphabet letters
@@ -55,6 +60,9 @@
 #               equivalent to set following 3 parameters,
 #                 col='black', shading=TRUE,
 #                 COLOR.SHEER=(function(a) a)
+#  STAT = function, default=bxpdou.boxplot.stat,
+#                   delegate to standard boxplot function
+#         specify user function to calculate summary
 #  verbose = logical, default=FALSE, TRUE is to show debug information
 #  plot = logical, default=TRUE, to draw a chart
 #  ... = accepts graphical parameters and boxplot color parameters
@@ -85,6 +93,7 @@
 # dependencies
 #
 # using boxplot to calculate boxplot statistics
+# can be independent if STAT option is used
 
 # data structure (output values)
 #
@@ -97,12 +106,13 @@ boxplotdou <- function(x, ...) UseMethod("boxplotdou")
 boxplotdou.data.frame <- 
   function(x, y, 
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
            condense=FALSE, condense.severity="iqr",
            condense.once=FALSE,
            col=NULL,
            COLOR.SHEER=bxpdou.sheer.color, 
            shading=NA, shading.angle=NA, blackwhite=FALSE,
+           STAT=bxpdou.boxplot.stat, 
            verbose=FALSE, plot=TRUE, ...) {
 
   # both x and y expect data frame with 2 columns:  factor, observation
@@ -111,6 +121,7 @@ boxplotdou.data.frame <-
                                 condense=condense, 
                                 severity=condense.severity, 
                                 once=condense.once,
+                                STAT=STAT,
                                 verbose=verbose)
 
   if(plot) {
@@ -139,12 +150,13 @@ boxplotdou.data.frame <-
 boxplotdou.factor <- 
   function(f.x, obs.x, f.y, obs.y,  
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
            condense=FALSE, condense.severity="iqr",
            condense.once=FALSE,
            col=NULL,
            COLOR.SHEER=bxpdou.sheer.color, 
            shading=NA, shading.angle=NA, blackwhite=FALSE,
+           STAT=bxpdou.boxplot.stat, 
            verbose=FALSE, plot=TRUE, ...) {
 
   # f.x and f.y are factor vectors
@@ -160,18 +172,20 @@ boxplotdou.factor <-
            condense.severity=condense.severity, condense.once=condense.once,
            col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
            shading.angle=shading.angle, blackwhite=blackwhite,
+           STAT=STAT,
            verbose=verbose, plot=plot, ...) 
 }
 
 boxplotdou.formula <- 
   function(formula.x, data.x, formula.y, data.y,  
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-           name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+           name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
            condense=FALSE, condense.severity="iqr",
            condense.once=FALSE,
            col=NULL,
            COLOR.SHEER=bxpdou.sheer.color, 
            shading=NA, shading.angle=NA, blackwhite=FALSE,
+           STAT=bxpdou.boxplot.stat, 
            verbose=FALSE, plot=TRUE, ...) {
 
   # generate a model data frame,
@@ -187,6 +201,7 @@ boxplotdou.formula <-
            condense.severity=condense.severity, condense.once=condense.once,
            col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
            shading.angle=shading.angle, blackwhite=blackwhite,
+           STAT=STAT,
            verbose=verbose, plot=plot, ...) 
 }
 
@@ -196,7 +211,7 @@ boxplotdou.default <- boxplotdou.data.frame
 bxpdou <- 
 function(x.stats, y.stats, factor.levels, 
          boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-         name.on.axis=TRUE, factor.labels=NULL, draw.legend=NA,
+         name.on.axis=NULL, factor.labels=NULL, draw.legend=NA,
          col=NULL,
          COLOR.SHEER=bxpdou.sheer.color,
          shading.density=NA, shading.angle=NA,
@@ -215,41 +230,6 @@ function(x.stats, y.stats, factor.levels,
     make.shadings(n=levels.num, density=shading.density, 
                   angle=shading.angle, verbose=verbose)
 
-  use.strict.factor.labels <- is.null(factor.labels)
-  factor.labels <-
-    if(length(factor.labels) == 1) rep(factor.labels, levels.num) else
-      factor.labels[1L:levels.num]
-
-  abbr.factor.labels <-
-    if(use.strict.factor.labels) {
-      rep('s', levels.num) # strict
-    } else if(is.logical(factor.labels)) {
-      ifelse(factor.labels, 
-             'g',          # generates internally
-             'n')          # no labels
-    } else {
-      ifelse(is.na(factor.labels), 
-             NA,           # ignore, not draw
-             'e')          # specified explicitly
-    }
-  if(levels.num > 26) {
-    abbr.is.g <- abbr.factor.labels %in% 'g'
-    abbr.is.g[1:26] <- FALSE
-    abbr.factor.labels[abbr.is.g] <- 's'
-  }
-
-  column.char <- 
-    sapply(as.list(1L:levels.num),
-           function(i) switch(abbr.factor.labels[i],
-                              s=as.character(factor.levels[i]),
-                              g=letters[i],
-                              e=as.character(factor.labels[i]),
-                              '')
-           )
-
-  if(is.na(draw.legend))
-    draw.legend <- !use.strict.factor.labels
-
   medcol <- rep(extract.from.dots('medcol', NULL, ...), levels.num)
   whiskcol <- rep(extract.from.dots('whiskcol', NULL, ...), levels.num)
   staplecol <- rep(extract.from.dots('staplecol', NULL, ...), levels.num)
@@ -263,9 +243,15 @@ function(x.stats, y.stats, factor.levels,
   if(is.null(staplecol)) staplecol <- levels.col
   if(is.null(outcol)) outcol <- levels.col
 
+  labels <- make.labels(names=factor.levels, convert=factor.labels)
+  labels.on.axis <- make.labels(names=factor.levels, 
+                                convert=name.on.axis, blank=NA)
+
+  if(is.na(draw.legend))
+    draw.legend <- !labels$use.strict
+
   if(verbose) {
-    print(list(factor.labels=factor.labels,
-               abbr.factor.labels=abbr.factor.labels,
+    print(list(labels=labels, labels.on.axis=labels.on.axis,
                xlim=xlim, ylim=ylim))
   }
 
@@ -274,30 +260,28 @@ function(x.stats, y.stats, factor.levels,
 
   # legend for abbreviates at top
   if(draw.legend) {
-    not.na <- !is.na(abbr.factor.labels)
-    abbr <- column.char[not.na]
-    strict <- factor.levels[not.na]
-    legend.col <- levels.col[not.na]
+    legends <- make.legend.labels(labels, labels.on.axis, 
+                                  col=levels.col, sep=':', 
+                                  na.rm=TRUE, single.rm=TRUE, dup.rm=TRUE, 
+                                  verbose=verbose)
 
-    legend <- paste(abbr, strict, sep=': ')
-
-    n <- length(legend)
+    n <- length(legends$legend)
     pt <- seq(from=xlim[1], to=xlim[2], length.out=n)
     for(i in 1L:n)
       do.call.with.par('mtext', list(...), dots.win=T,
-                       text=legend[i], side=3, line=1, at=pt[i],
-                       col=legend.col[i])
+                       text=legends$legend[i], side=3, line=1, at=pt[i],
+                       col=legends$col[i])
   }
 
   # draw boxes
   for(i in 1L:levels.num) {
-    if(!is.na(abbr.factor.labels[i]))
+    if(labels$not.na[i])
       bxpdou.abox(x.stats, y.stats, 
-                  column.num=i, column.char=column.char[i],
+                  column.num=i, column.char=labels$labels[i],
                   color=levels.col[i], color.sheer=levels.col.sheer[i],
                   density=levels.shade$density[i],
                   angle=levels.shade$angle[i],
-                  name.on.axis=name.on.axis, 
+                  name.on.axis=labels.on.axis$labels[i], 
                   boxed.whiskers=boxed.whiskers, 
                   outliers.has.whiskers=outliers.has.whiskers,
                   median.color=medcol[i],
@@ -321,7 +305,7 @@ function(x, y, column.num, column.char,
          color, color.sheer, 
          density=NULL, angle=NULL,
          boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
-         name.on.axis=TRUE, 
+         name.on.axis=NA, 
          median.color=NULL,
          whisker.color=NULL,
          staple.color=NULL,
@@ -359,13 +343,13 @@ function(x, y, column.num, column.char,
   }
 
   # draw factor character on top and right axis
-  if(name.on.axis) {
+  if(!is.na(name.on.axis)) {
     if(has.x) 
       do.call.with.par('mtext', list(...), dots.win=T, 
-                       text=column.char, side=3, at=x.center, col=color)
+                       text=name.on.axis, side=3, at=x.center, col=color)
     if(has.y) 
       do.call.with.par('mtext', list(...), dots.win=T,
-                       text=column.char, side=4, at=y.center, col=color)
+                       text=name.on.axis, side=4, at=y.center, col=color)
   }
 
   # both X and Y are required to draw followings
@@ -437,7 +421,13 @@ function(x, y, column.num, column.char,
   return(TRUE)
 }
 
-bxpdou.stats <- function(x, y, verbose=FALSE) {
+bxpdou.boxplot.stat <- function(formula) {
+  # delegate the calculation to the standard boxplot
+  # formula is data~factor
+  boxplot(formula=formula, plot=FALSE)
+}
+
+bxpdou.stats <- function(x, y, STAT=bxpdou.boxplot.stat, verbose=FALSE) {
 
   # both x and y expect data frame with 2 columns:  factor, observation
 
@@ -452,10 +442,7 @@ bxpdou.stats <- function(x, y, verbose=FALSE) {
                  y=factor(y[,1],levels=factor.levels))
 
   for(v in c("x","y")) {
-    # delegate the calculation to the standard boxplot
-    stat[[v]] <- boxplot(formula=
-                         formula(paste("data$", v, "~factor$", v, sep="")), 
-                         plot=FALSE)
+    stat[[v]] <- STAT(formula(paste("data$", v, "~factor$", v, sep="")))
     if(is.null(name[[v]])) name[[v]] <- v
   }
 
@@ -471,9 +458,10 @@ bxpdou.stats <- function(x, y, verbose=FALSE) {
 bxpdou.stats.condense <- 
   function(x, y,
            condense=FALSE, severity="iqr", once=FALSE,
+           STAT=bxpdou.boxplot.stat, 
            verbose=FALSE) {
     
-    stat <- bxpdou.stats(x, y, verbose=verbose)
+    stat <- bxpdou.stats(x, y, STAT=STAT, verbose=verbose)
     to.be.condensed <- 
       bxpdou.check.condense(stat=stat$stat,
                             condense=condense, severity=severity,
