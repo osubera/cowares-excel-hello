@@ -1,0 +1,17 @@
+Changes that will affect to existing users
+
+r988 (2013/11/3)
+
+output value format is changed.
+  Previous output is available as an item of $stat
+  This change is to enable replay by previous output.
+
+r985 (2013/11/2)
+
+name.on.axis=TRUE is to show lables by abbreviation (a, b, c, ...).
+  Previsously, the value was to show labels by full name.
+  To do the same, name.on.axis=NULL or =factor.labels must be specified.
+  The default action is unchanged, showing full names.
+  The roll of FALSE is unchanged.
+  This change is to make the action compatible to factor.labels.
+
