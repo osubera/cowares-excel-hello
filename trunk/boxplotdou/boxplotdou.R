@@ -9,10 +9,12 @@
 #  default = data.frame
 #  factor
 #  formula
+#  list
 
 # boxplotdou.data.frame(cbind(factor1, data1), cbind(factor2, data2))
 # boxplotdou.factor(factor1, data1, factor2, data2)
 # boxplotdou.formula(formula1, data1, formula2, data2)
+# boxplotdou.list(stat)
 
 # boxplotdou.data.frame(
 #  x = data.frame, factor and observation to x-axis
@@ -79,6 +81,9 @@
 #  formula.y = model formula to y-axis
 #  data.y = data frame containing variables in formula.y
 
+# boxplotdou.list(
+#  stat = output values of boxplotdou
+
 # boxplot color parameters
 #
 #  medcol = default=NULL, is black, colors for median labels
@@ -97,11 +102,52 @@
 
 # data structure (output values)
 #
-# list of 2 items (x, y)
-# each item is identical to boxplot statistics
+# list of 3 items (stat, name, level)
+#   $stat
+#     list of 2 items (x, y)
+#     each item is identical to boxplot statistics
+#   $name
+#     list of 2 items (x, y)
+#     each item is name of axis
+#   $level
+#     charactor vecotr of factor names
 
 
 boxplotdou <- function(x, ...) UseMethod("boxplotdou")
+
+boxplotdou.list <- 
+  function(stat, 
+           boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
+           name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
+           col=NULL,
+           COLOR.SHEER=bxpdou.sheer.color, 
+           shading=NA, shading.angle=NA, blackwhite=FALSE,
+           verbose=FALSE, plot=TRUE, ...) {
+
+  # receive previously saved stat, to redraw a chart
+
+  if(plot) {
+    if(blackwhite) {
+      if(is.null(col)) col <- 'black'
+      COLOR.SHEER <- function(a) a
+      if(is.na(shading) && is.na(shading.angle)) shading=TRUE
+    }
+
+    bxpdou(stat$stat$x, stat$stat$y, stat$level,
+           xlab=stat$name$x, ylab=stat$name$y, 
+           boxed.whiskers=boxed.whiskers, 
+           outliers.has.whiskers=outliers.has.whiskers,
+           name.on.axis=name.on.axis,
+           factor.labels=factor.labels, draw.legend=draw.legend,
+           col=col,
+           COLOR.SHEER=COLOR.SHEER, 
+           shading.density=shading, shading.angle=shading.angle,
+           verbose=verbose, ...)
+    invisible(stat)
+  } else {
+    stat
+  }
+}
 
 boxplotdou.data.frame <- 
   function(x, y, 
@@ -124,27 +170,14 @@ boxplotdou.data.frame <-
                                 STAT=STAT,
                                 verbose=verbose)
 
-  if(plot) {
-    if(blackwhite) {
-      if(is.null(col)) col <- 'black'
-      COLOR.SHEER <- function(a) a
-      if(is.na(shading) && is.na(shading.angle)) shading=TRUE
-    }
-
-    bxpdou(stat$stat$x, stat$stat$y, stat$level,
-           xlab=stat$name$x, ylab=stat$name$y, 
-           boxed.whiskers=boxed.whiskers, 
+  boxplotdou.list(stat,
+           boxed.whiskers=boxed.whiskers,
            outliers.has.whiskers=outliers.has.whiskers,
-           name.on.axis=name.on.axis,
-           factor.labels=factor.labels, draw.legend=draw.legend,
-           col=col,
-           COLOR.SHEER=COLOR.SHEER, 
-           shading.density=shading, shading.angle=shading.angle,
-           verbose=verbose, ...)
-    invisible(stat$stat)
-  } else {
-    stat$stat
-  }
+           name.on.axis=name.on.axis, factor.labels=factor.labels,
+           draw.legend=draw.legend, 
+           col=col, COLOR.SHEER=COLOR.SHEER, shading=shading, 
+           shading.angle=shading.angle, blackwhite=blackwhite,
+           verbose=verbose, plot=plot, ...) 
 }
 
 boxplotdou.factor <- 
