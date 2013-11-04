@@ -136,10 +136,14 @@ beadsplot.numeric <- function(x, index=NULL, horizontal=FALSE,
                S=min, E=mean, N=max, summary.labels=NULL,
                plot=TRUE, verbose=FALSE, ...) {
   beadsplot.data.frame(data.frame(x),
-    index, horizontal, col, sheer, shading, shading.angle,
-    bw, lwd, lwd.center, legend, label.factor, label.range,
-    drift.label.factor, drift.label.range, S, E, N, summary.labels,
-    plot, verbose)
+    index=index, horizontal=horizontal, col=col, sheer=sheer, 
+    shading=shading, shading.angle=shading.angle,
+    bw=bw, lwd=lwd, lwd.center=lwd.center, legend=legend, 
+    label.factor=label.factor, label.range=label.range,
+    drift.label.factor=drift.label.factor, 
+    drift.label.range=drift.label.range, 
+    S=S, E=E, N=N, summary.labels=summary.labels,
+    plot=plot, verbose=verbose, ...)
 }
 
 beadsplot.character <- function(index, x, horizontal=FALSE,
@@ -153,11 +157,15 @@ beadsplot.character <- function(index, x, horizontal=FALSE,
   column <- which(names(x) == index)
   if(length(column) == 0) column <- as.numeric(index)
   
-  beadsplot.data.frame(x[- column],
-    x[,column], horizontal, col, sheer, shading, shading.angle,
-    bw, lwd, lwd.center, legend, label.factor, label.range,
-    drift.label.factor, drift.label.range, S, E, N, summary.labels,
-    plot, verbose)
+  beadsplot.data.frame(x[- column], index=x[,column], 
+    horizontal=horizontal, col=col, sheer=sheer, 
+    shading=shading, shading.angle=shading.angle,
+    bw=bw, lwd=lwd, lwd.center=lwd.center, legend=legend, 
+    label.factor=label.factor, label.range=label.range,
+    drift.label.factor=drift.label.factor, 
+    drift.label.range=drift.label.range, 
+    S=S, E=E, N=N, summary.labels=summary.labels,
+    plot=plot, verbose=verbose, ...)
 }
 
 beadsplot.formula <- function(formula, data, horizontal=FALSE,
@@ -171,11 +179,15 @@ beadsplot.formula <- function(formula, data, horizontal=FALSE,
   # with the 1st column as factor, and the 2nd- as observations
   x <- model.frame(formula, data=data)
   
-  beadsplot.data.frame(x[-1],
-    x[1], horizontal, col, sheer, shading, shading.angle,
-    bw, lwd, lwd.center, legend, label.factor, label.range,
-    drift.label.factor, drift.label.range, S, E, N, summary.labels,
-    plot, verbose)
+  beadsplot.data.frame(x[-1], index=x[1], 
+    horizontal=horizontal, col=col, sheer=sheer, 
+    shading=shading, shading.angle=shading.angle,
+    bw=bw, lwd=lwd, lwd.center=lwd.center, legend=legend, 
+    label.factor=label.factor, label.range=label.range,
+    drift.label.factor=drift.label.factor, 
+    drift.label.range=drift.label.range, 
+    S=S, E=E, N=N, summary.labels=summary.labels,
+    plot=plot, verbose=verbose, ...)
 }
 
 beadsplot.default <- beadsplot.data.frame
@@ -346,11 +358,11 @@ make.scale <- function(...) {
 
   scale <- modifyList(scale.init, list(...))
 
-  if(is.na(scale$scale.grid.center)) {
+  if(!is.null(scale$scale.grid.center) && is.na(scale$scale.grid.center)) {
     scale$scale.grid.center <- 
       if(is.null(scale$scale.mean)) NULL else color.default
   }
-  if(is.na(scale$scale.grid.border)) { 
+  if(!is.null(scale$scale.grid.border) && is.na(scale$scale.grid.border)) { 
     scale$scale.grid.border <- 
       if(is.null(scale$scale.range)) NULL else color.default
   }
