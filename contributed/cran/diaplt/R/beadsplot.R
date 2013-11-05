@@ -33,6 +33,7 @@
 #                 default=lwd, same width as border 
 #   legend = logical, default=TRUE, to draw legend
 #   label.factor = logical, default=TRUE, to draw labels of factor
+#                  character vector, as alternative labels
 #   label.range = logical, default=TRUE, to draw range value of series
 #   drift.label.factor = numeric vector, (value, cycle),
 #                        give small drifts on factor label location,
@@ -116,12 +117,15 @@ beadsplot.data.frame <- function(x, index=NULL, horizontal=FALSE,
   if(verbose) print(stats)
  
   if(plot) {
-    plt.beads(stats, scale, horizontal, bw, col, 
-              shading, shading.angle, lwd, lwd.center, 
-              legend, label.factor, label.range, 
-              drift.label.factor, drift.label.range, 
-              sheer, summary.labels,
-              verbose, ...)
+    plt.beads(stats=stats, scale=scale, 
+              horizontal=horizontal, bw=bw, col=col, 
+              shading=shading, shading.angle=shading.angle, 
+              lwd=lwd, lwd.center=lwd.center, legend=legend, 
+              label.factor=label.factor, label.range=label.range, 
+              drift.label.factor=drift.label.factor, 
+              drift.label.range=drift.label.range, 
+              sheer=sheer, summary.labels=summary.labels,
+              verbose=verbose, ...)
     invisible(stats)
   } else {
     stats
@@ -387,17 +391,27 @@ calc.drifts <- function(scaled, series,
 
   if(label.factor) {
     rank.f <- order(order(scaled[series,,'E']))
-    drift.f <- rank.f %% drift.label.factor[2] * drift.label.factor[1]
-    drift.f[is.nan(drift.f) | is.na(drift.f)] <- 0
-    drifts$f <- drift.f
+    drifts$f <- calc.drifts.vector(rank.f, drift.label.factor)
   }
   if(label.range) {
-    drift.r <- series %% drift.label.range[2] * drift.label.range[1]
-    if(is.nan(drift.r) || is.na(drift.r)) drift.r <- 0
-    drifts$r <- drift.r
+    drifts$r <- calc.drifts.vector(series, drift.label.range)
   }
 
   drifts
+}
+
+calc.drifts.vector <- function(data, seed) {
+  if(is.null(seed)) seed <- NA
+  s1 <- seed[1]
+  s2 <- seed[2]
+  drift <-
+    if(is.na(s2)) {
+      rep(s1, length(data))
+    } else {
+      data %% s2 * s1
+    }
+  drift[is.nan(drift) | is.na(drift)] <- 0
+  drift
 }
 
 make.colors <- function(n, col=NULL, sheer=NULL) {
