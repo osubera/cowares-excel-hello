@@ -58,7 +58,7 @@
 #   x = numeric vector, single observations
 
 # beadsplot.character(
-#   index = character, single observations
+#   index = character, column name of factor
 #   x = data.frame, contains a factor and observations
 
 # beadsplot.formula(
