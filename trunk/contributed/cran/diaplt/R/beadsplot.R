@@ -242,16 +242,18 @@ calc.stats <- function(stats, x, index, S, E, N,
   stats
 }
 
-scale.stats.range <- function(stats, zoom=2, mid=0) {
+scale.stats.range <- function(stats, zoom=2, mid=0, centers=NULL) {
   lseries <- as.list(1L:dim(stats)['series'])
   whole.range <- sapply(lseries, 
                         function(series) range(stats[series,,c('S','N')]))
   if(is.null(mid)) {
     mid <- 0
     whole.mean <- apply(whole.range, 2, mean)
-  } else {
+  } else if(is.null(centers)) {
     whole.mean <- sapply(lseries, 
                          function(series) mean(stats[series,,'E']))
+  } else {
+    whole.mean <- centers
   }
   scale.stats.any(stats, zoom, mid, whole.range, whole.mean)
 }
@@ -277,7 +279,8 @@ scale.stats <- function(stats, x, index, scale=make.scale()) {
 
   if(is.null(scale$scale.data.border)) {
     if(!is.null(zoom))
-      stats <- scale.stats.range(stats, zoom, mid)
+      stats <- scale.stats.range(stats, zoom, mid,
+                                 scale$scale.data.center)
   } else {
     if(is.null(zoom)) zoom <- 2
     if(is.null(mid)) mid <- 0
