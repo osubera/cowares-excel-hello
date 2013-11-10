@@ -58,8 +58,8 @@
 #   x = numeric vector, single observations
 
 # beadsplot.character(
-#   index = character, column name of factor
-#   x = data.frame, contains a factor and observations
+#   x = character, column name of factor
+#   data = data.frame, contains a factor and observations
 
 # beadsplot.formula(
 #   formula = formula, a model formula, ex. factor~obs1+obs2+obs3
@@ -150,7 +150,7 @@ beadsplot.numeric <- function(x, index=NULL, horizontal=FALSE,
     plot=plot, verbose=verbose, ...)
 }
 
-beadsplot.character <- function(index, x, horizontal=FALSE,
+beadsplot.character <- function(x, data, horizontal=FALSE,
                col=NULL, sheer=NULL, shading=NA, shading.angle=NA,
                bw=0.2, lwd=1, lwd.center=lwd, 
                legend=TRUE, label.factor=TRUE, label.range=TRUE, 
@@ -158,10 +158,10 @@ beadsplot.character <- function(index, x, horizontal=FALSE,
                S=min, E=mean, N=max, summary.labels=NULL,
                plot=TRUE, verbose=FALSE, ...) {
   # convert column name to column number to use - operator
-  column <- which(names(x) == index)
-  if(length(column) == 0) column <- as.numeric(index)
+  column <- which(names(data) == x)
+  if(length(column) == 0) column <- as.numeric(x)
   
-  beadsplot.data.frame(x[- column], index=x[,column], 
+  beadsplot.data.frame(data[- column], index=data[,column], 
     horizontal=horizontal, col=col, sheer=sheer, 
     shading=shading, shading.angle=shading.angle,
     bw=bw, lwd=lwd, lwd.center=lwd.center, legend=legend, 
