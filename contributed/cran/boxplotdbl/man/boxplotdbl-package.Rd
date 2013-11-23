@@ -3,38 +3,42 @@
 \alias{boxplotdbl}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Double Box Plot
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Correlation chart of two set (x and y) of data. 
+Extend the box plot chart for two-axes to show the
+correlation of independent two set of observations
+with common factor.  Quartiles and outliers are 
+calculated by standard boxplot function. 
 }
 \details{
 \tabular{ll}{
 Package: \tab boxplotdbl\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-10-20\cr
-License: \tab What license is it under?\cr
+Version: \tab 1.2.0\cr
+Date: \tab 2013-11-23\cr
+License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
 }
-~~ An overview of how to use the package, including the most ~~
-~~ important functions ~~
+This package contains boxplotdou function. 
+It is used for 2 sets data, to visualize the correlation 
+of x and y axis.  
 }
 \author{
-Who wrote it
+Shinichiro Tomizono
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer: Shinichiro Tomizono <cowares@gmail.com>
 }
 \references{
-~~ Literature or other references for background information ~~
+Double Box Plot: \url{http://tomizonor.wordpress.com/2013/03/15/double-box-plot/}\cr
+Double Box Plot: \url{http://tomizonor.wordpress.com/2013/03/15/double-box-plot/}
 }
 \keyword{ package }
+\keyword{ hplot }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+  \code{\link{boxplotdou}},
+  \code{\link{boxplot}}.
 }
 \examples{
-# ~~ simple examples of the most important functions ~~
+boxplotdou(Sepal.Width~Species, iris, Petal.Width~Species, iris)
 }
