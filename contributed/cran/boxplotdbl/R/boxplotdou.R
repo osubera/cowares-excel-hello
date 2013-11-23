@@ -116,7 +116,7 @@
 boxplotdou <- function(x, ...) UseMethod("boxplotdou")
 
 boxplotdou.list <- 
-  function(stat, 
+  function(x, 
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
            name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
            col=NULL,
@@ -133,8 +133,8 @@ boxplotdou.list <-
       if(is.na(shading) && is.na(shading.angle)) shading=TRUE
     }
 
-    bxpdou(stat$stat$x, stat$stat$y, stat$level,
-           xlab=stat$name$x, ylab=stat$name$y, 
+    bxpdou(x$stat$x, x$stat$y, x$level,
+           xlab=x$name$x, ylab=x$name$y, 
            boxed.whiskers=boxed.whiskers, 
            outliers.has.whiskers=outliers.has.whiskers,
            name.on.axis=name.on.axis,
@@ -143,9 +143,9 @@ boxplotdou.list <-
            COLOR.SHEER=COLOR.SHEER, 
            shading.density=shading, shading.angle=shading.angle,
            verbose=verbose, ...)
-    invisible(stat)
+    invisible(x)
   } else {
-    stat
+    x
   }
 }
 
@@ -181,7 +181,7 @@ boxplotdou.data.frame <-
 }
 
 boxplotdou.factor <- 
-  function(f.x, obs.x, f.y, obs.y,  
+  function(x, obs.x, f.y, obs.y,  
            boxed.whiskers=FALSE, outliers.has.whiskers=FALSE, 
            name.on.axis=factor.labels, factor.labels=NULL, draw.legend=NA,
            condense=FALSE, condense.severity="iqr",
@@ -191,6 +191,8 @@ boxplotdou.factor <-
            shading=NA, shading.angle=NA, blackwhite=FALSE,
            STAT=bxpdou.boxplot.stat, 
            verbose=FALSE, plot=TRUE, ...) {
+  # using x instead of f.x to keep S3 method consistency.
+  f.x <- x
 
   # f.x and f.y are factor vectors
   # obs.x and obs.y are observation vectors
