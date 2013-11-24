@@ -16,7 +16,7 @@ calculated by standard boxplot function.
 \tabular{ll}{
 Package: \tab boxplotdbl\cr
 Type: \tab Package\cr
-Version: \tab 1.2.1\cr
+Version: \tab 1.2.2\cr
 Date: \tab 2013-11-24\cr
 License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
 }
