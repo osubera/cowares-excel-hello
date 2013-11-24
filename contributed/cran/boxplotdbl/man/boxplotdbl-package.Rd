@@ -16,8 +16,8 @@ calculated by standard boxplot function.
 \tabular{ll}{
 Package: \tab boxplotdbl\cr
 Type: \tab Package\cr
-Version: \tab 1.2.0\cr
-Date: \tab 2013-11-23\cr
+Version: \tab 1.2.1\cr
+Date: \tab 2013-11-24\cr
 License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
 }
 This package contains boxplotdou function. 
@@ -31,7 +31,7 @@ Maintainer: Shinichiro Tomizono <cowares@gmail.com>
 }
 \references{
 Double Box Plot: \url{http://tomizonor.wordpress.com/2013/03/15/double-box-plot/}\cr
-Double Box Plot: \url{http://tomizonor.wordpress.com/2013/03/15/double-box-plot/}
+Double Box Plot 1.2: \url{http://tomizonor.wordpress.com/2013/11/24/double-box-plot-1-2/}
 }
 \keyword{ package }
 \keyword{ hplot }
