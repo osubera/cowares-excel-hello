@@ -1,5 +1,12 @@
 Changes that will affect to existing users
 
+r1005 (2013/11/23)
+
+first argument was renamed to x
+  to met the requirement of keeping S3 method consistency,
+  stat and f.x at boxploddou.list(stat, ...) and boxplotdou.factor(f.x, ...)
+  were renamed to x.
+
 r988 (2013/11/3)
 
 output value format is changed.
