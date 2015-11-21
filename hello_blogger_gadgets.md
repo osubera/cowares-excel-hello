@@ -1,0 +1,155 @@
+# Introduction #
+
+  * how to make gadgets for blogger
+
+## 概要 ##
+  * ブロガー用のガジェットを作る
+  * i Google でもそのまま使えるようだ
+
+# References / 資料 #
+
+  * How to submit a gadget to Blogger / Blogger にガジェットを送信する
+    * http://www.google.com/support/blogger/bin/answer.py?hl=en&answer=150745
+    * http://www.google.com/support/blogger/bin/answer.py?hl=ja&answer=150745
+  * Gadgets for Blogger - Blogger APIs (Labs)
+    * http://code.google.com/apis/blogger/docs/gadgets/gadgets_for_blogger.html
+  * Hello, World
+    * http://code.google.com/apis/gadgets/docs/gs.html#Hello_World
+```
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs title="hello world example" /> 
+  <Content type="html">
+     <![CDATA[ 
+       Hello, world!
+     ]]>
+  </Content> 
+</Module>
+```
+  * Developer Tools and Debugging Tips
+    * http://code.google.com/apis/gadgets/docs/tools.html
+  * Gadget API
+    * http://code.google.com/intl/ja/apis/gadgets/index.html
+    * Submit gadgets into the iGoogle directory
+      * http://www.google.com/ig/submit
+  * iGoogle Developer Home / アカウント登録すると、自分のガジェットの統計を見れる。 iGoogle 向けのDocもある。
+    * http://code.google.com/intl/en/apis/igoogle/
+
+# howto add a gadget to a blog / ガジェット追加の方法 #
+
+  1. 適当なWebサーバーにガジェットをアップしておく(URLが必要)
+  1. デザインタブ
+  1. ガジェットを追加
+  1. 独自に追加
+  1. URLを指定
+  1. タイトル、高さを調整してプレビュー
+  1. 保存
+  1. 使っているスキンが良くできていたらどこでも配置できるが、スキンによっては、たとえばヘッダに配置したら背景画像が切れたりすることもあるようだ。
+  1. ガジェットは、読み込み元URLとリンクしているが、キャッシュされている。元URLでの更新は、そのうち反映される。
+    * 開発中は、タイトルに数字を increment していけばキャッシュなのかどうか判別しやすいかも。
+  1. 自前の URL を持ってない場合、 Google が提供する環境での開発もできるようだ。
+    * http://code.google.com/apis/gadgets/docs/tools.html
+
+# cache / キャッシュ #
+
+  * キャッシュが提供されているので、外部URLはそこを使って読み込む。
+    * http://code.google.com/apis/gadgets/docs/publish.html
+```
+img.src = gadgets.io.getProxyUrl("http://.....jpg");
+```
+
+# 自分で使う #
+
+  * テストや、自分で使うだけなら、直接URL指定で読み込めば、ブロガーでも iGoogle でも使える。
+
+# publish / 公開する #
+
+  * 公開するには、作者などの項目を追加しないといけない。
+    * http://code.google.com/apis/gadgets/docs/reference.html#Moduleprefs_Ref
+```
+  <ModulePrefs
+      title="東京の停電予定"
+      directory_title="東京電力の計画停電予定"
+      description="東京電力の今日の計画停電時間を表示する。午後７時以降は翌日の予定を表示する。"
+      author="Tomizono"
+      author_email="cowares+tokyoteiden@gmail.com"
+      screenshot="http://xlsm.web.fc2.com/teiden/tepco-blackout-schedule.png"
+      thumbnail="http://xlsm.web.fc2.com/teiden/tepco-blackout-schedule-s.png"
+      title_url="http://xlsm.web.fc2.com/teiden/"
+      height="196">
+    <Locale lang="ja" country="jp" />
+  </ModulePrefs>
+```
+    * スクリーンショット用画像は、横幅 280px まで。普通の感覚なら、ガジェット全体が入る。
+    * 別途サムネイル画像も指定しないと、一覧のときに画像が出ない。こちらは 120x60px
+  * ここから送信して、ディレクトリにリストしてもらう。
+    * http://www.google.com/ig/submit
+
+### iGoogle publish / iGoogle 用の拡張 ###
+
+  * http://code.google.com/intl/en/apis/igoogle/docs/igoogledevguide.html#profiledata
+    * 次の項目を使うと、ディレクトリリストの作者項目が充実する。
+```
+      author_link="http://cowares.nobody.jp"
+      author_photo="http://xlsm.web.fc2.com/teiden/i.png"
+      author_location="Chiba, Japan"
+      author_affiliation="kobobau"
+      author_aboutme=""
+      author_quote=""
+```
+      * 作者画像は 70x100px portrait だ。
+      * aboutme が自己紹介で、 quote が座右の銘といった感じか。
+      * このあたりまで文字情報が増えてくると、国際化対応の書き方をしないとつらいかな。
+      * 作者関連項目 `author_*` は、自分の登録するガジェットのうち１個だけに入れれば十分らしい。
+
+# internationalization / 国際化 #
+
+  * http://code.google.com/intl/en/apis/gadgets/docs/i18n.html#Bundles_Gadget
+    * 外部ファイルにせず、インラインでも書けるようだが、いくつかのガジェットに共通のメッセージファイルを外に持つのがスマートな気がする。
+    * Locale で外部ファイルを指定する。 country は気にせず、言語だけというのが流儀のようだ。 ALL\_ALL は必須。ここに英語を書けばいい。
+```
+    <Locale messages="http://xlsm.web.fc2.com/teiden/ALL_ALL.xml" />
+    <Locale lang="ja" messages="http://xlsm.web.fc2.com/teiden/ja_ALL.xml" />
+```
+    * ALL\_ALL.xml の例。
+```
+<messagebundle>
+  <msg name="location">Chiba, Japan</msg>
+  <msg name="aboutme">Open source scriptings, vba solutions. See http://cowares.nobody.jp and http://cowares.blogspot.com for details.</msg>
+  <msg name="quote">Fortitudinous, Free, Fair</msg>
+  <msg name="tohoku_teiden">TOHOKU blackout</msg>
+  <msg name="tohoku_teiden_dir">blackout schedule for TOHOKU</msg>
+  <msg name="tohoku_teiden_desc">Today's schedule of the blackout in a region of Tohoku electoric power co. Shows tomorrow schedule after 7 o'clock pm. These blackouts are caused by the disaster of the earthquake and tsunami on 3.11 2011 in east japan.</msg>
+</messagebundle>
+```
+    * MSG を使って外部リソースを挿入する。
+```
+      title="__MSG_tohoku_teiden__"
+```
+
+# misc #
+
+  * キャッシュの扱いが面倒だ。
+    * ガジェットのキャッシュが制御できないので、修正したのをアップしてもすぐに動作確認ができない。
+    * 動作確認はローカルで済ませた上、確実に動くのをアップしてね、という方針かな。
+    * 昨日夕方に、一斉にガジェットギャラリーのサムネールが消えた瞬間があったので、おそらく、日に一度ぐらい、キャッシュの強制更新をしているのかな。
+    * 何が今動いているか把握するために、 author\_email にバージョン番号を仕込むと良さそうだ。 cowares+tohokuteiden+2@gmail.com のようにして increment していく。
+    * もしかしたら、ブロガーの管理画面を使って、URL指定で読み込みなおすことで、キャッシュ更新が少しは早まる場合があるかもしれない。少なくともこれをやっても更新されない状況があったので、確実な方法ではない。確実でない理由はキャッシュサーバーが複数あるからかも。
+  * 国際化は最初からやった方がいい。そうでないと言語が変わると、そのファイルが無いかのようなメッセージが出る。おそらく、新着にリストされない原因になる。 ~~文字列を言語別の別ファイルに切り出す、国際化が推奨されているようだ。でも、とりあえず自国で動かすだけなら、上のように単一ファイルで始めるのが手っ取り早い。~~
+  * 小さく作る方法としては、別ファイルにせず、とりあえず ALL\_ALL だけインラインで messagebundle を入れる手がある。
+  * 共通化したメッセージファイルを使うなら、そこにメッセージを足すだけなので、２つ目からは最初から分離する方が早いか。
+  * ~~最初は小さく作れ、という鉄則をグーグルも掲げているし。~~
+  * キャッシュをこちらで制御できない以上、開発用と公開用をちゃんと区別して、開発用で確認済みのものだけ公開する、という手間を踏まないと、下手に公開したのにつまらないミスがあったら、次のキャッシュ更新までほぼ１日待たないといけなくなり、特にユーザーが使用を開始したものだとまずいことになるな。
+  * そのあたりまで面倒見るなら、 google code の project として svn が使える環境でやるのが良さそうだ。
+  * 一般の無料ホームページなんかにある、アップロード画面だと、ローカル側で大文字のファイル名をわざわざ小文字に変換してくれるものなんかがあったりする。そういうおせっかいに気をつけないと ALL\_ALL が all\_all になってたりする。
+  * 開発用のテストを、公開用と同一の id で流していると、自分のところだけ、本番も勝手に更新されたかに見えたりする。こいつはブラウザのキャッシュだ。
+  * view に canvas を明記してあげるだけで、 canvas 対応になる。最大化したとき、画面の半分でなく全体が使えるようになる。
+```
+  <Content type="html" view="home,profile,default,canvas">
+```
+  * GGE (Google Gadget Editor) は、 iGoogle 画面に組み込んで、その場でガジェットの作成と preview ができるすぐれものだが、実は制約がある。最新のバージョンに対応してないとかで、 gadgets.io なんかの API が使えない。どちらかというと html の色とか配置とかを工夫する時点で使うと便利なのかな。あと、純粋な javascript の動作チェックとか。
+  * ガジェットの更新は日に３回が上限みたいな文言がどっかにあったので、もしかしたら、同じ名前で submit しなおせば、強制 update されるのかもしれない。これは試してない。
+    * 個別ユーザーが、自分のバージョンを知って、必要なら強制ロードできる仕組みってできないのかな？
+  * gadgets.io.makeRequests なんかで html を取得したときに、日本語の Shift\_JIS とか euc-jp がどうなるのか明確に書かれていないが、少なくとも iGoogle のホストだと、ちゃんと解釈して utf-8 を返してくれているように見える。これで面倒な文字コードは考えなくてよいから楽だ。
+    * これがホスト依存なのか仕様なのかは不明。まあ、自動解釈できないような相手だとこれも働かないんだろうけど、それはもう対象外だ。
+  * 効率を考えるなら、 gadgets 系の、どうしてもホスト上でないと確認できない関数以外はローカルのみで作った方が良さそうだ。いちいち up してリロードして、では遅い。

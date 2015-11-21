@@ -1,0 +1,2289 @@
+
+
+# Introduction #
+
+  * compare two sheets of excel workbook
+
+## 概要 ##
+  * エクセルで２つのシートを比較する
+
+# Details #
+
+## 説明 ##
+  * ブックを開くと、操作用のボタンがツールバー（リボン）に追加される。
+    * 編集シート、参照シート、比較、比較結果、≏値、≏式、着色、差分
+  * ツールバーの機能
+    * `編集シート` ボタンを押すと現在のシートを編集用（２次）シートとして記憶する。
+    * `参照シート` ボタンを押すと現在のシートを参照用（１次）シートとして記憶する。
+    * `比較` ボタンを押すとシート全体の比較を行う。
+      * 比較結果のサマリーをツールバーに表示する。
+    * 比較により一致しないセルの位置がリストに入っており、選択により該当セルに移動する。
+    * `≏値` ボタンで、セル値による比較の有無を切り替える。
+      * 初期値は、オン。
+    * `≏式` ボタンで、セル数式による比較の有無を切り替える。
+      * 初期値は、オフ。
+    * `着色` ボタンで、不一致セルへの着色の有無を切り替える。
+      * 編集シートの不一致セルを着色する。(赤色)
+      * 編集シートの使用済み列の右隣に、不一致セルのある行を着色する。(黄色)
+      * ワークシートの右端いっぱいまで使用済みの場合、行への着色は行わない。
+      * 編集シートのセル背景色は、比較開始時にすべて消去される。
+      * 初期値は、着色する。
+    * `差分` ボタンで、不一致セル情報を抜き出した差分シート作成の有無を切り替える。
+      * 出力される情報
+        * 不一致セルのアドレス、編集側の値、参照側の値
+      * 初期値は、出力する。
+
+# Downloads #
+
+  * [downloads / ダウンロード](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=compare_sheet_cells)
+
+# How to use #
+
+
+## 使い方 ##
+
+  * 用途
+    1. ２つのワークシートで、内容が一致しないセルを探す。
+    1. セルが一致する条件は、値、式、あるいはその両方、といったように、設定する。
+    1. 通常ブックとアドインの両形式が利用できる。アドイン名称は、`エクセル比較 甲子`。
+
+  1. 不一致セルの検索
+    1. ツールバーの `編集シート` ボタンを押すと現在のシートを編集用（２次）シートとして記憶する。
+    1. ツールバーの `参照シート` ボタンを押すと現在のシートを参照用（１次）シートとして記憶する。
+    1. ツールバーの `比較` ボタンを押すと、２つのシートを比較し、ボタンの右側の結果表示枠に結果を表示する。
+      * すべて一致している場合、 `○` が表示される。
+      * 一致しないセルがあれば、その数が表示される。
+      * 一致しないセルのリストが、数の下に並び、選んだセルにジャンプする。
+    1. ツールバーの `≏値` ボタンがオンの場合、値の一致をセル一致の必要条件とする。
+      * セルの計算結果 (.Value) を比較する。
+      * 異なる計算式でも、固定値との混在でも、計算結果が一致すれば値の一致とする。
+      * 計算エラーの場合、同種のエラーなら値の一致とする。
+    1. ツールバーの `≏式` ボタンがオンの場合、数式の一致をセル一致の必要条件とする。
+      * セルの計算式 (`.FormulaR1C1`) を比較する。
+      * 計算式でなく固定値がセルに入力されている場合、セル値 (.Value) を用いる。
+      * 一方が固定値で他方が計算式の場合は、常に数式の不一致とする。
+    1. ツールバーの `着色` ボタンがオンの場合、編集用シートに不一致セルを着色して記録する。
+    1. ツールバーの `差分` ボタンがオンの場合、差分を抜き出したシートを新たに作成する。
+  1. セルの一致条件を切り替える
+    1. 値オンの場合、計算値が一致しないセルが抽出される。
+      * 初期値は、値のみオンで、計算値の比較。
+    1. 式オンの場合、数式が一致しないセルが抽出される。
+    1. 値と式の両方をオンにした場合、数式とその計算値の両方が一致するセル以外が抽出される。
+  1. 制約など
+    * 違いが大きすぎるシートを比較した場合には、エクセルの仕様上の制限などにより、動作に制約を受けることがある。また、制限を越えた処理を可能にしている場合でも、制限に近いレベルではエクセルの使用するメモリ等資源が膨大になるため、動作が遅くなったり、エクセルが不安定になることもある。
+    * 既知の事項
+      1. エクセルの仕様により、エクセル2007以前では8,192を超える不連続なセル範囲を同時に扱えない。
+        * 不一致セルの不連続領域が8,192を超えた場合に問題となる。
+        * `AreaBuilder` を導入し、この制限を越えた処理を可能にしている。
+        * エクセル2010では上限値がこれより大きいが、8,192程度の不連続領域を扱うと動作が非常に遅くなることに違いはない。
+      1. エクセルの仕様により、セルのアドレスを文字として扱う場合、255字を超えるものは扱えない。
+        * 不一致セルのアドレスを表記する際に問題となる。
+        * `AreaBuilder` を導入し、この制限を越えた処理を可能にしている。
+      1. エクセルの仕様により、１つのセルに格納できる最長の文字列は、32,767字。
+        * 不一致セルのアドレスを表記する際に問題となる。
+        * 差分シートに記載する差分セルのアドレス長が32,767字を超える場合、隣接するセルに分割して格納する。
+      1. エクセルの仕様により、エクセル2007以上では、ツールバーのリストに1,000個を超えるデータを格納できない。
+        * 不一致セルの総数が1,000個以上になった場合、先頭999個までの不一致セルだけがツールバーに格納される。
+        * エクセル2000など、ツールバーの動作に上記制限が無いバージョンでは、この問題は発生しない。
+    * 未知の事項
+      * エクセルには明確に公開されていない仕様上の制約が多数あるため、他にも潜在的な問題が潜んでいる可能性はある。
+      * 制約の上限値が、搭載メモリ量に依存しているケースもある。
+      * 多くの場合、制約にかかるほど多くの不一致セルがある場合には、差分作成に時間がかかり、その間、エクセルが応答しない状態になる。この状況は搭載メモリ量などに依存する。また、応答していなくても差分作成を続行しているため、待てば答えを返す。
+
+
+# Snapshots #
+
+**エクセル2000 ではツールバーを表示する。
+> ![http://3.bp.blogspot.com/-j67bnFBozh4/T91CYgfN5iI/AAAAAAAAAJU/4ncjnRP17KQ/s1600/shot12.png](http://3.bp.blogspot.com/-j67bnFBozh4/T91CYgfN5iI/AAAAAAAAAJU/4ncjnRP17KQ/s1600/shot12.png)**
+
+**エクセル2007 ではリボンのアドインタブにボタンを表示する。
+> ![http://4.bp.blogspot.com/-h3wM1iQVaTY/T91CF5tVNVI/AAAAAAAAAH8/Rq583XBw4XY/s1600/shot1.png](http://4.bp.blogspot.com/-h3wM1iQVaTY/T91CF5tVNVI/AAAAAAAAAH8/Rq583XBw4XY/s1600/shot1.png)**
+
+**一致した場合、ツールバーの結果欄に○が表示される。
+> ![http://1.bp.blogspot.com/-kqwoy0K4zV4/T91CIdgY2xI/AAAAAAAAAIE/RZWTJL6b5AA/s1600/shot2.png](http://1.bp.blogspot.com/-kqwoy0K4zV4/T91CIdgY2xI/AAAAAAAAAIE/RZWTJL6b5AA/s1600/shot2.png)**
+
+**不一致セルがある場合、ツールバーの結果欄に不一致セルの数が表示され、ドロップダウンで該当セルが一覧表示される。
+> ![http://3.bp.blogspot.com/-2RkmN72mBP4/T91CMeYKi5I/AAAAAAAAAIU/LK4buJKqzVE/s1600/shot4.png](http://3.bp.blogspot.com/-2RkmN72mBP4/T91CMeYKi5I/AAAAAAAAAIU/LK4buJKqzVE/s1600/shot4.png)
+> ![http://3.bp.blogspot.com/-uzSCcQkUgyA/T91COd4h5nI/AAAAAAAAAIc/pxxbLHdWXqY/s1600/shot5.png](http://3.bp.blogspot.com/-uzSCcQkUgyA/T91COd4h5nI/AAAAAAAAAIc/pxxbLHdWXqY/s1600/shot5.png)**
+
+**一致した場合の差分シート
+> ![http://3.bp.blogspot.com/-YHgF2mGfjHQ/T91CKfjc0WI/AAAAAAAAAIM/7kDb1RvIXMQ/s1600/shot3.png](http://3.bp.blogspot.com/-YHgF2mGfjHQ/T91CKfjc0WI/AAAAAAAAAIM/7kDb1RvIXMQ/s1600/shot3.png)**
+
+**不一致セルがある場合の差分シート
+> ![http://3.bp.blogspot.com/-Dp0zPhCx2vo/T91CQOlAvzI/AAAAAAAAAIk/obmJGI7G37Q/s1600/shot6.png](http://3.bp.blogspot.com/-Dp0zPhCx2vo/T91CQOlAvzI/AAAAAAAAAIk/obmJGI7G37Q/s1600/shot6.png)**
+
+**不一致セルがある場合の、編集シートへの色塗り
+> ![http://1.bp.blogspot.com/-8PB77uqE7TU/T91CRhmn9uI/AAAAAAAAAIs/Px13AKt1iMQ/s1600/shot7.png](http://1.bp.blogspot.com/-8PB77uqE7TU/T91CRhmn9uI/AAAAAAAAAIs/Px13AKt1iMQ/s1600/shot7.png)**
+
+**上記に対応する参照側シートの内容。赤丸が不一致箇所。
+> ![http://3.bp.blogspot.com/-anrGT9XZc2g/T91CTAl-MYI/AAAAAAAAAI0/tb4kVUPj-bI/s1600/shot8.png](http://3.bp.blogspot.com/-anrGT9XZc2g/T91CTAl-MYI/AAAAAAAAAI0/tb4kVUPj-bI/s1600/shot8.png)**
+
+**値および式による一致の見本に使用した編集および参照シートの値と式
+> ![http://4.bp.blogspot.com/-KJ9EGqN5-AE/T91CVmRklMI/AAAAAAAAAJE/RSRzV8hObVA/s1600/shot10.png](http://4.bp.blogspot.com/-KJ9EGqN5-AE/T91CVmRklMI/AAAAAAAAAJE/RSRzV8hObVA/s1600/shot10.png)
+> ![http://3.bp.blogspot.com/-aQC1dpApGiQ/T91CWlYtmDI/AAAAAAAAAJM/fAOM4m2zk3Q/s1600/shot11.png](http://3.bp.blogspot.com/-aQC1dpApGiQ/T91CWlYtmDI/AAAAAAAAAJM/fAOM4m2zk3Q/s1600/shot11.png)**
+
+**値による一致、式による一致、値と式による一致、の動作の違いを示す差分シート
+> ![http://3.bp.blogspot.com/-PCmB4u9LpnE/T91CUGUt6FI/AAAAAAAAAI8/Sz3W3I14Q7U/s1600/shot9.png](http://3.bp.blogspot.com/-PCmB4u9LpnE/T91CUGUt6FI/AAAAAAAAAI8/Sz3W3I14Q7U/s1600/shot9.png)**
+
+
+# Code #
+
+```
+'ssf-begin
+';
+
+'workbook
+'   name;compare_sheet_cells.xls/F3CompareSheetCells
+
+'book-identity
+'  title;エクセル比較 甲子
+
+'require
+
+'cells-name
+'       ;=compare_sheet_cells!R15C1
+'       ;compare_sheet_cells!_ButtonCaption
+'       ;=compare_sheet_cells!R3C2
+'       ;compare_sheet_cells!_Comment
+'       ;=compare_sheet_cells!R6C2
+'       ;compare_sheet_cells!_Contributor
+'       ;=compare_sheet_cells!R4C2
+'       ;compare_sheet_cells!_Copyright
+'       ;=compare_sheet_cells!R5C2
+'       ;compare_sheet_cells!_License
+'       ;=compare_sheet_cells!R2C2
+'       ;compare_sheet_cells!_LocalComment
+'       ;=compare_sheet_cells!R1C2
+'       ;compare_sheet_cells!_PublicName
+'       ;=compare_sheet_cells!R7C2
+'       ;compare_sheet_cells!_Since
+'       ;=compare_sheet_cells!R10C2
+'       ;compare_sheet_cells!_Tag
+'       ;=compare_sheet_cells!R9C2
+'       ;compare_sheet_cells!_Timestamp
+'       ;=compare_sheet_cells!R8C2
+'       ;compare_sheet_cells!_Url
+
+'worksheet
+'   name;compare_sheet_cells/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;compare_sheet_cells
+'         ;コメント
+'         ;２つのシートを比較する
+'         ;comment
+'         ;compare two sheets of excel workbook
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - kobobau.mocvba.com
+'         ;初版
+'         ;2002
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/compare_sheet_cells
+'         ;更新
+'         ;41076.8503240741
+'         ;keyword
+'         ;excel,validation,difference
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:J22
+'         ;編集シート
+'         ;アクティブシートを編集用（２次）シートに設定する。
+'         ;edit
+'         ;=_ButtonCaption
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;2
+'         ;参照シート
+'         ;アクティブシートを参照用（１次）シートに設定する。
+'         ;refer
+'         ;=RC[-3]
+'         ;1
+'         ;2
+'     skip;4
+'         ;比較
+'         ;設定したシート全体を比較する。
+'         ;validate
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;2
+'         ;結果
+'         ;検証結果のサマリー
+'         ;summary
+'     skip;1
+'         ;3
+'     skip;5
+'         ;≏値
+'         ;セル計算値を比較する
+'         ;comparevalue
+'         ;=MID(RC[-3],2,LEN(RC[-3])-1)
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;1
+'         ;1
+'         ;≏式
+'         ;セル数式を比較する
+'         ;compareformula
+'         ;=MID(RC[-3],2,LEN(RC[-3])-1)
+'         ;1
+'         ;2
+'     skip;4
+'         ;着色
+'         ;不一致セルを着色する
+'         ;reportcolor
+'     skip;1
+'         ;1
+'     skip;2
+'         ;1
+'     skip;1
+'         ;1
+'         ;差分
+'         ;不一致セルの一覧表を出力する
+'         ;reportbook
+'     skip;1
+'         ;1
+'     skip;4
+'         ;1
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'cells-v-align
+'  address;A1:M22
+'   repeat;286
+'         ;center
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+Private CompareHelper As CompareCells
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3CompareSheetCells"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+Friend Function GetCompareHelper() As CompareCells
+    Set GetCompareHelper = CompareHelper
+End Function
+
+Friend Sub InitializeCompareHelper()
+    Set CompareHelper = New CompareCells
+End Sub
+
+Friend Sub TerminateCompareHelper()
+    Set CompareHelper = Nothing
+End Sub
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        InitializeCompareHelper
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        If CompareHelper Is Nothing Then InitializeCompareHelper
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    Helper.OnButtonToggle
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_refer(oAC As Object)
+    Dim Ws As Worksheet
+    
+    If TypeName(ActiveSheet) <> "Worksheet" Then Exit Sub
+    Set Ws = ActiveSheet
+    CompareHelper.SetReferenceSheet Ws, oAC
+End Sub
+
+Public Sub Menu_edit(oAC As Object)
+    Dim Ws As Worksheet
+    
+    If TypeName(ActiveSheet) <> "Worksheet" Then Exit Sub
+    Set Ws = ActiveSheet
+    CompareHelper.SetEditSheet Ws, oAC
+End Sub
+
+Public Sub Menu_validate(oAC As Object)
+    CompareHelper.DoValidate
+End Sub
+
+Public Sub Menu_summary(oAC As Object)
+    CompareHelper.JumpTo
+End Sub
+
+Public Sub Menu_comparevalue(oAC As Object)
+    Helper.ButtonSwitchToggle oAC
+End Sub
+
+Public Sub Menu_compareformula(oAC As Object)
+    Helper.ButtonSwitchToggle oAC
+End Sub
+
+Public Sub Menu_reportcolor(oAC As Object)
+    Helper.ButtonSwitchToggle oAC
+End Sub
+
+Public Sub Menu_reportbook(oAC As Object)
+    Helper.ButtonSwitchToggle oAC
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'class
+'   name;CompareCells
+'{{{
+Option Explicit
+
+Private Helper As ToolBarV2
+Private EditButton As Office.CommandBarButton
+Private ReferButton As Office.CommandBarButton
+
+Private Core As CompareCellsCore
+Private ReportSummary As ReportDifferenceByToolBar
+
+
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    SetHelperSettings
+End Sub
+
+Private Sub Class_Terminate()
+    Set ReportSummary = Nothing
+    Set Core = Nothing
+    Set Helper = Nothing
+    Set EditButton = Nothing
+    Set ReferButton = Nothing
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Sub SetReferenceSheet(Ws As Worksheet, oAC As Office.CommandBarButton)
+    If Ws Is Core.GetEditSheet Then ClearEditSheet
+    If Not ReferButton Is oAC Then SetHelperSettings
+    ReportSummary.ClearSummaries
+    Core.SetReferSheet Ws
+    SetupButton ReferButton, Ws
+End Sub
+
+Public Sub SetEditSheet(Ws As Worksheet, oAC As Office.CommandBarButton)
+    If Ws Is Core.GetReferSheet Then ClearReferSheet
+    If Not EditButton Is oAC Then SetHelperSettings
+    ReportSummary.ClearSummaries
+    Core.SetEditSheet Ws
+    SetupButton EditButton, Ws
+End Sub
+
+Public Sub ClearReferSheet()
+    ReportSummary.ClearSummaries
+    Core.SetReferSheet Nothing
+    SetupButton ReferButton, Nothing
+End Sub
+
+Public Sub ClearEditSheet()
+    ReportSummary.ClearSummaries
+    Core.SetEditSheet Nothing
+    SetupButton EditButton, Nothing
+End Sub
+
+Public Sub ClearSettings()
+    ReportSummary.ClearSummaries
+    ClearReferSheet
+    ClearEditSheet
+End Sub
+
+Public Sub DoValidate()
+    If Not EnsureResources Then Exit Sub
+    
+    SetupRules
+    SetupReports
+    With Core
+        .Compare
+        .PublishReport
+        .ClearDiffer    ' release large results
+    End With
+End Sub
+
+Public Sub JumpTo()
+    If Not EnsureResources Then Exit Sub
+    
+    With Core
+        ReportSummary.JumpTo .GetReferSheet, .GetEditSheet
+    End With
+End Sub
+
+
+'== Public Methods end ==
+'== Helper for toolbar buttons begin ==
+
+
+Private Sub SetHelperSettings()
+    Set Helper = BaumMain.GetHelper
+    Set EditButton = Helper.GetButton("edit")
+    Set ReferButton = Helper.GetButton("refer")
+    If Core Is Nothing Then
+        Set Core = New CompareCellsCore
+    End If
+    Set ReportSummary = New ReportDifferenceByToolBar
+End Sub
+
+Private Sub SetupRules()
+    Dim Tag As String
+    
+    Core.ClearRules
+    
+    Tag = "comparevalue"
+    If Helper.GetControlState(Tag) Then
+        Core.AddRule New IsExactCellValue, Helper.GetButton(Tag).Parameter
+    End If
+    
+    Tag = "compareformula"
+    If Helper.GetControlState(Tag) Then
+        Core.AddRule New IsExactCellFormula, Helper.GetButton(Tag).Parameter
+    End If
+End Sub
+
+Private Sub SetupReports()
+    Core.ClearReports
+    Core.AddReport ReportSummary
+    If Helper.GetControlState("reportcolor") Then
+        Core.AddReport New ReportDifferenceByColor
+    End If
+    If Helper.GetControlState("reportbook") Then
+        Core.AddReport New ReportDifferenceByBook
+    End If
+End Sub
+
+Private Function EnsureResources() As Boolean
+    Dim Sure As Boolean
+    Sure = True
+    
+    If Not IsAlive(Core.GetReferSheet) Then
+        ClearReferSheet
+        Sure = False
+    End If
+    If Not IsAlive(Core.GetEditSheet) Then
+        ClearEditSheet
+        Sure = False
+    End If
+    
+    EnsureResources = Sure
+End Function
+
+Private Sub SetupButton(Button As Office.CommandBarButton, Ws As Worksheet)
+    On Error GoTo ButtonFailure
+    
+    If IsAlive(Ws) Then
+        With Button
+            .Caption = Left(.Parameter, 1) & "[" & Ws.Parent.Name & "]" & Ws.Name
+            .State = msoButtonDown
+        End With
+    Else
+        With Button
+            .Caption = .Parameter
+            .State = msoButtonUp
+        End With
+    End If
+    Exit Sub
+    
+ButtonFailure:
+    Debug.Print Err.Number, Err.Description
+    SetHelperSettings
+End Sub
+
+Private Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+
+'== Helper for toolbar buttons end ==
+
+'}}}
+
+'class
+'   name;CompareCellsCore
+'{{{
+Option Explicit
+
+' core engine to compare cells
+
+Const DoVerbose = False  ' true expects debugging
+
+Private Rules As Collection
+Private Reports As Collection
+Private EditSheet As Worksheet
+Private ReferSheet As Worksheet
+Public DifferArea As AreaBuilder
+
+
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    Set Rules = New Collection
+    Set Reports = New Collection
+    Set DifferArea = New AreaBuilder
+    With DifferArea
+        .InternalSheetVisible = DoVerbose
+        .Verbose = DoVerbose
+        .EnableOptimization = True
+    End With
+End Sub
+
+Private Sub Class_Terminate()
+    ClearRules
+    ClearReports
+    
+    Set DifferArea = Nothing
+    Set Rules = Nothing
+    Set Reports = Nothing
+    Set EditSheet = Nothing
+    Set ReferSheet = Nothing
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Property Get HasDiffer() As Boolean
+    HasDiffer = DifferArea.HasArea
+End Property
+
+Public Sub AddRule(Rule As Variant, Title As String)
+    Rules.Add Rule
+    Rules(Rules.Count).Text = Title
+End Sub
+
+Public Sub AddReport(Report As Variant)
+    Reports.Add Report
+End Sub
+
+Public Sub ClearRules()
+    Do While Rules.Count > 0
+        Rules.Remove 1
+    Loop
+End Sub
+
+Public Sub ClearReports()
+    Do While Reports.Count > 0
+        Reports.Remove 1
+    Loop
+End Sub
+
+Public Sub SetEditSheet(Target As Worksheet)
+    Set EditSheet = Target
+End Sub
+
+Public Sub SetReferSheet(Target As Worksheet)
+    Set ReferSheet = Target
+End Sub
+
+Public Function GetEditSheet() As Worksheet
+    Set GetEditSheet = EditSheet
+End Function
+
+Public Function GetReferSheet() As Worksheet
+    Set GetReferSheet = ReferSheet
+End Function
+
+Public Function GetDifferCells() As Variant
+    If HasDiffer Then
+        Set GetDifferCells = DifferArea.AreasCollection
+    Else
+        GetDifferCells = Array()
+    End If
+End Function
+
+Public Function DifferCellsAddress() As String
+    If HasDiffer Then
+        DifferCellsAddress = DifferArea.Address(False, False, xlA1, False)
+    Else
+        DifferCellsAddress = ""
+    End If
+End Function
+
+Public Sub Compare()
+    ClearDiffer
+    DoVerify
+End Sub
+
+Public Sub PublishReport()
+    DoReport
+End Sub
+
+' reset differ area
+Public Sub ClearDiffer()
+    DifferArea.SelectNone
+End Sub
+
+
+'== Public Methods end ==
+'== Compare functions begin ==
+
+
+' core logic to verify
+Private Sub DoVerify()
+    On Error GoTo TrapAll
+    
+    Dim Ra As Range
+    Dim SmallerTarget As Range
+    
+    Set SmallerTarget = Union(EditSheet.UsedRange, _
+        EditSheet.Range(ReferSheet.UsedRange.Address(True, True, xlA1, False)))
+    For Each Ra In SmallerTarget
+        VerifySingleCell Ra
+    Next
+    
+    Exit Sub
+    
+TrapAll:
+    Debug.Print Err.Number, Err.Description
+    MsgBox "比較に失敗しました。結果は信頼できません。", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+End Sub
+
+' verify a single cell
+Private Sub VerifySingleCell(Target As Range)
+    If Not IsSame(Target, Refered(Target, ReferSheet)) Then
+        DifferArea.PushArea Target
+    End If
+End Sub
+
+' get the reference cell against an another sheet
+Private Function Refered(x As Range, AtSheet As Worksheet) As Range
+    ' .Address doesn't return an address longer than 255 chars.
+    ' using this for a single cell would be safe.
+    Set Refered = AtSheet.Range(x.Address(True, True, xlA1, False))
+End Function
+
+' validate a cell
+Private Function IsSame(x As Range, y As Range) As Boolean
+    Dim Equal As Boolean
+    Dim Rule As Variant
+    
+    Equal = True
+    
+    For Each Rule In Rules
+        Equal = Rule.IsSame(x, y)
+        If Not Equal Then Exit For
+    Next
+    
+    IsSame = Equal
+End Function
+
+' reporting
+Private Sub DoReport()
+    Dim Report As Variant
+    Dim RuleText As String
+    
+    RuleText = DumpRuleText
+    For Each Report In Reports
+        Report.Report RuleText, HasDiffer, DifferArea, EditSheet, ReferSheet
+    Next
+End Sub
+
+' dump rules
+Private Function DumpRuleText(Optional Delimiter As String = " ") As String
+    Dim Text As String
+    Dim Rule As Variant
+    
+    Text = ""
+    For Each Rule In Rules
+        Text = Text & Rule.Text & Delimiter
+    Next
+    
+    DumpRuleText = Text
+End Function
+
+
+'== Compare functions end ==
+
+'}}}
+
+'class
+'   name;IsExactCellValue
+'{{{
+Option Explicit
+
+' a family of the IsExactCell virtual class
+
+Public Text As String
+
+Public Function IsSame(x As Range, y As Range) As Boolean
+    IsSame = StrictEqual(SmartValue(x), SmartValue(y))
+End Function
+
+Private Function StrictEqual(x As Variant, y As Variant) As Boolean
+    ' we impliment the "TooStrictEqual" on http://code.google.com/p/cowares-excel-hello/wiki/bad_empty
+    ' because the cell doesn't return integer nor single type.
+    ' and this let the empty cell be distinguished from 0 and "".
+    Dim Equal As Boolean
+    
+    If VarType(x) <> VarType(y) Then
+        Equal = False
+    ElseIf IsNull(x) Then
+        Equal = True
+    Else
+        ' vbError types are comparable each other if both are vbError types.
+        Equal = (x = y)
+    End If
+    
+    StrictEqual = Equal
+End Function
+
+Private Function SmartValue(x As Range) As Variant
+    SmartValue = x.Value
+End Function
+
+'}}}
+
+'class
+'   name;IsExactCellFormula
+'{{{
+Option Explicit
+
+' a family of the IsExactCell virtual class
+
+Public Text As String
+
+Public Function IsSame(x As Range, y As Range) As Boolean
+    IsSame = StrictEqual(SmartValue(x), SmartValue(y))
+End Function
+
+Private Function StrictEqual(x As Variant, y As Variant) As Boolean
+    ' we impliment the "TooStrictEqual" on http://code.google.com/p/cowares-excel-hello/wiki/bad_empty
+    ' because the cell doesn't return integer nor single type.
+    ' and this let the empty cell be distinguished from 0 and "".
+    Dim Equal As Boolean
+    
+    If VarType(x) <> VarType(y) Then
+        Equal = False
+    ElseIf IsNull(x) Then
+        Equal = True
+    Else
+        ' vbError types are comparable each other if both are vbError types.
+        Equal = (x = y)
+    End If
+    
+    StrictEqual = Equal
+End Function
+
+Private Function SmartValue(x As Range) As Variant
+    ' we must distinguish the Formula and Value,
+    ' because the maximum length allowed is different by the excel design
+    ' for formula and string value.
+    ' this problem occurs on reading cell only.
+    If x.HasFormula Then
+        SmartValue = x.Formula
+    Else
+        SmartValue = x.Value
+    End If
+End Function
+
+'}}}
+
+'class
+'   name;ReportDifferenceByColor
+'{{{
+Option Explicit
+
+' a family of the ReportDifferenceBy virtual class
+
+Const ClearColor = -4105    ' automatic (white)
+Const CellColor = 3         ' red
+Const RowColor = 6          ' yellow
+
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
+    ClearColors EditSheet
+    If HasDiffer Then
+        Set DifferArea.ParentSheet = EditSheet
+        MarkCells DifferArea
+        MarkRows DifferArea
+        Application.Goto DifferArea.Area(1), False
+    Else
+        ' validated as good!
+        Application.Goto EditSheet.Cells(1), False
+    End If
+End Sub
+
+Private Sub ClearColors(Target As Worksheet)
+    Target.Cells.Interior.ColorIndex = ClearColor
+End Sub
+
+Private Sub MarkCells(Target As AreaBuilder)
+    Dim i As Variant
+    For i = 1 To Target.AreasCount
+        Target.Area(i).Interior.ColorIndex = CellColor
+    Next
+End Sub
+
+Private Sub MarkRows(Target As AreaBuilder)
+    Dim MarkAt As Long
+    Dim i As Variant
+    
+    With Target.ParentSheet
+        MarkAt = .UsedRange.Column + .UsedRange.Columns.Count
+        If MarkAt > .Columns.Count Then Exit Sub
+        
+        For i = 1 To Target.AreasCount
+            Application.Intersect(.Columns(MarkAt), Target.Area(i).EntireRow).Interior.ColorIndex = RowColor
+        Next
+    End With
+End Sub
+
+'}}}
+
+'class
+'   name;ReportDifferenceByBook
+'{{{
+Option Explicit
+
+' a family of the ReportDifferenceBy virtual class
+
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
+    Dim x As Range
+    Dim ReportSheet As Worksheet
+    Dim Line As Range
+    Dim i As Variant
+    
+    Set ReportSheet = CreateBlankReport()
+    Application.ScreenUpdating = False
+    Set Line = MakeHeader(ReportSheet, RuleText, EditSheet, ReferSheet)
+    
+    If HasDiffer Then
+        MakeDifferAddressLine Line, DifferArea
+        Set Line = ReportSheet.Rows(8)
+        Set DifferArea.ParentSheet = EditSheet
+        For i = 1 To DifferArea.AreasCount
+            For Each x In DifferArea.Area(i).Cells
+                Set Line = MakeDifferLine(Line, x, Refered(x, ReferSheet))
+            Next
+        Next
+    Else
+        ' validated as good!
+        Line.Cells(1).Value = "違いはありません。"
+    End If
+    
+    Application.ScreenUpdating = True
+    ReportSheet.Parent.Saved = True
+    Set ReportSheet = Nothing
+End Sub
+
+Private Function CreateBlankReport() As Worksheet
+    Dim Wb As Workbook
+    
+    Set Wb = Application.Workbooks.Add
+    Set CreateBlankReport = Wb.Worksheets(1)
+    Set Wb = Nothing
+End Function
+
+Private Function MakeHeader(ReportSheet As Worksheet, RuleText As String, EditSheet As Worksheet, ReferSheet As Worksheet) As Range
+    With ReportSheet
+        .Rows(1).Range("A1:B1") = Array("編集シート", SheetFullName(EditSheet))
+        .Rows(2).Range("A1:B1") = Array("参照シート", SheetFullName(ReferSheet))
+        .Rows(3).Range("A1:B1") = Array("比較", RuleText)
+        .Rows(7).Range("A1:E1") = Array("セル", "編集値", "編集式", "参照値", "参照式")
+        .Rows(7).Font.Bold = True
+        .Columns("B:E").ColumnWidth = 17
+        .Columns("B:E").NumberFormat = "@"
+        .Rows(5).NumberFormat = "@"
+    End With
+    
+    Set MakeHeader = ReportSheet.Rows(5).Cells(1)
+End Function
+
+Private Sub MakeDifferAddressLine(Line As Range, DifferArea As AreaBuilder)
+    Const MaxCellStringLength = 32767
+    ' because a cell of excel can't have a string larger than above limit,
+    ' we will divide a very large address string, into consequent cells.
+    Dim CellAt As Long
+    Dim CommaAt As Long
+    Dim x As String
+    
+    CellAt = 0
+    Line.Offset(0, CellAt) = "差分セル"
+    
+    x = DifferArea.Address(False, False, xlA1, False)
+    Do
+        CellAt = CellAt + 1
+        If Len(x) > MaxCellStringLength Then
+            CommaAt = InStrRev(x, ",", MaxCellStringLength, vbBinaryCompare)
+            If CommaAt <= 1 Then CommaAt = MaxCellStringLength  ' safety
+            Line.Offset(0, CellAt) = Left(x, CommaAt)
+            x = Mid(x, CommaAt + 1)
+        Else
+            Line.Offset(0, CellAt) = x
+            x = ""
+            ' above line is required to avoid a vb bug of leaking memory on releasing large string.
+            Exit Do
+        End If
+    Loop
+End Sub
+
+Private Function MakeDifferLine(Line As Range, EditCell As Range, ReferCell As Range) As Range
+    Line.Range("A1:E1") = _
+        Array(EditCell.Address(False, False, xlA1, False), _
+            SafeValue(EditCell), EditCell.Formula, _
+            SafeValue(ReferCell), ReferCell.Formula)
+    Set MakeDifferLine = Line.Offset(1, 0)
+End Function
+
+Private Function SheetFullName(Target As Worksheet) As String
+    With Target
+        SheetFullName = "[" & .Parent.Name & "]" & .Name
+    End With
+End Function
+
+Private Function SafeValue(x As Range) As String
+    Dim y As Variant
+    y = x.Value
+    
+    If VarType(y) = vbError Then
+        SafeValue = TranslateError(y)
+    Else
+        SafeValue = y
+    End If
+End Function
+
+Private Function TranslateError(x As Variant) As String
+    Dim a As Variant
+    Static Dic As Variant
+    
+    If IsEmpty(Dic) Then
+        Dic = Array( _
+                Array(CVErr(xlErrDiv0), "#DIV/0!"), _
+                Array(CVErr(xlErrNA), "#N/A"), _
+                Array(CVErr(xlErrName), "#NAME?"), _
+                Array(CVErr(xlErrNull), "#NULL!"), _
+                Array(CVErr(xlErrNum), "#NUM!"), _
+                Array(CVErr(xlErrRef), "#REF!"), _
+                Array(CVErr(xlErrValue), "#VALUE!") _
+            )
+    End If
+    
+    For Each a In Dic
+        If x = a(0) Then
+            TranslateError = a(1)
+            Exit Function
+        End If
+    Next
+    
+    TranslateError = "#ERROR!"
+End Function
+
+Private Function Refered(x As Range, AtSheet As Worksheet) As Range
+    Set Refered = AtSheet.Range(x.Address(True, True, xlA1, False))
+End Function
+
+'}}}
+
+'class
+'   name;ReportDifferenceByToolBar
+'{{{
+Option Explicit
+
+' a family of the ReportDifferenceBy virtual class
+
+Private Helper As ToolBarV2
+Private SummaryButton As Office.CommandBarComboBox
+
+Private Sub Class_Initialize()
+    CatchHelper
+End Sub
+
+Private Sub Class_Terminate()
+    ReleaseHelper
+End Sub
+
+Public Sub Report(RuleText As String, HasDiffer As Boolean, DifferArea As AreaBuilder, EditSheet As Worksheet, ReferSheet As Worksheet)
+    Dim x As Range
+    Dim i As Variant
+    
+    ClearSummaries
+    
+    If HasDiffer Then
+        For i = 1 To DifferArea.AreasCount
+            For Each x In DifferArea.Area(i).Cells
+                SummaryButton.AddItem x.Address(False, False, xlA1, False)
+            Next
+        Next
+        Helper.ListAddHistory SummaryButton, SummaryButton.ListCount & " !"
+    Else
+        ' validated as good!
+        Helper.ListAddHistory SummaryButton, "○"
+    End If
+End Sub
+
+Public Sub ClearSummaries()
+    EnsureSummaryButton
+    SummaryButton.Clear
+End Sub
+
+Public Sub JumpTo(ParamArray Targets() As Variant)
+    Dim ToAddress As String
+    Dim x As Variant
+    
+    EnsureSummaryButton
+    With SummaryButton
+        If .ListIndex <= 1 Then Exit Sub
+        
+        ToAddress = .List(.ListIndex)
+        For Each x In Targets
+            Application.Goto x.Range(ToAddress), False
+        Next
+    End With
+End Sub
+
+Private Sub EnsureSummaryButton()
+    On Error GoTo ButtonFailure
+    If Not SummaryButton Is Helper.GetButton("summary") Then CatchHelper
+    Exit Sub
+    
+ButtonFailure:
+    Debug.Print Err.Number, Err.Description
+    CatchHelper
+End Sub
+
+Private Sub CatchHelper()
+    Set Helper = BaumMain.GetHelper
+    Set SummaryButton = Helper.GetButton("summary")
+End Sub
+
+Private Sub ReleaseHelper()
+    Set Helper = Nothing
+    Set SummaryButton = Nothing
+End Sub
+
+'}}}
+
+'class
+'   name;AreaBuilder
+'{{{
+Option Explicit
+
+Private Bag As Collection
+Private OptimizationRequired As Boolean
+Private BaseSheet As Worksheet
+Private InternalSheet As Worksheet
+Private AddressCache As String
+Private CellsCountCache As Variant
+
+Public EnableOptimization As Boolean
+Public InternalSheetVisible As Boolean
+Public Verbose As Boolean
+
+
+'== Class events begin ==
+
+
+Private Sub Class_Initialize()
+    Set Bag = New Collection
+    EnableOptimization = True
+    InternalSheetVisible = True
+End Sub
+
+Private Sub Class_Terminate()
+    SelectNone
+    Set Bag = Nothing
+    ReleaseInternalSheet
+End Sub
+
+
+'== Class events end ==
+'== Public Methods begin ==
+
+
+Public Property Get HasArea() As Boolean
+    HasArea = (AreasCount > 0)
+End Property
+
+Public Property Get AreasCount() As Variant
+    MayOptimize
+    AreasCount = Bag.Count
+End Property
+
+Public Property Get CellsCount() As Variant
+    Dim x As Variant
+    
+    If Not EnableOptimization Then
+        If IsAlive(BaseSheet) Then
+            CellsCountCache = 0
+            For Each x In Bag
+                CellsCountCache = CellsCountCache + CellsCountLarge(BaseSheet.Range(x))
+            Next
+        Else
+            Err.Raise Number:=1004, Description:="Worksheet is required when EnableOptimization is False."
+        End If
+    End If
+    
+    CellsCount = CellsCountCache
+End Property
+
+Public Property Get AreasCollection() As Collection
+    Set AreasCollection = Bag
+End Property
+
+Public Property Get Address( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    Dim x As Variant
+    
+    MayOptimize
+    AddressCache = ""
+    For Each x In Bag
+        AddressCache = AddressCache & "," & TranslateAddress(x, RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Next
+    If Len(AddressCache) > 1 Then AddressCache = Mid(AddressCache, 2)
+    
+    Address = AddressCache
+End Property
+
+Public Sub SetAddress(ByVal AddressText As String)
+    Dim AddressArray As Variant
+    Dim x As Variant
+    
+    SelectNone
+    AddressArray = Split(AddressText, ",")
+    For Each x In AddressArray
+        PushAddress x
+    Next
+    OptimizationRequired = True
+End Sub
+
+Public Property Get LastArea() As Range
+    Set LastArea = Area(AreasCount)
+End Property
+
+Public Property Get Area(Optional Item As Variant = 1) As Range
+    If BaseSheet Is Nothing Then
+        Set Area = Nothing
+    Else
+        MayOptimize
+        If AreasCount < Item Or Item < 1 Then
+            Set Area = BaseSheet.Cells
+        Else
+            Set Area = BaseSheet.Range(Bag(Item))
+        End If
+    End If
+End Property
+
+Public Property Set Areas(RangeItem As Range)
+    Dim x As Range
+    
+    SelectNone
+    For Each x In RangeItem.Areas
+        PushArea x
+    Next
+    OptimizationRequired = True
+End Property
+
+Public Property Get ParentSheet() As Worksheet
+    Set ParentSheet = BaseSheet
+End Property
+
+Public Property Set ParentSheet(Target As Worksheet)
+    MayUpdateWorksheet Target
+End Property
+
+Public Sub PushArea(RangeItem As Range)
+    Bag.Add RangeItem.Address(False, False, xlA1, False)
+    MayUpdateWorksheet RangeItem.Worksheet
+    OptimizationRequired = True
+End Sub
+
+Public Function PopArea() As Range
+    Set PopArea = LastArea
+    If HasArea Then Bag.Remove AreasCount
+End Function
+
+Public Function ShiftArea() As Range
+    Set ShiftArea = Area(1)
+    If HasArea Then Bag.Remove 1
+End Function
+
+Public Sub PushAddress(ByVal AddressText As String)
+    Bag.Add TranslateAddress(AddressText)
+    OptimizationRequired = True
+End Sub
+
+Public Function PopAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        PopAddress = TranslateAddress(Bag(AreasCount), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove AreasCount
+    Else
+        PopAddress = ""
+    End If
+End Function
+
+Public Function ShiftAddress( _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+
+    If HasArea Then
+        ShiftAddress = TranslateAddress(Bag(1), RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+        Bag.Remove 1
+    Else
+        ShiftAddress = ""
+    End If
+End Function
+
+Public Sub SelectNone()
+    Do While Bag.Count > 0
+        Bag.Remove 1
+    Loop
+    CellsCountCache = 0
+End Sub
+
+Public Sub SelectAll()
+    On Error GoTo Trap
+    Set Areas = BaseSheet.Cells
+    CellsCountCache = CellsCountLarge(BaseSheet.Cells)
+    Exit Sub
+    
+Trap:
+    ' error should be raised at the no basesheet error
+    Debug.Print Err.Number, Err.Description, TypeName(BaseSheet)
+    Err.Raise Err.Number
+End Sub
+
+Public Sub SelectValues(Target As Range)
+    MayUpdateWorksheet Target.Worksheet
+    SelectNone
+    SearchBySpecialCells Target
+End Sub
+
+
+'== Public Methods end ==
+'== Public Util Functions begin ==
+
+
+Public Function SpecialCellsValue(Target As Range, ByRef ReturnSpecial As Range) As Variant
+    ' return a count of cells found, that may be a Long or Decimal Variant
+    On Error GoTo NoCellsFound
+    
+    If IsASingleCell(Target) Then
+    ' protect from the single cell issue. http://code.google.com/p/cowares-excel-hello/wiki/bad_special_cells
+        Set ReturnSpecial = Target.Range("A1,A1").SpecialCells(xlCellTypeConstants)
+    Else
+        Set ReturnSpecial = Target.SpecialCells(xlCellTypeConstants)
+    End If
+    SpecialCellsValue = CellsCountLarge(ReturnSpecial)
+    Exit Function
+    
+NoCellsFound:
+    If Err.Number = 1004 Then
+    ' runtime error on no cells found
+        Set ReturnSpecial = Nothing
+        SpecialCellsValue = 0
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function IsAlive(Ws As Worksheet) As Boolean
+    If Ws Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    Dim i As Long
+    i = Ws.Index
+    If Err.Number = 0 Then IsAlive = True
+End Function
+
+Public Function CellsCountLarge(Target As Range) As Variant
+    If Application.Version >= 12 Then
+        CellsCountLarge = CDec(Target.Cells.CountLarge)
+    Else
+        CellsCountLarge = Target.Cells.Count
+    End If
+End Function
+
+Public Function IsASingleCell(Target As Range) As Boolean
+    On Error GoTo MayFailOnExcel2007
+    
+    IsASingleCell = (Target.Cells.Count = 1)
+    Exit Function
+    
+MayFailOnExcel2007:
+    If Err.Number = 6 Then
+    ' overflowed, means very large, larger than 1, maybe
+        IsASingleCell = False
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+Public Function DivideIntoHalf(x As Range) As Variant
+    Dim r As Long
+    Dim c As Long
+    Dim n As Long
+    Dim D1 As Range
+    Dim D2 As Range
+    
+    r = x.Rows.Count
+    c = x.Columns.Count
+    If r >= c Then
+        n = Int(r / 2)
+        Set D1 = x.Rows("1:" & CStr(n)).Cells
+        Set D2 = x.Rows(CStr(n + 1) & ":" & CStr(r)).Cells
+    Else
+        n = Int(c / 2)
+        Set D1 = Range(x.Columns(1), x.Columns(n)).Cells
+        Set D2 = Range(x.Columns(n + 1), x.Columns(c)).Cells
+    End If
+    
+    If Verbose Then Debug.Print "DivideIntoHalf: ", x.Address(False, False), "->", D1.Address(False, False), D2.Address(False, False)
+    
+    DivideIntoHalf = Array(D1, D2)
+End Function
+
+
+'== Public Util Functions end ==
+'== Helper Functions begin ==
+
+
+Private Sub MayUpdateWorksheet(Target As Worksheet)
+    ' only the worksheet of the lattest range added will survive
+    If BaseSheet Is Target Then Exit Sub
+    
+    Set BaseSheet = Target
+End Sub
+
+Private Sub MayOptimize()
+    If Not EnableOptimization Then Exit Sub
+    
+    If OptimizationRequired Then
+        Optimize
+        OptimizationRequired = False
+    End If
+End Sub
+
+Private Sub Optimize()
+    Dim x As Variant
+    Dim y As Range
+    
+    EnsureInternalSheet
+    InternalSheet.Cells.Clear
+    For Each x In Bag
+        InternalSheet.Range(x).Value = 1
+    Next
+    
+    SelectNone
+    SearchBySpecialCells InternalSheet.UsedRange
+    InternalSheet.Parent.Saved = True
+End Sub
+
+Private Sub SearchBySpecialCells(ByVal Target As Range)
+    Dim Counter As Variant
+    Dim FoundArea As Range
+    Dim x As Range
+    Dim y As Variant
+    
+    Counter = SpecialCellsValue(Target, FoundArea)
+    If Counter = 0 Then Exit Sub
+    ' we expect Counter > 0 when division is needed
+    
+    If IsExpectedCellsCount(Target, Counter) Then
+        CellsCountCache = CellsCountCache + Counter
+        For Each x In FoundArea.Areas
+            PushAddress x.Address(False, False, xlA1, False)
+        Next
+    Else
+        ' divide until success
+        For Each y In DivideIntoHalf(Target)
+            SearchBySpecialCells y
+        Next
+    End If
+End Sub
+
+Private Function IsExpectedCellsCount(Target As Range, Count As Variant) As Boolean
+    Dim Expected As Variant
+    ' expect constant values only
+    Expected = Application.WorksheetFunction.CountA(Target)
+    IsExpectedCellsCount = (Count = Expected)
+    'IsExpectedCellsCount = ((Count = Expected) And (Count <= 4))    ' for debug
+End Function
+
+Private Sub EnsureInternalSheet()
+    Dim Wb As Workbook
+    
+    If IsAlive(InternalSheet) Then Exit Sub
+    
+    Set Wb = Application.Workbooks.Add
+    Wb.Windows(1).Visible = InternalSheetVisible
+    Wb.Saved = True
+    Set InternalSheet = Wb.Worksheets(1)
+    Set Wb = Nothing
+End Sub
+
+Private Sub ReleaseInternalSheet()
+    On Error Resume Next
+    InternalSheet.Parent.Close False
+    Set InternalSheet = Nothing
+End Sub
+
+Private Function TranslateAddress( _
+        ByVal FromAddress As String, _
+        Optional RowAbsolute As Boolean = False, _
+        Optional ColumnAbsolute As Boolean = False, _
+        Optional ReferenceStyle As XlReferenceStyle = xlA1, _
+        Optional External As Boolean = False, _
+        Optional RelativeTo As Range = Nothing) As String
+    ' this function should not trap errors caused by a wrong address
+    ' once trap it, keep precise information, and then throw again would be a good manner.
+    On Error GoTo Trap
+    Dim Ra As Range
+    
+    If Not EnableOptimization Then
+        TranslateAddress = FromAddress
+        Exit Function
+    End If
+    
+    EnsureInternalSheet
+    Set Ra = InternalSheet.Range(FromAddress)
+    TranslateAddress = Ra.Address(RowAbsolute, ColumnAbsolute, ReferenceStyle, External, RelativeTo)
+    Exit Function
+    
+Trap:
+    Debug.Print Err.Number, Err.Description, FromAddress
+    Err.Raise Err.Number
+End Function
+
+
+'== Helper Functions end ==
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+    BaumMain.InitializeCompareHelper
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.TerminateCompareHelper
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
+
+```

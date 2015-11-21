@@ -1,0 +1,497 @@
+
+
+# Introduction #
+
+  * ellipse summary plot for R
+
+## 概要 ##
+  * Rで楕円要約図を描く
+
+# Details #
+
+## 説明 ##
+
+# Downloads #
+
+  * [downloads / ダウンロード](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=ellipseplot_r)
+  * [download from developer source tree / 開発用レポジトリの最新のソース](http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ellipseplot/)
+
+# How to use #
+
+  * [Draw an Ellipse Summary Plot in R](http://tomizonor.wordpress.com/2013/04/29/ellipse-plot/)
+
+## 使い方 ##
+
+# Snapshots #
+
+# Code #
+
+### midpoints.r ###
+
+```
+# midpoints, ninenum, seventeennum
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ellipseplot/
+#
+# Copyright (C) 2013 Tomizono
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+
+# return list of divided range of c(min.index, max.index)
+midpoint <- function(x) {
+  n <- (x[1] + x[2]) / 2
+  list(c(x[1], floor(n)), c(ceiling(n), x[2]))
+}
+
+# dig midpoints of array
+midpoints.calc <- function(x, n) {
+  nx <- length(x)
+  pl <- list(c(1, nx))
+  for(i in 1:n) pl <- unlist(lapply(pl, midpoint), recursive=F)
+  pm <- matrix(c(1, simplify2array(pl), nx), ncol=2, byrow=T)
+  apply(pm, 1, function(a) sum(x[a]) / 2)
+}
+
+# midpoints
+midpoints <- function(x, n=1, na.rm=TRUE) {
+  xna <- is.na(x)
+  if(na.rm) x <- x[!xna]
+  if((!na.rm && any(xna)) || (length(x) == 0)) 
+    return(rep.int(NA, length(xna)))
+
+  midpoints.calc(sort(x), n)
+}
+
+# derived
+ninenum <- function(x, ...) midpoints(x, 3, ...)
+seventeennum <- function(x, ...) midpoints(x, 4, ...)
+
+```
+
+### test.midpoints.r ###
+
+```
+# test midpoints
+
+# test five number summary of quartiles
+test1 <- function(r=1, n=100) {
+  myfivenum <- function(x, ...) midpoints(x, 2, ...)
+  res <- sapply(as.list(1:r),
+                function(a) {
+                  data <- rnorm(n)
+                  control <- fivenum(data)
+                  my5 <- myfivenum(data)
+                  my9 <- ninenum(data)
+                  my17 <- seventeennum(data)
+                  all(my5 == control) &&
+                  all(my9[seq(1,9,2)] == control) &&
+                  all(my17[seq(1,17,4)] == control)
+                })
+  all(res)
+}
+
+# test nine number summary of octiles
+#  and seventeen number summary of hexadeciles
+test2 <- function(r=1, n=100) {
+  res <- sapply(as.list(1:r),
+                function(a) {
+                  data <- rnorm(n)
+                  control9 <- testninenum(data)
+                  control17 <- testseventeennum(data)
+                  my9 <- ninenum(data)
+                  my17 <- seventeennum(data)
+                  all(my9 == control9) &&
+                  all(my17 == control17) 
+                })
+  all(res)
+}
+
+# check differences to zarfivenum
+test3 <- function(r=1, n=9) {
+  myfivenum <- function(x, ...) midpoints(x, 2, ...)
+  res <- sapply(as.list(1:r),
+                function(a) {
+                  data <- rnorm(n)
+                  control <- zarfivenum(data)
+                  my5 <- myfivenum(data)
+                  my5 - control
+                })
+  rowMeans(res)
+}
+
+# check differences to zarninenum
+test4 <- function(r=1, n=9) {
+  res <- sapply(as.list(1:r),
+                function(a) {
+                  data <- rnorm(n)
+                  control <- zarninenum(data)
+                  my9 <- ninenum(data)
+                  my9 - control
+                })
+  rowMeans(res)
+}
+
+# bulk test
+test5 <- function() {
+  print(rowSums(sapply(as.list(1:100), function(a) testninenum(1:a) - ninenum(1:a))))
+  print(rowSums(sapply(as.list(1:100), function(a) testseventeennum(1:a) - seventeennum(1:a))))
+  print(all(sapply(as.list(1:100), function(n) test1(30,n))))
+  print(all(sapply(as.list(1:100), function(n) test2(30,n))))
+
+  print(min(sapply(as.list(1:100), function(a) zarninenum(1:a) - ninenum(1:a))))
+  print(max(sapply(as.list(1:100), function(a) zarninenum(1:a) - ninenum(1:a))))
+  print(rowMeans(sapply(as.list(1:100), function(a) zarninenum(1:a) - ninenum(1:a))))
+  print(rowMeans(sapply(as.list(1:100), function(n) test3(30,n))))
+  print(rowMeans(sapply(as.list(1:100), function(n) test4(30,n))))
+}
+
+# visualize differences between ninenum and zarninenum
+test6 <- function(n1=1, n2=25) {
+  d <- data.frame(t(
+         sapply(as.list(n1:n2), function(a) zarninenum(1:a) - ninenum(1:a))
+       ))
+  names(d) <- paste(0:8, c('','st','nd','rd',rep('th',5)), ' O', sep='')
+  names(d)[1] <- 'Min'
+  names(d)[5] <- 'Med'
+  names(d)[9] <- 'Max'
+  parkeeper <- par(c('mfrow','mar'))
+  par(mfrow=c(7,1), mar=c(2,4,1,1))
+  lapply(as.list(c(2:4,6:8)), function(i)
+    plot(d[,i],type='b',ylab='diff',xlab='',main=names(d)[i],
+    ylim=c(-0.5,0.5),yaxp=c(-0.5,0.5,2))
+  )
+  matplot(d[,c(1,5,9)],type='l',ylab='',xlab='length',
+    main='Min, Med, Max',mgp=c(1,1,0),
+    ylim=c(-0.5,0.5),yaxp=c(-0.5,0.5,2))
+  par(parkeeper)
+  d
+}
+
+test7 <- function(n1=1, n2=100) {
+  d <- sweep(t(
+         sapply(as.list(n1:n2), function(a) zarninenum(1:a) - ninenum(1:a))
+       ), 1, (n1:n2)-1, '/')
+  matplot(d,type='l',ylab='diff',xlab='length')
+}
+
+
+### other calculations
+
+# direct calculation
+
+testninenum <- function(x, na.rm=TRUE)
+{
+  xna <- is.na(x)
+  if(na.rm) x <- x[!xna]
+  else if(any(xna)) return(rep.int(NA,9))
+  x <- sort(x)
+  n <- length(x)
+  if(n == 0) {
+    rep.int(NA,9)
+  } else {
+    n2 <- (n+1) / 2
+    n4 <- floor((n+3) / 2) / 2
+    n8 <- floor((n+7) / 4) / 2
+    d <- c(1, n8, n4, n4 * 2 - n8, 
+           n2, 
+           n + 1 - n4 * 2 + n8, n + 1 - n4, n + 1 - n8, n)
+    0.5 * (x[floor(d)] + x[ceiling(d)])
+  }
+}
+
+testseventeennum <- function(x, na.rm=TRUE)
+{
+  xna <- is.na(x)
+  if(na.rm) x <- x[!xna]
+  else if(any(xna)) return(rep.int(NA,17))
+  x <- sort(x)
+  n <- length(x)
+  if(n == 0) {
+    rep.int(NA,17)
+  } else {
+    n2 <- (n+1) / 2
+    n4 <- floor((n+3) / 2) / 2
+    n8 <- floor((n+7) / 4) / 2
+    n16 <- floor((n+15) / 8) / 2
+    d <- c(1, n16, n8, n8 * 2 - n16,
+           n4,
+           n4 * 2 - n8 * 2 + n16, 
+           n4 * 2 - n8, n4 * 2 - n16, 
+           n2, 
+           n + 1 - n4 * 2 + n16, n + 1 - n4 * 2 + n8, 
+           n + 1 - n4 * 2 + n8 * 2 - n16,
+           n + 1 - n4,
+           n + 1 - n8 * 2 + n16, n + 1 - n8, n + 1 - n16, n)
+    0.5 * (x[floor(d)] + x[ceiling(d)])
+  }
+}
+
+
+# according to Zar
+
+zarfivenum <- function(x) {
+  x <- sort(x)
+  n <- length(x)
+  n2 <- (n + 1) / 2
+  n4 <- ceiling((n + 1) / 2) / 2
+  d <- pmax(1, pmin(n, c(1, n4, n2, n + 1 - n4, n)))
+  0.5 * (x[floor(d)] + x[ceiling(d)])
+}
+
+zarninenum <- function(x) {
+  x <- sort(x)
+  n <- length(x)
+  n2 <- (n + 1) / 2
+  n4 <- ceiling((n + 1) / 2) / 2
+  n8 <- ceiling((n + 1) / 4) / 2
+  d <- pmax(1, pmin(n, 
+         c(1, n8, n4, n4 * 2 - n8, n2, 
+           n + 1 - n4 * 2 + n8, n + 1 - n4, n + 1 - n8, n)
+       ))
+  0.5 * (x[floor(d)] + x[ceiling(d)])
+}
+
+```
+
+### ellipseplot.r ###
+
+```
+# ellipse plot
+# http://code.google.com/p/cowares-excel-hello/source/browse/trunk/ellipseplot/
+#
+# Copyright (C) 2013 Tomizono
+# Fortitudinous, Free, Fair, http://cowares.nobody.jp
+#
+# ellipseplot(
+#             x= data frame for x-axis; factors and observations,
+#             y= data frame for y-axis; factors and observations,
+#             SUMMARY= function generating summaries to write contours,
+#             plot= TRUE for chart / FALSE for print summary,
+#             verbose= TRUE for debugging information,
+#             ...= accepts plot parameters
+#            )
+#
+# ellipseplot.single(
+#             x= vector data for x-axis; observations without factor,
+#             y= vector data for y-axis; observations without factor,
+#             # plot single pair of (x,y) data without any factors
+#             # other parameters are same as ellipseplot
+#
+# requires midpoints
+
+ellipseplot <- function(x, y, 
+                   SUMMARY=ninenum, 
+                   plot=TRUE, verbose=FALSE, ...) {
+  stats <- calc.stats(x, y, SUMMARY)
+  axes <- list(x=names(x), y=names(y))
+  
+  if(plot) {
+    many.ellipses(stats, axes, ...)
+    invisible(stats)
+  } else {
+    stats
+  }
+}
+
+ellipseplot.single <- function(x, y, 
+                   SUMMARY=ninenum, 
+                   plot=TRUE, verbose=FALSE, ...) {
+  xd <- data.frame(rep('o',length(x)), x)
+  yd <- data.frame(rep('o',length(y)), y)
+  ellipseplot(xd, yd, SUMMARY, plot, verbose, ...)
+}
+
+
+# draw multiple ellipses of stat
+# stats is a list of stat
+many.ellipses <- function(stats, axes, ...) {
+  xy <- list('x', 'y')
+  lims <- lapply(xy, function(a) 
+                 c(min=min(sapply(stats, function(stat) min(stat[a]))), 
+                   max=max(sapply(stats, function(stat) max(stat[a]))))
+                 )
+  names(lims) <- paste(xy, 'lim', sep='')
+
+  lims$xlab <- axes$x[2]
+  lims$ylab <- axes$y[2]
+
+  pars <- modifyList(lims, c(list(...), x=NA))
+  do.call('plot', pars)
+
+  statnum <- length(stats)
+  col <- ( if(hasArg(col)) list(...)$col
+           else rainbow(statnum) )
+  if(length(col) < statnum) col <- rep(col, statnum)
+  name <- names(stats)
+  if(is.null(name)) name <- as.character(1L:statnum)
+
+  for(i in 1L:statnum) {
+    ellipses(stats[[i]], name[i], col[i])
+  }
+}
+
+# draw ellipses of stat
+# stat must have odd number of rows and ascending order
+ellipses <- function(stat, name, col, SHEER=sheer.color) {
+  xy <- list('x', 'y')
+ 
+  boxes <- calc.abox(stat)
+  boxnumber <- length(boxes)
+  
+  center <- lapply(xy,
+                   function(a) boxes[[1]][a, 'center'])
+  names(center) <- xy
+
+  for(i in 1L:boxnumber) {
+    pcol <- SHEER(col, i / boxnumber)
+    anellipse(boxes[[i]], col=pcol, border=pcol)
+  }
+
+  text(center$x, center$y, name)
+  mtext(name, side=3, at=center$x, col=col)
+  mtext(name, side=4, at=center$y, col=col)
+}
+
+sheer.color <- function(col, level) {
+  sheer <- level^2 * 0.5
+  adjustcolor(col, alpha.f=sheer)
+}
+
+# draw a single inscribed ellipse to the specified box 
+# accepts parameters for polygon()
+anellipse <- function(abox, verbose=FALSE, ...) {
+  axes <- rbind(rt=abox[,'high'] - abox[,'center'], 
+                lb=abox[,'center'] - abox[,'low'])
+  colnames(axes) <- c('x', 'y')
+  if(verbose) print(axes)
+
+  qx <- c('rt','lb','lb','rt')
+  qy <- c('rt','rt','lb','lb')
+
+  seed.ellipse <- data.frame(
+    quadrant=1:4,
+    startangle=seq(0, 2*pi, length=5)[1:4],
+    endangle=seq(0, 2*pi, length=5)[2:5],
+    xcenter=rep(abox['x', 'center'], 4),
+    ycenter=rep(abox['y', 'center'], 4),
+    xaxis=axes[qx, 'x'],
+    yaxis=axes[qy, 'y']
+  )
+  if(verbose) print(seed.ellipse)
+
+  x.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.x))
+  y.ellipse <- as.vector(apply(seed.ellipse, 1, calc.ellipse.y))
+  if(verbose) { 
+    str(x.ellipse)
+    str(y.ellipse)
+  }
+
+  polygon(x.ellipse, y.ellipse, ...)
+}
+
+calc.ellipse <- function(center, axis, 
+                         start=0, end=2*pi, length=100, 
+                         FUNC=cos) {
+  theta <- seq(start, end, length=length)
+  axis * FUNC(theta) + center
+}
+
+calc.ellipse.x <- function(seed) {
+  calc.ellipse(seed['xcenter'], seed['xaxis'], 
+               seed['startangle'], seed['endangle'],
+               FUNC=cos)
+}
+
+calc.ellipse.y <- function(seed) {
+  calc.ellipse(seed['ycenter'], seed['yaxis'], 
+               seed['startangle'], seed['endangle'],
+               FUNC=sin)
+}
+
+
+# expect a data frame with 1st column factor and 2nd column data,
+# for each x and y
+calc.stats <- function(x, y, SUMMARY=ninenum, na.rm=TRUE) {
+  factors <- sort(union(levels(as.factor(x[,1])), 
+                        levels(as.factor(y[,1]))))
+  stats <- lapply(as.list(factors), function(f) {
+                  calc.stat(x[x[,1]==f,2],
+                            y[y[,1]==f,2],
+                            SUMMARY)
+           })
+  names(stats) <- factors
+  calc.stats.na.rm(stats, na.rm)
+}
+
+calc.stats.na.rm <- function(x, na.rm) {
+  if(na.rm) for(f in names(x)) if(all(is.na(x[[f]]))) x[f] <- NULL
+  x
+}
+
+calc.stat <- function(x, y, SUMMARY=ninenum) {
+  data.frame(x=SUMMARY(x), y=SUMMARY(y))
+}
+
+calc.abox <- function(stat) {
+  np <- nrow(stat) + 1
+  center <- np / 2
+  lapply(as.list(1L:(center - 1)), 
+         function(i) {
+           box <- rbind(stat[i,], stat[center,], stat[np - i,])
+           rownames(box) <- c('low', 'center', 'high')
+           t(box)
+         })
+}
+
+```
+
+### test.ellipseplot.r ###
+
+```
+# test functions
+
+testdata.onebox <- data.frame(low=1:0,center=3:4,high=6:5,row.names=c('x','y'))
+
+test.anellipse <- function(x=testdata.onebox, verbose=F) {
+  plot(t(x['x',]), t(x['y',]))
+  anellipse(x, verbose, col='red', border='blue', lty='dotted')
+}
+
+test.ninenum <- function() {
+  print(ninenum(1:9))
+  print(ninenum(1:999))
+  print(ninenum(1:1000))
+  print(ninenum(c(9:1,NA)))
+  print(ninenum(rep(NA,9)))
+  invisible(T)
+}
+
+test.manyellipses <- function(...) {
+  SUMMARY=ninenum
+  stats <- list(
+                data.frame(x=SUMMARY(rnorm(10)), y=SUMMARY(rnorm(10))),
+                data.frame(x=SUMMARY(rnorm(10,1)), y=SUMMARY(rnorm(10))),
+                data.frame(x=SUMMARY(rnorm(10,2)), y=SUMMARY(rnorm(10,1))),
+                data.frame(x=SUMMARY(rnorm(10,3)), y=SUMMARY(rnorm(10,1))),
+                data.frame(x=SUMMARY(rnorm(10,4)), y=SUMMARY(rnorm(10,4)))
+                )
+  many.ellipses(stats, list(x='x', y='y'), ...) 
+}
+
+test.ellipseplot.single <- function(n=10, SUMMARY=ninenum, 
+                                  plot=T, verbose=F, ...) {
+  x <- rnorm(n)
+  y <- rnorm(n)
+  ellipseplot.single(x, y, SUMMARY=SUMMARY, plot, verbose, ...)
+}
+
+test.ellipseplot <- function(series=7, n=10, SUMMARY=ninenum, 
+                             plot=T, verbose=F, ...) {
+  x <- rnorm(n * series)
+  y <- rnorm(n * series)
+  f <- rep(1:series, each=n)
+  ellipseplot(data.frame(f=LETTERS[f],x=x+f), 
+              data.frame(f=LETTERS[f],y=y+f),
+              SUMMARY=SUMMARY, plot, verbose, ...)
+}
+
+```

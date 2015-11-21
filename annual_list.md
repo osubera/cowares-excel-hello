@@ -1,0 +1,154 @@
+# Introduction #
+
+  * generate sheets with annual list in an excel book
+
+## 概要 ##
+  * エクセルで年間スケジュール表のシートを作る
+
+# Details #
+
+  * generate an annual schedule table for the next year, or the specified year.
+  * monthly sheet
+  * daily rows in every sheet
+
+## 説明 ##
+  * 来年または、指定した年の年間スケジュール表を作る
+  * 月ごとにシートを用意する
+  * １日１行の縦リスト
+
+# Downloads #
+
+  * [downloads](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=annual_list)
+
+# How to use #
+
+  1. add a vba module into your excel book.
+  1. paste the below Code on the module.
+  1. run the macro.
+  1. will be the next year or the current cell year.
+
+## 使い方 ##
+  1. エクセルブックにVBAのモジュールを挿入する。
+  1. そのモジュールに、下記の Code を貼り付ける。
+  1. 貼り付けたマクロを実行する。
+  1. 来年または、セル上の年を作成。
+
+# Code #
+
+```
+'identity
+' timestamp;2010/12/12 10:50 JST
+'       url;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
+
+'comment
+' en;create an annual calendar excel book
+' ja;年間カレンダーのエクセルブックを作る
+
+'tag
+' en;calendar,vba,excel
+
+'copyright
+'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
+' contributors;Tomizono - kobobau.com
+'        since;2010
+
+'module
+'  name;AnnualList
+'{{{
+
+Public Sub AnnualList()
+    Dim TheYear As Integer
+    TheYear = GetYear
+    AddMonthlySheets CreateNewBook, TheYear
+End Sub
+
+Private Sub NameTheSheet(ToSheet As Object, TheDay As Date)
+    'Const TheFormat = "yyyy-m"
+    Const TheFormat = "oooo"
+    'Const TheFormat = "mmm"
+    ToSheet.Name = Format(TheDay, TheFormat)
+End Sub
+
+Private Sub FillTheSheet(ToSheet As Object, TheFirstDay As Date)
+    ' People may want to change a lot of things in this function to get their favorite sheets
+    'Const TheFormat = "d"
+    Const TheFormat = "d aaa"
+    'Const TheFormat = "d ddd"
+    Dim TheDay As Integer
+    Dim TheRow As Integer
+    ' header
+    With ToSheet.Range("A1")
+        .Value = Format(TheFirstDay, "mmmm yyyy") & ": Schedules"
+        .VerticalAlignment = xlCenter
+        .RowHeight = 32
+        .Font.Bold = True
+        .Font.Size = 18
+    End With
+    With ToSheet.Range("A2:B2")
+        .Value = Array("Day", "ToDo")
+        .HorizontalAlignment = xlCenter
+        .Interior.ColorIndex = 35
+        .Font.Italic = True
+        .Cells(2).ColumnWidth = 48
+    End With
+    ' body
+    ToSheet.Range("A3").Value = TheFirstDay
+    ToSheet.Range("A4:A33").Formula = "=R[-1]C+1"
+    ToSheet.Range("A3:A33").NumberFormat = TheFormat
+    For TheDay = 29 To 31
+        TheRow = TheDay + 2
+        If Month(ToSheet.Range("A" & TheRow).Value) <> Month(TheFirstDay) Then
+            ToSheet.Range("A" & TheRow).Clear
+        End If
+    Next
+End Sub
+
+Private Function GetYear() As Integer
+    Dim SpecifiedYear As Integer
+    SpecifiedYear = Val(ActiveCell.Text)
+    If SpecifiedYear <= 0 Then
+        ' actually excel cells do not support dates before 1900 or 1904, but avoid a const to go far around this.
+        GetYear = NextYear
+        Exit Function
+    End If
+    GetYear = SpecifiedYear
+End Function
+
+Private Function NextYear() As Integer
+    NextYear = Year(Now) + 1
+End Function
+
+Private Function CreateNewBook() As Workbook
+    Set CreateNewBook = Application.Workbooks.Add
+End Function
+
+Private Function CreateNewSheet(ToBook As Workbook) As Worksheet
+    Set CreateNewSheet = ToBook.Sheets.Add(After:=ToBook.ActiveSheet)
+End Function
+
+Private Sub AddMonthlySheets(ToBook As Workbook, TheYear As Integer, Optional MonthBegin As Integer = 1, Optional MonthEnd As Integer = 12)
+    Dim TheMonth As Integer
+    Debug.Print "AddMonthlySheets begin: ", ToBook.Name, TheYear, MonthBegin, MonthEnd
+    ' avoid a cost to check MonthBegin and MonthEnd, because they are only options at this time.
+    For TheMonth = MonthBegin To MonthEnd
+        Debug.Print "call AddAMonth: ", TheYear, TheMonth
+        AddAMonth ToBook, TheYear, TheMonth
+    Next
+    Debug.Print "AddMonthlySheets end:: "
+End Sub
+
+Private Sub AddAMonth(ToBook As Workbook, TheYear As Integer, TheMonth As Integer)
+    Dim ToSheet As Worksheet
+    Dim FirstDay As Date
+    FirstDay = DateSerial(TheYear, TheMonth, 1)
+    Set ToSheet = CreateNewSheet(ToBook)
+    NameTheSheet ToSheet, FirstDay
+    FillTheSheet ToSheet, FirstDay
+End Sub
+
+'}}}
+```
+
+# Snapshots #
+
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TQWH6L6NZnI/AAAAAAAAAAY/6z3yF1dzppM/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TQWH6L6NZnI/AAAAAAAAAAY/6z3yF1dzppM/s1600/shot1.png)

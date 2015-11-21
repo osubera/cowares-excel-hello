@@ -1,0 +1,1047 @@
+
+
+# Introduction #
+
+  * how to do URL Encode and Decode in vba
+  * also provides binary dump tools.
+
+## 概要 ##
+  * VBAで URL エンコードとデコードを行う。
+  * また、バイト列を書き出すツールも一緒に入れている。
+
+# Details / 説明 #
+
+| EncUrlParameters | url encode from key-value sets. <br />key=value の集合（ハッシュデータ）を URL エンコードする |
+|:-----------------|:--------------------------------------------------------------------------|
+| DecUrlParametersValue | url decode to key-value sets as a value to a specified key. <br /> key=value の集合（ハッシュデータ）として URL デコードする。 key を１つ受け取り、それに対応する value 値だけをテキストで返す。 |
+| DecUrlParameters | url decode to key-value sets as a Scripting.Dictionary object. <br /> key=value の集合（ハッシュデータ）として URL デコードする。 Scripting.Dictionary 形式を返す。 |
+| DecUrlParametersArray | url decode to key-value sets as a variant array. <br /> key=value の集合（ハッシュデータ）として URL デコードする。 Variant Array ((key1,value1), (key2,value2), ,,,) 形式を返す。 |
+| EncUrlString     | url encode from a unicode text String. <br /> 文字列を URL エンコードする            |
+| DecUrlString     | url decode to a unicode text String. <br /> 文字列を URL デコードする               |
+| EncUrlBytes      | url encode from bytes array. <br /> バイト列を URL エンコードする                     |
+| DecUrlBytes      | url decode to bytes array. <br /> バイト列を URL デコードする                        |
+
+  * a HelloUrlencode module contains everything required above functions. they do not call UtilText functions.
+> > HelloUrlencode 標準モジュールに、上記の関数に必要なものがすべて入っている。 UtilText の関数は呼び出さない。
+  * a UtilText module functions are required to execute the test1().
+> > UtilText 標準モジュールの関数は、 test1() を実行するために必要。
+
+# How to use #
+
+  1. use an ssf reader tool like [ssf\_reader\_primitive](ssf_reader_primitive.md) to convert a text code below into an excel book.
+  1. from test1() is an executable test.
+
+## 使い方 ##
+  1. [ssf\_reader\_primitive](ssf_reader_primitive.md) のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+  1. test1() が実行可能なテスト
+
+# Code #
+
+```
+
+'workbook
+'  name;hello_urlencode.xls
+
+'require
+'  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+
+'worksheet
+'  name;Sheet1
+
+
+'module
+'  name;UtilText
+'{{{
+Option Explicit
+
+Const DefaultLineFeed = vbCrLf
+Const DefaultDelimiter = " "
+
+' 検索、切り取り
+
+Public Function DivideAtFirstMatch( _
+    ByRef MatchedTag As String, ByRef BeforeTag As String, ByRef AfterTag As String, _
+    Text As String, Tags As Variant, Optional Compare As VbCompareMethod = vbBinaryCompare) As Boolean
+    ' 配列でもらった Tag のいずれかの、最初の位置に見つかったもので、文字列を前後に分けて返す。
+    ' MatchedTag: 実際に見つかったタグ、見つからないときは "" を返す。
+    ' BeforeTag:  Text の Tag より前の部分 を返す。
+    ' AfterTag:   Text の Tag より後の部分 を返す。
+    ' Text:       検索対象の文字列を指定する。
+    ' Tags:       検索するタグを指定する。 Array("<b>","<i>") など
+    ' 戻り値:     タグが１つも無ければ false
+    ' 同一順位なら、先に指定されたタグを優先する。 ("<b","<br" のようにどちらにも一致する場合)
+    
+    Dim Tag As Variant
+    Dim At As Long
+    Dim AtFirst As Long
+    Dim AtTag As String
+    
+    If Not IsArray(Tags) Then
+        DivideAtFirstMatch = DivideAtFirstMatch(MatchedTag, BeforeTag, AfterTag, Text, Array(CStr(Tags)))
+        Exit Function
+    End If
+    
+    AtFirst = Len(Text) + 1
+    AtTag = ""
+    For Each Tag In Tags
+        If Tag = "" Then GoTo Ignore
+        At = InStr(1, Text, CStr(Tag), Compare)
+        If At = 0 Then GoTo Ignore
+        If At >= AtFirst Then GoTo Ignore
+        
+        AtFirst = At
+        AtTag = CStr(Tag)
+Ignore:
+    Next
+    
+    MatchedTag = AtTag
+    BeforeTag = Left(Text, AtFirst - 1)
+    AfterTag = Right(Text, Len(Text) - AtFirst + 1 - Len(AtTag))
+    DivideAtFirstMatch = (AtTag <> "")
+End Function
+
+' 検索語の直後から切り取る
+
+Public Function LaserKnife(Text As Variant, SearchMe As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim SearchText As String
+    Dim FoundAt As Long
+    
+    SearchText = CStr(SearchMe)
+    Select Case TypeName(Text)
+    Case "String"
+        If Length = -1 Then Length = Len(Text)
+        FoundAt = InStr(1, Text, SearchText, vbTextCompare)
+        If FoundAt = 0 Then
+            out = Left(Text, Length)
+        Else
+            out = Mid(Text, FoundAt + Len(SearchText), Length)
+        End If
+    Case Else
+        out = TypeName(Text)
+    End Select
+    
+    LaserKnife = out
+End Function
+
+
+' ユニコード文字とバイト配列間の変換
+
+Public Function BytesToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrB(Data(i))
+    Next
+    
+    BytesToString = out
+End Function
+
+Public Function StringToBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = LenB(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscB(MidB(Text, i, 1))
+    Next
+    
+    StringToBytes = out
+End Function
+
+' ユニコード文字とワード配列間の変換
+
+Public Function WordsToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrW(Data(i))
+    Next
+    
+    WordsToString = out
+End Function
+
+Public Function StringToWords(Text As String) As Integer()
+    Dim out() As Integer
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscW(Mid(Text, i, 1))
+    Next
+    
+    StringToWords = out
+End Function
+
+' ユニコード文字とロング配列間の変換
+
+Public Function LongsToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & Chr(Data(i))
+    Next
+    
+    LongsToString = out
+End Function
+
+Public Function StringToLongs(Text As String) As Long()
+    Dim out() As Long
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = Asc(Mid(Text, i, 1))
+    Next
+    
+    StringToLongs = out
+End Function
+
+' ワードまとめと分離
+
+Public Function BytesToWords(Data As Variant, Optional ByVal Length As Long = -1) As Integer()
+    Dim WordLength As Long
+    Dim i As Long
+    Dim out() As Integer
+    
+    If Length = -1 Then Length = UBound(Data) + 1
+    WordLength = Int(Length / 2) + Length Mod 2
+    ' this will lose an information of the original length, odd
+    If WordLength > 0 Then
+        ReDim out(0 To WordLength - 1)
+        For i = 0 To Length - 1 Step 2
+            out(i / 2) = Data(i)
+        Next
+        For i = 1 To Length - 1 Step 2
+            If Data(i) < &H80 Then
+                out((i - 1) / 2) = out((i - 1) / 2) + Data(i) * CLng(&H100)
+            Else    ' minus bit
+                out((i - 1) / 2) = out((i - 1) / 2) + (Data(i) - &H100) * CLng(&H100)
+            End If
+        Next
+    End If
+    
+    BytesToWords = out
+End Function
+
+Public Function WordsToBytes(Data As Variant, Optional ByVal Length As Long = -1) As Byte()
+    Dim ByteLength As Long
+    Dim i As Long
+    Dim out() As Byte
+    
+    If Length = -1 Then Length = UBound(Data) + 1
+    ByteLength = Length * 2
+    If ByteLength > 0 Then
+        ReDim out(0 To ByteLength - 1)
+        For i = 0 To Length - 1
+            out(i * 2) = CByte(Data(i) And &HFF)
+            If Data(i) >= 0 Then
+                out(i * 2 + 1) = CByte(Int(Data(i) / &H100))
+            Else
+                out(i * 2 + 1) = CByte(Int(Data(i) / &H100) + &H100)
+            End If
+        Next
+    End If
+    
+    WordsToBytes = out
+End Function
+
+' バイト配列と16進ダンプ間の変換
+
+Public Function EncHexDelimited(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & Hex(Data(i)) & DefaultDelimiter
+    Next
+    
+    EncHexDelimited = out
+End Function
+
+Public Function EncHexDelimitedB(Data As Variant, Optional ByVal Length As Long = -1, Optional ByVal Width As Long = 2) As String
+    Dim out As String
+    Dim i As Long
+    Dim s As String
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    s = String(Width, "0")
+    For i = 0 To Length - 1
+        out = out & Right(s & Hex(Data(i)), Width) & DefaultDelimiter
+    Next
+    
+    EncHexDelimitedB = out
+End Function
+
+Public Function DecHexDelimited(Text As String) As Byte()
+    Dim Line As Variant
+    Dim ByteData As Variant
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, DefaultLineFeed)
+        For Each ByteData In Split(Line, DefaultDelimiter)
+            If ByteData <> "" Then
+                pan = Array(CByte("&H" & ByteData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimited = out
+End Function
+
+Public Function DecHexDelimitedL(Text As String) As Long()
+    Dim Line As Variant
+    Dim LongData As Variant
+    Dim out() As Long
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, DefaultLineFeed)
+        For Each LongData In Split(Line, DefaultDelimiter)
+            If LongData <> "" Then
+                pan = Array(CLng("&H" & LongData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimitedL = out
+End Function
+
+' 改行統一 (vbCrLF, vbLF, vbCr を指定のものに統一する)
+
+Public Function FixLineFeed(Text As String, Optional NewLineFeed As String = vbCrLf) As String
+    Dim pan As Collection
+    Dim out As String
+    Dim Line As Variant
+    Dim MoreLine As Variant
+    Dim MoreEnd As Long
+    Dim i As Long
+    
+    Set pan = New Collection
+    For Each Line In Split(Text, vbLf)
+        If Line = "" Then
+            pan.Add ""
+        Else
+            MoreLine = Split(Line, vbCr)
+            MoreEnd = UBound(MoreLine)
+            If MoreLine(MoreEnd) = "" Then MoreEnd = MoreEnd - 1
+            For i = 0 To MoreEnd
+                pan.Add MoreLine(i)
+            Next
+        End If
+    Next
+    Do While pan.Count > 0
+        out = out & pan(1) & NewLineFeed
+        pan.Remove 1
+    Loop
+    
+    If out = "" Then
+        FixLineFeed = ""
+    Else
+        FixLineFeed = Left(out, Len(out) - Len(NewLineFeed))
+    End If
+End Function
+
+' 整数配列とビット列ダンプ間の変換
+
+Public Function EncBits(Data As Variant, Optional ByVal Length As Long = -1, _
+                Optional ByVal LowbitFirst As Boolean = True, _
+                Optional ByVal FixedBitLength As Long = -1, _
+                Optional Delimiter As String = " ") As String
+    Dim out As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As Long
+    Dim BitLength As Long
+    Dim Bits() As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    
+    If FixedBitLength = -1 Then
+        ReDim Bits(0 To 31)
+    Else
+        BitLength = FixedBitLength
+        ReDim Bits(0 To FixedBitLength - 1)
+    End If
+    
+    For i = 0 To Length - 1
+        If FixedBitLength = -1 Then
+            Select Case TypeName(Data(i))
+            Case "Byte"
+                BitLength = 8
+            Case "Integer"
+                BitLength = 16
+            Case "Long"
+                BitLength = 32
+            Case Else
+                BitLength = 0
+            End Select
+        End If
+        
+        x = Data(i)
+        For j = 0 To BitLength - 1
+            Bits(j) = Abs(x Mod 2)
+            x = Int(x / 2)
+        Next
+        
+        If LowbitFirst Then
+            For j = 0 To BitLength - 1
+                out = out & CStr(Bits(j))
+            Next
+        Else
+            For j = BitLength - 1 To 0 Step -1
+                out = out & CStr(Bits(j))
+            Next
+        End If
+        out = out & Delimiter
+    Next
+    
+    EncBits = out
+End Function
+
+Public Function DecBits(Text As String, Optional ByVal LowbitFirst As Boolean = True) As Variant
+    Dim out() As Variant
+    Dim DataValue As Variant
+    Dim Bitter As Long
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Dim TextAddEnd As String
+    
+    pan = Empty
+    Counter = 0
+    Bitter = 0
+    DataValue = 0
+    TextAddEnd = Text & " "
+    
+    For i = 1 To Len(TextAddEnd)
+        Select Case Mid(TextAddEnd, i, 1)
+        Case "0"
+            If Not LowbitFirst Then
+                DataValue = DataValue * 2
+            End If
+            Bitter = Bitter + 1
+        Case "1"
+            If LowbitFirst Then
+                DataValue = DataValue + 2 ^ Bitter
+            Else
+                DataValue = DataValue * 2 + 1
+            End If
+            Bitter = Bitter + 1
+        Case Else
+            If Bitter > 1 Then
+                If Bitter <= 8 Then
+                    DataValue = CByte(DataValue)
+                ElseIf Bitter <= 15 Then
+                    DataValue = CInt(DataValue)
+                ElseIf Bitter = 16 Then
+                    If DataValue >= 32768 Then
+                        DataValue = CInt(DataValue - 65536)
+                    Else
+                        DataValue = CInt(DataValue)
+                    End If
+                ElseIf Bitter <= 31 Then
+                    DataValue = CLng(DataValue)
+                ElseIf Bitter = 32 Then
+                    If DataValue >= 2147483648# Then
+                        DataValue = CLng(DataValue - 4294967296#)
+                    Else
+                        DataValue = CLng(DataValue)
+                    End If
+                End If
+                pan = Array(DataValue, pan)
+                Counter = Counter + 1
+                Bitter = 0
+                DataValue = 0
+            End If
+        End Select
+    Next
+    
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecBits = out
+End Function
+
+
+' バリアント配列のテキスト変換
+' Array(1, Array(2, 3), 4, 5) を次のように記す
+' (1,(2,3,)4,5,)
+
+Private Function DefineParenthes() As Variant
+    DefineParenthes = Array("(", ")", ",")
+End Function
+
+Public Function EncVariantArray(Data As Variant) As String
+    Dim Parenthes As Variant
+    Dim KeyValue As Variant
+    Dim out As String
+    Dim Delimiter As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    
+    Parenthes = DefineParenthes
+    ArrayBegin = Parenthes(0)
+    ArrayEnd = Parenthes(1)
+    Delimiter = Parenthes(2)
+    
+    If IsArray(Data) Then
+        out = ArrayBegin
+        For Each KeyValue In Data
+            out = out & EncVariantArray(KeyValue) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        out = TypeName(Data)
+    Else
+        out = CStr(Data)
+    End If
+    
+    EncVariantArray = out
+End Function
+
+Public Function DecVariantArray(ByVal Text As String) As Variant
+    Dim Evaluated As Variant
+    EvalAfter Evaluated, Text
+    DecVariantArray = Evaluated(0)
+End Function
+
+Private Function EvalComma(ByRef MatchedTag As String, ByRef BeforeTag As String, ByRef Text As String) As Long
+    Dim i As Long
+    Dim AfterTag As String
+    Dim Tags As Variant
+    
+    Tags = DefineParenthes
+    EvalComma = -1
+    If DivideAtFirstMatch(MatchedTag, BeforeTag, AfterTag, Text, Tags) Then
+        For i = 0 To UBound(Tags)
+            If MatchedTag = Tags(i) Then
+                EvalComma = i
+                Exit For
+            End If
+        Next
+    End If
+    
+    Text = AfterTag
+End Function
+
+Private Function EvalBefore(ByRef Evaluated As Variant, Text As String) As Boolean
+    If IsNumeric(Text) Then
+        Evaluated = Array(Val(Text), Evaluated)
+    Else
+        Evaluated = Array(Text, Evaluated)
+    End If
+    EvalBefore = True
+End Function
+
+Private Function EvalAfter(ByRef Evaluated As Variant, ByRef Text As String) As Boolean
+    Dim MatchedTag As String
+    Dim BeforeTag As String
+    Dim MyEvaluated As Variant
+    Dim Divider As String
+    Dim Counter As Long
+    Dim i As Long
+    Dim out() As Variant
+    
+    Divider = DefineParenthes(2)
+    Counter = 0
+    
+    Do Until Text = ""
+        Select Case EvalComma(MatchedTag, BeforeTag, Text)
+        Case 0  'new child
+            ' ignore BeforeTag
+            MyEvaluated = Empty
+            If EvalAfter(MyEvaluated, Text) Then Evaluated = Array(MyEvaluated, Evaluated)
+            Counter = Counter + 1
+            'skip to next comma
+            Text = LaserKnife(Text, Divider)
+        Case 2  'next
+            EvalBefore Evaluated, BeforeTag
+            Counter = Counter + 1
+        'Case 1  'end
+        Case Else   'end or not found
+            ' ignore BeforeTag and AfterTag
+            Exit Do
+        End Select
+    Loop
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = Evaluated(0)
+            Evaluated = Evaluated(1)
+        Next
+    End If
+    
+    Evaluated = out
+    EvalAfter = Not IsEmpty(Evaluated)
+End Function
+
+' 辞書のテキスト変換
+' Dic(key) = value を次のように記す
+' key1=value1
+' key2=value2
+
+Private Function DefineDictionarySymbols() As Variant
+    DefineDictionarySymbols = Array(vbCrLf, "=")
+End Function
+
+Public Function EncDictionary(Dic As Scripting.Dictionary) As String
+    Dim Tags As Variant
+    Dim Equal As String
+    Dim LineFeed As String
+    Dim Key As Variant
+    Dim out As String
+    
+    Tags = DefineDictionarySymbols
+    LineFeed = Tags(0)
+    Equal = Tags(1)
+    out = ""
+    For Each Key In Dic.Keys
+        out = out & Key & Equal & Dic(Key) & LineFeed
+    Next
+    
+    EncDictionary = out
+End Function
+
+Public Function DecDictionary(Text As String) As Scripting.Dictionary
+    Dim Tags As Variant
+    Dim LineFeed As String
+    Dim Equal As String
+    Dim Lines As Variant
+    Dim Line As Variant
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim out As Scripting.Dictionary
+    
+    Tags = DefineDictionarySymbols
+    LineFeed = Tags(0)
+    Equal = Tags(1)
+    Set out = New Scripting.Dictionary
+    
+    Lines = Split(Text, LineFeed)
+    For Each Line In Lines
+        KeyValue = Split(CStr(Line), Equal, 2)
+        If UBound(KeyValue) >= 0 Then
+            Key = KeyValue(0)
+            If Key <> "" Then
+                If UBound(KeyValue) = 1 Then
+                    Value = KeyValue(1)
+                Else
+                    Value = ""
+                End If
+                out(Key) = Value
+            End If
+        End If
+    Next
+    
+    Set DecDictionary = out
+End Function
+'}}}
+
+'module
+'  name;HelloUrlencode
+'{{{
+Option Explicit
+
+' URL Encode
+
+' references
+' http://www.faqs.org/rfcs/rfc2396.html
+' http://www.kinet.or.jp/hiromin/cgi_introduction/appendix/url_encode.html
+
+' 変換の対象外とする文字は、最小限のものを採用し、次のとおりとする。
+' 英数字、.(x2e)、-(x2d)、_(x5f)
+'
+' 特殊扱いの変換は、 " "(x20) を +(x2b) にすること。
+'
+' 残りは %xx 表記
+
+Sub test1()
+    Dim enc As Variant
+    Dim tb As Variant
+    Dim s As String
+    Dim t As String
+    Dim p As Variant
+    Dim q As Scripting.Dictionary
+    
+    s = "E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 20 30 39 41 5A 61 7A 2E 2D 5F"
+    tb = DecHexDelimited(s)
+    Debug.Print EncUrlBytes(tb)
+    Debug.Print EncHexDelimited(DecUrlBytes(EncUrlBytes(tb)))
+    Debug.Print IIf(s & " " = EncHexDelimited(DecUrlBytes(EncUrlBytes(tb))), "OK", "NG")
+    
+    s = "お帰りなさいませ 09AZaz.-_"
+    Debug.Print EncUrlString(s)
+    Debug.Print DecUrlString(EncUrlString(s))
+    
+    For Each enc In Array("utf-8", "iso-2022-jp", "shift_jis", "euc-jp")
+        Debug.Print CStr(enc)
+        Debug.Print EncUrlString(s, CStr(enc))
+        Debug.Print DecUrlString(EncUrlString(s, CStr(enc)), CStr(enc))
+        Debug.Print IIf(s = DecUrlString(EncUrlString(s, CStr(enc)), CStr(enc)), "OK", "NG")
+    Next
+    
+    t = "((q,url エンコード,),(hl,ja,),(山,川,),)"
+    p = DecVariantArray(t)
+    Debug.Print EncVariantArray(p)
+    s = EncUrlParameters(p)
+    Debug.Print s
+    Debug.Print DecUrlParametersValue(s, "q")
+    Debug.Print DecUrlParametersValue(s, "hl")
+    Debug.Print DecUrlParametersValue(s, "山")
+    Debug.Print IIf(t = EncVariantArray(DecUrlParametersArray(s)), "OK", "NG")
+    
+    Set q = DecUrlParameters(s)
+    Debug.Print EncDictionary(q)
+    Debug.Print EncUrlParameters(q)
+    Debug.Print IIf(s = EncUrlParameters(q), "OK", "NG")
+    q.RemoveAll
+    Set q = Nothing
+    
+    ' check the issue 1
+    Debug.Print EncUrlBytes(Array(&HD))
+    Debug.Print EncUrlBytes(DecHexDelimited("0 1 2 3 4 5 6 7 8 9 A B C D E F 10"))
+    Debug.Print IIf("%0D" = EncUrlBytes(Array(&HD)), "OK", "NG")
+    
+    ' check null
+    Debug.Print EncUrlString("")
+    Debug.Print DecUrlString("")
+End Sub
+
+
+' key=value の集合（ハッシュデータ）を URL エンコードする
+' Scripting.Dictionary 形式と、Variant Array ((key1,value1), (key2,value2), ,,,) 形式を受け取る
+' 文字列を受け取ったときは、 http://www.....com/?one_value_only のように解釈する。
+
+Function EncUrlParameters(Params As Variant, Optional Charset = "utf-8") As String
+    Dim Key As Variant
+    Dim Value As Variant
+    Dim KeyValue As Variant
+    Dim out As String
+    
+    out = ""
+    If IsEmpty(Params) Then
+        ' exit now
+    ElseIf IsObject(Params) Then
+        For Each Key In Params.Keys
+            Value = Params(Key)
+            If Not out = "" Then out = out & "&"
+            out = out & EncUrlString(CStr(Key), Charset) & "=" & EncUrlString(CStr(Value), Charset)
+        Next
+    ElseIf IsArray(Params) Then
+        For Each KeyValue In Params
+            Key = KeyValue(0)
+            Value = KeyValue(1)
+            If Not out = "" Then out = out & "&"
+            out = out & EncUrlString(CStr(Key), Charset) & "=" & EncUrlString(CStr(Value), Charset)
+        Next
+    Else
+        out = EncUrlString(CStr(Params), Charset)
+    End If
+    EncUrlParameters = out
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' key を１つ受け取り、それに対応する value 値だけをテキストで返す。
+
+Function DecUrlParametersValue(Text As String, Key As String, Optional Charset = "utf-8") As String
+    Dim KeyValue As Scripting.Dictionary
+    
+    Set KeyValue = DecUrlParameters(Text, Charset)
+    DecUrlParametersValue = KeyValue(Key)
+    
+    KeyValue.RemoveAll
+    Set KeyValue = Nothing
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' Scripting.Dictionary 形式を返す。
+
+Function DecUrlParameters(Text As String, Optional Charset = "utf-8") As Scripting.Dictionary
+    Dim KeyValue As Variant
+    Dim out As Scripting.Dictionary
+    Set out = New Scripting.Dictionary
+    
+    For Each KeyValue In DecUrlParametersArray(Text, Charset)
+        out(KeyValue(0)) = KeyValue(1)
+    Next
+    
+    Set DecUrlParameters = out
+End Function
+
+' key=value の集合（ハッシュデータ）として URL デコードする
+' Variant Array ((key1,value1), (key2,value2), ,,,) 形式を返す。
+
+Function DecUrlParametersArray(Text As String, Optional Charset = "utf-8") As Variant
+    Dim Params As Variant
+    Dim Param As Variant
+    Dim KeyValue As Variant
+    Dim Key As String
+    Dim Value As String
+    Dim Counter As Long
+    Dim i As Long
+    Dim pan As Variant
+    Dim out() As Variant
+    
+    pan = Empty
+    Counter = 0
+    
+    Params = Split(Text, "&")
+    For Each Param In Params
+        If Param <> "" Then
+            KeyValue = Split(CStr(Param), "=", 2)
+            Key = DecUrlString(CStr(KeyValue(0)), Charset)
+            If UBound(KeyValue) = 1 Then
+                Value = DecUrlString(CStr(KeyValue(1)), Charset)
+            Else
+                Value = ""
+            End If
+            pan = Array(Array(Key, Value), pan)
+            Counter = Counter + 1
+        End If
+    Next
+
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecUrlParametersArray = out
+End Function
+
+' 文字列を URL エンコードする
+
+Function EncUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim bs As Variant
+    Dim Stream As ADODB.Stream
+    
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Charset = Charset
+    Stream.WriteText Text
+    
+    Stream.Position = 0
+    Stream.Type = adTypeBinary
+    
+    ' skip 3 bytes BOM
+    If Charset = "utf-8" Then Stream.Position = 3
+    
+    bs = Stream.Read
+    Stream.Close
+    Set Stream = Nothing
+    
+    EncUrlString = EncUrlBytes(bs)
+End Function
+
+' 文字列を URL デコードする
+
+Function DecUrlString(Text As String, Optional Charset = "utf-8") As String
+    Dim Stream As ADODB.Stream
+    
+    If Text = "" Then Exit Function
+    
+    Set Stream = New ADODB.Stream
+    Stream.Open
+    Stream.Type = adTypeBinary
+    Stream.Write DecUrlBytes(Text)
+    
+    Stream.Position = 0
+    Stream.Type = adTypeText
+    Stream.Charset = Charset
+    DecUrlString = Stream.ReadText
+    
+    Stream.Close
+    Set Stream = Nothing
+End Function
+
+' バイト列を URL エンコードする
+
+Function EncUrlBytes(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        Select Case Data(i)
+        Case &H20   '" "
+            out = out & "+"
+        Case &H30 To &H39, &H41 To &H5A, &H61 To &H7A, &H2E, &H2D, &H5F '"0" To "9", "A" To "Z", "a" To "z", ".", "-", "_"
+            out = out & Chr(Data(i))
+        Case Is < &H10
+            out = out & "%0" & Hex(Data(i))
+        Case Else
+            out = out & "%" & Hex(Data(i))
+        End Select
+    Next
+    
+    EncUrlBytes = out
+End Function
+
+' バイト列を URL デコードする
+
+Function DecUrlBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Ps As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    If Text = "" Then Exit Function
+    
+    pan = Empty
+    Counter = 0
+    Ps = Split(Replace(Text, "+", " "), "%")
+    ' Ps(0)   : all raw characters
+    ' Ps(1) - : the first pair bytes make a byte char, the left are raw characters
+    
+    pan = StackPushAscii(pan, CStr(Ps(0)), Counter)
+    For i = 1 To UBound(Ps)
+        If Len(Ps(i)) >= 2 Then
+            pan = Array(CByte("&H" & Left(Ps(i), 2)), pan)
+            Counter = Counter + 1
+            pan = StackPushAscii(pan, Mid(Ps(i), 3), Counter)
+        Else
+            pan = StackPushAscii(pan, CStr(Ps(i)), Counter)
+        End If
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecUrlBytes = out
+End Function
+
+' 文字列を１文字ずつ分解して、そのユニコード値をスタックに積む
+
+Function StackPushAscii(Stack As Variant, Text As String, ByRef Counter As Long) As Variant
+    Dim i As Long
+    Dim pan As Variant
+    
+    pan = Stack
+    For i = 1 To Len(Text)
+        pan = Array(AscW(Mid(Text, i, 1)), pan)
+        Counter = Counter + 1
+    Next
+    
+    StackPushAscii = pan
+End Function
+
+'}}}
+
+```
+
+### Result ###
+
+```
+%E3%81%8A%E5%B8%B0%E3%82%8A%E3%81%AA%E3%81%95%E3%81%84%E3%81%BE%E3%81%9B+09AZaz.-_
+E3 81 8A E5 B8 B0 E3 82 8A E3 81 AA E3 81 95 E3 81 84 E3 81 BE E3 81 9B 20 30 39 41 5A 61 7A 2E 2D 5F 
+OK
+%E3%81%8A%E5%B8%B0%E3%82%8A%E3%81%AA%E3%81%95%E3%81%84%E3%81%BE%E3%81%9B+09AZaz.-_
+お帰りなさいませ 09AZaz.-_
+utf-8
+%E3%81%8A%E5%B8%B0%E3%82%8A%E3%81%AA%E3%81%95%E3%81%84%E3%81%BE%E3%81%9B+09AZaz.-_
+お帰りなさいませ 09AZaz.-_
+OK
+iso-2022-jp
+%1B%24B%24%2A5%22%24j%24J%245%24%24%24%5E%24%3B%1B%28B+09AZaz.-_
+お帰りなさいませ 09AZaz.-_
+OK
+shift_jis
+%82%A8%8BA%82%E8%82%C8%82%B3%82%A2%82%DC%82%B9+09AZaz.-_
+お帰りなさいませ 09AZaz.-_
+OK
+euc-jp
+%A4%AA%B5%A2%A4%EA%A4%CA%A4%B5%A4%A4%A4%DE%A4%BB+09AZaz.-_
+お帰りなさいませ 09AZaz.-_
+OK
+((q,url エンコード,),(hl,ja,),(山,川,),)
+q=url+%E3%82%A8%E3%83%B3%E3%82%B3%E3%83%BC%E3%83%89&hl=ja&%E5%B1%B1=%E5%B7%9D
+url エンコード
+ja
+川
+OK
+q=url エンコード
+hl=ja
+山=川
+
+q=url+%E3%82%A8%E3%83%B3%E3%82%B3%E3%83%BC%E3%83%89&hl=ja&%E5%B1%B1=%E5%B7%9D
+OK
+%0D
+%00%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F%10
+OK
+
+
+```
+
+### Changes / 修正履歴 ###
+
+  * above code is [r172](https://code.google.com/p/cowares-excel-hello/source/detail?r=172)
+  * see [r170](https://code.google.com/p/cowares-excel-hello/source/detail?r=170), [r171](https://code.google.com/p/cowares-excel-hello/source/detail?r=171) and [r172](https://code.google.com/p/cowares-excel-hello/source/detail?r=172)
+  * includ fixes for [issue 1](https://code.google.com/p/cowares-excel-hello/issues/detail?id=1)

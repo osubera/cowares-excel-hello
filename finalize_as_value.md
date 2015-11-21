@@ -1,0 +1,1664 @@
+
+
+# Introduction #
+
+  * remove cell formulas to finalize values in excel
+
+## 概要 ##
+  * エクセルでセル数式の計算値を確定する
+
+# Details #
+
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png)
+
+  * removes cell formulas to finalize values in cells.
+  1. `値確定` button is to execute finalizing.
+  1. select `選択セル`, `シート` or `ブック` to change the target range of execution.
+  1. select `すべての式`, `別シート参照` or `外部ブック参照` to change the target by formula references.
+  1. outputs detail logs when `ログ` button is turned on.
+
+## 説明 ##
+  * 数式のセルを値に置き換える。
+  1. 「値確定」を押すと確定操作を実行。
+  1. 「選択セル」「シート」「ブック」のいずれかを選ぶと、確定操作の対象範囲を指定できる。
+  1. 「すべての式」「別シート参照」「外部ブック参照」のいずれかを選ぶと、確定操作の対象を数式の参照先により限定できる。
+  1. 「ログ」スイッチがオンの時は、確定操作の記録をメモ帳に出力する。
+
+# Downloads #
+
+  * [downloads / ダウンロード](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=finalize_as_value)
+
+# How to use #
+
+  1. open a new book.
+  1. enter `=Now()` into the `A1` cell.
+  1. move your cursor at the `A1` cell.
+  1. push `値確定` button.
+  1. watch the `A1` cell to be finalized as a value of date.
+
+## 使い方 ##
+  1. 新規ブックを開く。
+  1. セル `A1` に `=Now()` と入れる。
+  1. セル `A1` にカーソルを移動する。
+  1. `値確定` ボタンを押す。
+  1. セル `A1` の日付が確定値になったはず。
+
+# Code #
+
+```
+'workbook
+'  name;finalize_as_value_2k.xls
+
+'require
+'  ;{3F4DACA7-160D-11D2-A8E9-00104B365C9F} 5 5 Microsoft VBScript Regular Expressions 5.5
+
+'worksheet
+'  name;セル計算値確定/BaumMain
+
+'cells-formula
+'  address;A1:L19
+'         ;名称
+'         ;finalize_as_value
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;コメント
+'         ;セル数式の計算値を確定する
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;comment
+'         ;remove cell formulas to finalize values
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;初版
+'         ;2011
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;配布元
+'         ;http://cowares.blogspot.com/search/label/baum
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;更新
+'         ;40578.6458333333
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;keyword
+'         ;vba,excel
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;値確定
+'         ;数式の計算値を確定する
+'         ;finalize
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;対象範囲
+'         ;実行対象の範囲
+'         ;select
+'         ;
+'         ;3
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;選択セル
+'         ;シート
+'         ;ブック
+'         ;対象数式
+'         ;実行対象の数式
+'         ;external
+'         ;
+'         ;3
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;すべての式
+'         ;別シート参照
+'         ;外部ブック参照
+'         ;ログ
+'         ;実行ログの出力を切り替え
+'         ;verbose
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;
+'         ;BaumMain.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;=R1C2 & " について"
+'         ;このシートを表示する。
+'         ;about
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+
+'cells-name
+'  ;=セル計算値確定!R15C1
+'  ;セル計算値確定!_ButtonCaption
+'  ;=セル計算値確定!R3C2
+'  ;セル計算値確定!_Comment
+'  ;=セル計算値確定!R6C2
+'  ;セル計算値確定!_Contributor
+'  ;=セル計算値確定!R4C2
+'  ;セル計算値確定!_Copyright
+'  ;=セル計算値確定!R5C2
+'  ;セル計算値確定!_License
+'  ;=セル計算値確定!R2C2
+'  ;セル計算値確定!_LocalComment
+'  ;=セル計算値確定!R1C2
+'  ;セル計算値確定!_PublicName
+'  ;=セル計算値確定!R7C2
+'  ;セル計算値確定!_Since
+'  ;=セル計算値確定!R10C2
+'  ;セル計算値確定!_Tag
+'  ;=セル計算値確定!R9C2
+'  ;セル計算値確定!_Timestamp
+'  ;=セル計算値確定!R8C2
+'  ;セル計算値確定!_Url
+
+'class
+'  name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+'}}}
+
+'code
+'  name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.OnButtonToggle
+    End If
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_finalize(oAC As Object)
+    FinalizeAsValue.FinalizeAsValue _
+        Helper.GetButton("select").ListIndex, _
+        Helper.GetButton("external").ListIndex, _
+        Helper.GetControlState("verbose")
+End Sub
+
+Public Sub Menu_select(oAC As Object)
+
+End Sub
+
+Public Sub Menu_external(oAC As Object)
+
+End Sub
+
+Public Sub Menu_verbose(oAC As Object)
+
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    Me.Activate
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+'}}}
+
+'module
+'  name;FinalizeAsValue
+'{{{
+Option Explicit
+
+Public Sub FinalizeAsValue(ByVal iSelect As Long, ByVal iExternal As Long, ByVal bVerbose As Boolean)
+    Dim hWnd As Long
+    Dim Data As Variant
+    
+    hWnd = 0
+    If bVerbose Then hWnd = OpenNotepad(vbNormalNoFocus, BaumMain.Name)
+    
+    For Each Data In FindFormulas(iSelect, iExternal)
+        FinalizeData Data, hWnd
+    Next
+    
+    If bVerbose Then SetSavedNotepad hWnd
+End Sub
+
+
+'=== finalize begin ===
+
+
+Private Sub FinalizeData(Data As Variant, Optional hWnd As Long = 0)
+    Dim Ra As Range
+    Dim ValueType As Long
+    
+    ValueType = ExtractData(Data, Ra)
+    
+    If hWnd <> 0 Then
+        If ValueType = -1 Then
+            WriteLineNotepad hWnd, DumpWorksheet(Ra.Worksheet)
+        Else
+            WriteLineNotepad hWnd, DumpCellsFormula(Ra)
+            WriteLineNotepad hWnd, DumpCellsText(Ra)
+        End If
+    End If
+    
+    Select Case ValueType
+    Case xlNumbers Or xlLogical ' 1 or 4 = 5
+        FinalizeRangeValue Ra
+    Case xlTextValues           ' 2
+        FinalizeRangeText Ra
+    Case xlErrors               ' 16
+        FinalizeRangeError Ra
+    End Select
+End Sub
+
+Private Sub FinalizeRangeValue(Ra As Range)
+    Ra.Formula = Ra.Value
+End Sub
+
+Private Sub FinalizeRangeText(Ra As Range)
+    Dim x As Variant
+    Dim r As Long
+    Dim c As Long
+    
+    x = Ra.Value
+    If IsArray(x) Then
+        For r = 1 To UBound(x, 1)
+            For c = 1 To UBound(x, 2)
+                x(r, c) = "'" & x(r, c)
+            Next
+        Next
+    Else
+        x = "'" & x
+    End If
+    Ra.Formula = x
+End Sub
+
+Private Sub FinalizeRangeError(Ra As Range)
+    Dim x As Variant
+    Dim r As Long
+    Dim c As Long
+    
+    x = Ra.Value
+    If IsArray(x) Then
+        For r = 1 To UBound(x, 1)
+            For c = 1 To UBound(x, 2)
+                x(r, c) = TranslateError(x(r, c))
+            Next
+        Next
+    Else
+        x = TranslateError(x)
+    End If
+    Ra.Formula = x
+End Sub
+
+Private Function TranslateError(x As Variant) As String
+    Dim a As Variant
+    Static Dic As Variant
+    
+    If IsEmpty(Dic) Then
+        Dic = Array( _
+                Array(CVErr(xlErrDiv0), "#DIV/0!"), _
+                Array(CVErr(xlErrNA), "#N/A"), _
+                Array(CVErr(xlErrName), "#NAME?"), _
+                Array(CVErr(xlErrNull), "#NULL!"), _
+                Array(CVErr(xlErrNum), "#NUM!"), _
+                Array(CVErr(xlErrRef), "#REF!"), _
+                Array(CVErr(xlErrValue), "#VALUE!") _
+            )
+    End If
+    
+    For Each a In Dic
+        If x = a(0) Then
+            TranslateError = a(1)
+            Exit Function
+        End If
+    Next
+    
+    TranslateError = "#ERROR!"
+End Function
+
+Private Function DumpWorksheet(Ws As Worksheet) As String
+    Dim Result As String
+    
+    Result = "'worksheet" & vbCrLf
+    Result = Result & "'  name;" & Ws.Name
+    ' avoid to print the default codename
+    If Ws.Name <> Ws.CodeName Then
+        Result = Result & "/" & Ws.CodeName
+    End If
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of worksheet block
+    
+    DumpWorksheet = Result
+End Function
+
+Private Function DumpCellsFormula(Ra As Range) As String
+    Dim Result As String
+    Dim Ce As Range
+    
+    Result = "'cells-formula" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.Formula & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsFormula = Result
+End Function
+
+Private Function DumpCellsText(Ra As Range) As String
+    Dim Result As String
+    Dim Ce As Range
+    
+    Result = "'cells-text" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.Text & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsText = Result
+End Function
+
+
+'=== finalize end ===
+'=== find external link begin ===
+
+
+' expect a single cell as an argument
+' return 1 : no external precedents
+'        2 : refer another sheet in a same book
+'        3 : refer another book
+Private Function ExternalLevelOfFormula(Ce As Range) As Long
+    Dim PureFormula As String
+    Dim out As Long
+    
+    PureFormula = RemoveStringConstants(Ce.Formula)
+    If HasBrackets(PureFormula) Then
+        out = 3
+    ElseIf HasExclamation(PureFormula) Then
+        out = 2
+    Else
+        out = 1
+    End If
+    
+    ExternalLevelOfFormula = out
+End Function
+
+Private Function RemoveStringConstants(Text As String) As String
+    Static r As VBScript_RegExp_55.RegExp
+    
+    If r Is Nothing Then
+        Set r = New VBScript_RegExp_55.RegExp
+        r.Global = True
+        r.IgnoreCase = False
+        r.MultiLine = False
+        r.Pattern = """[^""]*"""
+    End If
+    
+    RemoveStringConstants = r.Replace(Text, "")
+End Function
+
+Private Function HasExclamation(Text As String) As Boolean
+    Static r As VBScript_RegExp_55.RegExp
+    
+    If r Is Nothing Then
+        Set r = New VBScript_RegExp_55.RegExp
+        r.Global = True
+        r.IgnoreCase = False
+        r.MultiLine = False
+        r.Pattern = "!"
+    End If
+    
+    HasExclamation = r.test(Text)
+End Function
+
+Private Function HasBrackets(Text As String) As Boolean
+    Static r As VBScript_RegExp_55.RegExp
+    
+    If r Is Nothing Then
+        Set r = New VBScript_RegExp_55.RegExp
+        r.Global = True
+        r.IgnoreCase = False
+        r.MultiLine = False
+        r.Pattern = "\[.+\]"
+    End If
+    
+    HasBrackets = r.test(Text)
+End Function
+
+
+'=== find external link end ===
+'=== find formulas begin ===
+
+
+Private Function FindFormulas(ByVal iSelect As Long, ByVal iExternal As Long) As Collection
+    Dim out As Collection
+    Dim Ws As Worksheet
+    Dim x As Variant
+    
+    Select Case iSelect
+    Case 3  '"Workbook"
+        Set out = New Collection
+        For Each Ws In ActiveWorkbook.Worksheets
+            out.Add MakeData(-1, Ws.Cells(1))   ' dummy record to give a sheet name
+            For Each x In MakeFormulasArray(Ws.Cells, iExternal)
+                out.Add x
+            Next
+        Next
+    Case 2  '"Worksheet"
+        Set out = MakeFormulasArray(ActiveSheet.Cells, iExternal)
+    Case 1  '"Range"
+        Set out = MakeFormulasArray(Selection, iExternal)
+    End Select
+    
+    Set FindFormulas = out
+End Function
+
+Private Function MakeFormulasArray(Ce As Range, ByVal iExternal As Long) As Collection
+    Dim out As Collection
+    Dim Data As Object
+    Dim Item As Variant
+    Dim ValueTypes As Variant
+    Dim ValueType As Variant
+    
+    Set out = New Collection
+    
+    ValueTypes = Array(xlNumbers Or xlLogical, xlTextValues, xlErrors)
+    
+    For Each ValueType In ValueTypes
+        Set Data = MakeFormulasRangeArray(Ce, iExternal, ValueType)
+        For Each Item In Data
+            out.Add MakeData(ValueType, Item)
+        Next
+    Next
+    
+    Set MakeFormulasArray = out
+End Function
+
+Private Function MakeFormulasRangeArray(Ce As Range, ByVal iExternal As Long, ByVal ValueType As Long) As Object
+    On Error GoTo TrapNoFormulas
+    
+    Dim out As Object
+    Dim Ra As Range
+    Dim Rb As Range
+    
+    Set out = New Collection    ' as a blank array object
+    
+    Set Ra = Ce.SpecialCells(xlCellTypeFormulas, ValueType)
+    
+    If iExternal = 1 Then
+        Set out = Ra.Areas
+    Else
+        For Each Rb In Ra.Cells
+            If ExternalLevelOfFormula(Rb) >= iExternal Then
+                out.Add Rb
+            End If
+        Next
+    End If
+    
+    Set MakeFormulasRangeArray = out
+    Exit Function
+    
+TrapNoFormulas:
+    If Err.Number = 1004 Then
+        Set MakeFormulasRangeArray = out
+        Exit Function
+    Else
+        Err.Raise Err.Number
+    End If
+End Function
+
+
+'=== find formulas end ===
+'=== data structure begin ===
+
+
+Private Function MakeData(ByVal ValueType As Long, ByVal Ce As Range) As Variant
+    MakeData = Array(ValueType, Ce)
+End Function
+
+Private Function ExtractData(Data As Variant, ByRef Ce As Range) As Long
+    ExtractData = Data(0)
+    Set Ce = Data(1)
+End Function
+
+
+'=== data structure end ===
+'}}}
+
+'module
+'  name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' hWndで指定したメモ帳の未保存フラグをクリアする。
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' hWndで指定したメモ帳を閉じる。
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' メモ帳を新しく起動し、hWndを返す。
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
+            Optional NameMe As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcID As Long
+    Dim i As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    
+    On Error GoTo Err1
+    
+    TitleText = " - notepad - meets VBA"
+    'TitleText = "無題 - ﾒﾓ帳"
+    ExePath = "notepad.exe"
+    
+    ProcID = Shell(ExePath, iWindowState)
+    If ProcID = 0 Then GoTo Err1
+    
+    hWnd = GetWindowByProcessId(ProcID)
+    If hWnd = 0 Then GoTo Err1
+    
+    TitleText = IIf(NameMe = "", ProcID, NameMe) & TitleText
+    i = SetWindowText(hWnd, TitleText)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' Z-order も変えるなら SetWindowPos
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "メモ帳の起動に失敗しました。", , "failed to start a notepad"
+    OpenNotepad = 0
+End Function
+ 
+' hWndで指定したメモ帳の内容を、指定した文字で置き換える。
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行つき。
+' push text into the notepad with a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行無し。
+' push text into the notepad without a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' 全部選択
+        SendMessage i, EM_SETSEL, -1, 0     ' 選択解除 (カーソルが選択領域の最後に移動)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' hWndで指定したメモ帳の内容を、文字として取得する。
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+' hWnd から ProcessID を取得する。
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    GetWindowProcessId = ProcID
+End Function
+
+' ProcessID から hWnd を取得する。(メモ帳)
+Public Function GetWindowByProcessId(ProcessId As Long, _
+        Optional TaskName As String = "Notepad", _
+        Optional TitleText As String = vbNullString) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    Dim hWnd As Long
+
+    hWnd = 0
+    Do
+        hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        If hWnd = 0 Then Exit Do
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until ProcessId = ProcID
+    
+    GetWindowByProcessId = hWnd
+End Function
+
+' hWndで指定したメモ帳を、ユーザーに視覚で通知する。
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+'}}}
+
+'code
+'  name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.BarTerminate
+End Sub
+'}}}
+
+
+```
+
+
+# Log #
+
+```
+'cells-formula
+'  address;A7:A8
+'         ;=SUM(A4:A6)
+'         ;=Sheet2!A1
+
+
+'cells-text
+'  address;A7:A8
+'         ;6
+'         ;2011/2/4 15:31
+
+
+'cells-formula
+'  address;A9
+'         ;=[Book2]Sheet1!$A$1
+
+
+'cells-text
+'  address;A9
+'         ;fix
+
+
+```
+
+
+# Snapshots #
+
+  * Excel 2000 toolbar
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TUx3QhE4pMI/AAAAAAAAACg/TW45fai7Ejs/s1600/shot1.png)
+
+  * Excel 2007 ribbon
+![http://4.bp.blogspot.com/_EUW0nrj9XlM/TUx3NbDByFI/AAAAAAAAACc/kTA8saX1TmQ/s1600/shot2.png](http://4.bp.blogspot.com/_EUW0nrj9XlM/TUx3NbDByFI/AAAAAAAAACc/kTA8saX1TmQ/s1600/shot2.png)

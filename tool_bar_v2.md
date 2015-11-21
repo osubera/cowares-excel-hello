@@ -1,0 +1,2624 @@
+
+
+# Introduction #
+
+  * add a cusomized toolbar to your VBA macro
+
+## 概要 ##
+  * ツールバー付きの VBA マクロを簡単に作る
+
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oWLjZYWI/AAAAAAAAABo/nErWKPgcCF0/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TT4oWLjZYWI/AAAAAAAAABo/nErWKPgcCF0/s1600/shot1.png)
+
+# Details #
+
+  * works widely in many platforms in Microsoft Office, including Excel, Word and Access
+  * define buttons in a class as an array
+    * a worksheet also can be used for excel
+  * define procedures to handle button events
+
+## 説明 ##
+  * マイクロソフトオフィスの製品上で幅広く動作する。エクセル、ワード、アクセスなど
+  * ボタンをクラス内に配列で定義する
+    * エクセルではワークシートも使える
+  * ボタン操作を扱うプロシジャを定義する
+
+# How to use #
+
+  1. [hello\_now](hello_now.md) is a good sample.
+  1. also read [tool\_bar\_buttons](tool_bar_buttons.md)
+
+## 使い方 ##
+  1. [hello\_now](hello_now.md) を参考にするとよい。
+  1. [tool\_bar\_buttons](tool_bar_buttons.md) も。
+
+# Definitions / 仕様 #
+
+  1. 1 or more addin classes / １つ以上のアドインクラス
+    * an addin class defines buttons and button event handlers.
+> > > アドインクラスはボタンとボタンイベントのハンドラを定義する。
+    * a single tool bar has 1 or more addin classes.
+> > > １つのツールバーには１つ以上のアドインクラスがある。
+    * an addin class is your application itself.
+> > > アドインクラスが、あなたのアプリケーション本体となる。
+  1. 2 properties required / ２つのプロパティが必須
+    1. `ButtonData` property
+```
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("Button1", "i am the 1st", "hello"), _
+        Array("Button2", "the 2nd button", "world") _
+        )
+End Property
+```
+      * it is an Array of Arrays. each child array defines a button in a bar. so above example brings up 2 buttons.
+> > > > これは入れ子の配列。各々の子配列がボタン１個にあたり、上の例だと２つのボタンが作られる。
+      * items in a child array are attributes of the button.
+> > > > 子配列の中身は、ボタンの属性。
+    1. `ButtonParent` property
+```
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("Module1")
+End Property
+```
+      * the 1st item is a namespace of main procedure to be called on every button event, so the above example means that a public `Module1.BarMain` is called on each button action.
+> > > > 最初の要素がボタンイベントで呼ばれるプロシジャの名前空間を表している。上の場合、 `Module1.BarMain` というパブリック関数がボタン動作の都度呼び出される。
+  1. 1 optional method / １つのメソッドがオプション
+    1. `BarMain` method
+      * this is a special name to be called at first on each button event.
+> > > > これはボタンイベントで最初に呼び出される特別な名前。
+      * this procedure must have a public scope to be called.
+> > > > このプロシジャは、パブリックなスコープで呼べないといけない。
+  1. data structure / データ構造
+    1. an Array of Arrays is almost described by a two-dimensional worksheet cells.
+
+> > > 入れ子の配列は、二次元ワークシートのセルで、ほぼ表現できる。
+> > > ![http://3.bp.blogspot.com/_EUW0nrj9XlM/TT584agYXkI/AAAAAAAAACI/Ibgoco6zgeY/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TT584agYXkI/AAAAAAAAACI/Ibgoco6zgeY/s1600/shot1.png)
+      * each child array is an Array(face name, description, tag, parameter, type, style, width, group, action, initializer,,,)
+> > > > それぞれの子配列は、 Array(表示名, 説明, タグ, パラメータ, タイプ, スタイル, 幅, 区切り, 動作, 初期化,,,) となっている。
+      * the `tag` should be unique because it is used to identify the button and to determin a default function to be called.
+> > > > `タグ` には重複しない名前をつける。これはボタンを区別するのに使い、標準で呼び出される関数名を決める。
+      * use the `action` to use a special function directly to override the default `BarMain`.
+> > > > `動作` を使えば、標準の `BarMain` 以外の関数を直接呼び出して使える。
+      * the `type` and `style` define a look and feature of the button, they are `MsoControlType` and `MsoButtonStyle`.
+> > > > `タイプ` と `スタイル` で、ボタンの見た目や特徴を決める。 `MsoControlType` と `MsoButtonStyle`
+      * for a popup type, the `initializer` has another `ButtonData` array, and is out of two-dimensional cells.
+> > > > ポップアップタイプでは、 `初期化` に別の `ButtonData` 配列を指定する。これは二次元セルで表現できない。
+
+# Code #
+
+### for All ###
+
+```
+'class
+'  name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Dim T1 As testAddin1
+Dim T2 As testAddin2
+
+' testAddin1 only
+Sub test_Addin1()
+    Set T1 = New testAddin1
+End Sub
+
+Sub test_Addin1_end()
+    Set T1 = Nothing
+End Sub
+
+' testAddin1 and testAddin2 in a same toolbar
+Sub test_Addin2()
+    Set T1 = New testAddin1
+    Set T2 = New testAddin2
+    Set T2.Helper = T1.Helper
+    T1.Helper.WithAddins T2
+End Sub
+
+Sub test_Addin2_end()
+    Set T2 = Nothing
+    Set T1 = Nothing
+End Sub
+
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    Select Case oAC.Tag
+    Case "hello"
+        Menu_hello oAC
+    Case "world"
+        Menu_world oAC
+    Case Else
+        T2.BarMain
+    End Select
+End Sub
+
+Private Sub Menu_hello(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "Hello"
+End Sub
+
+Private Sub Menu_world(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "World"
+End Sub
+
+Public Sub OnButtonToggle()
+    T1.Helper.OnButtonToggle
+End Sub
+
+
+'=== default main procedures end ===
+'}}}
+
+'class
+'  name;testAddin1
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+Public Helper As ToolBarV2
+
+
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("ボタン1", "最初のボタンです", "hello"), _
+        Array("ボタン2", "２番目のボタンです", "world") _
+        )
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("Module1")     ' main procedure is in the Module1
+End Property
+
+
+'=== button data end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName "testAddin1"
+    Helper.NewBar vMe
+End Sub
+
+Private Sub Class_Terminate()
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'}}}
+
+'class
+'  name;testAddin2
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+Public Helper As ToolBarV2
+
+
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("ボタン", "通常のボタン", "you", Empty, 1, 2, Empty, 1), _
+        Array("トグル", "オンとオフを切り替えるトグルボタン", "must", Empty, 1, 2, Empty, Empty, "Module1.OnButtonToggle"), _
+        Array("テキスト", "テキストボックスに入力する", "set", Empty, 2), _
+        Array("リスト", "リストから選ぶ", "a", Empty, 3, Empty, Empty, Empty, Empty, "りんご", "みかん", "いちご"), _
+        Array("コンボ", "リストから選ぶことも入力することもできる", "tag", Empty, 4, Empty, Empty, Empty, Empty, "林檎", "蜜柑", "苺", "葡萄"), _
+        Array("長いボタン", "説明が長いボタン", "to", Empty, 1, 14), _
+        Array("ポップアップ", "階層メニューにする", "every", Empty, 10, Empty, Empty, Empty, Empty, Array("サブボタン", "通常のボタン", "everychild")), _
+        Array(TypeName(Me) & "について", "このアプリケーションについて", "item", Empty, 1, 2, Empty, 1) _
+        )
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("Module1")     ' main procedure is in the Module1
+End Property
+
+
+'=== button data end ===
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button, through Module1.Main
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Helper.BarMain Me
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+
+Public Sub Menu_you(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "you"
+End Sub
+
+Public Sub Menu_must(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "must"
+End Sub
+
+Public Sub Menu_set(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "set"
+End Sub
+
+Public Sub Menu_a(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "a"
+End Sub
+
+Public Sub Menu_tag(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "tag"
+End Sub
+
+Public Sub Menu_to(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "to"
+End Sub
+
+Public Sub Menu_every(oAC As Object)
+    'MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "every"
+End Sub
+
+Public Sub Menu_item(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "item"
+End Sub
+
+Public Sub Menu_everychild(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "everychild"
+End Sub
+
+
+'=== default main procedures end ===
+'}}}
+
+
+
+```
+
+### for Excel (using a Worksheet) ###
+
+```
+'workbook
+'  name;tool_bar_v2.xls
+
+'require
+
+'worksheet
+'  name;testAddin3
+
+'cells-formula
+'  address;A1:M22
+'         ;名称
+'         ;testAddin3
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;コメント
+'         ;マクロ用の簡易ツールバーを生成する。
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;comment
+'         ;easy toolbar generator
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;作者
+'         ;Tomizono - kobobau.com
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;初版
+'         ;2002
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;配布元
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/tool_bar_v2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;更新
+'         ;40638.4166666667
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;keyword
+'         ;toolbar,vba,excel,word,access
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ボタン
+'         ;通常のボタン
+'         ;you
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;トグル
+'         ;オンとオフを切り替えるトグルボタン
+'         ;must
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;
+'         ;testAddin3.OnButtonToggle
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;テキスト
+'         ;テキストボックスに入力する
+'         ;set
+'         ;
+'         ;2
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;リスト
+'         ;リストから選ぶ
+'         ;a
+'         ;
+'         ;3
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;りんご
+'         ;みかん
+'         ;いちご
+'         ;
+'         ;コンボ
+'         ;リストから選ぶことも入力することもできる
+'         ;tag
+'         ;
+'         ;4
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;林檎
+'         ;蜜柑
+'         ;苺
+'         ;葡萄
+'         ;長いボタン
+'         ;説明が長いボタン
+'         ;to
+'         ;
+'         ;1
+'         ;14
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;ポップアップ
+'         ;階層メニューにする
+'         ;every
+'         ;
+'         ;10
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;=R1C2 & " について"
+'         ;このシートを表示する。
+'         ;item
+'         ;
+'         ;1
+'         ;2
+'         ;
+'         ;1
+'         ;
+'         ;
+'         ;
+'         ;
+'         ;
+
+'cells-numberformat
+'  address;A1:M22
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;m/d/yyyy h:mm
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+'         ;General
+
+'cells-name
+'  ;=testAddin3!R15C1
+'  ;testAddin3!_ButtonCaption
+'  ;=testAddin3!R3C2
+'  ;testAddin3!_Comment
+'  ;=testAddin3!R6C2
+'  ;testAddin3!_Contributor
+'  ;=testAddin3!R4C2
+'  ;testAddin3!_Copyright
+'  ;=testAddin3!R5C2
+'  ;testAddin3!_License
+'  ;=testAddin3!R2C2
+'  ;testAddin3!_LocalComment
+'  ;=testAddin3!R1C2
+'  ;testAddin3!_PublicName
+'  ;=testAddin3!R7C2
+'  ;testAddin3!_Since
+'  ;=testAddin3!R10C2
+'  ;testAddin3!_Tag
+'  ;=testAddin3!R9C2
+'  ;testAddin3!_Timestamp
+'  ;=testAddin3!R8C2
+'  ;testAddin3!_Url
+
+'class
+'  name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Dim T1 As testAddin1
+Dim T2 As testAddin2
+
+' testAddin1 only
+Sub test_Addin1()
+    Set T1 = New testAddin1
+End Sub
+
+Sub test_Addin1_end()
+    Set T1 = Nothing
+End Sub
+
+' testAddin1 and testAddin2 in a same toolbar
+Sub test_Addin2()
+    Set T1 = New testAddin1
+    Set T2 = New testAddin2
+    Set T2.Helper = T1.Helper
+    T1.Helper.WithAddins T2
+End Sub
+
+Sub test_Addin2_end()
+    Set T2 = Nothing
+    Set T1 = Nothing
+End Sub
+
+' for excel
+Sub test_Addin3()
+    testAddin3.BarInitialize
+End Sub
+
+Sub test_Addin3_end()
+    testAddin3.BarTerminate
+End Sub
+
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    Select Case oAC.Tag
+    Case "hello"
+        Menu_hello oAC
+    Case "world"
+        Menu_world oAC
+    Case Else
+        T2.BarMain
+    End Select
+End Sub
+
+Private Sub Menu_hello(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "Hello"
+End Sub
+
+Private Sub Menu_world(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "World"
+End Sub
+
+Public Sub OnButtonToggle()
+    T1.Helper.OnButtonToggle
+End Sub
+
+
+'=== default main procedures end ===
+'}}}
+
+'class
+'  name;testAddin1
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+Public Helper As ToolBarV2
+
+
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("ボタン1", "最初のボタンです", "hello"), _
+        Array("ボタン2", "２番目のボタンです", "world") _
+        )
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("Module1")     ' main procedure is in the Module1
+End Property
+
+
+'=== button data end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName "testAddin1"
+    Helper.NewBar vMe
+End Sub
+
+Private Sub Class_Terminate()
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'}}}
+
+'class
+'  name;testAddin2
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+Public Helper As ToolBarV2
+
+
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = Array( _
+        Array("ボタン", "通常のボタン", "you", Empty, 1, 2, Empty, 1), _
+        Array("トグル", "オンとオフを切り替えるトグルボタン", "must", Empty, 1, 2, Empty, Empty, "Module1.OnButtonToggle"), _
+        Array("テキスト", "テキストボックスに入力する", "set", Empty, 2), _
+        Array("リスト", "リストから選ぶ", "a", Empty, 3, Empty, Empty, Empty, Empty, "りんご", "みかん", "いちご"), _
+        Array("コンボ", "リストから選ぶことも入力することもできる", "tag", Empty, 4, Empty, Empty, Empty, Empty, "林檎", "蜜柑", "苺", "葡萄"), _
+        Array("長いボタン", "説明が長いボタン", "to", Empty, 1, 14), _
+        Array("ポップアップ", "階層メニューにする", "every", Empty, 10, Empty, Empty, Empty, Empty, Array("サブボタン", "通常のボタン", "everychild")), _
+        Array(TypeName(Me) & "について", "このアプリケーションについて", "item", Empty, 1, 2, Empty, 1) _
+        )
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array("Module1")     ' main procedure is in the Module1
+End Property
+
+
+'=== button data end ===
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button, through Module1.Main
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Helper.BarMain Me
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+
+Public Sub Menu_you(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "you"
+End Sub
+
+Public Sub Menu_must(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "must"
+End Sub
+
+Public Sub Menu_set(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "set"
+End Sub
+
+Public Sub Menu_a(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "a"
+End Sub
+
+Public Sub Menu_tag(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "tag"
+End Sub
+
+Public Sub Menu_to(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "to"
+End Sub
+
+Public Sub Menu_every(oAC As Object)
+    'MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "every"
+End Sub
+
+Public Sub Menu_item(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "item"
+End Sub
+
+Public Sub Menu_everychild(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "everychild"
+End Sub
+
+
+'=== default main procedures end ===
+'}}}
+
+'code
+'  name;testAddin3
+'{{{
+Option Explicit
+
+' sample addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    Helper.BarMain Me
+End Sub
+
+Public Sub OnButtonToggle()
+    Helper.OnButtonToggle
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_you(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "XXyou"
+End Sub
+
+Public Sub Menu_must(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "must"
+End Sub
+
+Public Sub Menu_set(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "set"
+End Sub
+
+Public Sub Menu_a(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "a"
+End Sub
+
+Public Sub Menu_tag(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "tag"
+End Sub
+
+Public Sub Menu_to(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "to"
+End Sub
+
+Public Sub Menu_every(oAC As Object)
+    'MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "every"
+End Sub
+
+Public Sub Menu_item(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "item"
+End Sub
+
+Public Sub Menu_everychild(oAC As Object)
+    MsgBox oAC.Index & ": " & oAC.TooltipText, vbOKOnly, "everychild"
+End Sub
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName Me.CodeName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+'}}}
+
+
+
+```
+
+
+### patch for Excel ( [issue 16](https://code.google.com/p/cowares-excel-hello/issues/detail?id=16) on 2011/4/5 ) ###
+
+```
+--- tool_bar_v2_excel.txt	(revision 521)
++++ tool_bar_v2_excel.txt	(revision 522)
+@@ -48,7 +48,7 @@
+ '         ;
+ '         ;
+ '         ;著作権
+-'         ;="Copyright (C) " &R[3]C & "-" & YEAR(NOW()) & " " & R[2]C
++'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+ '         ;
+ '         ;
+ '         ;
+@@ -113,7 +113,7 @@
+ '         ;
+ '         ;
+ '         ;更新
+-'         ;40567.5833333333
++'         ;40638.4166666667
+ '         ;
+ '         ;
+ '         ;
+@@ -1562,7 +1562,7 @@
+ End Property
+ 
+ Public Property Get ButtonParent() As Variant
+-    ButtonParent = Array(Me.CodeName)
++    ButtonParent = Array(ThisWorkbook.VBProject.Name & "." & Me.CodeName)
+ End Property
+ 
+ ' above simple property codes are supported by the following range helpers
+```

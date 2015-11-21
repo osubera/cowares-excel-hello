@@ -1,0 +1,220 @@
+# Introduction #
+
+  * how to create a class to act as a stream in vba
+
+## 概要 ##
+  * VBAでストリームの振る舞いをするクラスを作る
+
+# Details #
+
+  * add some methods like the Scripting.TextStream
+
+## 説明 ##
+  * Scripting.TextStream のようなメソッドを作る
+
+# How to use #
+
+  1. use an ssf reader tool like [ssf\_reader\_primitive](ssf_reader_primitive.md) to convert a text code below into an excel book.
+  1. try to run test macro test1(), or modify XXXX as you like.
+
+## 使い方 ##
+  1. [ssf\_reader\_primitive](ssf_reader_primitive.md) のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+  1. sub test1() のテストマクロを試したり、 XXXX を適当に変えたりしてみよう。
+
+# Code #
+
+```
+'workbook
+'  name;hello_stream.xls
+
+'class
+'  name;StringStream
+'{{{
+Option Explicit
+
+' wrap other modules into a stream class, do like a Scripting.TextStream
+
+Private MyText As Collection
+Private MyLineFeed As String
+Private RememberFlush As String
+
+Private Sub Class_Initialize()
+    Set MyText = New Collection
+    MyLineFeed = vbCrLf
+    RememberFlush = ""
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyText = Nothing
+End Sub
+
+Public Function OpenTextRead(Optional Text As Variant) As Boolean
+    If Not IsMissing(Text) Then Enqueue Text
+    RememberFlush = ""
+    OpenTextRead = True
+End Function
+
+Public Function OpenTextWrite(Optional Append As Boolean = False) As Boolean
+    If Not Append Then ClearAll
+    RememberFlush = ""
+    OpenTextWrite = True
+End Function
+
+Public Function OpenText() As Boolean
+    ClearAll
+    RememberFlush = ""
+    OpenText = True
+End Function
+
+Public Sub CloseText()
+    If RememberFlush <> "" Then
+        CallByName Me, RememberFlush, VbMethod
+    End If
+    ClearAll
+    RememberFlush = ""
+End Sub
+
+Public Property Get LineFeed() As String
+    LineFeed = MyLineFeed
+End Property
+
+Public Property Let LineFeed(Text As String)
+    MyLineFeed = Text
+End Property
+
+Public Property Get AtEndOfStream() As Boolean
+    AtEndOfStream = IsEmpty
+End Property
+
+Public Function ReadLine() As String
+    ReadLine = Dequeue
+End Function
+
+Public Function ReadAll() As String
+    ReadAll = ToText
+    ClearAll
+End Function
+
+' "Write" is a reserved word in VBA, so we use this
+Public Sub WriteLine(ParamArray Text() As Variant)
+    Dim x As Variant
+    For Each x In Text
+        Enqueue x
+    Next
+End Sub
+
+Public Sub WriteTextArray(Texts As Variant)
+    EnqueueArray Texts
+End Sub
+
+Private Sub ClearAll()
+    Do While MyText.Count > 0
+        MyText.Remove 1
+    Loop
+End Sub
+
+Private Sub EnqueueArray(Texts As Variant)
+    Dim Text As Variant
+    For Each Text In Texts
+        Enqueue Text
+    Next
+End Sub
+
+Private Sub Enqueue(Text As Variant)
+    Dim Splitted As Variant
+    Dim x As Variant
+    Splitted = Split(Text, MyLineFeed)
+    For Each x In Splitted
+        MyText.Add CStr(x)
+    Next
+End Sub
+
+Private Function Dequeue() As String
+    Dequeue = MyText(1)
+    MyText.Remove 1
+End Function
+
+Private Function IsEmpty() As Boolean
+    IsEmpty = (MyText.Count = 0)
+End Function
+
+Private Function ToText() As String
+    Dim Result As String
+    Dim i As Long
+    For i = 1 To MyText.Count
+        Result = Result & MyText(i) & MyLineFeed
+    Next
+    ToText = Result
+End Function
+
+' wrap XXXX: begin
+Public Function OpenXXXXRead(Optional Args As Variant) As Boolean
+    ClearAll
+    RememberFlush = ""
+    ' do something to get a text from XXXX, like below
+    Enqueue CopyFromXXXX
+    OpenXXXXRead = True
+End Function
+
+Public Function OpenXXXXWrite(Optional Args As Variant) As Boolean
+    ClearAll
+    RememberFlush = "ToXXXX"
+    OpenXXXXWrite = True
+End Function
+
+Public Sub ToXXXX()
+    'do something to save the text into XXXX, like below
+    CopyToXXXX ToText
+End Sub
+
+' wrap XXXX: end
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    Dim x As StringStream
+    Set x = New StringStream
+    
+    ' let strings to be a stream
+    x.OpenText
+    x.WriteLine "hello", "string", "stream"
+    Do Until x.AtEndOfStream
+        Debug.Print x.ReadLine
+    Loop
+    
+    x.LineFeed = "#"
+    x.WriteLine "hello", "string", "stream"
+    Debug.Print x.ReadAll
+    x.CloseText
+    
+    ' let XXXX to be a stream
+    x.OpenXXXXRead
+    Do Until x.AtEndOfStream
+        Debug.Print x.ReadLine
+    Loop
+    x.CloseText
+    
+    x.OpenTextWrite
+    x.LineFeed = "#"
+    x.WriteLine "hello", "string", "stream"
+    Debug.Print x.ReadAll
+    x.CloseText
+End Sub
+
+' sample XXXX to be wrapped
+
+Public Function CopyFromXXXX() As String
+    CopyFromXXXX = Now()
+End Function
+
+Public Sub CopyToXXXX(Text As String)
+    Debug.Print Text
+End Sub
+
+'}}}
+
+```

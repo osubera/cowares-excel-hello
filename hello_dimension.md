@@ -1,0 +1,854 @@
+
+
+# Introduction #
+
+  * how to improve the speed of writing excel cells in vba
+
+## 概要 ##
+  * VBAでエクセルのセルに高速書き込みを行う
+
+# Details #
+
+  * this tips has been described well on [Range Object - Excel 97](http://translate.google.co.jp/translate?sl=ja&tl=en&u=http%3A%2F%2Fkobobau.mocvba.com%2Fxls%2Fyama%2Fvba%2Frange1.html) written by kobobau.com .
+  * though that page is on the legendary Excel 97, the basic design arround the Excel Cells Range Object is not changed in more than a decade.
+  * so it still works even for the Excel 2010.
+
+## 説明 ##
+  * ここで紹介する技法は、 kobobau.com による [Range Object - Excel 97](http://kobobau.mocvba.com/xls/yama/vba/range1.html) に細かく記載されている。
+  * そこではもはや伝説的なエクセル97に基づいて書いているが、エクセルのセルの Range オブジェクトの根本的な仕様は、この１０年間以上変わっていない。
+  * だから、これはエクセル2010でも効果がある。
+
+# Code #
+
+```
+'workbook
+'  name;hello_dimension.xls
+
+'require
+
+'worksheet
+'  name;Sheet1
+
+
+'module
+'  name;testDimension
+'{{{
+Option Explicit
+
+Sub test_all()
+    test_DimArray
+    test_BoundsArray
+    test_FlatArray2D
+    test_FlatArrayNest
+    test_ToNestArray2D
+    test_FromNestArray2D
+    test_FromNestRowsArray2D
+    
+    test_measure
+    test_measure_more
+    test_measure_bulk
+End Sub
+
+Sub test_measure()
+    Const nRow = 128
+    Const nCol = 32
+    Dim r As Long
+    Dim c As Long
+    Dim b As Long
+    Dim BeginAt As Single
+    Dim EndAt As Single
+    Dim TargetColumns As Range
+    Dim RBuffer() As Variant
+    Dim BBuffer() As Variant
+    
+    ReDim RBuffer(1 To nCol)
+    ReDim BBuffer(1 To nRow, 1 To nCol)
+    Application.Goto Sheet1.Range("A1")
+    
+    With Sheet1
+        .Cells.Clear
+        Set TargetColumns = Range(.Columns(1), .Columns(nCol))
+        
+        BeginAt = Timer()
+        For r = 1 To nRow
+            For c = 1 To nCol
+                .Cells(r, c).Value = Rnd
+            Next
+        Next
+        EndAt = Timer()
+        Debug.Print "Each Cell: ", EndAt - BeginAt
+        
+        BeginAt = Timer()
+        For r = 1 To nRow
+            For c = 1 To nCol
+                RBuffer(c) = Rnd
+            Next
+            TargetColumns.Rows(r) = RBuffer
+        Next
+        EndAt = Timer()
+        Debug.Print "Each Row: ", EndAt - BeginAt
+        
+        BeginAt = Timer()
+        For r = 1 To nRow
+            For c = 1 To nCol
+                BBuffer(r, c) = Rnd
+            Next
+        Next
+        TargetColumns.Rows("1:" & nRow) = BBuffer
+        EndAt = Timer()
+        Debug.Print "Bulk Rows: ", EndAt - BeginAt
+        
+    End With
+End Sub
+
+Sub test_measure_more()
+    Application.ScreenUpdating = False
+    Sheet1.EnableCalculation = False
+    
+    test_measure
+    
+    Sheet1.EnableCalculation = True
+    Application.ScreenUpdating = True
+End Sub
+
+Sub test_measure_bulk()
+    Const nCol = 32
+    Dim nRow As Long
+    Dim i As Long
+    Dim r As Long
+    Dim c As Long
+    Dim b As Long
+    Dim BeginAt As Single
+    Dim BeginTrans As Single
+    Dim EndAt As Single
+    Dim TargetColumns As Range
+    Dim RBuffer() As Variant
+    Dim BBuffer() As Variant
+    
+    ReDim RBuffer(1 To nCol)
+    Application.Goto Sheet1.Range("A1")
+    
+    Application.ScreenUpdating = False
+    
+    With Sheet1
+        .EnableCalculation = False
+        .Cells.Clear
+        Set TargetColumns = Range(.Columns(1), .Columns(nCol))
+        
+        For i = 0 To 12
+            nRow = 2 ^ i
+            ReDim BBuffer(1 To nRow)
+            BeginAt = Timer()
+            For r = 1 To nRow
+                For c = 1 To nCol
+                    RBuffer(c) = Rnd
+                Next
+                BBuffer(r) = RBuffer
+            Next
+            BeginTrans = Timer()
+            TargetColumns.Rows("1:" & nRow) = FromNestRowsArray2D(BBuffer, nRow, nCol)(0)
+            EndAt = Timer()
+            Debug.Print "converter: ", nRow, BeginTrans - BeginAt, EndAt - BeginTrans
+        Next
+        
+        .EnableCalculation = True
+    End With
+    
+    Application.ScreenUpdating = True
+End Sub
+
+Sub test_DimArray()
+    Dim a
+    Dim b(0 To 1)
+    Dim c(0 To 1, 0 To 2)
+    Dim d(0 To 1, 0 To 2, 0 To 3)
+    Dim e(0 To 1, 0 To 2, 0 To 3, 0 To 4)
+    
+    Debug.Assert DimArray(a) = 0
+    Debug.Assert DimArray(b) = 1
+    Debug.Assert DimArray(c) = 2
+    Debug.Assert DimArray(d) = 3
+    Debug.Assert DimArray(e) = 4
+End Sub
+
+Sub test_BoundsArray()
+    Dim a
+    Dim b(0 To 1)
+    Dim c(0 To 1, 0 To 2)
+    Dim d(0 To 1, 0 To 2, 0 To 3)
+    Dim e(0 To 1, 0 To 2, 0 To 3, 0 To 4)
+    
+    Debug.Assert EncVariant(BoundsArray(a)) = "()"
+    Debug.Assert EncVariant(BoundsArray(b)) = "((0,1,),)"
+    Debug.Assert EncVariant(BoundsArray(c)) = "((0,1,),(0,2,),)"
+    Debug.Assert EncVariant(BoundsArray(d)) = "((0,1,),(0,2,),(0,3,),)"
+    Debug.Assert EncVariant(BoundsArray(e)) = "((0,1,),(0,2,),(0,3,),(0,4,),)"
+End Sub
+
+Function EncVariant(Data As Variant) As String
+    Dim x As Variant
+    Dim out As String
+    Dim ArrayBegin As String
+    Dim ArrayEnd As String
+    Dim Delimiter As String
+    Dim Bra As Variant
+    
+    Bra = Array("(", ")", ",")
+    ArrayBegin = Bra(0)
+    ArrayEnd = Bra(1)
+    Delimiter = Bra(2)
+    
+    If IsError(Data) Or IsEmpty(Data) Then
+        ' IsError(Array(1,,2)(1)) = True
+        ' IsEmpty(Array(1,Empty,2)(1)) = True
+        out = ""
+    ElseIf IsArray(Data) Then
+        out = ArrayBegin
+        For Each x In Data
+            out = out & EncVariant(x) & Delimiter
+        Next
+        out = out & ArrayEnd
+    ElseIf IsObject(Data) Then
+        out = TypeName(Data)
+    Else
+        out = Data
+    End If
+    
+    EncVariant = out
+End Function
+
+Sub test_FlatArray2D()
+    Dim x(3 To 5, 1 To 2) As String
+    Dim r As Long
+    Dim c As Long
+    
+    For r = 3 To 5
+        For c = 1 To 2
+            x(r, c) = Chr(64 + c) & r
+        Next
+    Next
+    
+    Debug.Assert EncVariant(FlatArray2D(x, 1)) = "(A3,B3,A4,B4,A5,B5,)"
+    Debug.Assert EncVariant(FlatArray2D(x, 2)) = "(A3,A4,A5,B3,B4,B5,)"
+End Sub
+
+Sub test_FoldArray2D()
+    Dim x As Variant
+    Dim y As Variant
+    Dim i As Long
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7)
+    
+    y = FoldArray2D(x)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 7
+    Debug.Assert UBound(y, 2) = 1
+    For i = 1 To 7
+        Debug.Assert y(i, 1) = i
+    Next
+    
+    y = FoldArray2D(x, 1, 4)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 2
+    Debug.Assert UBound(y, 2) = 4
+    Debug.Assert y(1, 1) = 1
+    Debug.Assert y(1, 2) = 2
+    Debug.Assert y(1, 3) = 3
+    Debug.Assert y(1, 4) = 4
+    Debug.Assert y(2, 1) = 5
+    Debug.Assert y(2, 2) = 6
+    Debug.Assert y(2, 3) = 7
+    Debug.Assert IsEmpty(y(2, 4))
+    
+    y = FoldArray2D(x, 2, 4)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 4
+    Debug.Assert UBound(y, 2) = 2
+    Debug.Assert y(1, 1) = 1
+    Debug.Assert y(2, 1) = 2
+    Debug.Assert y(3, 1) = 3
+    Debug.Assert y(4, 1) = 4
+    Debug.Assert y(1, 2) = 5
+    Debug.Assert y(2, 2) = 6
+    Debug.Assert y(3, 2) = 7
+    Debug.Assert IsEmpty(y(4, 2))
+    
+    y = FoldArray2D(x, 1, 3, 0)
+    Debug.Assert LBound(y, 1) = 0
+    Debug.Assert LBound(y, 2) = 0
+    Debug.Assert UBound(y, 1) = 2
+    Debug.Assert UBound(y, 2) = 2
+    Debug.Assert y(0, 0) = 1
+    Debug.Assert y(0, 1) = 2
+    Debug.Assert y(0, 2) = 3
+    Debug.Assert y(1, 0) = 4
+    Debug.Assert y(1, 1) = 5
+    Debug.Assert y(1, 2) = 6
+    Debug.Assert y(2, 0) = 7
+    Debug.Assert IsEmpty(y(2, 1))
+    Debug.Assert IsEmpty(y(2, 2))
+End Sub
+
+Sub test_FlatArrayNest()
+    Debug.Assert EncVariant(FlatArrayNest(Array())) = "()"
+    Debug.Assert EncVariant(FlatArrayNest(Array(1, 2, 3))) = "(1,2,3,)"
+    Debug.Assert EncVariant(FlatArrayNest(Array(1, Array(2, 3), 4))) = "(1,2,3,4,)"
+    Debug.Assert EncVariant(FlatArrayNest(Array(Array(1, 2, 3), 4))) = "(1,2,3,4,)"
+    Debug.Assert EncVariant(FlatArrayNest(Array(1, Array(2, 3), Array(4, 5)))) = "(1,2,3,4,5,)"
+    Debug.Assert EncVariant(FlatArrayNest(Array(1, Array(2, 3, Array(4, 5)), 6))) = "(1,2,3,4,5,6,)"
+End Sub
+
+Sub test_FoldArrayNest()
+    Dim x As Variant
+    
+    x = Array(1, 2, 3, 4, 5, 6, 7)
+    Debug.Assert EncVariant(FoldArrayNest(x)) = "((1,),(2,),(3,),(4,),(5,),(6,),(7,),)"
+    Debug.Assert EncVariant(FoldArrayNest(x, 2)) = "((1,2,),(3,4,),(5,6,),(7,,),)"
+    Debug.Assert EncVariant(FoldArrayNest(x, 3)) = "((1,2,3,),(4,5,6,),(7,,,),)"
+    Debug.Assert EncVariant(FoldArrayNest(x, 7)) = "((1,2,3,4,5,6,7,),)"
+    Debug.Assert EncVariant(FoldArrayNest(x, 8)) = "((1,2,3,4,5,6,7,),)"
+    Debug.Assert EncVariant(FoldArrayNest(x, 0)) = "((1,),(2,),(3,),(4,),(5,),(6,),(7,),)"
+    Debug.Assert EncVariant(FoldArrayNest("a", 0)) = "((a,),)"
+End Sub
+
+Sub test_ToNestArray2D()
+    Dim x(3 To 5, 1 To 3) As Variant
+    Dim r As Long
+    Dim c As Long
+    
+    For r = 3 To 5
+        For c = 1 To 2
+            x(r, c) = Chr(64 + c) & r
+        Next
+    Next
+    x(4, 3) = "C4"
+    
+    Debug.Assert EncVariant(ToNestArray2D(x)) = "((A3,B3,),(A4,B4,C4,),(A5,B5,),)"
+    Debug.Assert EncVariant(ToNestArray2D(x, 1, True)) = "((A3,B3,,),(A4,B4,C4,),(A5,B5,,),)"
+    Debug.Assert EncVariant(ToNestArray2D(x, 2)) = "((A3,A4,A5,),(B3,B4,B5,),(,C4,),)"
+    Debug.Assert EncVariant(ToNestArray2D(x, 2, True)) = "((A3,A4,A5,),(B3,B4,B5,),(,C4,,),)"
+End Sub
+
+Sub test_FromNestArray2D()
+    Dim x As Variant
+    Dim y As Variant
+    
+    x = Array( _
+            Array("A3", "B3"), _
+            Array("A4", "B4", "C4"), _
+            Array(), _
+            Array("A6", "B6") _
+        )
+    
+    y = FromNestArray2D(x)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 4
+    Debug.Assert UBound(y, 2) = 3
+    Debug.Assert EncVariant(ToNestArray2D(y)) = "((A3,B3,),(A4,B4,C4,),(),(A6,B6,),)"
+    
+    y = FromNestArray2D(x, 2)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 3
+    Debug.Assert UBound(y, 2) = 4
+    Debug.Assert EncVariant(ToNestArray2D(y)) = "((A3,A4,,A6,),(B3,B4,,B6,),(,C4,),)"
+    
+    y = FromNestArray2D(x, 1, 2)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 4
+    Debug.Assert UBound(y, 2) = 2
+    Debug.Assert EncVariant(ToNestArray2D(y)) = "((A3,B3,),(A4,B4,),(),(A6,B6,),)"
+    
+    y = FromNestArray2D(x, 1, 5)
+    Debug.Assert LBound(y, 1) = 1
+    Debug.Assert LBound(y, 2) = 1
+    Debug.Assert UBound(y, 1) = 4
+    Debug.Assert UBound(y, 2) = 5
+    Debug.Assert EncVariant(ToNestArray2D(y)) = "((A3,B3,),(A4,B4,C4,),(),(A6,B6,),)"
+    
+    y = FromNestArray2D(x, 1, -1, 0)
+    Debug.Assert LBound(y, 1) = 0
+    Debug.Assert LBound(y, 2) = 0
+    Debug.Assert UBound(y, 1) = 3
+    Debug.Assert UBound(y, 2) = 2
+    Debug.Assert EncVariant(ToNestArray2D(y)) = "((A3,B3,),(A4,B4,C4,),(),(A6,B6,),)"
+End Sub
+
+Sub test_FromNestRowsArray2D()
+    Dim x As Variant
+    Dim y As Variant
+    
+    x = Array( _
+            Array("A3", "B3"), _
+            Array("A4", "B4", "C4"), _
+            Array(), _
+            Array("A6", "B6") _
+        )
+    
+    y = FromNestRowsArray2D(x)
+    Debug.Assert LBound(y) = 0
+    Debug.Assert UBound(y) = 0
+    Debug.Assert LBound(y(0), 1) = 1
+    Debug.Assert LBound(y(0), 2) = 1
+    Debug.Assert UBound(y(0), 1) = 4
+    Debug.Assert UBound(y(0), 2) = 2
+    Debug.Assert EncVariant(ToNestArray2D(y(0))) = "((A3,B3,),(A4,B4,),(),(A6,B6,),)"
+    
+    y = FromNestRowsArray2D(x, 2, 3)
+    Debug.Assert LBound(y) = 0
+    Debug.Assert UBound(y) = 1
+    Debug.Assert LBound(y(0), 1) = 1
+    Debug.Assert LBound(y(0), 2) = 1
+    Debug.Assert UBound(y(0), 1) = 2
+    Debug.Assert UBound(y(0), 2) = 3
+    Debug.Assert EncVariant(ToNestArray2D(y(0))) = "((A3,B3,),(A4,B4,C4,),)"
+    Debug.Assert EncVariant(ToNestArray2D(y(1))) = "((),(A6,B6,),)"
+    
+    y = FromNestRowsArray2D(x, 3, 3, False)
+    Debug.Assert LBound(y) = 0
+    Debug.Assert UBound(y) = 1
+    Debug.Assert LBound(y(0), 1) = 1
+    Debug.Assert LBound(y(0), 2) = 1
+    Debug.Assert UBound(y(0), 1) = 3
+    Debug.Assert UBound(y(0), 2) = 3
+    Debug.Assert EncVariant(ToNestArray2D(y(0))) = "((A3,B3,),(A4,B4,C4,),(),)"
+    Debug.Assert EncVariant(ToNestArray2D(y(1))) = "((A6,B6,),(),(),)"
+End Sub
+'}}}
+
+'module
+'  name;UtilDimension
+'{{{
+Option Explicit
+
+' get an array dimension number
+' the default is a limit of dimensions by vb design
+Public Function DimArray(x As Variant, Optional ByVal DimMax As Long = 60) As Long
+    On Error GoTo ErrorOverflow
+    Dim Result As Long
+    Dim i As Long
+    
+    Result = 0
+    If IsArray(x) Then
+        For i = 1 To DimMax
+            If LBound(x, i) < 0 Then Exit For
+            Result = i
+        Next
+    End If
+    
+ErrorOverflow:
+    DimArray = Result
+End Function
+
+' get an array lower bound, upper bound
+' Array(Array(1-low,1-up), Array(2-low,2-up),,,)
+Public Function BoundsArray(x As Variant, Optional ByVal DimMax As Long = 60) As Variant
+    Dim i As Long
+    Dim n As Long
+    Dim out() As Variant
+    
+    n = DimArray(x)
+    If n = 0 Then
+        BoundsArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To n - 1)
+    For i = 1 To n
+        out(i - 1) = Array(LBound(x, i), UBound(x, i))
+    Next
+    
+    BoundsArray = out
+End Function
+
+' serialize a 2-dimensional array into a flat array, by row or by column.
+' xlByRows    (1) : Array(A1,B1,A2,B2)
+' xlByColumns (2) : Array(A1,A2,B1,B2)
+Public Function FlatArray2D(x As Variant, Optional ByVal Direction As Long = 1) As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim a As Long
+    Dim nFlat As Long
+    Dim w(1 To 2) As Long
+    Dim Offset(1 To 2) As Long
+    Dim out() As Variant
+    
+    For i = 1 To 2
+        w(i) = UBound(x, i) - LBound(x, i) + 1
+    Next
+    nFlat = w(1) * w(2)
+    Offset(1) = LBound(x, 1) * w(2) + LBound(x, 2)
+    Offset(2) = LBound(x, 2) * w(1) + LBound(x, 1)
+    ReDim out(0 To nFlat - 1)
+    
+    For i = LBound(x, 1) To UBound(x, 1)
+        For j = LBound(x, 2) To UBound(x, 2)
+            If Direction = 1 Then   ' xlByRows
+                a = i * w(2) + j - Offset(1)
+            Else                    ' xlByColumns
+                a = j * w(1) + i - Offset(2)
+            End If
+            out(a) = x(i, j)
+        Next
+    Next
+    
+    FlatArray2D = out
+End Function
+
+' fold a flat array into a 2-dimensional array
+Public Function FoldArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal Unit As Long = 1, Optional ByVal OptionBase As Long = 1) As Variant
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If Direction = 1 Then
+        nC = Unit
+        nR = Int(n / Unit)
+        If n Mod Unit > 0 Then nR = nR + 1
+    Else
+        nR = Unit
+        nC = Int(n / Unit)
+        If n Mod Unit > 0 Then nC = nC + 1
+    End If
+    
+    ReDim out(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For r = 0 To nR - 1
+        For c = 0 To nC - 1
+            If Direction = 1 Then   ' xlByRows
+                i = r * nC + c + LowerLimit
+            Else                    ' xlByColumns
+                i = c * nR + r + LowerLimit
+            End If
+            If i <= UpperLimit Then
+                out(r + OptionBase, c + OptionBase) = x(i)
+            End If
+        Next
+    Next
+    
+    FoldArray2D = out
+End Function
+
+' serialize a nested array into a flat array
+Public Function FlatArrayNest(x As Variant) As Variant
+    Dim out() As Variant
+    Dim Length As Long
+    
+    Length = -1
+    FlatArrayNestDig x, out, Length
+    If Length <= 0 Then
+        FlatArrayNest = Array()
+    Else
+        FlatArrayNest = out
+    End If
+End Function
+
+Public Function FlatArrayNestDig(x As Variant, ByRef out() As Variant, ByRef Cursor As Long) As Long
+    Dim y As Variant
+    
+    If UBound(x) = -1 Then Exit Function
+    
+    If Cursor = -1 Then
+        ReDim out(0 To UBound(x) - LBound(x))
+        Cursor = 0
+    Else
+        ReDim Preserve out(0 To UBound(out) + UBound(x) - LBound(x))
+    End If
+    
+    For Each y In x
+        If IsArray(y) Then
+            FlatArrayNestDig y, out, Cursor
+        Else
+            out(Cursor) = y
+            Cursor = Cursor + 1
+        End If
+    Next
+End Function
+
+' fold a flat array into a double nested array
+' Array(a,b,c,d,e) -> Array(Array(a,b),Array(c,d),Array(e,Empty))
+Public Function FoldArrayNest(x As Variant, Optional ByVal Unit As Long = 1) As Variant
+    Dim Length As Long
+    Dim LenExt As Long
+    Dim LenExtPlus As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    Dim i As Long
+    Dim j As Long
+    
+    If Not IsArray(x) Then
+        FoldArrayNest = FoldArrayNest(Array(x), Unit)
+        Exit Function
+    End If
+    
+    Length = UBound(x) + 1
+    If Unit < 1 Then Unit = 1
+    If Unit > Length Then Unit = Length
+    
+    LenExt = Int(Length / Unit)
+    LenExtPlus = IIf(Length Mod Unit > 0, 1, 0)
+    
+    ReDim out(0 To LenExt + LenExtPlus - 1)
+    ReDim item(0 To Unit - 1)
+    
+    For j = 0 To LenExt - 1
+        For i = 0 To Unit - 1
+            item(i) = x(i + j * Unit)
+        Next
+        out(j) = item
+    Next
+    If LenExtPlus = 1 Then
+        For i = 0 To (Length Mod Unit) - 1
+            item(i) = x(i + LenExt * Unit)
+        Next
+        For i = (Length Mod Unit) To Unit - 1
+            item(i) = Empty
+        Next
+        out(LenExt) = item
+    End If
+    
+    FoldArrayNest = out
+End Function
+
+' convert a 2-dimensional array into a nested array
+Public Function ToNestArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal FixedLength As Boolean = False) As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim VarUpper As Long
+    Dim w(1 To 2) As Long
+    Dim Lower(1 To 2) As Long
+    Dim Upper(1 To 2) As Long
+    Dim out() As Variant
+    Dim item() As Variant
+    
+    For i = 1 To 2
+        j = IIf(Direction = 1, i, 3 - i)
+        Lower(j) = LBound(x, i)
+        Upper(j) = UBound(x, i)
+        w(j) = UBound(x, i) - LBound(x, i) + 1
+    Next
+    
+    If FixedLength Then
+        ReDim item(0 To w(2) - 1)
+        VarUpper = Upper(2)
+    End If
+    
+    ReDim out(0 To w(1) - 1)
+    
+    For i = Lower(1) To Upper(1)
+        If Not FixedLength Then
+            VarUpper = Upper(2)
+            Do While VarUpper >= Lower(2)
+                If Direction = 1 Then
+                    If Not IsEmpty(x(i, VarUpper)) Then Exit Do
+                Else
+                    If Not IsEmpty(x(VarUpper, i)) Then Exit Do
+                End If
+                VarUpper = VarUpper - 1
+            Loop
+            If VarUpper < Lower(2) Then
+                out(i - Lower(1)) = Array()
+                GoTo NextItem
+            End If
+            ReDim item(0 To VarUpper - Lower(2))
+        End If
+        
+        For j = Lower(2) To VarUpper
+            If Direction = 1 Then   ' xlByRows
+                item(j - Lower(2)) = x(i, j)
+            Else                    ' xlByColumns
+                item(j - Lower(2)) = x(j, i)
+            End If
+        Next
+        out(i - Lower(1)) = item
+        
+NextItem:
+    Next
+    
+    ToNestArray2D = out
+End Function
+
+' convert a nested array into a 2-dimensional array
+Public Function FromNestArray2D(x As Variant, Optional ByVal Direction As Long = 1, _
+        Optional ByVal Unit As Long = -1, Optional ByVal OptionBase As Long = 1) As Variant
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim j As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If Unit = -1 Then
+        For i = LowerLimit To UpperLimit
+            j = UBound(x(i)) - LBound(x(i)) + 1
+            If Unit < j Then Unit = j
+        Next
+    End If
+    If Unit <= 0 Then Exit Function
+    
+    If Direction = 1 Then
+        nC = Unit
+        nR = n
+    Else
+        nR = Unit
+        nC = n
+    End If
+    
+    ReDim out(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For r = 0 To nR - 1
+        For c = 0 To nC - 1
+            If Direction = 1 Then   ' xlByRows
+                i = r + LowerLimit
+                j = c + LBound(x(i))
+            Else                    ' xlByColumns
+                i = c + LowerLimit
+                j = r + LBound(x(i))
+            End If
+            If j <= UBound(x(i)) Then
+                out(r + OptionBase, c + OptionBase) = x(i)(j)
+            End If
+        Next
+    Next
+    
+    FromNestArray2D = out
+End Function
+
+' convert a nested array into a 2-dimensional array, as bulk rows
+' the result is an array of fixed length 2-dimensional array
+Public Function FromNestRowsArray2D(x As Variant, Optional ByVal BulkRows As Long = 128, _
+        Optional ByVal ColumnSize As Long = -1, Optional ByVal OptimizeLastRows As Boolean = True) As Variant
+    Const OptionBase = 1
+    Dim n As Long
+    Dim nC As Long
+    Dim nR As Long
+    Dim nB As Long
+    Dim b As Long
+    Dim r As Long
+    Dim c As Long
+    Dim i As Long
+    Dim j As Long
+    Dim UpperLimit As Long
+    Dim LowerLimit As Long
+    Dim out() As Variant
+    Dim bulk() As Variant
+    
+    UpperLimit = UBound(x)
+    If UpperLimit = -1 Then Exit Function
+    
+    LowerLimit = LBound(x)
+    n = UpperLimit - LowerLimit + 1
+    
+    If ColumnSize = -1 Then ColumnSize = UBound(x(LowerLimit)) - LBound(x(LowerLimit)) + 1
+    If ColumnSize <= 0 Then Exit Function
+    
+    nC = ColumnSize
+    nR = BulkRows
+    nB = Int(n / nR)
+    If n Mod nR > 0 Then nB = nB + 1
+    
+    ReDim out(0 To nB - 1)
+    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+    
+    For b = 0 To nB - 1
+        If b = nB - 1 Then
+            If n Mod nR > 0 Then
+                If OptimizeLastRows Then
+                    nR = n Mod nR
+                    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+                Else
+                    ' this ReDim is to reset the values, not for changing sizes
+                    ReDim bulk(OptionBase To nR - 1 + OptionBase, OptionBase To nC - 1 + OptionBase)
+                    nR = n Mod nR
+                End If
+            End If
+        End If
+        For r = 0 To nR - 1
+            For c = 0 To nC - 1
+                i = r + LowerLimit + b * BulkRows
+                j = c + LBound(x(i))
+                If j <= UBound(x(i)) Then
+                    bulk(r + OptionBase, c + OptionBase) = x(i)(j)
+                Else
+                    bulk(r + OptionBase, c + OptionBase) = Empty
+                End If
+            Next
+        Next
+        out(b) = bulk
+    Next
+    
+    FromNestRowsArray2D = out
+End Function
+'}}}
+
+
+
+```
+
+# Results #
+
+  * writing to each cell is slow.
+  * writing to each row is faster.
+  * writing to multiple rows at one time is best.
+  * the bulk writing is still fast even if we use complex converters to generate a bulk data.
+  * easy and effective way is to disable updating the screen and calculating.
+  * the best way is 100 times faster than the worst one. and note this is a very simple worksheet without any formulas. if we have some formulas, the difference grows larger and more significant.
+
+```
+test_measure()
+
+Each Cell:     3.25 
+Each Row:      0.1796875 
+Bulk Rows:     0.0859375 
+
+test_measure_more()
+
+Each Cell:     1.960938 
+Each Row:      0.1015625 
+Bulk Rows:     0.0390625 
+
+test_measure_bulk()
+
+converter:     1             0             0 
+converter:     2             0             0.015625 
+converter:     4             0             0 
+converter:     8             0             0 
+converter:     16            0             0 
+converter:     32            0             0.015625 
+converter:     64            0             0.03125 
+converter:     128           0.0078125     0.0625 
+converter:     256           0.0078125     0.1171875 
+converter:     512           0.0078125     0.25 
+converter:     1024          0.0234375     0.4921875 
+converter:     2048          0.0703125     0.96875 
+converter:     4096          0.1484375     1.9375 
+```

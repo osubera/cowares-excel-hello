@@ -1,0 +1,374 @@
+# Introduction #
+
+  * bad vba: implements is not for abstract
+
+## 概要 ##
+  * 失敗マクロ: VBAの implements は抽象化に使えない
+
+# Details #
+
+  * `Implements` statement is expected by its name to define an abstract interface, but it's not.
+  * it is far from the interface of Java, C++ and other languages.
+  * remember,
+    1. no other methods
+    1. no events
+    1. forget friend
+    1. inconstant
+    1. difficult to read
+    1. difficult to understand
+  * maybe, it's for,
+    1. bring a lot of classes into a single huge class to share some implements.
+    1. declare 2 or more tricky methods with a same name, and completely different implemtns.
+    1. hide some public methods.
+    1. let people go to VB.Net from deprecated VB6 and VBA.
+
+## 説明 ##
+  * `Implements` 文は、名前からして、抽象化したインターフェースを宣言するように見えるが、実は違う。
+  * こいつは Java や C++ その他の言語のインターフェースとは全く違う。
+  * 忘れてはいけないのが、
+    * 他のメソッドは使えない
+    * イベントは使えない
+    * Friend は使えない
+    * 気まぐれ
+    * 読みにくくなる
+    * 理解しにくくなる
+  * たぶん、こんな用途に役立つのだろうか、
+    * たくさんのクラスを、１個の巨大クラスに入れて、実装を共有する
+    * 同名で全く違う実装のメソッドを２、３個宣言する魔術
+    * Public のメソッドを隠す
+    * 古臭い VB6 や VBA は捨てて、 VB.Net に移行するよう誘導する
+
+# Bad Code #
+
+```
+'workbook
+'  name;bad_implements.xls
+
+
+'class
+'  name;IPrice
+'{{{
+Option Explicit
+
+Public Function Price(Number As Long) As Long
+End Function
+
+'(-.-;) this does not work
+Friend Function Tax(Number As Long) As Long
+End Function
+'}}}
+
+'class
+'  name;Orange
+'{{{
+Option Explicit
+
+Implements ISize
+Implements IPrice
+
+Private MySize As String
+
+Public Property Get ISize_Size() As String
+    ISize_Size = MySize
+End Property
+
+Public Sub ISize_SetSize(Size As String)
+    MySize = Size
+End Sub
+
+Public Function IPrice_Price(Number As Long) As Long
+    IPrice_Price = UnitPrice * Number
+End Function
+
+Private Function UnitPrice() As Long
+    Select Case MySize
+    Case "S"
+        UnitPrice = 50
+    Case "M"
+        UnitPrice = 70
+    Case "L"
+        UnitPrice = 100
+    Case Else
+        UnitPrice = Int(Rnd * 1000)
+    End Select
+End Function
+'}}}
+
+'class
+'  name;ISize
+'{{{
+Option Explicit
+
+'(-.-;) this is ignored
+Public Event SizeChanged()
+
+Public Property Get Size() As String
+End Property
+
+Public Sub SetSize(Size As String)
+End Sub
+'}}}
+
+'class
+'  name;Egg
+'{{{
+Option Explicit
+
+Implements ISize
+
+Private MySize As String
+
+'Public Event ISize_SizeChanged() 'compile error
+'(-.-;) event name must not contain "_" by VB design
+
+Public Property Get ISize_Size() As String
+'(-.-;) add "ISize_" to the name for the interface Implemented
+    ISize_Size = MySize
+End Property
+
+Public Sub ISize_SetSize(Size As String)
+    MySize = Size
+End Sub
+
+'(-.-;) when variable X is declared As ISize, this is invisible.
+'(-.-;) when variable X is declared As Egg, this is visible.
+Public Sub Boil(Tag As String)
+    Debug.Print "boiled by " & Tag
+End Sub
+
+Public Property Get ISize_Boiled() As String
+    ISize_Boiled = "Unknown"
+End Property
+'}}}
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test_ALL()
+    test_Egg_Implements_ISize
+    test_Coffee_Implements_ISize
+    test_Orange_Implements_ISize_IPrice
+    test_GreenObject
+End Sub
+
+Sub test_Egg_Implements_ISize()
+    Dim u As Egg
+    Dim v As ISize
+    Dim w As Object
+    Dim x As Egg
+    Dim y As ISize
+    Dim z As Object
+    
+    Set x = New Egg
+    Set y = New Egg
+    Set z = New Egg
+    
+    '(-.-;) available methods depend on variable declarations
+    x.ISize_SetSize "S"
+    'y.ISize_SetSize "M"     ' compile error
+    z.ISize_SetSize "L"
+    
+    'x.SetSize "S"           ' compile error
+    y.SetSize "M"
+    'z.SetSize "L"           ' 438 runtime error
+    
+    Debug.Assert x.ISize_Size = "S"
+    Debug.Assert y.Size = "M"
+    Debug.Assert z.ISize_Size = "L"
+    
+    '(-.-;) set to an Object keeps the interface
+    Set w = y
+    Debug.Assert w.Size = "M"
+    Set w = x
+    Debug.Assert w.ISize_Size = "S"
+    
+    '(-.-;) set to an explicit type changes the interface
+    Set u = y
+    Set v = x
+    Debug.Assert v.Size = "S"
+    Debug.Assert u.ISize_Size = "M"
+    
+    '(-.-;) never can use non-implemented methods
+    x.Boil "x"
+    'y.Boil "y"              ' compile error
+    'Debug.Print y.Boiled    ' compile error
+    z.Boil "z"
+    Debug.Assert z.ISize_Boiled = "Unknown"
+    
+    Set w = Nothing
+    Set x = Nothing
+    Set y = Nothing
+    Set z = Nothing
+End Sub
+
+Sub test_Coffee_Implements_ISize()
+    Dim x As Coffee
+    Dim y As ISize
+    Dim z As ISize
+    
+    Set x = New Coffee
+    Set y = New Coffee
+    Set z = x
+    
+    x.ISize_SetSize "M"
+    Debug.Assert x.ISize_Size = "M"
+    
+    '(-.-;) same method name in same instance, but different implementation
+    x.SetSize "L"
+    Debug.Assert x.ISize_Size = "XXXL"
+    z.SetSize "L"
+    Debug.Assert x.ISize_Size = "L"
+    
+    y.SetSize "S"
+    Debug.Assert y.Size = "S"
+    
+    Set x = Nothing
+    Set y = Nothing
+End Sub
+
+Sub test_Orange_Implements_ISize_IPrice()
+    Dim o As Orange
+    Dim s As ISize
+    Dim p As IPrice
+    
+    Set o = New Orange
+    Set s = o
+    Set p = o
+    
+    On Error Resume Next
+    Debug.Print p.Tax(1)    ' 97 runtime error
+    Debug.Print Err.Description
+    Debug.Assert Err.Number = 97
+    On Error GoTo 0
+    
+    '(-.-;) cannot use both interfaces at same time
+    'Debug.Print o.Price(1)  ' compile error
+    'Debug.Print s.Price(1)  ' compile error
+    Debug.Print p.Price(1)
+    Debug.Print s.Size
+    'Debug.Print p.Size      ' compile error
+    
+    s.SetSize "M"
+    Debug.Assert p.Price(2) = 140
+    s.SetSize "L"
+    Debug.Assert p.Price(2) = 200
+    
+    Set p = Nothing
+    Set s = Nothing
+    Set o = Nothing
+End Sub
+
+Sub test_GreenObject()
+    Dim a As GreenApple
+    Dim b As GreenBeen
+    Dim m As GreenMan
+    
+    '(-.-;) GreenObject is a huge class that contains 3 classes sharing implementations
+    Set a = New GreenObject
+    Set b = New GreenObject
+    Set m = New GreenObject
+    
+    Debug.Print a.Desription
+    Debug.Print b.Desription
+    Debug.Print m.Desription
+    
+    Set m = Nothing
+    Set b = Nothing
+    Set a = Nothing
+End Sub
+'}}}
+
+'class
+'  name;Coffee
+'{{{
+Option Explicit
+
+Implements ISize
+
+Private MySize As String
+
+Public Property Get ISize_Size() As String
+    ISize_Size = MySize
+End Property
+
+Public Sub ISize_SetSize(Size As String)
+    MySize = Size
+End Sub
+
+'(-.-;) when variable X is declared As ISize, above ISize_Size is called as "Size".
+'(-.-;) when variable X is declared As Coffee or Object, this is called as "Size".
+Public Sub SetSize(Size As String)
+    MySize = "XXX" & Size
+End Sub
+'}}}
+
+'class
+'  name;GreenApple
+'{{{
+Option Explicit
+
+Public Function Desription() As String
+End Function
+'}}}
+
+'class
+'  name;GreenBeen
+'{{{
+Option Explicit
+
+Public Function Desription() As String
+End Function
+'}}}
+
+'class
+'  name;GreenMan
+'{{{
+Option Explicit
+
+Public Function Desription() As String
+End Function
+'}}}
+
+'class
+'  name;GreenObject
+'{{{
+Option Explicit
+
+Implements GreenApple
+Implements GreenBeen
+Implements GreenMan
+
+Private Function Color() As String
+    Color = "Green"
+End Function
+
+Public Function GreenApple_Desription() As String
+    GreenApple_Desription = Color & " Apple"
+End Function
+
+Public Function GreenBeen_Desription() As String
+    GreenBeen_Desription = Color & " Been"
+End Function
+
+Public Function GreenMan_Desription() As String
+    GreenMan_Desription = "Little " & Color & " Man"
+End Function
+'}}}
+
+
+```
+
+### Result ###
+
+```
+boiled by x
+boiled by z
+オブジェクトが定義クラスのインスタンスではない場合、このオブジェクトに関するフレンド関数は呼び出せません。
+ 705 
+
+Green Apple
+Green Been
+Little Green Man
+```

@@ -1,0 +1,80 @@
+# Introduction #
+
+  * how to use FIFO arrays (queue) in vba
+
+## 概要 ##
+  * VBAでFIFO構造の配列（キュー）を使う
+
+# Details #
+
+  * use a Collection object to implement a queue.
+
+## 説明 ##
+  * Collection object でキューを実装する。
+
+# Code #
+
+```
+Option Explicit
+
+Function EmptyList() As Variant
+    Set EmptyList = New Collection
+End Function
+
+Function IsEmpty(List As Variant) As Boolean
+    IsEmpty = IIf(List.Count = 0, True, False)
+End Function
+
+Sub Enqueue(List As Variant, ParamArray Items() As Variant)
+    Dim Item As Variant
+    For Each Item In Items
+        List.Add Item
+    Next
+End Sub
+
+Function Dequeue(List As Variant) As Variant
+    If IsEmpty(List) Then
+        Dequeue = ""
+    Else
+        Dequeue = List(1)
+        List.Remove 1
+    End If
+End Function
+
+Function ToText(List As Variant) As String
+    Dim Result As String
+    Dim i As Long
+    For i = 1 To List.Count
+        Result = Result & "," & CStr(List(i))
+    Next
+    ToText = Result
+End Function
+
+Sub test()
+    Dim x As Variant
+    Set x = EmptyList
+    Debug.Print IsEmpty(x), ToText(x)
+    Call Enqueue(x, 1)
+    Debug.Print IsEmpty(x), ToText(x)
+    Call Enqueue(x, 2, 3, 4, 5, 6)
+    Debug.Print IsEmpty(x), ToText(x)
+    
+    Do Until IsEmpty(x)
+        Debug.Print Dequeue(x), ToText(x)
+    Loop
+End Sub
+```
+
+results
+
+```
+True          
+False         ,1
+False         ,1,2,3,4,5,6
+ 1            ,2,3,4,5,6
+ 2            ,3,4,5,6
+ 3            ,4,5,6
+ 4            ,5,6
+ 5            ,6
+ 6            
+```

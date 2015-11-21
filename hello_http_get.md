@@ -1,0 +1,213 @@
+
+
+# Introduction #
+
+  * how to get texts and files from web using http in vba
+
+## 概要 ##
+  * VBAで http を使ってウェブからテキストやファイルを取得する
+
+# Details #
+
+  * we use the Microsoft XML v6.0 to process a request.
+  * this code has a explicit version as MSXML2.XMLHTTP60, maybe you can use MSXML2.XMLHTTP instead.
+  * MSXML uses an Internet Explorer insalled on the Windows OS, thus
+    * the request goes to a web server by the IE.
+    * the user agent string is same as your browser.
+    * it uses caches of the IE.
+    * it uses cookies of the IE.
+    * it depends to the IE settings on connections and securities.
+  * it may raise an error when the IE security setting deny the server response to do.
+  * a responsed body is stored as a byte array, and also a stream is provided.
+  * when server response headers have an explicit character set for text body, it uses the information to decode the body into a unicode text string.
+    * otherwise, always utf-8 is assumed for text encoding. means no html meta tags are reffered, nor no information in body itself are used to decide the character set.
+    * no way to change this default encoding to another one but utf-8.
+  * it goes to an asynchronous request at default, but this example uses it synchronously.
+
+## 説明 ##
+  * Microsoft XML v6.0 でリクエストを処理する。
+  * MSXML2.XMLHTTP60 のようにバージョンまで明示しているが、 MSXML2.XMLHTTP だけで良い場合もある。
+  * MSXML はウィンドウズに入っているインターネットエクスプローラを使うので、
+    * サーバーへのリクエストは IE が投げていることになる。
+    * ユーザーエージェント文字はブラウザと同じもの。
+    * IEのキャッシュを使う。
+    * IEのクッキーを使う。
+    * IEの接続、セキュリティ設定に依存する。
+  * IEのセキュリティ設定により、サーバーレスポンスの実行を拒否した場合、エラーを返す。
+  * 本文のレスポンスはバイト列に格納される。ストリームも提供している。
+  * サーバーヘッダーのレスポンスに、明確な文字コード指定があれば、その情報を使って本文をユニコード文字に変換する。
+    * 明示されないときは、テキストの文字コードは常に utf-8 となる。 html meta タグ情報はいっさい使わないし、そもそも本文にある情報は文字コードを決める材料として使われない。
+    * このデフォルト utf-8 というのを変更することはできない。
+  * 普通は非同期通信で使うのだが、ここでは同期通信の見本を示す。
+
+# How to use #
+
+  1. use an ssf reader tool like [ssf\_reader\_primitive](ssf_reader_primitive.md) to convert a text code below into an excel book.
+  1. test1() and test2() are executable examples.
+
+## 使い方 ##
+  1. [ssf\_reader\_primitive](ssf_reader_primitive.md) のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+  1. test1() と test2() が実行可能な見本。
+
+# Code #
+
+```
+'workbook
+'  name;hello_http_get.xls
+
+'require
+'  ;{F5078F18-C551-11D3-89B9-0000F81FE221} 6 0 Microsoft XML, v6.0
+
+
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    Const URL = "http://cowares.nobody.jp/license/ja.txt"
+    
+    Dim tp As MSXML2.XMLHTTP60
+    Set tp = New MSXML2.XMLHTTP60
+    
+    tp.Open "GET", URL, False
+    tp.send
+    Debug.Print tp.responseText
+    
+    Set tp = Nothing
+End Sub
+
+Sub test2()
+    Const URL = "http://cowares.nobody.jp/favicon.ico"
+    Const FileName = "C:\tmp\favicon.ico"
+    
+    Dim tp As MSXML2.XMLHTTP60
+    Set tp = New MSXML2.XMLHTTP60
+    
+    tp.Open "GET", URL, False
+    tp.send
+    SaveBinaryFile tp.responseBody, FileName
+    
+    Set tp = Nothing
+End Sub
+
+Function SaveBinaryFile(Data() As Byte, FileName As String) As Boolean
+    Open FileName For Binary Access Write As #1
+    Put #1, , Data
+    Close #1
+End Function
+'}}}
+
+```
+
+### Result ###
+
+test1()
+
+```
+コ・ウェア・ライセンス - 自律、自由、公正
+
+1. 保証はありません。 (自律)
+既知の欠陥も未知の欠陥も含めたまま公開されています。 
+品質や正確さはご自身で判断してください。 
+使用により生じた損失など、すべての責任はあなたが負います。 
+
+2. フリーです。 (自由)
+どなたでも目的によらず無料で無期限に使えます。 
+登録や承諾は不要です。 
+商用も可です。 
+自由な加工を含む再利用も再配布もできます。 
+
+3. 公正であれ。 (公正)
+オリジナルが、あなたの作品と無関係に利用できることを明示する。 
+オリジナルの仕事とあなたの仕事を、正直に区別する。 
+オリジナルの著作権とライセンスを尊重する。 
+
+ライセンスの詳細は http://cowares.nobody.jp/license/ で公開されています。
+```
+
+test2()
+
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TRvEMuKlI3I/AAAAAAAAAA0/qdqy_v2BZJU/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TRvEMuKlI3I/AAAAAAAAAA0/qdqy_v2BZJU/s1600/shot1.png)
+
+# Cookies #
+
+  * above simple code does cookies inside, when your Internet Explorer settings allow them. means this code can walk through web pages with session controled.
+> > 上の単純なコードでも、インターネットエクスプローラの設定に依存して、内部でクッキー処理が行われている。ということは、これでセッション制御のあるウェブページが渡り歩ける。
+  * we can check this ability with a simple server page script below.
+> > 下の簡単なサーバースクリプトで、実際に試すことができる。
+  * getAllResponseHeaders and getResponseHeader methods show server response headers.
+> > サーバーレスポンスヘッダは、 getAllResponseHeaders メソッドと getResponseHeader メソッドで取得できる。
+
+```
+<?php
+  $header_charset="Content-Type: text/html; charset=utf-8";
+  $counter = $_COOKIE["counter"] + 1;
+  setcookie("counter",$counter);
+  $title="お帰りなさいませ";
+  $message=($counter>1) ? $counter."回目の".$title : "はじめまして";
+  header($header_charset);
+  header("Cache-Control: no-cache, must-revalidate");
+  header("Expires: Thu, 30 Dec 2010 00:00:00 GMT");
+  echo "<html>
+<head><title>".$title."</title></head>
+<body><h1>".$message."</h1></body></html>";
+?>
+```
+
+### Result ###
+
+```
+Date: Thu, 30 Dec 2010 00:15:35 GMT
+Set-Cookie: counter=1
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>はじめまして</h1></body></html>
+
+Date: Thu, 30 Dec 2010 00:15:37 GMT
+Set-Cookie: counter=2
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>2回目のお帰りなさいませ</h1></body></html>
+
+Date: Thu, 30 Dec 2010 00:34:16 GMT
+Set-Cookie: counter=3
+Cache-Control: no-cache, must-revalidate
+Expires: Thu, 30 Dec 2010 00:00:00 GMT
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head><title>お帰りなさいませ</title></head>
+<body><h1>3回目のお帰りなさいませ</h1></body></html>
+```
+
+# Status 300 #
+
+  * the send method handles server redirections inside automatically.
+> > send メソッドは、サーバーによるリダイレクトを自動で内部処理する。
+  * we only get a result of the last one, so there's nothing to indicate the redirection and the real url gotten.
+> > 最後の飛び先の結果を得るだけなので、リダイレクトされたことや実際の url 情報などを示すものは手に入らない。
+  * the response shows 200 OK status.
+> > レスポンスは 200 OK のステータスを示す。
+  * the send method may raise a runtime error when the Location header shows another host to go and the IE security settings deny this.
+> > Location ヘッダのリダイレクト先が他のサーバーの時、インターネットエクスプローラのセキュリティ設定がこれを認めなければ、 send メソッドは実行時エラーになる。
+```
+-2147024891 
+アクセスが拒否されました。
+```
+> > このエラーメッセージと、 msxml6.dll でエラー259が発生したことは検知できるが、それ以上の情報は返ってこない。
+
+# Cache #
+
+### How To Clear Cache When Your Application Hosts a WebBrowser Control ###
+  * see the url below, to clear the cache.
+> > キャッシュを消したいなら、この url を参考に。
+  * http://support.microsoft.com/kb/262110/en-us

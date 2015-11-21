@@ -1,0 +1,872 @@
+
+
+# Introduction #
+
+  * how to encode and decode as Base64 (ASCII Armor) at a low level in vba
+  * also provides binary dump tools.
+
+## 概要 ##
+  * VBAで Base64 (ASCII Armor) のエンコードとデコードを低レベルに行う
+  * また、バイト列を書き出すツールも一緒に入れている。
+
+# Details / 説明 #
+
+| EncBase64 | convert bytes array into a Base64 text string. <br /> バイト列を Base64 テキストに |
+|:----------|:-------------------------------------------------------------------------|
+| DecBase64 | convert a Base64 text string into bytes array. <br /> Base64 テキストをバイト列に  |
+| EncBase64char | character table to give a character for a number. <br /> 数値に対応する文字を返す表   |
+| DecBase64char | character table to give a number for a character. <br /> 文字に対応する数値を返す表   |
+| Enc6      | convert 8bit bytes array into 6bit bytes array. <br /> 8bit バイト列を 6bit バイト列に |
+| Dec6      | convert 6bit bytes array into 8bit bytes array. <br /> 6bit バイト列を 8bit バイト列に |
+| EncBits   | convert numbers array into a text String as bit representation. <br /> 数値列を２進表記のテキストに |
+| DecBits   | convert a bit text String into bytes array. <br /> ２進表記のテキストをバイト列に       |
+| EncHexDelimited | convert numbers array into a text String as hexadecimal representation. <br /> 数値列を１６進表記のテキストに |
+| DecHexDelimited | convert a hexadecimal text String into bytes array. <br /> １６進表記のテキストをバイト列に |
+| BytesToString | convert bytes array into a text String. <br /> バイト列を String 型テキストに       |
+| StringToBytes | convert a text String into bytes array. <br /> String 型テキストをバイト列に        |
+| WordsToString | convert words array into a text String. <br /> ワード列を String 型テキストに       |
+| StringToWords | convert a text String into words array. <br /> String 型テキストをワード列に        |
+
+# How to use #
+
+  1. use an ssf reader tool like [ssf\_reader\_primitive](ssf_reader_primitive.md) to convert a text code below into an excel book.
+  1. from test1() to test5() do demonstrations and round trip tests.
+
+## 使い方 ##
+  1. [ssf\_reader\_primitive](ssf_reader_primitive.md) のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+  1. test1() から test5() がデモと相互変換のテストをする。
+
+# Code #
+
+```
+'ssf-begin
+';
+
+'workbook
+'   name;hello_base64.xls/VBAProject
+
+'book-identity
+
+'require
+
+'worksheet
+'   name;Sheet1
+
+'cells-formula
+'  address;A1:A68
+'         ;AAABAAQAEBAQAAEABAAoAQAARgAAABgYEAABAAQA6AEAAG4BAAAgIBAAAQAEAOgC
+'         ;AABWAwAAMDAQAAEABABoBgAAPgYAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAgAAggAAAP8AGAAAAP8AAP8LAAH//wAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREREREREREREREREREA
+'         ;RERVREREEQBERFVEREQREUQiVRERERERRCJVERERESJEIlURERERIkQiVREREREi
+'         ;RCIzMzMRESJEIjMzMxEiIiIiMxERESIiIiIzERERERERETMRERERERERMxEREREA
+'         ;AAAzMzMzEQAAADMzMzMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAABgAAAAwAAAAAQAEAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAACCAAAA/wAYAAAA/wAA/wsAAf//AAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARERERERERERER
+'         ;EREREREREREREREREREREREREREREREREREREABERERVVEREREQREABERERVVERE
+'         ;REQREABERERVVEREREQRERFEQiJVURERERERERFEQiJVURERERERERFEQiJVURER
+'         ;EREREiJEQiJVUREREREREiJEQiJVUREREREREiJEQiJVUREREREREiJEQiIzMzMz
+'         ;MREREiJEQiIzMzMzMREREiJEQiIzMzMzMREiIiIiIiIzMREREREiIiIiIiIzMRER
+'         ;EREiIiIiIiIzMREREREREREREREzMREREREREREREREzMREREREREREREREzMRER
+'         ;EREREAAAAAAzMzMzMzMREAAAAAAzMzMzMzMREAAAAAAzMzMzMzMAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAIAAAAEAA
+'         ;AAABAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAIIAAAD/ABgAAAD/AAD/
+'         ;CwAB//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABER
+'         ;ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER
+'         ;EREREREREREREREREREREQAARERERFVVREREREREEREAAERERERVVURERERERBER
+'         ;AABEREREVVVEREREREQREQAARERERFVVREREREREEREREUREIiJVVRERERERERER
+'         ;ERFERCIiVVURERERERERERERREQiIlVVEREREREREREREUREIiJVVRERERERERER
+'         ;IiJERCIiVVURERERERERESIiREQiIlVVEREREREREREiIkREIiJVVRERERERERER
+'         ;IiJERCIiVVURERERERERESIiREQiIjMzMzMzMxEREREiIkREIiIzMzMzMzMRERER
+'         ;IiJERCIiMzMzMzMzERERESIiREQiIjMzMzMzMxERIiIiIiIiIiIzMxERERERESIi
+'         ;IiIiIiIiMzMREREREREiIiIiIiIiIjMzERERERERIiIiIiIiIiIzMxERERERERER
+'         ;ERERERERMzMRERERERERERERERERETMzEREREREREREREREREREzMxERERERERER
+'         ;ERERERERMzMREREREREREQAAAAAAADMzMzMzMzMzEREAAAAAAAAzMzMzMzMzMxER
+'         ;AAAAAAAAMzMzMzMzMzMREQAAAAAAADMzMzMzMzMzAAAAAAAAAAAAAAAAAAAAAAAA
+'   repeat;2
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAoAAAAMAAAAGAAAAABAAQAAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAIAAIIAAAD/ABgAAAD/AAD/CwAB//8AAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAABERERERERERERERERERERERERERERERERER
+'   repeat;2
+'         ;ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER
+'         ;EREREREREREREREREREREREREREREREREQAAAERERERERFVVVURERERERERERBER
+'   repeat;2
+'         ;EQAAAERERERERFVVVURERERERERERBEREQAAAERERERERFVVVURERERERERERBER
+'         ;EQAAAERERERERFVVVURERERERERERBEREREREURERCIiIlVVVRERERERERERERER
+'   repeat;2
+'         ;EREREURERCIiIlVVVREREREREREREREREREREURERCIiIlVVVRERERERERERERER
+'         ;EREREURERCIiIlVVVRERERERERERERERESIiIkRERCIiIlVVVRERERERERERERER
+'   repeat;2
+'         ;ESIiIkRERCIiIlVVVRERERERERERERERESIiIkRERCIiIlVVVRERERERERERERER
+'         ;ESIiIkRERCIiIlVVVRERERERERERERERESIiIkRERCIiIjMzMzMzMzMzMxERERER
+'   repeat;2
+'         ;ESIiIkRERCIiIjMzMzMzMzMzMxERERERESIiIkRERCIiIjMzMzMzMzMzMxERERER
+'         ;ESIiIkRERCIiIjMzMzMzMzMzMxERESIiIiIiIiIiIiIiIjMzMxERERERERERESIi
+'   repeat;2
+'         ;IiIiIiIiIiIiIjMzMxERERERERERESIiIiIiIiIiIiIiIjMzMxERERERERERESIi
+'         ;IiIiIiIiIiIiIjMzMxERERERERERERERERERERERERERETMzMxERERERERERERER
+'   repeat;2
+'         ;ERERERERERERETMzMxERERERERERERERERERERERERERETMzMxERERERERERERER
+'         ;ERERERERERERETMzMxEREREREREREREREQAAAAAAAAAAADMzMzMzMzMzMzMzMxER
+'   repeat;2
+'         ;EQAAAAAAAAAAADMzMzMzMzMzMzMzMxEREQAAAAAAAAAAADMzMzMzMzMzMzMzMxER
+'         ;EQAAAAAAAAAAADMzMzMzMzMzMzMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+'   repeat;7
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+'         ;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+
+'module
+'   name;HelloBase64
+'{{{
+Option Explicit
+
+Sub test1()
+    Dim i As Long
+    Dim out As String
+    
+    out = "check my Base64 character table:" & vbCrLf
+    For i = 0 To 64
+        out = out & EncBase64char(i)
+        If i <> DecBase64char(EncBase64char(i)) Then
+            Debug.Print "NG at " & i & " " & EncBase64char(i) & " " & DecBase64char(EncBase64char(i))
+        End If
+    Next
+    Debug.Print out
+End Sub
+
+Sub test2()
+    Dim Aaa As Variant
+    Dim Aa As Variant
+    Dim a As String
+    
+    Aaa = Array("11110000 11110000 11110000", "11100011 10001110 00111000 11100011", "11001100 10101010")
+    For Each Aa In Aaa
+        a = CStr(Aa)
+        Debug.Print EncHexDelimited(DecBits(a, False))
+        Debug.Print EncBits(DecBits(a, False), -1, False)
+        Debug.Print EncBits(Enc6(DecBits(a, False)), -1, False, 6)
+        Debug.Print EncHexDelimited(Enc6(DecBits(a, False)))
+        Debug.Print EncBase64(DecBits(a, False))
+        Debug.Print IIf(a & " " = EncBits(Dec6(Enc6(DecBits(a, False))), -1, False, 8), "OK", "NG")
+        Debug.Print IIf(a & " " = EncBits(DecBase64(EncBase64(DecBits(a, False))), -1, False, 8), "OK", "NG")
+    Next
+End Sub
+
+Sub test3()
+    Dim Aaa As Variant
+    Dim Aa As Variant
+    Dim a As String
+    
+    Aaa = Array("Fortitudinous, Free, Fair", "自律、自由、公正")
+    For Each Aa In Aaa
+        a = CStr(Aa)
+        Debug.Print a, " encoded with unicode"
+        Debug.Print EncBase64(StringToBytes(a))
+        Debug.Print BytesToString(DecBase64(EncBase64(StringToBytes(a))))
+    Next
+    
+    a = CStr(Aaa(0))
+    Debug.Print a, " encoded with ascii"
+    Debug.Print EncBase64(StringToWords(a))
+    Debug.Print WordsToString(DecBase64(EncBase64(StringToWords(a))))
+End Sub
+
+Sub test3_more()
+    Dim Encoded As String
+    Dim Decoded As Variant
+    Dim Rounded As String
+    Dim x As Variant
+    
+    Encoded = "VEVTVA=="
+    Decoded = DecBase64(Encoded)
+    For Each x In Decoded
+        Debug.Print "&H" & Hex(x), x
+    Next
+    
+    Rounded = EncBase64(Decoded)
+    Debug.Print Rounded
+End Sub
+
+Sub test4()
+    ' encode from a binary file
+    ' 時間かかりすぎて実用的でない。enc6が遅い。 pan array が悪い？
+    Const FileFrom = "C:\tmp\favicon.ico"
+    Dim Armed As String
+    Dim Data() As Byte
+    
+    LoadBinaryFile Data, FileFrom
+    Debug.Print UBound(Data) + 1 & " bytes"
+    Armed = EncBase64(Data)
+    Debug.Print Armed
+End Sub
+
+Sub test5()
+    ' decode to a binary file
+    Const FileTo = "C:\tmp\favicon_decoded.ico"
+    Dim Armed As String
+    Dim Ce As Range
+    
+    For Each Ce In Sheet1.UsedRange.Cells
+        Armed = Armed & Ce.Value
+    Next
+    SaveBinaryFile DecBase64(Armed), FileTo
+End Sub
+
+Sub test5Faster()
+    ' decode to a binary file
+    Const FileTo = "C:\tmp\favicon_decoded_also.ico"
+    Dim Ce As Range
+    
+    Open FileTo For Binary Access Write As #1
+    For Each Ce In Sheet1.UsedRange.Cells
+        Put #1, , DecBase64(CStr(Ce.Value))
+    Next
+    Close #1
+End Sub
+
+Function LoadBinaryFile(Data() As Byte, FileName As String) As Boolean
+    Open FileName For Binary Access Read As #1
+    ReDim Data(0 To LOF(1) - 1)
+    Get #1, , Data
+    Close #1
+End Function
+
+Function SaveBinaryFile(Data() As Byte, FileName As String) As Boolean
+    Open FileName For Binary Access Write As #1
+    Put #1, , Data
+    Close #1
+End Function
+
+' test4() and test5() is toooooooooooooooooo slow!
+' both Enc6() and Dec6() are slow, because
+'   they do byte to byte conversion.
+'   they allocate a lot of memory to convert at once.
+'   they use a temporary memory, causes a lot of allocation and deallocation.
+'  we can fix above to do followings.
+'   3 bytes to 4 bytes conversion in a single long integer.
+'   split a whole data into some segments.
+'   pre-allocate a working space.
+
+
+' references for Base64
+' http://www.faqs.org/rfcs/rfc3548.html
+' http://www.faqs.org/rfcs/rfc1521.html
+' http://en.wikipedia.org/wiki/Base64
+' http://sonic64.com/2005-03-29.html
+' http://keicode.com/note/note05.php
+
+
+' Base64 (ASCII Armor)
+
+Function EncBase64(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Const LineFeed = vbCrLf
+    Const CharsPerLine = 64
+    
+    Dim EncTable(0 To 64) As String
+    Dim Data6 As Variant
+    Dim i As Long
+    Dim out As String
+    
+    If Length = -1 Then Length = UBound(Data) + 1
+    If Length <= 0 Then Exit Function
+    
+    For i = 0 To 64
+        EncTable(i) = EncBase64char(i)
+    Next
+    
+    out = ""
+    Data6 = Enc6(Data, Length)
+    For i = 0 To UBound(Data6)
+        out = out & EncTable(Data6(i))
+        If i Mod CharsPerLine = CharsPerLine - 1 Then out = out & LineFeed
+    Next
+    
+    EncBase64 = out
+End Function
+
+Function DecBase64(Text As String) As Byte()
+    Const CharsPerLine = 64
+    
+    Dim Data6() As Byte
+    Dim out() As Byte
+    Dim x As Long
+    Dim Last6 As Long
+    Dim i As Long
+    
+    DecBase64 = out
+    If Text = "" Then Exit Function
+    
+    ReDim Data6(0 To Len(Text))
+    Last6 = 0
+    For i = 1 To Len(Text)
+        x = DecBase64char(Mid(Text, i, 1))
+        If x < 64 Then
+            Data6(Last6) = x
+            Last6 = Last6 + 1
+        End If
+    Next
+        
+    DecBase64 = Dec6(Data6, Last6)
+End Function
+
+' Base64 で使う変換テーブル (RFC1521)
+
+Function EncBase64char(ByVal Bit6 As Long) As String
+    Dim out As String
+    
+    Select Case Bit6
+    Case 0 To 25    ' A-Z
+        out = Chr(Bit6 + 65)
+    Case 26 To 51   ' a-z
+        out = Chr(Bit6 + 71)
+    Case 52 To 61   ' 0-9
+        out = Chr(Bit6 - 4)
+    Case 62
+        out = "+"
+    Case 63
+        out = "/"
+    Case Else       ' padding
+        out = "="
+    End Select
+    
+    EncBase64char = out
+End Function
+
+Function DecBase64char(Text As String) As Long
+    Dim out As Long
+    
+    Select Case Asc(Text)
+    Case 65 To 90   ' "A" To "Z"
+        out = Asc(Text) - 65
+    Case 97 To 122  ' "a" To "z"
+        out = Asc(Text) - 71
+    Case 48 To 57   ' "0" To "9"
+        out = Asc(Text) + 4
+    Case 43         ' "+"
+        out = 62
+    Case 47         ' "/"
+        out = 63
+    Case Else       ' remove
+        out = 64
+    End Select
+    
+    DecBase64char = out
+End Function
+
+
+' 6 bit 単位
+' Enc6 : 8bit 配列を 6bit 配列に変換する
+' Dec6 : 6bit 配列を 8bit 配列に変換する
+' aaaabbbb ccccdddd eeeeffff → aabbbb00 ddddaa00 ffcccc00 eeeeff00
+' aaaabbbb ccccdddd → aabbbb00 ddddaa00 00cccc00 00000010
+' byte 内の bit 配列を上位から取るため順序が前後する。
+' 出力が4の倍数に満たない端数は padding を入れる。ここでは &H40 を使う
+Function Enc6(Data As Variant, Optional ByVal Length As Long = -1) As Byte()
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim i As Long
+    Dim Length6 As Long
+    
+    pan = Empty
+    If Length = -1 Then Length = UBound(Data) + 1
+    
+    For i = 0 To Length - 1
+        Select Case i Mod 3
+        Case 0      ' a.b.
+            ' y.shift(2)
+            pan = Array(Int(Data(i) / &H4), pan)
+        Case 1      ' a.d.
+            ' x.band(2).shift(-4) + y.shift(4)
+            pan = Array(((Data(i - 1) And &H3) * &H10) Or Int(Data(i) / &H10), pan)
+        Case Else   ' c.f. f.e.
+            ' x.band(4).shift(-2) + y.shift(6)
+            pan = Array(((Data(i - 1) And &HF) * &H4) Or Int(Data(i) / &H40), pan)
+            ' y.band(6)
+            pan = Array(Data(i) And &H3F, pan)
+        End Select
+    Next
+    
+    Length6 = Int(Length * 4 / 3)
+    Select Case Length Mod 3
+    Case 1  ' 2bit (aa) left
+        ' x.band(2).shift(-4)
+        pan = Array(((Data(i - 1) And &H3) * &H10), pan)
+        Length6 = Length6 + 1
+    Case 2  ' 4bit (cccc) left
+        ' x.band(4).shift(-2)
+        pan = Array(((Data(i - 1) And &HF) * &H4), pan)
+        Length6 = Length6 + 1
+    End Select
+    
+    If Length6 > 0 Then
+        ' padding
+        Do Until Length6 Mod 4 = 0
+            pan = Array(&H40, pan)
+            Length6 = Length6 + 1
+        Loop
+        
+        ReDim out(0 To Length6 - 1)
+        For i = Length6 - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    Enc6 = out
+End Function
+
+Function Dec6(Data As Variant, Optional ByVal Length As Long = -1) As Byte()
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim i As Long
+    Dim Length8 As Long
+    Dim m As Long
+    
+    pan = Empty
+    If Length = -1 Then Length = UBound(Data) + 1
+    
+    ' remove padding
+    For i = Length - 1 To 0 Step -1
+        If Data(i) = &H40 Then
+            Length = Length - 1
+        Else
+            Exit For
+        End If
+    Next
+    
+    For i = 0 To Length - 1
+        Select Case i Mod 4
+        Case 0      ' aabbbb00
+            ' y.shift(-2)
+            m = Data(i) * &H4
+        Case 1      ' ddddaa00
+            ' + y.shift(4)
+            pan = Array(m Or Int(Data(i) / &H10), pan)
+            ' y.band(4).shift(-4)
+            m = (Data(i) And &HF) * &H10
+        Case 2      ' ffcccc00
+            ' + y.shift(2)
+            pan = Array(m Or Int(Data(i) / &H4), pan)
+            ' y.band(2).shift(-6)
+            m = (Data(i) And &H3) * &H40
+        Case Else   ' eeeeff00
+            ' + y
+            pan = Array(m Or Data(i), pan)
+        End Select
+    Next
+    
+    Length8 = Int(Length * 3 / 4)
+    ' discard left bits
+    
+    If Length8 > 0 Then
+        ReDim out(0 To Length8 - 1)
+        For i = Length8 - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    Dec6 = out
+End Function
+
+
+
+' 整数配列とビット列ダンプ間の変換
+
+Function EncBits(Data As Variant, Optional ByVal Length As Long = -1, _
+                Optional ByVal LowbitFirst As Boolean = True, _
+                Optional ByVal FixedBitLength As Long = -1, _
+                Optional Delimiter As String = " ") As String
+    Dim out As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As Long
+    Dim BitLength As Long
+    Dim Bits() As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    
+    If FixedBitLength = -1 Then
+        ReDim Bits(0 To 31)
+    Else
+        BitLength = FixedBitLength
+        ReDim Bits(0 To FixedBitLength - 1)
+    End If
+    
+    For i = 0 To Length - 1
+        If FixedBitLength = -1 Then
+            Select Case TypeName(Data(i))
+            Case "Byte"
+                BitLength = 8
+            Case "Integer"
+                BitLength = 16
+            Case "Long"
+                BitLength = 32
+            Case Else
+                BitLength = 0
+            End Select
+        End If
+        
+        x = Data(i)
+        For j = 0 To BitLength - 1
+            Bits(j) = Abs(x Mod 2)
+            x = Int(x / 2)
+        Next
+        
+        If LowbitFirst Then
+            For j = 0 To BitLength - 1
+                out = out & CStr(Bits(j))
+            Next
+        Else
+            For j = BitLength - 1 To 0 Step -1
+                out = out & CStr(Bits(j))
+            Next
+        End If
+        out = out & Delimiter
+    Next
+    
+    EncBits = out
+End Function
+
+Function DecBits(Text As String, Optional ByVal LowbitFirst As Boolean = True) As Variant
+    Dim out() As Variant
+    Dim DataValue As Variant
+    Dim Bitter As Long
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    Dim TextAddEnd As String
+    
+    pan = Empty
+    Counter = 0
+    Bitter = 0
+    DataValue = 0
+    TextAddEnd = Text & " "
+    
+    For i = 1 To Len(TextAddEnd)
+        Select Case Mid(TextAddEnd, i, 1)
+        Case "0"
+            If Not LowbitFirst Then
+                DataValue = DataValue * 2
+            End If
+            Bitter = Bitter + 1
+        Case "1"
+            If LowbitFirst Then
+                DataValue = DataValue + 2 ^ Bitter
+            Else
+                DataValue = DataValue * 2 + 1
+            End If
+            Bitter = Bitter + 1
+        Case Else
+            If Bitter > 1 Then
+                If Bitter <= 8 Then
+                    DataValue = CByte(DataValue)
+                ElseIf Bitter <= 15 Then
+                    DataValue = CInt(DataValue)
+                ElseIf Bitter = 16 Then
+                    If DataValue >= 32768 Then
+                        DataValue = CInt(DataValue - 65536)
+                    Else
+                        DataValue = CInt(DataValue)
+                    End If
+                ElseIf Bitter <= 31 Then
+                    DataValue = CLng(DataValue)
+                ElseIf Bitter = 32 Then
+                    If DataValue >= 2147483648# Then
+                        DataValue = CLng(DataValue - 4294967296#)
+                    Else
+                        DataValue = CLng(DataValue)
+                    End If
+                End If
+                pan = Array(DataValue, pan)
+                Counter = Counter + 1
+                Bitter = 0
+                DataValue = 0
+            End If
+        End Select
+    Next
+    
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecBits = out
+End Function
+
+' バイト配列と16進ダンプ間の変換
+
+Function EncHexDelimited(Data As Variant, Optional ByVal Length As Long = -1, _
+                    Optional Delimiter As String = " ") As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & Hex(Data(i)) & Delimiter
+    Next
+    
+    EncHexDelimited = out
+End Function
+
+Function DecHexDelimited(Text As String, Optional Delimiter As String = " ") As Byte()
+    Const LineFeed = vbCrLf
+    Dim Line As Variant
+    Dim ByteData As Variant
+    Dim out() As Byte
+    Dim pan As Variant
+    Dim Counter As Long
+    Dim i As Long
+    
+    pan = Empty
+    Counter = 0
+    
+    For Each Line In Split(Text, LineFeed)
+        For Each ByteData In Split(Line, Delimiter)
+            If ByteData <> "" Then
+                pan = Array(CByte("&H" & ByteData), pan)
+                Counter = Counter + 1
+            End If
+        Next
+    Next
+    
+    If Counter > 0 Then
+        ReDim out(0 To Counter - 1)
+        For i = Counter - 1 To 0 Step -1
+            out(i) = pan(0)
+            pan = pan(1)
+        Next
+    End If
+    
+    DecHexDelimited = out
+End Function
+
+' ユニコード文字とバイト配列間の変換
+
+Function BytesToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrB(Data(i))
+    Next
+    
+    BytesToString = out
+End Function
+
+Function StringToBytes(Text As String) As Byte()
+    Dim out() As Byte
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = LenB(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscB(MidB(Text, i, 1))
+    Next
+    
+    StringToBytes = out
+End Function
+
+' ユニコード文字とワード配列間の変換
+
+Function WordsToString(Data As Variant, Optional ByVal Length As Long = -1) As String
+    Dim out As String
+    Dim i As Long
+    
+    out = ""
+    If Length = -1 Then Length = UBound(Data) + 1
+    For i = 0 To Length - 1
+        out = out & ChrW(Data(i))
+    Next
+    
+    WordsToString = out
+End Function
+
+Function StringToWords(Text As String) As Integer()
+    Dim out() As Integer
+    Dim i As Long
+    Dim Length As Long
+    
+    Length = Len(Text)
+    ReDim out(0 To Length - 1)
+    For i = 1 To Length
+        out(i - 1) = AscW(Mid(Text, i, 1))
+    Next
+    
+    StringToWords = out
+End Function
+
+'}}}
+
+'ssf-end
+
+
+```
+
+### Result ###
+
+```
+test1()
+
+check my Base64 character table:
+ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=
+
+test2()
+
+F0 F0 F0 
+11110000 11110000 11110000 
+111100 001111 000011 110000 
+3C F 3 30 
+8PDw
+OK
+OK
+E3 8E 38 E3 
+11100011 10001110 00111000 11100011 
+111000 111000 111000 111000 111000 110000 000000 000000 
+38 38 38 38 38 30 40 40 
+44444w==
+OK
+OK
+CC AA 
+11001100 10101010 
+110011 001010 101000 000000 
+33 A 28 40 
+zKo=
+OK
+OK
+
+test3()
+
+Fortitudinous, Free, Fair    encoded with unicode
+RgBvAHIAdABpAHQAdQBkAGkAbgBvAHUAcwAsACAARgByAGUAZQAsACAARgBhAGkA
+cgA=
+Fortitudinous, Free, Fair
+自律、自由、公正               encoded with unicode
+6oGLXwEw6oExdQEwbFFjaw==
+自律、自由、公正
+Fortitudinous, Free, Fair    encoded with ascii
+Rm9ydGl0dWRpbm91cywgRnJlZSwgRmFpcg==
+Fortitudinous, Free, Fair
+
+test4()
+
+3238 bytes
+AAABAAQAEBAQAAEABAAoAQAARgAAABgYEAABAAQA6AEAAG4BAAAgIBAAAQAEAOgC
+AABWAwAAMDAQAAEABABoBgAAPgYAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAgAAggAAAP8AGAAAAP8AAP8LAAH//wAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREREREREREREREREREA
+RERVREREEQBERFVEREQREUQiVRERERERRCJVERERESJEIlURERERIkQiVREREREi
+RCIzMzMRESJEIjMzMxEiIiIiMxERESIiIiIzERERERERETMRERERERERMxEREREA
+AAAzMzMzEQAAADMzMzMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAABgAAAAwAAAAAQAEAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAACCAAAA/wAYAAAA/wAA/wsAAf//AAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARERERERERERER
+EREREREREREREREREREREREREREREREREREREABERERVVEREREQREABERERVVERE
+REQREABERERVVEREREQRERFEQiJVURERERERERFEQiJVURERERERERFEQiJVURER
+EREREiJEQiJVUREREREREiJEQiJVUREREREREiJEQiJVUREREREREiJEQiIzMzMz
+MREREiJEQiIzMzMzMREREiJEQiIzMzMzMREiIiIiIiIzMREREREiIiIiIiIzMRER
+EREiIiIiIiIzMREREREREREREREzMREREREREREREREzMREREREREREREREzMRER
+EREREAAAAAAzMzMzMzMREAAAAAAzMzMzMzMREAAAAAAzMzMzMzMAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAIAAAAEAA
+AAABAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAIIAAAD/ABgAAAD/AAD/
+CwAB//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABER
+ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER
+EREREREREREREREREREREQAARERERFVVREREREREEREAAERERERVVURERERERBER
+AABEREREVVVEREREREQREQAARERERFVVREREREREEREREUREIiJVVRERERERERER
+ERFERCIiVVURERERERERERERREQiIlVVEREREREREREREUREIiJVVRERERERERER
+IiJERCIiVVURERERERERESIiREQiIlVVEREREREREREiIkREIiJVVRERERERERER
+IiJERCIiVVURERERERERESIiREQiIjMzMzMzMxEREREiIkREIiIzMzMzMzMRERER
+IiJERCIiMzMzMzMzERERESIiREQiIjMzMzMzMxERIiIiIiIiIiIzMxERERERESIi
+IiIiIiIiMzMREREREREiIiIiIiIiIjMzERERERERIiIiIiIiIiIzMxERERERERER
+ERERERERMzMRERERERERERERERERETMzEREREREREREREREREREzMxERERERERER
+ERERERERMzMREREREREREQAAAAAAADMzMzMzMzMzEREAAAAAAAAzMzMzMzMzMxER
+AAAAAAAAMzMzMzMzMzMREQAAAAAAADMzMzMzMzMzAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAoAAAAMAAAAGAAAAABAAQAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAIAAIIAAAD/ABgAAAD/AAD/CwAB//8AAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAABERERERERERERERERERERERERERERERERER
+ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER
+ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER
+EREREREREREREREREREREREREREREREREQAAAERERERERFVVVURERERERERERBER
+EQAAAERERERERFVVVURERERERERERBEREQAAAERERERERFVVVURERERERERERBER
+EQAAAERERERERFVVVURERERERERERBEREQAAAERERERERFVVVURERERERERERBER
+EQAAAERERERERFVVVURERERERERERBEREREREURERCIiIlVVVRERERERERERERER
+EREREURERCIiIlVVVREREREREREREREREREREURERCIiIlVVVRERERERERERERER
+EREREURERCIiIlVVVREREREREREREREREREREURERCIiIlVVVRERERERERERERER
+EREREURERCIiIlVVVRERERERERERERERESIiIkRERCIiIlVVVRERERERERERERER
+ESIiIkRERCIiIlVVVRERERERERERERERESIiIkRERCIiIlVVVRERERERERERERER
+ESIiIkRERCIiIlVVVRERERERERERERERESIiIkRERCIiIlVVVRERERERERERERER
+ESIiIkRERCIiIlVVVRERERERERERERERESIiIkRERCIiIjMzMzMzMzMzMxERERER
+ESIiIkRERCIiIjMzMzMzMzMzMxERERERESIiIkRERCIiIjMzMzMzMzMzMxERERER
+ESIiIkRERCIiIjMzMzMzMzMzMxERERERESIiIkRERCIiIjMzMzMzMzMzMxERERER
+ESIiIkRERCIiIjMzMzMzMzMzMxERESIiIiIiIiIiIiIiIjMzMxERERERERERESIi
+IiIiIiIiIiIiIjMzMxERERERERERESIiIiIiIiIiIiIiIjMzMxERERERERERESIi
+IiIiIiIiIiIiIjMzMxERERERERERESIiIiIiIiIiIiIiIjMzMxERERERERERESIi
+IiIiIiIiIiIiIjMzMxERERERERERERERERERERERERERETMzMxERERERERERERER
+ERERERERERERETMzMxERERERERERERERERERERERERERETMzMxERERERERERERER
+ERERERERERERETMzMxERERERERERERERERERERERERERETMzMxERERERERERERER
+ERERERERERERETMzMxEREREREREREREREQAAAAAAAAAAADMzMzMzMzMzMzMzMxER
+EQAAAAAAAAAAADMzMzMzMzMzMzMzMxEREQAAAAAAAAAAADMzMzMzMzMzMzMzMxER
+EQAAAAAAAAAAADMzMzMzMzMzMzMzMxEREQAAAAAAAAAAADMzMzMzMzMzMzMzMxER
+EQAAAAAAAAAAADMzMzMzMzMzMzMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+
+test5()
+
+see below.
+```
+
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TR6wi9RIH-I/AAAAAAAAAA4/8625GmEbkB4/s1600/shot1.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TR6wi9RIH-I/AAAAAAAAAA4/8625GmEbkB4/s1600/shot1.png)
+
+# More Code #
+
+  * below code improve the speed of test5() significantly.
+> > 次のコードは test5() の実行速度を飛躍的に良くする。
+  * putting a whole task into small segments is improtant for practical uses.
+> > 作業を小さなパーツに分解することで、実用的になる。
+
+```
+Sub test5Faster()
+    ' decode to a binary file
+    Const FileTo = "C:\tmp\favicon_decoded_again.ico"
+    Dim Ce As Range
+    
+    Open FileTo For Binary Access Write As #1
+    For Each Ce In Sheet1.UsedRange.Cells
+        Put #1, , DecBase64(CStr(Ce.Value))
+    Next
+    Close #1
+End Sub
+```
+
+# result of test3\_more() #
+
+```
+&H54           84 
+&H45           69 
+&H53           83 
+&H54           84 
+VEVTVA==
+
+```

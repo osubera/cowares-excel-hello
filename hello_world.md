@@ -1,0 +1,64 @@
+# Introduction #
+
+  * show traditional "Hello World"s into selected cells.
+
+## 概要 ##
+  * 選択したセルに "Hello World" と書き込む。
+
+# Details #
+
+  * hello world example
+  * show how to create a VBA function
+  * show how to put a value into excel cell from VBA
+  * show how we manage codes here
+
+## 説明 ##
+  * hello world によるサンプル
+  * VBA で関数を作る
+  * VBA からエクセルのセルに値を書き込む
+  * ここでのコード管理作法を知る
+
+# Downloads #
+
+  * [downloads](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=hello_world)
+
+# How to use #
+
+  1. add a vba module into your excel book.
+  1. paste the below Code on the module.
+  1. run the macro.
+
+## 使い方 ##
+  1. エクセルブックにVBAのモジュールを挿入する。
+  1. そのモジュールに、下記の Code を貼り付ける。
+  1. 貼り付けたマクロを実行する。
+
+# Code #
+
+```
+'identity
+' timestamp;2010/12/07 20:40 JST
+'       url;http://code.google.com/p/cowares-excel-hello/wiki/hello_world
+
+'comment
+' en;public text which implements a traditional "Hello World" on VBA
+' ja;伝統的な Hello World で VBA の雛型を用意する
+
+'tag
+' en;hello,vba,excel,M
+
+'copyright
+'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
+' contributors;Tomizono - kobobau.com
+'        since;2008
+
+'module
+'  name;HelloWorld
+'{{{
+
+Public Sub HelloWorld()
+    Selection.Value = "Hello World"
+End Sub
+
+'}}}
+```

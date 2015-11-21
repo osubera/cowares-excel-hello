@@ -1,0 +1,378 @@
+
+
+# Introduction #
+
+  * use windows notepad in VBA
+
+## 概要 ##
+  * メモ帳をVBAで利用する
+
+# Details #
+
+  * kick up a new process of notepad.exe
+  * keep an window handle of that process
+  * use win32api to control the notepad
+  * exchange text between vba and notepad
+
+## 説明 ##
+  * メモ帳を新しく起動する
+  * 起動したプロセスのウィンドウハンドルを保持する
+  * Win32Api で起動したメモ帳を制御する
+  * VBA とメモ帳の間でテキストを交換する
+
+# How to use #
+
+  1. add 2 vba modules into your excel book.
+  1. paste the below Code on them, module DoNotepad and test.
+  1. see sample codes in the module test.
+
+## 使い方 ##
+  1. エクセルブックにVBAの標準モジュールを２つ挿入する。
+  1. そこに、下記の Code の DoNotepad と test をそれぞれ貼り付ける。
+  1. 標準モジュール test のサンプルコードを確認する。
+
+# Code #
+
+```
+'identity
+' timestamp;2010/12/22 17:30 JST
+'       url;http://code.google.com/p/cowares-excel-hello/wiki/do_notepad
+
+'comment
+' en;use windows notepad in VBA
+' ja;メモ帳をVBAで利用する
+
+'tag
+' en;notepad,vba,win32api
+
+'copyright
+'      license;fortitudinous, free, fair, http://cowares.nobody.jp/license/
+' contributors;Tomizono - kobobau.com
+'        since;2002
+ 
+'module
+'    name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' hWndで指定したメモ帳の未保存フラグをクリアする。
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' hWndで指定したメモ帳を閉じる。
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' メモ帳を新しく起動し、hWndを返す。
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus) As Long
+    Dim hWnd As Long
+    Dim ProcID As Long, ThreadID As Long
+    Dim i As Long, j As Long, k As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    Dim TaskName As String
+    
+    On Error GoTo Err1
+    TitleText = "notepad - meets VBA - "
+    'TitleText = "無題 - ﾒﾓ帳"
+    ExePath = "notepad.exe"
+    TaskName = "Notepad"
+    i = Shell(ExePath, iWindowState)
+    If i = 0 Then GoTo Err1
+    hWnd = 0
+    Do
+        'hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        hWnd = FindWindowEx(0, hWnd, TaskName, vbNullString)
+        If hWnd = 0 Then GoTo Err1
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until i = ProcID
+    i = SetWindowText(hWnd, TitleText & ProcID)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' Z-order も変えるなら SetWindowPos
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "メモ帳の起動に失敗しました。", , "failed to start a notepad"
+    OpenNotepad = 0
+End Function
+ 
+' hWndで指定したメモ帳の内容を、指定した文字で置き換える。
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行つき。
+' push text into the notepad with a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' hWndで指定したメモ帳に、指定した文字を追加する。改行無し。
+' push text into the notepad without a linefeed
+' iPos=0: 現在のカーソル位置 / at a cursor position
+'     -1: 先頭              / at the first
+'      1: 最後              / at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' 全部選択
+        SendMessage i, EM_SETSEL, -1, 0     ' 選択解除 (カーソルが選択領域の最後に移動)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' hWndで指定したメモ帳の内容を、文字として取得する。
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+'}}}
+ 
+'module
+'    name;test
+'{{{
+Option Explicit
+
+Dim hWnd As Long
+
+Sub test1()
+    hWnd = OpenNotepad
+    Debug.Print WriteNotepad(hWnd, "Hello Notepad")
+End Sub
+
+Sub test2()
+    Debug.Print ReadNotepad(hWnd)
+    CloseNotepad hWnd
+End Sub
+'}}}
+```
+
+# More Code (contains no far east characters) #
+
+```
+'ssf-begin
+';
+
+'module
+'   name;DoNotepad
+'{{{
+Option Explicit
+ 
+Private Const GW_CHILD = 5
+Private Const WM_SETTEXT = &HC
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_CLOSE = &H10
+Private Const EM_REPLACESEL = &HC2
+Private Const EM_SETSEL = &HB1
+Private Const EM_SETMODIFY = &HB9
+Private Const HWND_BOTTOM = 1
+Private Const HWND_TOP = 0
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+Private Const SW_RESTORE = 9
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function SendMessageStr Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Any) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+ 
+' clear the save me flag
+Public Function SetSavedNotepad(hWnd As Long) As Long
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    SendMessage i, EM_SETMODIFY, 0, 0
+    SetSavedNotepad = i
+End Function
+ 
+' close the notepad
+Public Sub CloseNotepad(hWnd As Long)
+    SetSavedNotepad hWnd
+    SendMessage hWnd, WM_CLOSE, 0, 0
+End Sub
+ 
+' kick up a new notepad process, return the hWnd
+Public Function OpenNotepad(Optional iWindowState As Long = vbNormalFocus, _
+            Optional NameMe As String = "") As Long
+    Dim hWnd As Long
+    Dim ProcID As Long
+    Dim i As Long
+    Dim TitleText As String
+    Dim ExePath As String
+    
+    On Error GoTo Err1
+    
+    TitleText = " - notepad - meets VBA"
+    ExePath = "notepad.exe"
+    
+    ProcID = Shell(ExePath, iWindowState)
+    If ProcID = 0 Then GoTo Err1
+    
+    hWnd = GetWindowByProcessId(ProcID)
+    If hWnd = 0 Then GoTo Err1
+    
+    TitleText = IIf(NameMe = "", ProcID, NameMe) & TitleText
+    i = SetWindowText(hWnd, TitleText)
+    'MoveWindow hWnd, 0, 50, 300, 200, 1
+    ' SetWindowPos can be used to change Z-order
+    'SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+    OpenNotepad = hWnd
+    Exit Function
+Err1:
+    MsgBox "failed to start a notepad", vbExclamation Or vbOKOnly, Err.Number & " " & Err.Description
+    OpenNotepad = 0
+End Function
+
+' repalce text at the notepad
+Public Function WriteNotepad(hWnd As Long, strTextAll As String) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    WriteNotepad = _
+        (0 <> SendMessageStr(i, WM_SETTEXT, 0, strTextAll))
+End Function
+ 
+' push text into the notepad with a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteLineNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    WriteLineNotepad = WriteTextNotepad(hWnd, strText & vbNewLine, iPos)
+End Function
+ 
+' push text into the notepad without a linefeed
+' iPos=0: at a cursor position
+'     -1: at the first
+'      1: at the last
+Public Function WriteTextNotepad(hWnd As Long, strText As String, Optional iPos As Long = 0) As Boolean
+    Dim i As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    Select Case iPos
+    Case -1
+        SendMessage i, EM_SETSEL, 0, 0
+    Case 1
+        SendMessage i, EM_SETSEL, 0, -1     ' select all
+        SendMessage i, EM_SETSEL, -1, 0     ' unselect (let the cursor move to the end of the selection)
+    End Select
+    WriteTextNotepad = _
+        (0 <> SendMessageStr(i, EM_REPLACESEL, 0, strText))
+End Function
+ 
+' get text from the notepad
+Public Function ReadNotepad(hWnd As Long) As String
+    Dim i As Long
+    Dim j As Long
+    Dim x As String
+    i = GetWindow(hWnd, GW_CHILD)
+    j = 1 + SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    x = String(j, Chr(0))
+    SendMessageStr i, WM_GETTEXT, j, x
+    ReadNotepad = x
+End Function
+
+' get text length from the notepad
+Public Function ReadNotepadLength(hWnd As Long) As Long
+    Dim i As Long
+    Dim j As Long
+    i = GetWindow(hWnd, GW_CHILD)
+    j = SendMessage(i, WM_GETTEXTLENGTH, 0, 0)
+    ReadNotepadLength = j
+End Function
+
+' get a ProcessID from hWnd
+Public Function GetWindowProcessId(hWnd As Long) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    GetWindowProcessId = ProcID
+End Function
+
+' get an hWnd from ProcessID (Notepad only)
+Public Function GetWindowByProcessId(ProcessId As Long, _
+        Optional TaskName As String = "Notepad", _
+        Optional TitleText As String = vbNullString) As Long
+    Dim ProcID As Long
+    Dim ThreadID As Long
+    Dim hWnd As Long
+
+    hWnd = 0
+    Do
+        hWnd = FindWindowEx(0, hWnd, TaskName, TitleText)
+        If hWnd = 0 Then Exit Do
+        ThreadID = GetWindowThreadProcessId(hWnd, ProcID)
+    Loop Until ProcessId = ProcID
+    
+    GetWindowByProcessId = hWnd
+End Function
+
+' notify user to see the notepad described with the hWnd
+Public Function ShowNotepad(hWnd As Long) As Boolean
+    Dim Result As Long
+    Result = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    ShowWindow hWnd, SW_RESTORE
+    ShowNotepad = (Result <> 0)
+End Function
+
+'}}}
+
+'ssf-end
+
+```

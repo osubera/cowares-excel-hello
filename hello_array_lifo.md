@@ -1,0 +1,96 @@
+# Introduction #
+
+  * how to use LIFO arrays (stack) in vba
+
+## 概要 ##
+  * VBAでLIFO構造の配列（スタック）を使う
+
+# Details #
+
+  * use a variant array to implement the pair.
+```
+cons(x, y) === Array(x, y)
+car(z) === z(0)
+cdr(z) === z(1)
+LIFO list structure === (4, (3, (2, (1, NIL))))
+```
+
+## 説明 ##
+  * variant array で対を実装する。
+
+# Code #
+
+```
+Function EmptyList() As Variant
+    EmptyList = Array()
+End Function
+
+Function IsEmpty(List As Variant) As Boolean
+    IsEmpty = IIf(UBound(List) = -1, True, False)
+End Function
+
+Function Push(List As Variant, ParamArray Items() As Variant) As Variant
+    Dim NewList As Variant
+    Dim Item As Variant
+    
+    NewList = List
+    For Each Item In Items
+        NewList = Array(Item, NewList)
+    Next
+    
+    Push = NewList
+End Function
+
+Function Peek(List As Variant) As Variant
+    If IsEmpty(List) Then
+        Peek = ""
+    Else
+        Peek = List(0)
+    End If
+End Function
+
+Function Pop(List As Variant) As Variant
+    If IsEmpty(List) Then
+        Pop = List
+    Else
+        Pop = List(1)
+    End If
+End Function
+
+Function ToText(List As Variant, Optional InitialText As String = "") As String
+    If IsEmpty(List) Then
+        ToText = InitialText
+    Else
+        ToText = ToText(List(1), CStr(List(0)) & "," & InitialText)
+    End If
+End Function
+
+Sub test()
+    Dim x As Variant
+    x = EmptyList
+    Debug.Print IsEmpty(x), ToText(x)
+    x = Push(x, 1)
+    Debug.Print IsEmpty(x), ToText(x)
+    x = Push(x, 2, 3, 4, 5, 6)
+    Debug.Print IsEmpty(x), ToText(x)
+    
+    Do Until IsEmpty(x)
+        Debug.Print Peek(x), ToText(x)
+        x = Pop(x)
+    Loop
+End Sub
+```
+
+results
+
+```
+True          
+False         1,
+False         1,2,3,4,5,6,
+ 6            1,2,3,4,5,6,
+ 5            1,2,3,4,5,
+ 4            1,2,3,4,
+ 3            1,2,3,
+ 2            1,2,
+ 1            1,
+```

@@ -1,0 +1,2125 @@
+
+
+# Introduction #
+
+  * list files in a folder into a worksheet
+
+## 概要 ##
+  * フォルダ内のファイル一覧表をエクセルで作成する
+
+# Details #
+
+
+## 説明 ##
+  * 指定したフォルダのファイル一覧を簡単に作る。
+  * サブフォルダの掘り下げレベルを指定できる。
+  * `.svn` のようなドットフォルダを除外することも、含むこともできる。
+
+# Downloads #
+
+  * [downloads / ダウンロード](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=list_files)
+
+
+# Snapshots #
+
+  * Excel 2000 toolbar
+> > ![http://3.bp.blogspot.com/-vo2ocWsnUCI/TctyoS5bgPI/AAAAAAAAAFg/dpVYZEcg_aE/s1600/shot1.png](http://3.bp.blogspot.com/-vo2ocWsnUCI/TctyoS5bgPI/AAAAAAAAAFg/dpVYZEcg_aE/s1600/shot1.png)
+  * Excel 2007 ribbon
+> > ![http://4.bp.blogspot.com/-efBtkV4OvUM/Tctyo9OOijI/AAAAAAAAAFk/HlsImQaSmZY/s1600/shot2.png](http://4.bp.blogspot.com/-efBtkV4OvUM/Tctyo9OOijI/AAAAAAAAAFk/HlsImQaSmZY/s1600/shot2.png)
+  * result sheet
+> > ![http://4.bp.blogspot.com/-A6J-pqO1xF0/TctypdYkeAI/AAAAAAAAAFo/K8NqHUclU8A/s1600/shot3.png](http://4.bp.blogspot.com/-A6J-pqO1xF0/TctypdYkeAI/AAAAAAAAAFo/K8NqHUclU8A/s1600/shot3.png)
+
+
+
+# How to use #
+
+
+## 使い方 ##
+
+  * このソフトウェアを開きます。
+  * ツールバーの３番目のフォルダボタンを押し、一覧作成したいフォルダを選びます。
+  * ツールバー先頭の一覧作成ボタンを押します。
+  * サブフォルダも含んだファイル一覧シートができました。
+
+# Code #
+
+```
+'ssf-begin
+';
+
+'workbook
+'   name;list_files_2k.xls/F3ListFiles
+
+'book-identity
+'  title;ファイル一覧表
+'  description;フォルダ内のファイル一覧表を作成する
+
+'require
+'       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+
+'cells-name
+'       ;=ファイル一覧表!R15C1
+'       ;ファイル一覧表!_ButtonCaption
+'       ;=ファイル一覧表!R3C2
+'       ;ファイル一覧表!_Comment
+'       ;=ファイル一覧表!R6C2
+'       ;ファイル一覧表!_Contributor
+'       ;=ファイル一覧表!R4C2
+'       ;ファイル一覧表!_Copyright
+'       ;=ファイル一覧表!R5C2
+'       ;ファイル一覧表!_License
+'       ;=ファイル一覧表!R2C2
+'       ;ファイル一覧表!_LocalComment
+'       ;=ファイル一覧表!R1C2
+'       ;ファイル一覧表!_PublicName
+'       ;=ファイル一覧表!R7C2
+'       ;ファイル一覧表!_Since
+'       ;=ファイル一覧表!R10C2
+'       ;ファイル一覧表!_Tag
+'       ;=ファイル一覧表!R9C2
+'       ;ファイル一覧表!_Timestamp
+'       ;=ファイル一覧表!R8C2
+'       ;ファイル一覧表!_Url
+
+'worksheet
+'   name;ファイル一覧表/BaumMain
+
+'cells-formula
+'  address;A1:B10
+'         ;名称
+'         ;list_files
+'         ;コメント
+'         ;フォルダ内のファイル一覧表を作成する
+'         ;comment
+'         ;list files in a folder into a worksheet
+'         ;著作権
+'         ;="Copyright (C) " &R[3]C & "-" & YEAR(R[5]C) & " " & R[2]C
+'         ;ライセンス
+'         ;自律, 自由, 公正, http://cowares.nobody.jp
+'         ;作者
+'         ;Tomizono - mocvba.com
+'         ;初版
+'         ;2002
+'         ;配布元
+'         ;http://cowares.blogspot.com/search/label/baum
+'         ;更新
+'         ;40670.1666666667
+'         ;keyword
+'         ;vba,excel,folder,file
+'  address;A13:J13
+'         ;ボタンの表示
+'         ;ボタンの機能
+'         ;Tag
+'         ;Parameter
+'         ;ControlType
+'         ;Style
+'         ;Width
+'         ;Group
+'         ;Action
+'         ;Initialize ..
+'  address;A15:M24
+'         ;一覧作成
+'         ;指定した条件でファイル一覧を作成する
+'         ;seek
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;5
+'         ;フォルダリスト
+'         ;一覧からフォルダを選ぶ
+'         ;folder
+'     skip;1
+'         ;4
+'     skip;1
+'         ;5
+'         ;1
+'     skip;1
+'         ;C:\Users\Public\
+'         ;C:\tmp\
+'     skip;2
+'         ;フォルダ
+'         ;ダイアログでフォルダを指定する
+'         ;folder_dialog
+'     skip;1
+'         ;1
+'         ;2
+'     skip;7
+'         ;深さ
+'         ;フォルダを掘り下げる深さを指定する。
+'         ;depth
+'     skip;1
+'         ;4
+'     skip;1
+'         ;1
+'     skip;2
+'         ;全部
+'         ;0
+'         ;1
+'         ;2
+'         ;ドットフォルダ
+'         ;ドットで始まるフォルダを含む
+'         ;dot_folders
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3ListFiles.BaumMain.OnButtonToggle
+'     skip;4
+'         ;詳細
+'         ;詳細な属性をリストに載せる
+'         ;details
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3ListFiles.BaumMain.OnButtonToggle
+'         ;1
+'     skip;3
+'         ;リンク
+'         ;リストのファイル名をリンクにする
+'         ;link
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3ListFiles.BaumMain.OnButtonToggle
+'     skip;4
+'         ;安全装置
+'         ;リストが大きくなるとき、一時停止する
+'         ;safety
+'         ;1000
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'         ;F3ListFiles.BaumMain.OnButtonToggle
+'         ;1
+'     skip;3
+'         ;結果
+'         ;一覧表の出力先
+'         ;report
+'         ;=RC[-3]
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'     skip;5
+'         ;=R1C2 & " について"
+'         ;情報シートを表示する。
+'         ;about
+'     skip;1
+'         ;1
+'         ;2
+'     skip;1
+'         ;1
+'  address;B29
+'         ;エクセルブック、ワード、アクセスのカスタムメイドやウェブシステムの開発などをリーズナブルな価格で承っております。
+'  address;C32:G38
+'         ;導入する利点
+'     skip;1
+'         ;発注について
+'     skip;2
+'         ;事業者で
+'     skip;1
+'         ;発注から公開まで
+'     skip;1
+'         ;プライバシー
+'         ;大企業で
+'     skip;1
+'         ;料金
+'     skip;1
+'         ;取引上の注意
+'         ;公益法人で
+'     skip;1
+'         ;公開（納品）
+'     skip;2
+'         ;個人で
+'     skip;1
+'         ;基本的なルール
+'     skip;2
+'         ;IT企業で
+'     skip;1
+'         ;細かいルール
+'     skip;4
+'         ;なぜ無料ソフトを買う？
+'  address;C40
+'         ;すぐに注文する
+'  address;B44
+'         ;簡単な指示、安い料金、早い結果
+'  address;B46
+'         ;料金 - コ・ウェア・ライセンスのシステム開発
+'  address;B48
+'         ;基本料金表
+'  address;B50:B51
+'         ;３つのサイズから選ぶだけで簡単。
+'         ;前払いが原則。
+'  address;B53:D55
+'         ;Sサイズ
+'         ;1,000円
+'         ;（税込 1,050円）
+'         ;Mサイズ
+'         ;10,000円
+'         ;（税込 10,500円）
+'         ;Lサイズ
+'         ;100,000円
+'         ;（税込 105,000円）
+'  address;B57
+'         ;サイズとは
+'  address;B59
+'         ;開発にかかる時間や難易度を、おおまかに３つのサイズで分類します。
+'  address;B61
+'         ;Sサイズ
+'  address;B63:C67
+'         ;1. 小型、 Small 、 partial
+'     skip;1
+'         ;2. ちょっとしたコード素片や、ワークシートの一部分など。
+'     skip;1
+'         ;3. 手に負えない、書き方のわからないコードだけを知りたいときに。
+'     skip;1
+'         ;4. 例）数行の VBA コード。次のリンク先の１つ目のコード
+'     skip;2
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/hello_key_value
+'  address;B69
+'         ;Mサイズ
+'  address;B71:C75
+'         ;1. 中型、 Medium 、 functional
+'     skip;1
+'         ;2. 完成した関数やワークシート。
+'     skip;1
+'         ;3. 単一の機能が、とりあえず動くレベルのものが欲しいときに。
+'     skip;1
+'         ;4. 例）マクロを実行すれば一つの動作を行う VBA コード。
+'     skip;2
+'         ;http://code.google.com/p/cowares-excel-hello/wiki/annual_list
+'  address;B77
+'         ;Lサイズ
+'  address;B79:B82
+'         ;1. 大型、 Large 、 integrated
+'         ;2. 実用的なアプリケーション。
+'         ;3. 複数の機能や、条件設定による動作切り替えや画面遷移も含むときに。
+'         ;4. 例）ユーザーインターフェースを持ち、ツールとして利用できる。
+'  address;B86
+'         ;公開 - コ・ウェア・ライセンスのシステム開発
+'  address;B88
+'         ;公開が納品です
+'  address;B90:B97
+'         ;所定の公開場所に成果物をアップロードする方法を採ります。
+'         ;仕様を決める段階から公開URLを使います。
+'         ;公開のタイミングで連絡はしますが、ファイル添付などはしません。
+'         ;公開先からのセルフダウンロードでお願いします。
+'         ;本人はもちろん、同僚や友達、その他大勢の人がダウンロードして利用できます。
+'         ;マクロコードをテキストで公開するので、セキュリティの強い職場で、マクロ付きブックのダウンロード規制がある環境でも心配ありません。
+'         ;公開後のコード修正等、追加情報も当該URLから派生していきます。
+'         ;URLは永久に変わらないものではありません。
+'  address;B99
+'         ;主な公開先URL
+'  address;B101:B102
+'         ;http://cowares.blogspot.com
+'         ;http://code.google.com/p/cowares-excel-hello/
+'  address;B106
+'         ;なぜ無料ソフトを買うのか？ - コ・ウェア・ライセンスのシステム開発
+'  address;B108
+'         ;そのお金は何に払っているのでしょうか
+'  address;B110:G110
+'         ;無料のもの
+'     skip;1
+'         ;買うもの
+'     skip;2
+'         ;買わないもの
+'  address;B112:G115
+'         ;ライセンス
+'     skip;1
+'         ;エンジニアの働き
+'     skip;2
+'         ;保証
+'         ;コピー
+'     skip;1
+'         ;世界への貢献
+'     skip;2
+'         ;役員の働き
+'     skip;5
+'         ;事務員の働き
+'     skip;5
+'         ;営業スマイル
+'  address;C117:D118
+'     skip;1
+'         ;コ・ウェアの料金
+'         ;通常のシステム開発で払うお金
+'  address;C122
+'         ;すぐに注文する
+
+'cells-numberformat
+'  address;B9
+'         ;m/d/yyyy h:mm
+
+'cells-width
+'   unit;pt
+'  address;B1
+'         ;96.75
+
+'cells-height
+'   unit;pt
+'  address;A29
+'         ;14.25
+'  address;A40
+'         ;24.75
+'  address;A46
+'         ;21
+'  address;A48
+'         ;14.25
+'  address;A52:A53
+'   repeat;2
+'         ;14.25
+'  address;A55:A57
+'   repeat;3
+'         ;14.25
+'  address;A86
+'         ;21
+'  address;A88
+'         ;14.25
+'  address;A99
+'         ;14.25
+'  address;A106
+'         ;21
+'  address;A108
+'         ;14.25
+'  address;A122
+'         ;24.75
+
+'cells-background-color
+'  address;A29:M29
+'   repeat;13
+'         ;#FF6600
+'  address;C32:H32
+'   repeat;2
+'         ;#FFCC99
+'   repeat;4
+'         ;#CCFFCC
+'  address;C40:F40
+'   repeat;4
+'         ;#99CC00
+'  address;B46:L46
+'   repeat;11
+'         ;#333399
+'  address;B53:B55
+'         ;#CCFFCC
+'         ;#FFFF99
+'         ;#FFCC99
+'  address;B61
+'         ;#CCFFCC
+'  address;B69
+'         ;#FFFF99
+'  address;B77
+'         ;#FFCC99
+'  address;B86:L86
+'   repeat;11
+'         ;#333399
+'  address;B106:L106
+'   repeat;11
+'         ;#333399
+'  address;B110:H110
+'   repeat;2
+'         ;#FF99CC
+'   repeat;2
+'         ;#CCFFCC
+'   repeat;3
+'         ;#FF99CC
+'  address;B117:H118
+'     skip;2
+'   repeat;2
+'         ;#00FF00
+'     skip;3
+'   repeat;7
+'         ;#FF00FF
+'  address;C122:F122
+'   repeat;4
+'         ;#99CC00
+
+'cells-color
+'  address;C33:G38
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;1
+'   repeat;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;1
+'   repeat;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;2
+'         ;#0000FF
+'     skip;1
+'         ;#0000FF
+'     skip;4
+'         ;#0000FF
+'  address;C40:F40
+'   repeat;4
+'         ;#0000FF
+'  address;B44
+'         ;#FF00FF
+'  address;B46:L46
+'   repeat;11
+'         ;#FFCC00
+'  address;C66:J67
+'     skip;2
+'   repeat;14
+'         ;#0000FF
+'  address;C75:H75
+'   repeat;6
+'         ;#0000FF
+'  address;B86:L86
+'   repeat;11
+'         ;#FFCC00
+'  address;B101:B102
+'   repeat;2
+'         ;#0000FF
+'  address;B106:L106
+'   repeat;11
+'         ;#FFCC00
+'  address;C122:F122
+'   repeat;4
+'         ;#0000FF
+
+'cells-font-size
+'  address;B29
+'         ;12
+'  address;C40:F40
+'   repeat;4
+'         ;12
+'  address;B46
+'         ;18
+'  address;B48
+'         ;12
+'  address;B57
+'         ;12
+'  address;B86
+'         ;18
+'  address;B88
+'         ;12
+'  address;B99
+'         ;12
+'  address;B106
+'         ;18
+'  address;B108
+'         ;12
+'  address;C122:F122
+'   repeat;4
+'         ;12
+
+'cells-font-bold
+'  address;B29
+'         ;yes
+'  address;C40:F40
+'   repeat;4
+'         ;yes
+'  address;B46
+'         ;yes
+'  address;B48
+'         ;yes
+'  address;B53:B55
+'   repeat;3
+'         ;yes
+'  address;B57
+'         ;yes
+'  address;B61
+'         ;yes
+'  address;B69
+'         ;yes
+'  address;B77
+'         ;yes
+'  address;B86
+'         ;yes
+'  address;B88
+'         ;yes
+'  address;B99
+'         ;yes
+'  address;B106
+'         ;yes
+'  address;B108
+'         ;yes
+'  address;B110:G110
+'         ;yes
+'     skip;1
+'   repeat;2
+'         ;yes
+'     skip;1
+'         ;yes
+'  address;C122:F122
+'   repeat;4
+'         ;yes
+
+'cells-h-align
+'  address;C40:F40
+'   repeat;4
+'         ;center
+'  address;C53:C55
+'   repeat;3
+'         ;right
+'  address;C66:J67
+'     skip;2
+'   repeat;6
+'         ;center
+'   repeat;7
+'         ;left
+'         ;center
+'  address;C75:H75
+'   repeat;6
+'         ;left
+'  address;D110:E110
+'   repeat;2
+'         ;center
+'  address;D117:E117
+'   repeat;2
+'         ;center
+'  address;C122:F122
+'   repeat;4
+'         ;center
+
+'cells-v-align
+'  address;C40:F40
+'   repeat;4
+'         ;center
+'  address;B48:J82
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;4
+'         ;center
+'     skip;1
+'   repeat;6
+'         ;center
+'     skip;1
+'   repeat;14
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;4
+'   repeat;5
+'         ;center
+'     skip;4
+'   repeat;6
+'         ;center
+'     skip;2
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'     skip;3
+'   repeat;6
+'         ;center
+'  address;B86:G102
+'   repeat;102
+'         ;center
+'  address;B106:B108
+'   repeat;3
+'         ;center
+'  address;B110:G118
+'   repeat;11
+'         ;center
+'     skip;1
+'   repeat;28
+'         ;center
+'     skip;2
+'   repeat;4
+'         ;center
+'     skip;2
+'   repeat;4
+'         ;center
+'  address;C122:F122
+'   repeat;4
+'         ;center
+
+'class
+'   name;ToolBarV2
+'{{{
+Option Explicit
+
+' Generate an application toolbar
+
+Private MyBar As Office.CommandBar
+Private MyName As String
+Private MyApp As Application
+
+
+'=== main procedures helper begin ===
+
+
+' this will called by pressing a button
+Friend Sub BarMain(Optional oWho As Object = Nothing)
+    Dim oAC As Object   ' this is the button itself pressed
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    ' switch to a main menu procedure
+    Main oAC, SomebodyOrMe(oWho)
+    Set oAC = Nothing
+End Sub
+
+' main menu procedure. if you delete this, a public Main in Standard Module will be called, maybe.
+Private Sub Main(oAC As Object, Optional oWho As Object = Nothing)
+    ' use a button tag to switch a procedure to be called as "Menu_xx"
+    CallByName SomebodyOrMe(oWho), "Menu_" & oAC.Tag, VbMethod, oAC
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    MsgBox TypeName(Me), vbOKOnly, "Sample of procedure called by the Main"
+End Sub
+
+Friend Sub OnButtonToggle()
+    Dim oAC As Object   ' toggle this button
+    Set oAC = Application.CommandBars.ActionControl
+    If oAC Is Nothing Then Exit Sub
+    
+    ButtonSwitchToggle oAC
+    Set oAC = Nothing
+End Sub
+
+Private Function SomebodyOrMe(oWho As Object) As Object
+    If oWho Is Nothing Then
+        Set SomebodyOrMe = Me
+    Else
+        Set SomebodyOrMe = oWho
+    End If
+End Function
+
+
+'=== main procedures helper end ===
+'=== event procedures begin ===
+
+
+Private Sub Class_Initialize()
+    Set MyApp = Application
+    MyName = CStr(Timer)    ' random name, maybe uniq
+End Sub
+
+Private Sub Class_Terminate()
+    Set MyApp = Nothing
+End Sub
+
+
+'=== event procedures end ===
+'=== construction and destruction begin ===
+
+
+Public Sub NewBar(ParamArray Addins() As Variant)
+    DelBar
+    Set MyBar = CreateBar(MyApp, MyName)
+    AddAddins MyBar, CVar(Addins)
+    ShowBar MyBar
+End Sub
+
+Public Sub DelBar()
+    DeleteBar MyBar
+    Set MyBar = Nothing
+End Sub
+
+Public Sub SetApplication(oApp As Application)
+    Set MyApp = oApp
+End Sub
+
+Public Sub SetName(NewName As String)
+    MyName = NewName
+End Sub
+
+Public Property Get Bar() As Office.CommandBar
+    Set Bar = MyBar
+End Property
+
+
+'=== construction and destruction end ===
+'=== bar generator begin ===
+
+
+Public Function CreateBar(oApp As Application, BarName As String) As Office.CommandBar
+    RemoveExistingBar oApp, BarName
+    Set CreateBar = oApp.CommandBars.Add(Name:=BarName, Temporary:=True)
+End Function
+
+Public Sub RemoveExistingBar(oApp As Application, BarName As String)
+    On Error Resume Next
+    oApp.CommandBars(BarName).Delete
+End Sub
+
+Public Sub DeleteBar(Bar As Object)
+    On Error Resume Next
+    Bar.Delete
+End Sub
+
+Public Sub ShowBar(Bar As Object, Optional Position As Long = msoBarTop, Optional Height As Long = 0)
+    Bar.Visible = True
+    Bar.Position = Position
+    If Height > 0 Then Bar.Height = Bar.Height * Height
+End Sub
+
+
+'=== bar generator end ===
+'=== handle addins begin ===
+
+
+Public Function WithAddins(ParamArray Addins() As Variant) As Long
+    WithAddins = AddAddins(MyBar, CVar(Addins))
+End Function
+
+Public Function AddAddins(Bar As Object, Addins As Variant) As Long
+    Dim Addin As Variant
+    Dim LastButtonIndex As Long
+    
+    For Each Addin In Addins
+        LastButtonIndex = AddButtons(Bar, Addin.ButtonData, Addin.ButtonParent)
+    Next
+    
+    AddAddins = LastButtonIndex
+End Function
+
+
+'=== handle addins end ===
+'=== button generator begin ===
+
+
+Public Function AddButtons(Bar As Object, Data As Variant, Parent As Variant) As Long
+    Dim LastButtonIndex As Long
+    Dim SingleData As Variant
+    
+    For Each SingleData In Data
+        LastButtonIndex = Add(Bar, MakeAButtonData(SingleData, Parent))
+    Next
+    
+    AddButtons = LastButtonIndex
+End Function
+
+Public Function Add(Bar As Object, Data As Variant) As Long
+    Dim ButtonA As CommandBarControl
+    
+    Set ButtonA = Bar.Controls.Add(Type:=ButtonControlType(Data), Temporary:=True)
+    With ButtonA
+        Select Case ButtonControlType(Data)
+        Case msoControlEdit                         '2      ' textbox
+        Case msoControlDropdown, msoControlComboBox '3, 4   ' list and combo
+            SetButtonItems ButtonA, Data
+            SetButtonStyle ButtonA, Data
+        Case msoControlPopup                        '10     ' popup
+            SetButtonPopup ButtonA, Data
+        Case msoControlButton                       '1      ' Button
+            SetButtonStyle ButtonA, Data
+            SetButtonState ButtonA, Data
+        End Select
+        SetButtonWidth ButtonA, Data
+        SetButtonGroup ButtonA, Data
+        .OnAction = ButtonAction(Data)
+        .Caption = ButtonCaption(Data)
+        .TooltipText = ButtonDescription(Data)
+        .Tag = ButtonTag(Data)
+        .Parameter = ButtonParameter(Data)
+    End With
+    
+    Add = ButtonA.Index
+    Set ButtonA = Nothing
+End Function
+
+Public Sub Remove(Bar As Object, Items As Variant)
+    On Error Resume Next
+    Dim Item As Variant
+    
+    If IsArray(Item) Then
+        For Each Item In Items
+            Remove Bar, Item
+        Next
+    Else
+        Bar.Controls(Item).Delete
+    End If
+End Sub
+
+
+'=== button generator end ===
+'=== button data structure begin ===
+
+
+' generator / selector
+
+' Data(): Array of button data
+' Parent(): Array of button parent information (bar and properties)
+'           Parent(0) is reserved for addin key
+
+
+Public Function MakeAButtonData(Data As Variant, Parent As Variant) As Variant
+    MakeAButtonData = Array(NormalizeArray(Data), Parent)
+End Function
+
+Public Function DataAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    DataAButtonData = AButtonData(0)
+End Function
+
+Public Function ParentAButtonData(AButtonData As Variant) As Variant
+    On Error Resume Next
+    ParentAButtonData = AButtonData(1)
+End Function
+
+Public Function KeyAButtonData(AButtonData As Variant) As String
+    On Error Resume Next
+    KeyAButtonData = ParentAButtonData(AButtonData)(0)
+End Function
+
+Public Function ItemAButtonData(AButtonData As Variant, ByVal Item As Long, _
+            Optional FallBack As Variant = Empty) As Variant
+    On Error Resume Next
+    Dim out As Variant
+    
+    out = DataAButtonData(AButtonData)(Item)
+    If IsEmpty(out) Then out = FallBack
+    
+    ItemAButtonData = out
+End Function
+
+
+'=== button data structure end ===
+'=== button data struncture detail begin ===
+
+
+Public Function ButtonCaption(Data As Variant) As String
+    ButtonCaption = ItemAButtonData(Data, 0)
+End Function
+
+Public Function ButtonDescription(Data As Variant) As String
+    ButtonDescription = ItemAButtonData(Data, 1)
+End Function
+
+Public Function ButtonTag(Data As Variant) As String
+    ButtonTag = ItemAButtonData(Data, 2, ButtonCaption(Data))
+End Function
+
+Public Function ButtonParameter(Data As Variant) As String
+    ButtonParameter = ItemAButtonData(Data, 3)
+End Function
+
+Public Function ButtonControlType(Data As Variant) As Long
+    'MsoControlType
+    On Error Resume Next
+    ButtonControlType = Val(ItemAButtonData(Data, 4, msoControlButton))
+End Function
+
+Public Function ButtonStyle(Data As Variant) As Long
+    'MsoButtonStyle
+    On Error Resume Next
+    ButtonStyle = Val(ItemAButtonData(Data, 5, msoButtonCaption))
+End Function
+
+Public Function ButtonWidth(Data As Variant) As Long
+    ' we use 45 units here
+    On Error Resume Next
+    Const UnitWidth = 45
+    ButtonWidth = Val(ItemAButtonData(Data, 6)) * UnitWidth
+End Function
+
+Public Function ButtonGroup(Data As Variant) As Boolean
+    ' put group line on its left
+    ButtonGroup = Not IsEmpty(ItemAButtonData(Data, 7))
+End Function
+
+Public Function ButtonAction(Data As Variant) As String
+    On Error Resume Next
+    ' Standard Method Name to be kicked with the button
+    Const BarMain = "BarMain"
+    Dim FullName As String
+    
+    If KeyAButtonData(Data) = "" Then
+        FullName = BarMain
+    Else
+        FullName = KeyAButtonData(Data) & "." & BarMain
+    End If
+    
+    ButtonAction = ItemAButtonData(Data, 8, FullName)
+End Function
+
+Public Function ButtonItems(Data As Variant) As Variant
+    Dim pan As Variant
+    Dim i As Long
+    
+    On Error GoTo DONE
+    pan = Empty
+    i = 9
+    
+    Do Until IsEmpty(ItemAButtonData(Data, i))
+        pan = Array(ItemAButtonData(Data, i), pan)
+        i = i + 1
+    Loop
+    
+DONE:
+    ButtonItems = pan
+End Function
+
+
+'=== button data struncture detail end ===
+'=== button tools for data begin ===
+
+
+Public Sub SetButtonWidth(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonWidth(Data) > 0 Then ButtonA.Width = ButtonWidth(Data)
+End Sub
+
+Public Sub SetButtonStyle(ButtonA As Object, Data As Variant)
+    On Error Resume Next
+    ' Each Button does not accept each style, but we won't check them.
+    If ButtonStyle(Data) <> 0 Then ButtonA.Style = ButtonStyle(Data)
+End Sub
+
+Public Sub SetButtonGroup(ButtonA As CommandBarControl, Data As Variant)
+    If ButtonGroup(Data) Then ButtonA.BeginGroup = True
+End Sub
+
+Public Sub SetButtonItems(ButtonA As Object, Data As Variant)
+    Dim pan As Variant
+    Dim HasItem As Boolean
+    
+    pan = ButtonItems(Data)
+    HasItem = False
+    
+    Do Until IsEmpty(pan)
+        ButtonA.AddItem pan(0), 1
+        pan = pan(1)
+        HasItem = True
+    Loop
+    If HasItem Then ButtonA.ListIndex = 1
+End Sub
+
+Public Sub SetButtonPopup(ButtonA As CommandBarControl, Data As Variant)
+    Dim MyChild As Variant
+    
+    MyChild = StackToArray(ButtonItems(Data))
+    If UBound(MyChild) >= 0 Then Add ButtonA, MyChild
+End Sub
+
+Public Sub SetButtonState(ButtonA As Object, Data As Variant)
+    If Not IsEmpty(ButtonItems(Data)) Then ButtonA.State = msoButtonDown
+End Sub
+
+
+'=== button tools for data end ===
+'=== button tools for control object begin ===
+
+
+Public Sub ComboAddHistory(oAC As Object, Optional AtBottom As Boolean = False)
+    If oAC.ListIndex > 0 Then Exit Sub
+    
+    If AtBottom Then
+        oAC.AddItem oAC.Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem oAC.Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Sub ListAddHistory(oAC As Object, Text As String, Optional AtBottom As Boolean = False)
+    If AtBottom Then
+        oAC.AddItem Text
+        oAC.ListIndex = oAC.ListCount
+    Else
+        oAC.AddItem Text, 1
+        oAC.ListIndex = 1
+    End If
+End Sub
+
+Public Function ListFindIndex(oAC As Object, Text As String) As Long
+    Dim i As Long
+    For i = 1 To oAC.ListCount
+        If oAC.List(i) = Text Then
+            ListFindIndex = i
+            Exit Function
+        End If
+    Next
+    ListFindIndex = 0
+End Function
+
+Public Function ControlText(oAC As Object) As String
+    ControlText = oAC.Text
+End Function
+
+Public Sub ButtonSwitchOn(oAC As Object)
+    oAC.State = msoButtonDown
+End Sub
+
+Public Sub ButtonSwitchOff(oAC As Object)
+    oAC.State = msoButtonUp
+End Sub
+
+Public Function ButtonSwitchToggle(oAC As Object) As Boolean
+    ButtonSwitchToggle = (Not IsButtonStateOn(oAC))
+    If ButtonSwitchToggle Then
+        ButtonSwitchOn oAC
+    Else
+        ButtonSwitchOff oAC
+    End If
+End Function
+
+Public Function IsButtonStateOn(oAC As Object) As Boolean
+    IsButtonStateOn = (oAC.State = msoButtonDown)
+End Function
+
+Public Function ButtonFindByTag(oAC As Object, Tag As Variant) As CommandBarControl
+    If oAC Is Nothing Then Exit Function
+    If TypeName(oAC) = "CommandBar" Then
+        Set ButtonFindByTag = oAC.FindControl(Tag:=Tag)
+    Else
+        Set ButtonFindByTag = oAC.Parent.FindControl(Tag:=Tag)
+    End If
+End Function
+
+
+'=== button tools for control object end ===
+'=== button tools for mybar begin ===
+
+
+Public Function GetButton(TagOrIndex As Variant) As Office.CommandBarControl
+    On Error Resume Next
+    Select Case TypeName(TagOrIndex)
+    Case "Long", "Integer", "Byte", "Double", "Single"
+        Set GetButton = MyBar.Controls(TagOrIndex)
+    Case Else
+        Set GetButton = ButtonFindByTag(MyBar, TagOrIndex)
+    End Select
+End Function
+
+Public Function GetControlText(TagOrIndex As Variant) As String
+    Dim out As String
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    Select Case oAC.Type
+    Case msoControlEdit, msoControlDropdown, msoControlComboBox
+        out = oAC.Text
+    Case Else   ' msoControlButton, msoControlPopup
+        out = oAC.Caption
+    End Select
+    
+    Set oAC = Nothing
+    GetControlText = out
+End Function
+
+Public Function SetControlText(TagOrIndex As Variant, ByVal Text As String) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    Dim Index As Long
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then
+        out = False
+    Else
+        Select Case oAC.Type
+        Case msoControlEdit
+            oAC.Text = Text
+        Case msoControlDropdown
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                ListAddHistory oAC, Text
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case msoControlComboBox
+            Index = ListFindIndex(oAC, Text)
+            If Index = 0 Then
+                oAC.Text = Text
+                ComboAddHistory oAC
+            Else
+                oAC.ListIndex = Index
+            End If
+        Case Else
+            oAC.Caption = Text
+        End Select
+        Set oAC = Nothing
+        out = True
+    End If
+    
+    SetControlText = out
+End Function
+
+Public Function GetControlState(TagOrIndex As Variant) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        ' return True when the button is pushed down
+        out = IsButtonStateOn(oAC)
+    End If
+    
+    Set oAC = Nothing
+    GetControlState = out
+End Function
+
+Public Function SetControlState(TagOrIndex As Variant, ByVal State As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Type = msoControlButton Then
+        If IsButtonStateOn(oAC) <> State Then
+            If State Then
+                ButtonSwitchOn oAC
+            Else
+                ButtonSwitchOff oAC
+            End If
+            ' return True when the status is strictly changed
+            out = True
+        End If
+    End If
+    
+    Set oAC = Nothing
+    SetControlState = out
+End Function
+
+Public Function GetControlVisible(TagOrIndex As Variant) As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    GetControlVisible = oAC.Visible
+End Function
+
+Public Function SetControlVisible(TagOrIndex As Variant, ByVal Visible As Boolean) As Boolean
+    Dim out As Boolean
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    out = False
+    If oAC.Visible <> Visible Then
+        oAC.Visible = Visible
+        ' return True when the visible is strictly changed
+        out = True
+    End If
+    
+    SetControlVisible = out
+End Function
+
+Public Function IncControlWidth(TagOrIndex As Variant, ByVal Width As Long) As Long
+    Dim out As Long
+    Dim oAC As Office.CommandBarControl
+    
+    Set oAC = GetButton(TagOrIndex)
+    If oAC Is Nothing Then Exit Function
+    
+    On Error Resume Next
+    oAC.Width = oAC.Width + Width
+    ' return the width accepted (tips: setting 0 to width makes it becomes default)
+    out = oAC.Width
+    
+    IncControlWidth = out
+End Function
+
+
+'=== button tools for mybar end ===
+'=== helper functions begin ===
+
+
+Public Function NormalizeArray(x As Variant) As Variant
+    On Error Resume Next
+    Dim out() As Variant
+    Dim i As Long
+    Dim L1 As Long
+    Dim L2 As Long
+    Dim U1 As Long
+    Dim U2 As Long
+    
+    L1 = 0
+    L2 = 0
+    U1 = -1
+    U2 = -1
+    
+    L1 = LBound(x)
+    L2 = LBound(x, 2)   ' error unless 2 dimensions
+    U1 = UBound(x)
+    U2 = UBound(x, 2)   ' error unless 2 dimensions
+    
+    If U1 < L1 Then
+        NormalizeArray = Array()
+        Exit Function
+    End If
+    
+    If U2 = -1 Then
+        ReDim out(0 To U1 - L1)
+        For i = 0 To UBound(out)
+            out(i) = x(i + L1)
+        Next
+    Else
+        ReDim out(0 To U2 - L2)
+        For i = 0 To UBound(out)
+            out(i) = x(L1, i + L2)
+            ' we pick up the 1st line only
+        Next
+    End If
+    
+    NormalizeArray = out
+End Function
+
+Public Function StackToArray(pan As Variant) As Variant
+    Dim out() As Variant
+    Dim x As Variant
+    Dim i As Long
+    Dim Counter As Long
+    
+    x = Empty
+    Counter = 0
+    Do Until IsEmpty(pan)
+        x = Array(pan(0), x)
+        pan = pan(1)
+        Counter = Counter + 1
+    Loop
+    
+    If Counter = 0 Then
+        StackToArray = Array()
+        Exit Function
+    End If
+    
+    ReDim out(0 To Counter - 1)
+    i = 0
+    Do Until IsEmpty(x)
+        out(i) = x(0)
+        x = x(1)
+        i = i + 1
+    Loop
+    
+    StackToArray = out
+End Function
+
+
+'=== helper functions end ===
+
+'}}}
+
+'code
+'   name;BaumMain
+'{{{
+Option Explicit
+
+' BaumMain addin for ToolBarV2
+
+' using a excel worksheet as a property holder
+
+' we do not support popup on excel sheet at this moment
+' no ideas how to describe it wisely on 2 dimensional sheet
+
+Private Helper As ToolBarV2
+'Public Helper As ToolBarV2
+' we cannot have a public variable in Excel Worksheet
+
+Friend Function VBProjectName() As String
+    ' VBProject.Name can't be accessed for the default settings.
+    VBProjectName = "F3ListFiles"
+End Function
+
+Friend Function GetHelper() As ToolBarV2
+    Set GetHelper = Helper
+End Function
+
+'=== default main procedures begin ===
+
+
+' this will called by pressing a button
+Public Sub BarMain(Optional oWho As Object = Nothing)
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.BarMain Me
+    End If
+End Sub
+
+Public Sub OnButtonToggle()
+    If Helper Is Nothing Then
+        BarInitialize
+        MsgBox "ツールバーを修復しました。もう一度操作してください。", vbExclamation, BaumMain.Name
+    Else
+        Helper.OnButtonToggle
+    End If
+End Sub
+
+' followings need to be public, because they are called from outside by the Helper
+' we also can copy the Helper.BarMain code here, and let the followings be private.
+
+Public Sub Menu_seek(oAC As Object)
+    ListFiles.Execute MakeData()
+End Sub
+
+Public Sub Menu_folder(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+End Sub
+
+Public Sub Menu_folder_dialog(oAC As Object)
+    Const FileFilter = "フォルダを決めます。,*.*"
+    Const OpenTitle = "対象フォルダ内のどのファイルを選んでもかまいません。"
+    Const InitialFileName = "ファイル名は何でもよい。"
+    Dim Result As String
+    
+    Result = Application.GetSaveAsFilename(FileFilter:=FileFilter, Title:=OpenTitle, InitialFileName:=InitialFileName)
+    If Result = "False" Then Exit Sub
+    
+    Do Until Right(Result, 1) = "\"
+        Result = Left(Result, Len(Result) - 1)
+    Loop
+    Helper.SetControlText "folder", Result
+    Helper.ComboAddHistory Helper.GetButton("folder"), False
+End Sub
+
+Public Sub Menu_depth(oAC As Object)
+    Helper.ComboAddHistory oAC, False
+End Sub
+
+Public Sub Menu_dot_folders(oAC As Object)
+End Sub
+
+Public Sub Menu_details(oAC As Object)
+End Sub
+
+Public Sub Menu_link(oAC As Object)
+End Sub
+
+Public Sub Menu_safety(oAC As Object)
+End Sub
+
+Public Sub Menu_report(oAC As Object)
+    Dim BookName As String
+    On Error GoTo LostTheBook
+    
+    BookName = TranslateReportBook
+    If BookName = "" Then Exit Sub
+    
+    Application.Workbooks(BookName).Activate
+    Exit Sub
+    
+LostTheBook:
+    ClearReportBook
+End Sub
+
+Public Sub Menu_about(oAC As Object)
+    If ThisWorkbook.IsAddin Then
+        Dim Wb As Workbook
+        Set Wb = Workbooks.Add
+        Me.Copy Before:=Wb.Sheets(1)
+        Wb.Saved = True
+        Set Wb = Nothing
+    Else
+        Me.Activate
+    End If
+End Sub
+
+Public Sub SetReportBook(BookName As String)
+    Dim oAC As CommandBarControl
+    
+    Set oAC = Helper.GetButton("report")
+    oAC.Caption = BookName
+End Sub
+
+Private Sub ClearReportBook()
+    Dim oAC As CommandBarControl
+    
+    Set oAC = Helper.GetButton("report")
+    oAC.Caption = oAC.Parameter
+End Sub
+
+Private Function TranslateReportBook() As String
+    Dim BookName As String
+    Dim DefaultFace As String
+    Dim oAC As CommandBarControl
+    
+    Set oAC = Helper.GetButton("report")
+    BookName = oAC.Caption
+    DefaultFace = oAC.Parameter
+    If BookName = DefaultFace Then BookName = ""
+    Set oAC = Nothing
+    
+    TranslateReportBook = BookName
+End Function
+
+Private Function TranslateDepth() As Long
+    On Error GoTo NotNumber
+    
+    TranslateDepth = CLng(Helper.GetControlText("depth"))
+    Exit Function
+    
+NotNumber:
+    ' unlimited depth
+    TranslateDepth = -1
+End Function
+
+Private Function MakeData() As Variant
+    MakeData = Array( _
+        Trim(Helper.GetControlText("folder")), _
+        TranslateDepth, _
+        Helper.GetControlState("dot_folders"), _
+        Helper.GetControlState("details"), _
+        Helper.GetControlState("link"), _
+        Helper.GetControlState("safety"), _
+        Val(Helper.GetButton("safety").Parameter), _
+        TranslateReportBook)
+End Function
+
+
+'=== default main procedures end ===
+'=== button data begin ===
+
+Public Property Get ButtonData() As Variant
+    ButtonData = ConvertRangeToArray(Application.Intersect(GetButtonRow, GetButtonCol))
+End Property
+
+Public Property Get ButtonParent() As Variant
+    ButtonParent = Array(VBProjectName & "." & Me.CodeName)
+End Property
+
+' above simple property codes are supported by the following range helpers
+
+Private Function GetButtonRow(Optional Address As String = "_ButtonCaption") As Range
+    Dim out As Range
+    Dim StartAt As Range
+    
+    Set StartAt = Me.Range(Address)
+    If IsEmpty(StartAt.Offset(1, 0).Value) Then
+        Set out = StartAt
+    Else
+        Set out = Me.Range(StartAt, StartAt.End(xlDown))
+    End If
+    
+    Set GetButtonRow = out.EntireRow
+End Function
+
+Private Function GetButtonCol(Optional Address As String = "_ButtonCaption") As Range
+    Dim StartAt As Range
+    Set StartAt = Me.Range(Address)
+    Set GetButtonCol = Me.Range(StartAt, StartAt.SpecialCells(xlCellTypeLastCell)).EntireColumn
+End Function
+
+Private Function ConvertRangeToArray(Ra As Range) As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    ReDim out(0 To Ra.Rows.Count - 1)
+    For i = 0 To UBound(out)
+        out(i) = Ra.Rows(i + 1).Value
+    Next
+    
+    ConvertRangeToArray = out
+End Function
+
+
+'=== button data end ===
+'=== constructor / destructor begin ===
+
+
+Private Function BarName() As String
+    BarName = Me.Name & Me.Range("_PublicName").Text & Me.Range("_Timestamp").Text
+End Function
+
+Public Sub BarInitialize()
+    Dim vMe As Variant
+    Set vMe = Me
+    Set Helper = New ToolBarV2
+    Helper.SetName BarName
+    Helper.NewBar vMe
+End Sub
+
+Public Sub BarTerminate()
+    On Error Resume Next
+    Helper.DelBar
+    Set Helper = Nothing
+End Sub
+
+
+'=== constructor / destructor end ===
+
+'}}}
+
+'class
+'   name;kobobauUtilaFile1
+'{{{
+' うちらのファイル(一覧表)1
+' Copyright (C) 2002 Tomizono
+' 2002.4.3
+
+' 2002.4.3
+' 大量出力を止める安全装置をつけた。ui実装はまだ。
+' 2002.4.4
+' 安全装置のチェックボックスを実装。初期値は1000件くらいが妥当か。
+' 過去リストの実装
+' 相対パス対応
+' 属性文字の修正
+' Excel 97 ではリンク作成しない。
+' 2002.4.5
+' バージョンチェックの廃止。97もフル機能に。
+' ls2 の引数を変更して、大幅刷新。絶対アドレス管理採用。
+' Range Object を引き回さないことで 97 での安定を確保。
+' object発生中は再計算しない。
+
+' 2011/5/6
+' オープンソースに移行
+' 自律, 自由, 公正, http://cowares.nobody.jp
+' ToolBarV2 に移行
+' ドットフォルダの扱いを追加
+' フォルダ掘り下げオプションを、深さ指定に強化
+' Excel 2007 に対応
+
+#Const EnableHyperLinks = True
+#Const EnableFastWriting = True
+#Const DisableCalculation = False
+
+Option Explicit
+
+Const BAUCAP As String = "ぱそ工房ばう"     ' 共通のタイトルバー
+
+' Fail Safe
+Private ExitNow As Boolean          ' 緊急脱出
+Private NextMileStone As Long       ' 次のチェックポイントの行位置
+Private FailSafeMessage As String   ' ダイアログ用の固定文字列
+
+' 非公開変数
+Private OutputRange As Range        ' 出力先の先頭セル
+Private OutputSheet As Worksheet    ' 出力先のワークシート
+Private AbsoluteRowBegin As Long    ' 先頭セルの行番号
+Private AbsoluteColBegin As Long    ' 先頭セルの桁番号
+Private AbsoluteRowNow As Long      ' 現在の書き込みセルの行番号
+Private oldCalcMode As Long         ' 初期化時の計算方式を待避
+
+' 公開プロパティ
+Public FolderName As String         ' フォルダー名
+Public ListDetails As Boolean       ' 詳細項目表示
+Public CreateHyperLinks As Boolean  ' リンクにする
+Public MaxRows As Long              ' リストの上限値
+Public DoFailSafe As Boolean        ' 安全装置を使う
+Public FailSafeCount As Long        ' 安全装置の件数設定
+Public SubFolderDepth As Long       ' 再帰検索の深さ指定。-1は無制限。0は掘り下げない。
+Public ShowDotFolders As Boolean    ' .(dot)で始まるフォルダを含む
+
+' OutputRange 入出用メソッド
+Sub SetOutputRange(aRange As Object)
+    On Error GoTo Err1
+    Select Case TypeName(aRange)
+    Case "Worksheet"
+        Set OutputRange = aRange.Cells(1)
+        Set OutputSheet = aRange
+        AbsoluteRowBegin = 1
+        AbsoluteColBegin = 1
+        AbsoluteRowNow = AbsoluteRowBegin
+    Case "Range"
+        Set OutputRange = aRange.Cells(1)
+        Set OutputSheet = aRange.Parent
+        AbsoluteRowBegin = aRange.Row
+        AbsoluteColBegin = aRange.Column
+        AbsoluteRowNow = AbsoluteRowBegin
+    Case Else
+        MsgBox TypeName(aRange) & "には出力できません。", , BAUCAP
+    End Select
+    Exit Sub
+Err1:
+    MsgBox Err.Description, , BAUCAP
+End Sub
+
+Function GetOutputRange() As Range
+    Set GetOutputRange = OutputRange
+End Function
+
+Private Sub page1(Ra As Range)
+' 書式設定
+    Dim oP As PageSetup
+    On Error Resume Next
+    Set oP = Ra.Parent.PageSetup
+    Application.ScreenUpdating = False
+    Ra.Columns(1).ColumnWidth = 32
+    Ra.Columns(2).ColumnWidth = 16
+    Ra.Columns(3).ColumnWidth = 16
+    Ra.Columns(4).ColumnWidth = 10
+    Ra.Columns(5).ColumnWidth = 18
+    Ra.Columns(6).ColumnWidth = 6
+    Ra.Columns(7).ColumnWidth = 26
+    Ra.Columns(7).EntireColumn.ShrinkToFit = True
+    With Ra.Range("A3:G3")
+        .HorizontalAlignment = xlHAlignCenter
+        .Font.Bold = True
+    End With
+    With oP
+        .LeftFooter = "&F &A"
+        .CenterFooter = "&P / &N"
+        '.RightFooter = "ぱそ工房ばう kobobau.com"
+        .RightFooter = "自律, 自由, 公正, http://cowares.nobody.jp"
+        .BlackAndWhite = True
+        .Orientation = xlLandscape
+        If Ra.Row = 1 Then
+            .PrintTitleRows = "$1:$3"
+        End If
+    End With
+    Application.ScreenUpdating = True
+End Sub
+
+Function ls() As Long
+' ディレクトリ一覧を出力する。
+
+    Dim fs As Scripting.FileSystemObject
+    Dim Fol As Folder
+    Dim Ra As Range
+    Dim Sa As Worksheet
+    Dim path1 As String, strA As String
+    Dim iR As Long, i As Long, j As Long
+    
+    On Error GoTo Err1
+    Set fs = New Scripting.FileSystemObject
+    
+    Set Ra = OutputRange
+    Set Sa = OutputSheet
+    If fs.FolderExists(FolderName) Then
+        NextMileStone = FailSafeCount   ' 安全装置設定
+        ExitNow = False
+        page1 Ra        ' 印刷設定
+        Set Fol = fs.GetFolder(FolderName)
+        With Ra.Range(Ra(1, 1), Ra(1, 7))
+            .Value = Array(Fol.Path, SubFolderDepth, IIf(ShowDotFolders, -1, 0), vbNullString, _
+                Now(), "検索中", BaumMain.Range("_PublicName").Value)
+            .Cells(2).NumberFormat = """深さ""0""段"";""サブフォルダ全部"";""サブフォルダ無し"""
+            .Cells(3).NumberFormat = "0;""ドットフォルダ含む"";""ドットフォルダ除外"""
+        End With
+        Ra(3, 1).Value = "ファイル名"
+        If ListDetails Then
+            Ra.Range(Ra(3, 2), Ra(3, 7)) = Array("フルパス", "DOS名", "サイズ", "更新日", "属性", "種類")
+        End If
+        AbsoluteRowNow = AbsoluteRowNow + 3
+        iR = ls2(Fol, 0)      ' コア
+        
+#If EnableHyperLinks = True Then
+        
+        If CreateHyperLinks Then    ' リンク作成
+            Ra(1, 6).Value = "設定中"
+            If ListDetails Then
+                j = Len(Fol.Path) + 1
+                For i = 4 To iR + 3     ' フルパス有り
+                    strA = Ra(i, 2).Value
+                    Sa.Hyperlinks.Add Ra(i, 2), strA        ' 絶対
+                    Sa.Hyperlinks.Add Ra(i, 1), Right(strA, Len(strA) - j)  ' 相対
+                Next
+            Else
+                For i = 4 To iR + 3     ' フルパス無し
+                    Sa.Hyperlinks.Add Ra(i, 1), Ra(i, 1).Value  ' 単純
+                Next
+            End If
+        End If
+        ' 戻るリンク(Excel97対応しないので廃止)
+        'Sa.Hyperlinks.Add Ra(1, 7), ThisWorkbook.FullName, , , Copyright.Range("D1").Value
+        
+#End If
+
+        Ra(1, 6).Value = iR
+        Set Fol = Nothing
+    Else
+        Ra(1).Value = FolderName & "は見つかりません。"
+    End If
+    Set Sa = Nothing
+    Set Ra = Nothing
+    
+    ls = iR                  ' 関数の返り値はファイル数
+    Set fs = Nothing
+    Exit Function
+Err1:
+    MsgBox "ファイルの検索中にエラーが発生しました。" & _
+         vbCrLf & vbCrLf & Err.Description, _
+        vbOKOnly, BAUCAP
+    
+#If DisableCalculation = True Then
+    Application.Calculation = oldCalcMode   ' 計算開始
+#End If
+
+End Function
+
+
+Private Function ls2(ByVal Fol As Folder, ByVal Depth As Long) As Long
+' ディレクトリ一覧を出力する。(コア部分)
+' fol   対象フォルダー
+' 2002.4.5 引数を変更
+' シートや書き込み位置はモジュール変数で管理。
+
+    Dim Fol2 As Folder
+    Dim file1 As File
+    Dim iR As Long
+    Dim iC As Long
+    Dim FileProps() As Variant
+    Dim FileAttrs As Variant
+    Dim iRow As Long, iCol As Long
+    
+    ' 初期条件
+    ls2 = 0
+    If ExitNow Then Exit Function
+    On Error GoTo Err1
+    'On Error Resume Next
+    
+    ' 対象件数取得
+    iRow = Fol.Files.Count
+    
+    ' 件数チェック
+    If DoFailSafe Then      ' 安全装置
+        If AbsoluteRowNow + iRow >= NextMileStone Then
+            'OutputSheet.Activate
+            With OutputSheet.Cells(AbsoluteRowNow, AbsoluteColBegin)
+                .Select
+                .Show
+                Select Case MsgBox(FailSafeMessage, vbYesNoCancel, BAUCAP)
+                Case vbCancel
+                    .Value = "中止しました。"
+                    ExitNow = True
+                    Exit Function
+                Case vbNo
+                    DoFailSafe = False
+                Case vbYes
+                    NextMileStone = AbsoluteRowNow + FailSafeCount
+                End Select
+            End With
+            With OutputSheet.Cells(AbsoluteRowBegin, AbsoluteColBegin)
+                .Select
+                .Show
+            End With
+        End If
+    End If
+    
+    ' ファイル情報取得
+    If iRow > 0 Then
+        If ListDetails Then
+            iCol = 7
+        Else
+            iCol = 1
+        End If
+        ReDim FileProps(iRow, iCol)     ' 一括して処理するため配列に格納
+        iR = 0
+        For Each file1 In Fol.Files
+            FileProps(iR, 0) = file1.Name
+            If ListDetails Then
+                FileAttrs = FileAttr(file1)
+                For iC = 1 To iCol - 1
+                    FileProps(iR, iC) = FileAttrs(iC - 1)
+                Next
+            End If
+            iR = iR + 1
+        Next
+        Set file1 = Nothing
+        ' 配列からセルへ(サブフォルダごとに書き込み)
+        If AbsoluteRowNow + iRow > MaxRows - 1 Then
+            iRow = MaxRows - 1 - AbsoluteRowNow
+            OutputSheet.Cells(AbsoluteRowNow + iRow + 1, AbsoluteColBegin).Value = "制限により中断しました。"
+            ExitNow = True
+        End If
+        ' 書き込み
+#If EnableFastWriting = True Then
+        OutputSheet.Range(OutputSheet.Cells(AbsoluteRowNow, AbsoluteColBegin), _
+            OutputSheet.Cells(AbsoluteRowNow + iRow, AbsoluteColBegin + iCol)) _
+            = FileProps
+#Else
+        For iR = 0 To iRow
+            For iC = 0 To iCol
+                OutputSheet.Cells(AbsoluteRowNow + iR, AbsoluteColBegin + iC).Value _
+                    = FileProps(iR, iC)
+            Next
+        Next
+#End If
+ 
+        AbsoluteRowNow = AbsoluteRowNow + iRow
+        DoEvents
+    End If
+    
+    ' サブフォルダーの展開
+    If SubFolderDepth < 0 Or SubFolderDepth > Depth Then             ' サブフォルダーを展開する場合
+        For Each Fol2 In Fol.SubFolders             ' フォルダー内のサブフォルダーでループ
+            If Left(Fol2.Name, 1) <> "." Or ShowDotFolders Then
+                iRow = iRow + ls2(Fol2, Depth + 1) ' 再帰呼び出し
+                If ExitNow Then Exit For
+            End If
+        Next
+    End If
+    ' 終了処理
+    ls2 = iRow                 ' 関数の返り値はファイル数
+    Set Fol2 = Nothing
+    Set file1 = Nothing
+    Exit Function
+Err1:
+    If MsgBox("ファイルの検索中にエラーが発生しました。" & vbCrLf & _
+        "エラーを無視して続行しますか?" & vbCrLf & vbCrLf & Err.Description, _
+        vbYesNo, BAUCAP) = vbNo Then
+        ExitNow = True
+    End If
+    ls2 = iRow
+    Set Fol2 = Nothing
+    Set file1 = Nothing
+End Function
+
+Private Function FileAttr(file1 As Object) As Variant
+' 指定されたファイルの属性一覧を返す。
+' エラーの出る属性をトラップするため独立している。
+    On Error Resume Next
+    Dim a1 As Variant, a2 As Variant, a3 As Variant
+    Dim a4 As Variant, a5 As Variant, a6 As Variant
+    a1 = file1.Path
+    a2 = file1.ShortPath      ' pagefileではエラー
+    'a2 = Replace(Mid(a1, Len(FolderName) + 1), "\", "/")   ' relative name, instead of dos-name
+    a3 = file1.Size
+    a4 = file1.DateLastModified
+    a5 = prtAttr(file1.Attributes)
+    a6 = file1.Type
+    FileAttr = Array(a1, a2, a3, a4, a5, a6)
+End Function
+
+Private Function prtAttr(iAttr As Integer) As String
+' ファイルの Attributes を数字でもらって、文字で表現して返す。
+    Const KUU As String = " "   ' 空文字
+    Dim strA As String
+    On Error GoTo Err1
+    If (iAttr And 32) = 32 Then
+        strA = "A"
+    Else
+        strA = KUU
+    End If
+    If (iAttr And 4) = 4 Then
+        strA = strA & "S"
+    Else
+        strA = strA & KUU
+    End If
+    If (iAttr And 2) = 2 Then
+        strA = strA & "H"
+    Else
+        strA = strA & KUU
+    End If
+    If (iAttr And 1) = 1 Then
+        strA = strA & "R"
+    Else
+        strA = strA & KUU
+    End If
+    prtAttr = strA
+    Exit Function
+Err1:
+    prtAttr = "    "
+End Function
+
+
+Private Sub Class_Initialize()
+' 初期化
+    On Error Resume Next
+    
+#If DisableCalculation = True Then
+    oldCalcMode = Application.Calculation
+    Application.Calculation = xlCalculationManual   ' 計算抑止
+#End If
+
+    FolderName = CurDir()
+    SubFolderDepth = 0
+    ShowDotFolders = False
+    ListDetails = False
+    CreateHyperLinks = False
+    MaxRows = 65536     ' Fail Safe
+    MaxRows = ActiveSheet.Rows.Count
+    ExitNow = False
+    DoFailSafe = True
+    FailSafeCount = 1000
+    FailSafeMessage = "大量検索のため、安全機構が働きました。" & vbCrLf & _
+        "次回も確認しますか?" & vbCrLf & vbCrLf & _
+        "  はい → 検索続行。次回も確認する。" & vbCrLf & _
+        "  いいえ  → 検索続行。もう確認しない。" & vbCrLf & _
+        "  キャンセル → 検索を中止。"
+End Sub
+
+Private Sub Class_Terminate()
+
+#If DisableCalculation = True Then
+    Application.Calculation = oldCalcMode   ' 計算開始
+#End If
+
+    Set OutputRange = Nothing
+    Set OutputSheet = Nothing
+End Sub
+
+'}}}
+
+'module
+'   name;ListFiles
+'{{{
+Option Explicit
+
+' 2002.4.4
+' Excel 97 では、リンク作成を抑止。
+' 2002.4.5
+' バージョンチェックの廃止
+' 2002.4.7
+' 過去リストの不具合修正
+' 2011.5.6
+' ToolBarV2 向けに調整
+
+Const BAUCAP As String = "エラーのため、失敗しました。 - ぱそ工房ばう"
+
+Private Sub ExtractData(Data As Variant, ByRef FolderName As String, ByRef Depth As Long, _
+        ByRef ShowDotFolders As Boolean, ByRef ShowDetails As Boolean, ByRef ShowLink As Boolean, _
+        ByRef DoSafety As Boolean, ByRef SafetyLimit As Long, ByRef BookName As String)
+    FolderName = Data(0)
+    Depth = Data(1)
+    ShowDotFolders = Data(2)
+    ShowDetails = Data(3)
+    ShowLink = Data(4)
+    DoSafety = Data(5)
+    SafetyLimit = Data(6)
+    BookName = Data(7)
+End Sub
+
+Public Sub Execute(Data As Variant)
+    Dim FolderName As String
+    Dim Depth As Long
+    Dim ShowDotFolders As Boolean
+    Dim ShowDetails As Boolean
+    Dim ShowLink As Boolean
+    Dim DoSafety As Boolean
+    Dim SafetyLimit As Long
+    Dim BookName As String
+    Dim o As kobobauUtilaFile1
+    On Error GoTo Err1
+    
+    ExtractData Data, FolderName, Depth, ShowDotFolders, ShowDetails, ShowLink, DoSafety, SafetyLimit, BookName
+    If FolderName = "" Then Exit Sub
+    
+    Set o = New kobobauUtilaFile1
+    o.FolderName = FolderName
+    o.CreateHyperLinks = ShowLink
+    o.ListDetails = ShowDetails
+    o.SubFolderDepth = Depth
+    o.ShowDotFolders = ShowDotFolders
+    o.DoFailSafe = DoSafety
+    o.FailSafeCount = SafetyLimit
+    o.SetOutputRange NewSheetInSagyoBook(BookName)
+    o.ls
+    Set o = Nothing
+    Exit Sub
+    
+Err1:
+    MsgBox Err.Description, , BAUCAP
+    Set o = Nothing
+End Sub
+
+Private Function NewSheetInSagyoBook(BookName As String) As Worksheet
+    ' Re-use same working book, by adding a new sheet every time
+    On Error GoTo Err1
+    
+    If BookName = "" Then GoTo Err1
+    Application.Workbooks(BookName).Activate
+    Set NewSheetInSagyoBook = ActiveWorkbook.Worksheets.Add
+    Exit Function
+    
+Err1:
+    Set NewSheetInSagyoBook = Application.Workbooks.Add.Worksheets(1)
+    BaumMain.SetReportBook NewSheetInSagyoBook.Parent.Name
+End Function
+
+'}}}
+
+'code
+'   name;ThisWorkbook
+'{{{
+Option Explicit
+
+Private Sub Workbook_Open()
+    BaumMain.BarInitialize
+End Sub
+
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    BaumMain.BarTerminate
+End Sub
+
+'}}}
+
+'ssf-end
+
+```

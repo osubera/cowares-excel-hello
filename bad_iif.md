@@ -1,0 +1,100 @@
+# Introduction #
+
+  * bad vba: no heavy works on iff
+
+## 概要 ##
+  * 失敗マクロ: VBAの iif に重い仕事を与えるな
+
+# Details #
+
+  * we can use an `iif` function instead of an `if` block, when the block is focused to return a value depend on a condition given.
+  * but attention, the `iif` does not same as the `if`.
+  * a `iif` function calculates all arguments given, before it returns a result.
+  * thus the `iif` will not do as expected, when it passed a condition to check arguments given are safe against errors.
+  * also, it does to many calculation than expected.
+  * anyway, the `iif` is good for simple things.
+
+## 説明 ##
+  * `iif` 関数は、 `if` ブロックが条件に応じた１つの値を返すだけの場合、代わりに使える。
+  * でも、 `iif` は `if` と同じ動きをしないのに注意。
+  * `iif` 関数は値を返す前に、すべての引数を計算する。
+  * そのため `iif` は、エラーを起こさないように引数チェックする条件に対しては、期待したような動きをしない。
+  * それに、思ったより多くの計算をしてしまう。
+  * それでも `iif` は簡単なものに使うにはよい。
+
+# Bad Code #
+
+```
+'module
+'  name;Module1
+'{{{
+Option Explicit
+
+Sub test1()
+    On Error GoTo Hell
+    Dim x As Single
+    
+    If True Then
+        x = 1 / 3
+    Else
+        x = 1 / 0
+    End If
+    Debug.Print x & " OK"
+    
+    x = IIf(True, 1 / 3, 1 / 0)
+    Debug.Print x & " NG"
+    Exit Sub
+    
+Hell:
+    Debug.Print "Error " & Err.Number
+    Debug.Print Err.Description
+End Sub
+
+Sub test2()
+    Dim i As Long
+    Dim j As Long
+    Randomize
+    
+    HeavyTask 0
+    For i = 1 To 100
+        If Rnd > 0.5 Then
+            j = HeavyTask(1)
+        Else
+            j = HeavyTask(2)
+        End If
+    Next
+    Debug.Print j & " times called"
+    
+    HeavyTask 0
+    For i = 1 To 100
+        j = IIf(Rnd > 0.5, HeavyTask(1), HeavyTask(2))
+    Next
+    Debug.Print j & " times called!"
+End Sub
+
+Function HeavyTask(x As Long) As Long
+    Static y As Long
+    If x = 0 Then
+        y = 0
+    Else
+        y = y + 1
+    End If
+    HeavyTask = y
+End Function
+'}}}
+```
+
+### Result ###
+
+```
+test1()
+
+0.3333333 OK
+Error 11
+0 で除算しました。
+
+test2()
+
+100 times called
+199 times called!
+```

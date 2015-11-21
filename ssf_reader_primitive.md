@@ -1,0 +1,647 @@
+
+
+# Introduction #
+
+  1. a primitive tool to convert an SSF text into an Excel Book
+
+## 概要 ##
+  1. SSF テキストをエクセルブックに変換する、原始的なツール
+
+# Details #
+
+  * this reader is designed for users unfamiliar to the SSF world.
+> > We publish tools in a format of SSF, so they are completely opened.
+> > But what happens to a newbies?
+> > He needs tools though he has no SSF tools yet.
+> > This is it.
+> > We offer him this tool.
+> > It was written to make the first step easy.
+> > It's simple and does only a few things.
+> > This is because its design is to maximize a quick start.
+> > However you can feel many advantages to use an SSF through this simple tool.
+  * this reader works in a single VBA module.
+  * [ssf\_writer\_primitive](ssf_writer_primitive.md) is also available as a simple writer.
+
+## 説明 ##
+  * このSSF読み込み装置は、 SSF の世界に馴れていない初心者向けに設計した。
+> > このプロジェクトでは、各種ツールを SSF 形式で配布している。それだから完全にオープンソースだ。
+> > しかし、新入りはどうするんだ？
+> > ツールが欲しくても、 SSF ツールすら持っていない。
+> > そこでこいつの出番だ。
+> > このツールが役に立つ。
+> > こいつは初めの第一歩が簡単に進めるように作ったものだ。
+> > 単純で、ほんのちょっとのことしかできない。
+> > 初動を最優先するように設計したのだ。
+> > そうとはいえ、この単純なツールを使ってみれば、 SSF を使うことの便利さを大いに感じることだろう。
+  * このツールは、たった一つの VBA モジュールで動いている。
+  * 対応する書き出し装置として [ssf\_writer\_primitive](ssf_writer_primitive.md) がある。
+
+# Limitations #
+
+  1. this tool cannot do full SSF format.
+  1. uses the following ssf keys only.
+> > workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
+  1. uses the following names only.
+> > name, address
+
+## 制約 ##
+  1. このツールは SSF 書式の全機能が使えるわけではない。
+  1. 次の ssf キーしか使わない。
+> > workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
+  1. 次の名前しか使わない。
+> > name, address
+
+# Downloads #
+
+  * [downloads](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=ssf+reader)
+
+# How to use #
+
+  1. add a vba module into your excel book.
+  1. paste the below Code on the module.
+  1. add references for
+    * Microsoft Scripting Runtime
+    * Microsoft Visual Basic for Applications Extensibility 5.3
+  1. change the filename at the topmost of the module code.
+    * GetFileName = "C:\tmp\ssf.txt"
+    * the input file name is fixed above, never asked, so you may want to change that name as you wish.
+  1. open a blank excel book and activate, to protect you.
+  1. run the macro, "Reader".
+  1. a new book will be generated.
+  1. [Trust access to the VBA project object model](vba#how_to_allow_access_to_a_Visual_Basic_project.md) is required.
+
+## 使い方 ##
+  1. エクセルブックにVBAのモジュールを挿入する。
+  1. そのモジュールに、下記の Code を貼り付ける。
+  1. 次の参照設定を追加する。
+    * Microsoft Scripting Runtime
+    * Microsoft Visual Basic for Applications Extensibility 5.3
+  1. モジュールコードの先頭近くにあるファイル名を変更する。
+    * GetFileName = "C:￥tmp￥ssf.txt"
+    * 入力するファイルは上のものに固定されていて、実行中に変更できない。ここを使いやすいように変えておけばよい。
+  1. 安全のため、空のブックを開いて前面にしておく。
+  1. 貼り付けたマクロ "Reader" を実行する。
+  1. 新しいブックが作成される。
+  1. [VBA プロジェクト オブジェクト モデルへのアクセスを信頼する](vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B.md) が必要。
+
+# Caution! #
+
+  * the reader acts violently, because a process to make an excel VBA module using its VBA code itself is something to fly like jumping to another car on a highway.
+  * may cause entire excel freezing or unexpected down.
+  * save your important files before run this macro.
+
+## 危険! ##
+  * リーダーの動作は過激だ。 VBA コードを、 同じエクセルで動く VBA のプログラムで作るというのは、高速道路で隣の車に飛び移るぐらい無茶なことだから。
+  * もしかして突然、エクセル全体が動作を止めたり、落ちたりするかもしれない。
+  * このマクロを動かす前に、大事なファイルは保存しておこう。
+
+# Code #
+
+```
+'ssf-begin
+';
+
+'workbook
+'   name;ssf_reader_primitive.xls/VBAProject
+
+'require
+'       ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'       ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
+
+'worksheet
+'   name;Sheet1
+
+'module
+'   name;SsfReaderPrimitive
+'{{{
+Option Explicit
+
+Dim Env As Scripting.Dictionary
+
+Function GetFileName() As String
+    GetFileName = "C:\tmp\ssf.txt"
+End Function
+
+Sub Reader()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    
+    InitializeEnv
+    ReadFrom Stream
+    TerminateEnv
+    
+    Stream.Close
+    Set Stream = Nothing
+    Set fs = Nothing
+End Sub
+
+Function ReadFrom(Stream As Scripting.TextStream) As String
+    Dim Result As String
+    Dim Line As String
+    Dim FoldedLine As String
+    Dim Escaping As Boolean
+    Dim Block As Collection
+    
+    Result = ""
+    FoldedLine = ""
+    Escaping = False
+    Set Block = New Collection
+    
+    ' though i hate these big tripple loops, still working in this small task
+    Do Until Stream.AtEndOfStream
+        Do
+            If FoldedLine <> "" Then
+                Block.Add FoldedLine
+            End If
+            
+            Do
+                If Stream.AtEndOfStream Then
+                    Line = ""
+                    If Escaping Then
+                        Escaping = False
+                    End If
+                Else
+                    Line = Stream.ReadLine
+                End If
+                
+                If IsSsfEscapeBegin(Line) Then
+                    Escaping = True
+                    FoldedLine = ";"
+                ElseIf IsSsfEscapeEnd(Line) Then
+                    Escaping = False
+                Else
+                    If Escaping Then
+                        FoldedLine = FoldedLine & Line & vbCrLf
+                    ElseIf IsSsfLine(Line) Then
+                        FoldedLine = RemoveSsfSign(Line)
+                    Else
+                        FoldedLine = ""
+                    End If
+                End If
+            Loop While Escaping
+        Loop While IsSsfLine(Line)
+        
+        If Block.Count > 0 Then
+            Result = Result & ParseSsfBlock(Block)
+            Do While Block.Count > 0
+                Block.Remove 1
+            Loop
+        End If
+    Loop
+    
+    Debug.Print Result
+    Set Block = Nothing
+End Function
+
+Function IsSsfLine(Line As String) As Boolean
+    IsSsfLine = (Left(Line, 1) = "'")
+End Function
+
+Function IsSsfEscapeBegin(Line As String) As Boolean
+    IsSsfEscapeBegin = (Line = "'{{{")
+End Function
+
+Function IsSsfEscapeEnd(Line As String) As Boolean
+    IsSsfEscapeEnd = (Line = "'}}}")
+End Function
+
+Function RemoveSsfSign(Line As String) As String
+    Dim Result As String
+    Dim StartAt As Long
+    Dim EndAt As Long
+    
+    RemoveSsfSign = ""
+    If Left(Line, 1) <> "'" Then Exit Function
+    
+    StartAt = 2
+    EndAt = Len(Line)
+    Do
+        If StartAt > EndAt Then Exit Function
+        If Mid(Line, StartAt, 1) <> " " And Mid(Line, StartAt, 1) <> vbTab Then Exit Do
+        StartAt = StartAt + 1
+    Loop
+    
+    RemoveSsfSign = Right(Line, EndAt - StartAt + 1)
+End Function
+
+Function ParseSsfBlock(Block As Collection) As String
+    Dim Result As String
+    Dim SsfKey As String
+    
+    SsfKey = Block(1)
+    Block.Remove 1
+    ' these are keys supported
+    Select Case SsfKey
+    Case "cells-formula"
+        Result = ParseSsfCellsFormulaV(Block)
+    Case "cells-name"
+        Result = ParseSsfCellsNameV(Block)
+    Case "cells-numberformat"
+        Result = ParseSsfCellsNumberFormatV(Block)
+    Case "class"
+        Result = ParseSsfModule(Block, vbext_ct_ClassModule)
+    Case "code"
+        Result = ParseSsfModule(Block, vbext_ct_Document)
+    Case "module"
+        Result = ParseSsfModule(Block, vbext_ct_StdModule)
+    Case "require"
+        Result = ParseSsfRequire(Block)
+    Case "workbook"
+        Result = ParseSsfWorkbook(Block)
+    Case "worksheet"
+        Result = ParseSsfWorksheet(Block)
+    End Select
+    
+    ParseSsfBlock = Result
+End Function
+
+Function InitializeEnv() As Object
+    Set Env = New Scripting.Dictionary
+    Set Env("workbook") = ActiveWorkbook
+    Set Env("worksheet") = ActiveSheet
+    Set Env("module") = Nothing
+    Env("chicken") = "NobodyCallsMeChicken_jk"  ' its an unexpected name
+    Env("copyof") = "COPY_ooop_"
+    Env("copythisworkbook") = False             ' true is safer
+    Set InitializeEnv = Env
+End Function
+
+Function TerminateEnv() As Object
+    Env.RemoveAll
+    Set Env = Nothing
+    Set TerminateEnv = Nothing
+End Function
+
+Function DivideSsfLine(Line As Variant, ByRef TheName As String, ByRef TheValue As String) As String
+    ' return results as TheName, TheValue and the function return value
+    Dim x As Variant
+    x = DivideLine(Line, ";", 2)
+    TheName = x(0)
+    TheValue = x(1)
+    DivideSsfLine = TheName
+End Function
+
+Function DivideName(Line As Variant, ByRef Name As String, ByRef CodeName As String) As String
+    Dim x As Variant
+    x = DivideLine(Line, "/", 2)
+    Name = x(0)
+    CodeName = IIf(x(1) = "", x(0), x(1))
+    ' we may have to set another rule on workbook
+    DivideName = CodeName
+End Function
+
+Function DivideLine(Line As Variant, Delimiter As String, Number As Long) As Variant
+    Dim x As Variant
+    Dim y() As Variant
+    Dim i As Long
+    
+    x = Split(Line, Delimiter, Number)
+    If UBound(x) = Number - 1 Then
+        DivideLine = x
+    Else
+        ReDim y(0 To Number - 1)
+        For i = 0 To UBound(x)
+            y(i) = x(i)
+        Next
+        DivideLine = y
+    End If
+End Function
+
+Function SwitchBook(Names As String) As Workbook
+    ' currently, we just open a new book
+    ' not name it, nor search an existing book
+    Dim Book As Workbook
+    Set Book = Application.Workbooks.Add
+    Set Env("workbook") = Book
+    Set SwitchBook = Book
+End Function
+
+Function SwitchWorksheet(Names As String) As Worksheet
+    ' 1. add a new sheet unless names are given
+    ' 2. search existing sheet for the given codename
+    ' 3. modify the name if the sheet found has another name
+    ' 4. add a new sheet if above 2 or 3 fail
+    
+    Dim Name As String
+    Dim CodeName As String
+    Dim Book As Workbook
+    Dim Ws As Worksheet
+    Dim Comp As VBComponent
+    Dim FrontName As String
+    
+    Set Book = Env("workbook")
+    On Error GoTo AddNew
+    
+    ' rule#1 no names
+    If DivideName(Names, Name, CodeName) = "" Then GoTo AddNew
+    
+    ' rule#2 search
+    Set Comp = Book.VBProject.VBComponents(CodeName)
+    FrontName = Comp.Properties("Name")
+    Set Ws = Book.Worksheets(FrontName)
+    
+    ' rule#3 rename
+    If Name <> FrontName Then Ws.Name = Name
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Ws = Nothing
+    Set Ws = Book.Worksheets.Add
+    If Ws.Name <> Name Then
+        Ws.Name = Name
+    End If
+    If Ws.CodeName <> CodeName Then
+        Book.VBProject.VBComponents(Ws.CodeName).Name = CodeName
+    End If
+    If Ws Is Nothing Then
+        Debug.Print CodeName & "*" & Name & "*" & Err.Number & Err.Description
+        Set SwitchWorksheet = Env("worksheet")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("worksheet") = Ws
+    Set SwitchWorksheet = Ws
+End Function
+
+Function SwitchModule(Name As String, ComponentType As vbext_ComponentType) As VBComponent
+    ' 1. add a new component unless names are given
+    ' 2. may copy ThisWorkbook by the condition of Env("copythisworkbook")
+    ' 3. search existing component for the given name
+    ' 4. add a new component if above 3 fails
+    ' 5. add only type of module
+    
+    Dim Project As VBProject
+    Dim Comp As VBComponent
+    Dim NewName As String
+    Dim NewType As vbext_ComponentType
+    Dim StdOrClass As Boolean
+    
+    Set Project = Env("workbook").VBProject
+    On Error GoTo AddNew
+    
+    ' we only add classes and stdmodules
+    StdOrClass = (ComponentType = vbext_ct_StdModule Or ComponentType = vbext_ct_ClassModule)
+    NewType = IIf(StdOrClass, ComponentType, vbext_ct_StdModule)
+    NewName = ""
+    
+    ' rule#1 no names
+    If Name = "" Then GoTo AddNew
+    
+    ' rule#5 add modules instead of documents
+    NewName = IIf(StdOrClass, Name, Env("copyof") & Name)
+    
+    ' rule#2 ThisWorkbook
+    If Name = "ThisWorkbook" And Env("copythisworkbook") Then GoTo AddNew
+    
+    ' rule#3 search
+    Set Comp = Project.VBComponents(Name)
+    If Comp.Type <> ComponentType Then
+        NewName = ""
+        GoTo AddNew
+    End If
+    
+    GoTo Done
+    
+    ' rule#4 add
+AddNew:
+    If Err.Number > 0 Then
+        'Debug.Print Names & "/" & Err.Number & Err.Description
+        Resume AddNew2
+    End If
+AddNew2:
+    On Error Resume Next
+    
+    Set Comp = Project.VBComponents.Add(NewType)
+    If NewName <> "" Then Comp.Name = NewName
+    If Comp Is Nothing Then
+        Debug.Print Name & "*" & Err.Number & Err.Description
+        Set SwitchModule = Env("module")
+        Exit Function
+    End If
+    
+Done:
+    Set Env("module") = Comp
+    Set SwitchModule = Comp
+End Function
+
+Function ParseSsfWorkbook(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    
+    Result = ""
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchBook TheValue
+            Result = Result & "new workbook " & Env("workbook").Name & vbCrLf
+        End Select
+    Next
+    
+    ParseSsfWorkbook = Result
+End Function
+
+Function ParseSsfWorksheet(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    
+    Result = ""
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchWorksheet TheValue
+            Result = Result & "new worksheet " & Env("worksheet").Name & vbCrLf
+        End Select
+    Next
+    
+    ParseSsfWorksheet = Result
+End Function
+
+Function ParseSsfModule(Block As Collection, Optional ComponentType As vbext_ComponentType = vbext_ct_StdModule) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Source As String
+    
+    Result = ""
+    Source = ""
+    
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "name"
+            SwitchModule TheValue, ComponentType
+            Result = Result & "new module " & Env("module").Name & vbCrLf
+        Case ""
+            Source = Source & TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    If Source <> "" And Not Env("module") Is Nothing Then
+        With Env("module").CodeModule
+            .DeleteLines 1, .CountOfLines
+            .InsertLines 1, Source
+        End With
+    End If
+    
+    ParseSsfModule = Result
+End Function
+
+Function ParseSsfRequire(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Project As VBProject
+    Dim GuidMajorMinorDescription As Variant
+    
+    Result = ""
+    Set Project = Env("workbook").VBProject
+    Result = Result & "require" & vbCrLf
+    
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case ""
+            GuidMajorMinorDescription = DivideLine(TheValue, " ", 4)
+            Result = Result & GuidMajorMinorDescription(3) & vbCrLf
+            Project.References.AddFromGuid GuidMajorMinorDescription(0), GuidMajorMinorDescription(1), GuidMajorMinorDescription(2)
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfRequire = Result
+End Function
+
+Function ParseSsfCellsFormulaV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set Ws = Env("worksheet")
+    Set Ra = Ws.Cells
+    Result = Result & "cells-formula on " & Ws.Name & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "address"
+            ' we only support an A1 style addresses here by Excel's design
+            ' maybe future, we can make a converter for R1C1
+            Set Ra = Ws.Range(TheValue)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).FormulaR1C1 = TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsFormulaV = Result
+End Function
+
+Function ParseSsfCellsNumberFormatV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim Ws As Worksheet
+    Dim Ra As Range
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set Ws = Env("worksheet")
+    Set Ra = Ws.Cells
+    Result = Result & "cells-numberformat on " & Ws.Name & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case "address"
+            ' we only support an A1 style addresses here by Excel's design
+            ' maybe future, we can make a converter for R1C1
+            Set Ra = Ws.Range(TheValue)
+            Counter = 0
+        Case ""
+            Counter = Counter + 1
+            Ra(Counter).NumberFormat = TheValue
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsNumberFormatV = Result
+End Function
+
+Function ParseSsfCellsNameV(Block As Collection) As String
+    Dim Result As String
+    Dim Line As Variant
+    Dim TheName As String
+    Dim TheValue As String
+    Dim ThePreviousValue As String
+    Dim CellsName As Names
+    Dim Counter As Long
+    
+    Result = ""
+    Counter = 0
+    Set CellsName = Env("workbook").Names
+    Result = Result & "cells-name" & vbCrLf
+    On Error Resume Next
+    For Each Line In Block
+        Select Case DivideSsfLine(Line, TheName, TheValue)
+        Case ""
+            Counter = Counter + 1
+            If Counter Mod 2 = 1 Then
+                ThePreviousValue = TheValue
+            Else
+                CellsName.Add Name:=TheValue, RefersToR1C1:=ThePreviousValue
+            End If
+        End Select
+        If Err.Number > 0 Then
+            Result = Result & Err.Number & "; " & Err.Description & "(" & TheName & "," & TheValue & ")" & vbCrLf
+            Err.Clear
+        End If
+    Next
+    
+    ParseSsfCellsNameV = Result
+End Function
+
+'}}}
+
+'ssf-end
+
+```
+

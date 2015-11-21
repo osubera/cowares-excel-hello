@@ -1,0 +1,2121 @@
+
+
+# Introduction #
+
+  * use a same interface to keep user data in vba of Excel, Word and Access
+
+## 概要 ##
+  * エクセルとワードとアクセスのVBAで、共通のインターフェースを使い、ユーザーのデータを保持する
+
+# Details #
+
+  * we may want to keep verious informations for intra session, or for inter sessions.
+  * also, we want to avoid low side things to influent application core logics.
+  * choosing a common interface is a good manner for working through above 2 requirements.
+  * belows are demonstrations to run small exactly same test applications on Excel, Word and Access.
+  * verious low level implements and differences between office applications are both hidden under a same API.
+  * we have 2 types of list. one is an ordered list, and another is a list with a unique key.
+
+## 説明 ##
+  * セッション内でも、セッション間でも、諸々の情報を保持したい。
+  * 低レベルの物事がアプリケーションの中心部の動作に影響して欲しくない。
+  * 共通のインターフェースを選ぶ。これが、上の２つをうまく収めるコツだ。
+  * 以下のコードでは、エクセルとワードとアクセスで完全に同一の、小さなテストアプリケーションを動かしている。
+  * さまざまな低レベルの実装もオフィスアプリ間での相違も、同一の API の中に隠されている。
+  * ２つのリストを用意した。１つは序数を持つリストで、もう一つは、重複の無いキーで扱うリスト。
+
+# How to use #
+
+  1. use an ssf reader tool like [ssf\_reader\_primitive](ssf_reader_primitive.md) to convert a text code below into an excel book.
+  1. copy and paste manually for non-excel codes, because we have no ssf tools for word and access at this moment.
+
+## 使い方 ##
+  1. [ssf\_reader\_primitive](ssf_reader_primitive.md) のような ssf 読み込みツールを使って、下のコードをエクセルブックに変換する。
+  1. エクセル以外のコードは手作業でコピー貼り付けをする。ワード版とアクセス版の ssf ツールはまだリリースしていないから。
+
+# Code #
+
+### executable test ###
+
+  * common executable test for Excel, Word and Access
+    * エクセルとワードとアクセスに共通のテストコード
+
+```
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'  ;{00000205-0000-0010-8000-00AA006D2EA4} 2 5 Microsoft ActiveX Data Objects 2.5 Library
+
+'module
+'  name;testSettings
+'{{{
+Option Explicit
+
+Sub test_List()
+    Dim x As SettingsList
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsList
+    Debug.Print x.GetSetting(1)
+    x.SetSetting "こんにちは", 1
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValue()
+    Dim x As SettingsKeyValue
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValue
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = "Hola!"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+
+Sub test_ListFile()
+    Dim x As SettingsListFile
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsListFile
+    x.SetSetting Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueFile()
+    Dim x As SettingsKeyValueFile
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValueFile
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+
+Sub test_ListTable()
+    Dim x As SettingsListTable
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsListTable
+    x.SetSetting Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueTable()
+    Dim x As SettingsKeyValueTable
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = New SettingsKeyValueTable
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+'}}}
+
+
+```
+
+  * we may want this option statement for every Access modules and classes
+    * アクセスの場合、全モジュールとクラスに次の Option 文が欲しいかもしれない。
+
+```
+Option Compare Database
+```
+
+### Collection Object for ordered list ###
+
+  * intra session only
+    * セッション内のみ
+  * a single code works with excel, word and access
+    * エクセル、ワード、アクセスとも同一コードで動く
+
+```
+'class
+'  name;SettingsList
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    AppendData
+End Sub
+
+Private Sub Class_Terminate()
+    Set MySettings = Nothing
+End Sub
+
+Private Sub AppendData()
+    With MySettings
+        .Add "Hello"
+        .Add "Settings"
+    End With
+End Sub
+'}}}
+
+
+```
+
+### Scripting.Dictionary Object for key-value list ###
+
+  * intra session only
+    * セッション内のみ
+  * a single code works with excel, word and access
+    * エクセル、ワード、アクセスとも同一コードで動く
+
+```
+'class
+'  name;SettingsKeyValue
+'{{{
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    AppendData
+End Sub
+
+Private Sub Class_Terminate()
+    Set MySettings = Nothing
+End Sub
+
+Private Sub AppendData()
+    With MySettings
+        .Add "Hello", "こんにちは"
+        .Add "Settings", "設定"
+    End With
+End Sub
+'}}}
+
+```
+
+### Text File ###
+
+  * inter sessions
+    * セッション間で保持
+  * basically same code run, a small difference is how to get the path of a document itself.
+    * 基本は同一のコードで良いが、オフィス文書自身のパスを取得する手段が違う。
+
+  * changes required for Excel against Word
+    * エクセル用でワード用と違うところ
+```
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = ThisWorkbook.FullName & ".ini"
+```
+
+  * changes required for Access against Word
+    * アクセス用でワード用と違うところ
+```
++Option Compare Database
+
+-    DefaultFileName = ThisDocument.FullName & ".ini"
++    DefaultFileName = CurrentDb.Name & ".ini"
+```
+
+  * for Word
+    * ワード用
+
+```
+'class
+'  name;SettingsListFile
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        MySettings.Add Stream.ReadLine
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For i = 1 To MySettings.Count
+        Stream.WriteLine MySettings(i)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Word ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = ThisDocument.FullName & ".ini"
+End Function
+'}}}
+
+
+'class
+'  name;SettingsKeyValueFile
+'{{{
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim KeyValue As Variant
+    Dim Text As String
+    
+    Const Splitter = "="
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        Text = Stream.ReadLine
+        KeyValue = Split(Text, Splitter, 2)
+        If UBound(KeyValue) = 1 Then
+            MySettings(CStr(KeyValue(0))) = CStr(KeyValue(1))
+        End If
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For Each Key In MySettings.Keys
+        Stream.WriteLine Key & "=" & MySettings(Key)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Word ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = ThisDocument.FullName & ".ini"
+End Function
+'}}}
+
+
+```
+
+  * for Excel
+    * エクセル用
+
+```
+'class
+'  name;SettingsListFile
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        MySettings.Add Stream.ReadLine
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For i = 1 To MySettings.Count
+        Stream.WriteLine MySettings(i)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Excel ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = ThisWorkbook.FullName & ".ini"
+End Function
+'}}}
+
+
+'class
+'  name;SettingsKeyValueFile
+'{{{
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim KeyValue As Variant
+    Dim Text As String
+    
+    Const Splitter = "="
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        Text = Stream.ReadLine
+        KeyValue = Split(Text, Splitter, 2)
+        If UBound(KeyValue) = 1 Then
+            MySettings(CStr(KeyValue(0))) = CStr(KeyValue(1))
+        End If
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For Each Key In MySettings.Keys
+        Stream.WriteLine Key & "=" & MySettings(Key)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Excel ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = ThisWorkbook.FullName & ".ini"
+End Function
+'}}}
+
+
+```
+
+  * for Access
+    * アクセス用
+
+```
+'class
+'  name;SettingsListFile
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        MySettings.Add Stream.ReadLine
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For i = 1 To MySettings.Count
+        Stream.WriteLine MySettings(i)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Access ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = CurrentDb.Name & ".ini"
+End Function
+'}}}
+
+
+'class
+'  name;SettingsKeyValueFile
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim KeyValue As Variant
+    Dim Text As String
+    
+    Const Splitter = "="
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForReading)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    Do Until Stream.AtEndOfStream
+        Text = Stream.ReadLine
+        KeyValue = Split(Text, Splitter, 2)
+        If UBound(KeyValue) = 1 Then
+            MySettings(CStr(KeyValue(0))) = CStr(KeyValue(1))
+        End If
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    If Stream Is Nothing Then Err.Raise 52  ' invalid file name
+    
+    For Each Key In MySettings.Keys
+        Stream.WriteLine Key & "=" & MySettings(Key)
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set fs = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Access ===
+
+Private Function DefaultFileName() As String
+    ' just add ".ini" after the full path of this document
+    DefaultFileName = CurrentDb.Name & ".ini"
+End Function
+'}}}
+
+
+```
+
+### Database Table ###
+
+  * inter sessions
+    * セッション間で保持
+  * basically same code run, a small difference is the Access uses its own table.
+    * 基本は同一のコードで良いが、アクセスは自分のテーブルを使えるところが違う。
+
+  * changes required for Excel against Word
+    * エクセル用でワード用と違うところ
+```
+-    out = ThisDocument.FullName
++    out = ThisWorkbook.FullName
+
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
++    FoundAt = InStrRev(out, ".xls", -1, vbTextCompare)
+```
+
+  * changes required for Access against Word
+    * アクセス用でワード用と違うところ
+```
++Option Compare Database
+
+-Private MyFileName As String
+
+-    Set Con = New ADODB.Connection
+-    Con.Open GetConnectionString
++    Set Con = CurrentProject.Connection
+
+-    Con.Close
+
+-
+-Private Function GetConnectionString() As String
+-    GetConnectionString = _
+-        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+-        GetFileName() & _
+-        ";User ID=Admin;Password=;"
+-End Function
+-
+-Private Function GetFileName() As String
+-    If MyFileName = "" Then MyFileName = DefaultFileName
+-    GetFileName = MyFileName
+-End Function
+-
+-
+-'=== procedures below this line work only for MS Word ===
+-
+-Private Function DefaultFileName() As String
+-    ' replace the full path of this document from ".doc" to ".mdb"
+-    Dim out As String
+-    Dim FoundAt As Long
+-    
+-    out = ThisDocument.FullName
+-    
+-    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+-    If FoundAt = 0 Then
+-        out = out & ".mdb"
+-    Else
+-        out = Left(out, FoundAt - 1) & ".mdb"
+-    End If
+-    
+-    DefaultFileName = out
+-End Function
+
+```
+
+  * for Word
+    * ワード用
+
+```
+'class
+'  name;SettingsListTable
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    MyTableName = "settings_list"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings.Add Stream.Fields("list").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+    Con.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For i = 1 To MySettings.Count
+        Stream.AddNew
+        Stream.Fields("list") = MySettings(i)
+        Stream.Update
+    Next
+    Stream.Close
+    
+    Con.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetConnectionString() As String
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetFileName() & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Word ===
+
+Private Function DefaultFileName() As String
+    ' replace the full path of this document from ".doc" to ".mdb"
+    Dim out As String
+    Dim FoundAt As Long
+    
+    out = ThisDocument.FullName
+    
+    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+    If FoundAt = 0 Then
+        out = out & ".mdb"
+    Else
+        out = Left(out, FoundAt - 1) & ".mdb"
+    End If
+    
+    DefaultFileName = out
+End Function
+'}}}
+
+
+'class
+'  name;SettingsKeyValueTable
+'{{{
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    MyTableName = "settings_key_value"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings(Stream.Fields("key").Value) = Stream.Fields("value").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+    Con.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For Each Key In MySettings.Keys
+        Stream.AddNew
+        Stream.Fields("key") = CStr(Key)
+        Stream.Fields("value") = MySettings(Key)
+        Stream.Update
+    Next
+    Stream.Close
+    
+    Con.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetConnectionString() As String
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetFileName() & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Word ===
+
+Private Function DefaultFileName() As String
+    ' replace the full path of this document from ".doc" to ".mdb"
+    Dim out As String
+    Dim FoundAt As Long
+    
+    out = ThisDocument.FullName
+    
+    FoundAt = InStrRev(out, ".doc", -1, vbTextCompare)
+    If FoundAt = 0 Then
+        out = out & ".mdb"
+    Else
+        out = Left(out, FoundAt - 1) & ".mdb"
+    End If
+    
+    DefaultFileName = out
+End Function
+'}}}
+
+
+```
+
+  * for Excel
+    * エクセル用
+
+```
+'class
+'  name;SettingsListTable
+'{{{
+Option Explicit
+
+Private MySettings As Collection
+Private MyFileName As String
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    MyTableName = "settings_list"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings.Add Stream.Fields("list").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+    Con.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For i = 1 To MySettings.Count
+        Stream.AddNew
+        Stream.Fields("list") = MySettings(i)
+        Stream.Update
+    Next
+    Stream.Close
+    
+    Con.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetConnectionString() As String
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetFileName() & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Excel ===
+
+Private Function DefaultFileName() As String
+    ' replace the full path of this document from ".xls" to ".mdb"
+    Dim out As String
+    Dim FoundAt As Long
+    
+    out = ThisWorkbook.FullName
+    
+    FoundAt = InStrRev(out, ".xls", -1, vbTextCompare)
+    If FoundAt = 0 Then
+        out = out & ".mdb"
+    Else
+        out = Left(out, FoundAt - 1) & ".mdb"
+    End If
+    
+    DefaultFileName = out
+End Function
+'}}}
+
+
+'class
+'  name;SettingsKeyValueTable
+'{{{
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyFileName As String
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    MyTableName = "settings_key_value"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings(Stream.Fields("key").Value) = Stream.Fields("value").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+    Con.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set Con = New ADODB.Connection
+    Con.Open GetConnectionString
+    
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For Each Key In MySettings.Keys
+        Stream.AddNew
+        Stream.Fields("key") = CStr(Key)
+        Stream.Fields("value") = MySettings(Key)
+        Stream.Update
+    Next
+    Stream.Close
+    
+    Con.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Private Function GetConnectionString() As String
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetFileName() & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Private Function GetFileName() As String
+    If MyFileName = "" Then MyFileName = DefaultFileName
+    GetFileName = MyFileName
+End Function
+
+
+'=== procedures below this line work only for MS Excel ===
+
+Private Function DefaultFileName() As String
+    ' replace the full path of this document from ".xls" to ".mdb"
+    Dim out As String
+    Dim FoundAt As Long
+    
+    out = ThisWorkbook.FullName
+    
+    FoundAt = InStrRev(out, ".xls", -1, vbTextCompare)
+    If FoundAt = 0 Then
+        out = out & ".mdb"
+    Else
+        out = Left(out, FoundAt - 1) & ".mdb"
+    End If
+    
+    DefaultFileName = out
+End Function
+'}}}
+
+
+```
+
+  * for Access
+    * アクセス用
+
+```
+'class
+'  name;SettingsListTable
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Collection
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        For i = 1 To MySettings.Count
+            out(i - 1) = MySettings(i)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    If Number <= 0 Or Number > MySettings.Count Then Exit Function
+    GetSetting = MySettings(Number)
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If MySettings.Count = 0 Or Number < 0 Or Number > MySettings.Count Then
+        MySettings.Add Data
+    ElseIf Number = 0 Then
+        MySettings.Add Data, Before:=1
+    Else
+        MySettings.Add Data, After:=Number
+        MySettings.Remove Number
+    End If
+End Sub
+
+Private Sub Class_Initialize()
+    Set MySettings = New Collection
+    MyTableName = "settings_list"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+
+'=== procedures below this line work only for MS Access ===
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings.Add Stream.Fields("list").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim i As Long
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For i = 1 To MySettings.Count
+        Stream.AddNew
+        Stream.Fields("list") = MySettings(i)
+        Stream.Update
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+'}}}
+
+
+'class
+'  name;SettingsKeyValueTable
+'{{{
+Option Compare Database
+Option Explicit
+
+Private MySettings As Scripting.Dictionary
+Private MyTableName As String
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim i As Long
+    Dim Key As Variant
+    
+    If MySettings.Count = 0 Then
+        out = Array()
+    Else
+        ReDim out(0 To MySettings.Count - 1)
+        i = 0
+        For Each Key In MySettings.Keys
+            out(i) = Array(Key, MySettings(Key))
+            i = i + 1
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    If Not MySettings.Exists(Key) Then Exit Function
+    GetSetting = MySettings(Key)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    MySettings(Key) = Data
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Private Sub Class_Initialize()
+    Set MySettings = New Scripting.Dictionary
+    MyTableName = "settings_key_value"
+    LoadData
+End Sub
+
+Private Sub Class_Terminate()
+    StoreData
+    Set MySettings = Nothing
+End Sub
+
+
+'=== procedures below this line work only for MS Access ===
+
+Public Sub LoadData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly
+    Do Until Stream.EOF
+        MySettings(Stream.Fields("key").Value) = Stream.Fields("value").Value
+        Stream.MoveNext
+    Loop
+    Stream.Close
+    
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+
+Public Sub StoreData()
+    Dim Stream As ADODB.Recordset
+    Dim Con As ADODB.Connection
+    Dim Key As Variant
+    
+    On Error GoTo DONE
+    
+    Set Con = CurrentProject.Connection
+    Con.Execute "DELETE * FROM " & MyTableName, Options:=adExecuteNoRecords
+    Set Stream = New ADODB.Recordset
+    Stream.Open MyTableName, Con, adOpenForwardOnly, adLockOptimistic
+    For Each Key In MySettings.Keys
+        Stream.AddNew
+        Stream.Fields("key") = CStr(Key)
+        Stream.Fields("value") = MySettings(Key)
+        Stream.Update
+    Next
+    Stream.Close
+
+DONE:
+    Set Stream = Nothing
+    Set Con = Nothing
+    If Err.Number > 0 Then Debug.Print Err.Number, Err.Description
+End Sub
+'}}}
+
+
+```
+
+### Excel Worksheet ###
+
+  * inter sessions
+    * セッション間で保持
+  * only for Excel
+    * エクセル専用。
+  * we could use excel sheets from word and access, but using access table is better for that kind of things.
+    * ワードやアクセスからエクセルシートを使えないこともないけど、そういう類の使い方ならアクセスのテーブルにすべき
+  * actually, we don't need a method to export raw Collection object and raw Dictionary object. so it can be smaller.
+    * 実際には、 Collection や Dictionary の生データを取り出すメソッドなんかは不要なので、もっと小さくできる。
+
+```
+'worksheet
+'  name;SettingsKeyValueSheet
+
+'cells-formula
+'  address;A2:B2
+'         ;Hello
+'         ;平成23年1月19日 水曜日 20430.73秒
+
+'worksheet
+'  name;SettingsListSheet
+
+'cells-formula
+'  address;A2:A3
+'         ;平成23年1月18日 火曜日 82262.37秒
+'         ;平成23年1月18日 火曜日 82335.69秒
+
+'module
+'  name;testSettingsOnExcel
+'{{{
+Option Explicit
+
+Sub test_ListSheet()
+    Dim x As SettingsListSheet
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = SettingsListSheet
+    x.SetSetting Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a
+    Next
+End Sub
+
+Sub test_KeyValueSheet()
+    Dim x As SettingsKeyValueSheet
+    Dim Data As Variant
+    Dim a As Variant
+    
+    Set x = SettingsKeyValueSheet
+    Debug.Print x.Properties("Hello")
+    x.Properties("Hello") = Format(Now(), "ggge年ooood日 aaaa ") & Timer() & "秒"
+    Data = x.GetSettings
+    Set x = Nothing
+    
+    For Each a In Data
+        Debug.Print a(0), a(1)
+    Next
+End Sub
+'}}}
+
+
+'code
+'  name;SettingsListSheet
+'{{{
+Option Explicit
+
+Public Function GetCollection() As Collection
+    Dim out As Collection
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then Exit Function
+    
+    Set out = New Collection
+    For r = 1 To UBoundRow - LBoundRow + 1
+        out.Add GetSetting(r)
+    Next
+    
+    Set GetCollection = out
+End Function
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then
+        out = Array()
+    Else
+        ReDim out(0 To UBoundRow - LBoundRow)
+        For r = 1 To UBoundRow - LBoundRow + 1
+            out(r - 1) = GetSetting(r)
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Number As Long) As Variant
+    Dim out As String
+    If UBoundRow < LBoundRow Or Number - 1 > UBoundRow - LBoundRow Then Exit Function
+    
+    out = Me.Cells(Number + 1, 1).Value
+    If Left(out, 1) = "'" Then out = Mid(out, 2)
+    GetSetting = out
+End Function
+
+Public Sub SetSetting(Data As Variant, Optional ByVal Number As Long = -1)
+    If UBoundRow < LBoundRow Or Number < 0 Or Number - 1 > UBoundRow - LBoundRow Then
+        Number = UBoundRow + 1
+    ElseIf Number = 0 Then
+        Number = LBoundRow
+        Me.Cells(Number, 1).Insert xlShiftDown
+    Else
+        Number = Number + 1
+        Me.Cells(Number, 1).Insert xlShiftDown
+    End If
+    Me.Cells(Number, 1).Value = "'" & Data
+End Sub
+
+Public Function LBoundRow() As Long
+    ' we ignore Row=1, because the Excel always assumes that $A$1 is a used cell.
+    LBoundRow = 2
+End Function
+
+Public Function UBoundRow() As Long
+    UBoundRow = Me.Cells.SpecialCells(xlCellTypeLastCell).Row
+End Function
+'}}}
+
+
+'code
+'  name;SettingsKeyValueSheet
+'{{{
+Option Explicit
+
+Public Function GetDictionary() As Scripting.Dictionary
+    Dim out As Scripting.Dictionary
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then Exit Function
+    
+    Set out = New Scripting.Dictionary
+    For r = LBoundRow To UBoundRow
+        out(RemoveQuot(KeyRange.EntireColumn.Rows(r).Value)) = _
+                RemoveQuot(ValueRange.EntireColumn.Rows(r).Value)
+    Next
+    
+    Set GetDictionary = out
+End Function
+
+Public Function GetSettings() As Variant
+    Dim out() As Variant
+    Dim r As Long
+    
+    If UBoundRow < LBoundRow Then
+        out = Array()
+    Else
+        ReDim out(0 To UBoundRow - LBoundRow)
+        For r = LBoundRow To UBoundRow
+            out(r - LBoundRow) = _
+                Array(RemoveQuot(KeyRange.EntireColumn.Rows(r).Value), _
+                    RemoveQuot(ValueRange.EntireColumn.Rows(r).Value))
+        Next
+    End If
+    
+    GetSettings = out
+End Function
+
+Public Function GetSetting(ByVal Key As String) As Variant
+    Dim FoundAt As Long
+    
+    FoundAt = FindRow(Key)
+    If FoundAt = 0 Then Exit Function
+    
+    GetSetting = RemoveQuot(ValueRange.EntireColumn.Rows(FoundAt).Value)
+End Function
+
+Public Sub SetSetting(ByVal Key As String, Data As Variant)
+    Dim FoundAt As Long
+    
+    FoundAt = FindRow(Key)
+    If FoundAt = 0 Then FoundAt = UBoundRow + 1
+    
+    Me.Rows(FoundAt).Columns("A:B").Value = Array(AddQuot(Key), AddQuot(Data))
+End Sub
+
+Public Property Get Properties(ByVal Key As String)
+    Properties = GetSetting(Key)
+End Property
+
+Public Property Let Properties(ByVal Key As String, Data As Variant)
+    SetSetting Key, Data
+End Property
+
+Public Function LBoundRow() As Long
+    ' we ignore Row=1, because the Excel always assumes that $A$1 is a used cell.
+    LBoundRow = 2
+End Function
+
+Public Function UBoundRow() As Long
+    UBoundRow = Me.Cells.SpecialCells(xlCellTypeLastCell).Row
+End Function
+
+Public Function KeyRange() As Range
+    Set KeyRange = Me.Columns("A").Rows(LBoundRow & ":" & UBoundRow)
+End Function
+
+Public Function ValueRange() As Range
+    Set ValueRange = Me.Columns("B").Rows(LBoundRow & ":" & UBoundRow)
+End Function
+
+Public Function FindRow(ByVal Key As String) As Long
+    Dim Found As Range
+    Dim out As Long
+    
+    Set Found = KeyRange.Find(Key, LookIn:=xlValues, LookAt:=xlWhole, MatchCase:=True)
+    If Found Is Nothing Then
+        out = 0
+    Else
+        out = Found.Row
+        Set Found = Nothing
+    End If
+    
+    FindRow = out
+End Function
+
+Private Function RemoveQuot(ByVal out As String) As String
+    If Left(out, 1) = "'" Then out = Mid(out, 2)
+    RemoveQuot = out
+End Function
+
+Private Function AddQuot(ByVal out As String) As String
+    AddQuot = "'" & out
+End Function
+'}}}
+
+
+```

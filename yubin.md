@@ -1,0 +1,1300 @@
+
+
+# Introduction #
+
+  * search zipcodes in japan
+
+## 概要 ##
+  * 日本の郵便番号を検索する
+
+# Details #
+
+![http://4.bp.blogspot.com/_EUW0nrj9XlM/TVIC2kYvgaI/AAAAAAAAAC0/JTq_mOMXSik/s1600/shot15.png](http://4.bp.blogspot.com/_EUW0nrj9XlM/TVIC2kYvgaI/AAAAAAAAAC0/JTq_mOMXSik/s1600/shot15.png)
+![http://3.bp.blogspot.com/_EUW0nrj9XlM/TVIC5ZnXZyI/AAAAAAAAAC4/7Ehh2TT0T7U/s1600/shot26.png](http://3.bp.blogspot.com/_EUW0nrj9XlM/TVIC5ZnXZyI/AAAAAAAAAC4/7Ehh2TT0T7U/s1600/shot26.png)
+
+  * search zipcodes or addresses in Japan.
+  * works both as an windows application and a commandl line tool.
+  * though it uses a mdb file as a database, it runs without Microsoft Access.
+  * no preconditions are required for almost Windows, because it's all written by `VBScript` .
+  * and free to customize.
+
+## 説明 ##
+  * 日本の郵便番号や住所を検索する。
+  * ウィンドウアプリとしても、コマンドプロンプトでも使える。
+  * mdb 形式のデータベースファイルを使っているが、マイクロソフトアクセスは必要無い。
+  * `VBScript` だけで書かれているので、ほとんどのウィンドウズ環境でそのまま動く。
+  * 好き勝手にカスタマイズできる。
+
+# Downloads #
+
+  * [downloads / ダウンロード](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=yubin)
+
+# How to use #
+
+  1. download zipcode data from japan post page.
+  1. use `new_yubin.vbs` to initialize data.
+  1. use `yubin.vbs` to search.
+
+## 使い方 ##
+  1. 日本郵便のページから郵便番号データをダウンロードする。
+  1. `new_yubin.vbs` で初期化。
+  1. `yubin.vbs` で検索。
+
+## 設計 ##
+  1. [yubin\_japanpost\_zipcode](yubin_japanpost_zipcode.md) に設計メモがある。
+
+
+# Code #
+
+### yubin.vbs ###
+
+```
+' yubin
+' search zip numbers of Japan.
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+Const PopX = 500    ' x location by screen twips
+Const PopY = 1000   ' y location by screen twips
+
+Const HowNA = 0
+Const HowFromYubin = 1
+Const HowFromCho = 2
+Const HowFromJigyo = 3
+Const adOpenForwardOnly = 0
+Const adLockReadOnly = 1
+Dim Bag     ' global resources
+
+On Error Resume Next
+Set Bag = New GlobalResources
+Set Args = WScript.Arguments
+Main Args
+If Err.Number <> 0 Then WScript.Echo Err.Description
+WScript.Quit(Err.Number)
+
+'=== main flows begin ===
+
+Sub Main(Args)
+    If WScript.Interactive Then
+        If Args.Count > 0 Then
+            SearchCommand Args
+        Else
+            SearchPrompt HasConsole()
+        End If
+    Else
+        SearchBatch
+    End If
+End Sub
+
+Sub SearchPrompt(WithConsole)
+    Dim AText, out
+    
+    Do
+        If WithConsole Then
+            WScript.Echo out
+            AText = WScript.StdIn.ReadLine
+        Else
+            AText = InputBox(out, Bag.Title, AText, PopX, PopY)
+        End If
+        
+        If AText = "" Then Exit Sub
+        
+        Bag.Joken.SetText AText
+        out = DoSearch()
+    Loop
+End Sub
+
+Sub SearchCommand(Args)
+    Bag.Joken.SetArgs Args
+    WScript.Echo DoSearch()
+End Sub
+
+Sub SearchBatch()
+    Dim AText, out
+    Dim inS, outS
+    
+    Set inS = WScript.StdIn
+    Set outS = WScript.StdOut
+    
+    Do Until inS.AtEndOfStream
+        AText = inS.ReadLine
+        Bag.Joken.SetText AText
+        out = DoSearch()
+        outS.WriteLine "<" & AText
+        outS.WriteLine out
+    Loop
+    
+    outS.Close
+    inS.Close
+    Set outS = Nothing
+    Set inS =  Nothing
+End Sub
+
+'=== main flows end ===
+'=== core seacher begin ===
+
+Function DoSearch()
+    Dim out
+    
+    Select Case Bag.Joken.How
+    Case HowFromYubin
+        out = DoYubinSearch()
+    Case HowFromCho
+        out = DoChoSearch()
+    Case HowFromJigyo
+        If Bag.Joken.Cho = "" Then
+            out = DoChoSearch()
+        Else
+            out = DoJigyoSearch()
+        End If
+    Case Else
+        out = ""
+    End Select
+    'out = Bag.Joken.Dump
+    
+    DoSearch = out
+End Function
+
+Function DoChoSearch()
+    Dim out
+    
+    If Bag.Joken.Ken = "県" Or Bag.Joken.Ken = "けん" Then
+        out = ListKen()
+    ElseIf Bag.Joken.Shi = "" Then
+        out = ListShi()
+    ElseIf Bag.Joken.Cho = "" Then
+        out = FromShi()
+    Else
+        out = FromCho()
+    End If
+    
+    DoChoSearch = out
+End Function
+
+Function DoJigyoSearch()
+    DoJigyoSearch = FromJigyo()
+End Function
+
+Function DoYubinSearch()
+    DoYubinSearch = FromYubin()
+End Function
+
+'=== core seacher end ===
+'=== SQL common functions begin ===
+
+Function GetId(Con, Sql)
+    Dim dbs, out
+    
+    Set dbs = CreateObject("ADODB.Recordset")
+    dbs.Open Sql, Con, adOpenForwardOnly, adLockReadOnly
+    
+    If dbs.EOF Then
+        out = 0
+    Else
+        out = dbs.Fields(0)
+    End If
+    
+    dbs.Close
+    Set dbs = Nothing
+    
+    GetId = out
+End Function
+
+Function ListRecords(Con, Sql)
+    Dim dbs, out
+    
+    Set dbs = CreateObject("ADODB.Recordset")
+    dbs.Open Sql, Con, adOpenForwardOnly, adLockReadOnly
+    
+    Do Until dbs.EOF
+        out = out & dbs.Fields(0) & vbCrLf
+        dbs.MoveNext
+    Loop
+    
+    dbs.Close
+    Set dbs = Nothing
+    
+    ListRecords = out
+End Function
+
+Function ListRecordsTab(Con, Sql, Cols)
+    Dim dbs, out, i
+    
+    Set dbs = CreateObject("ADODB.Recordset")
+    dbs.Open Sql, Con, adOpenForwardOnly, adLockReadOnly
+    
+    Do Until dbs.EOF
+        i = i + 1
+        out = out & dbs.Fields(0) & vbTab
+        If i Mod Cols = 0 Then out = out & vbCrLf
+        dbs.MoveNext
+    Loop
+    
+    dbs.Close
+    Set dbs = Nothing
+    
+    ListRecordsTab = out
+End Function
+
+Function ListRecordsLength(Con, Sql, Length)
+    Dim dbs, out, i
+    
+    Set dbs = CreateObject("ADODB.Recordset")
+    dbs.Open Sql, Con, adOpenForwardOnly, adLockReadOnly
+    
+    Do Until dbs.EOF
+        i = i + Len(dbs.Fields(0)) + 1
+        If i > Length Then
+            out = out & vbCrLf
+            i = Len(dbs.Fields(0)) + 1
+        End If
+        out = out & dbs.Fields(0) & " "
+        dbs.MoveNext
+    Loop
+    
+    dbs.Close
+    Set dbs = Nothing
+    
+    ListRecordsLength = out
+End Function
+
+'=== SQL common functions end ===
+'=== SQL functions begin ===
+
+Function ListKen()
+    ListKen = ListRecordsTab(Bag.Connect, _
+        "SELECT ken_name FROM ken ORDER BY code", _
+        4)
+End Function
+
+Function ListShi()
+    Dim KenCode
+    
+    KenCode = GetKen()
+    ListShi = ListRecordsLength(Bag.Connect, _
+        "SELECT shi_name FROM shi WHERE code BETWEEN " & _
+        KenCode & "000 AND " & KenCode & "999 ORDER BY code", _
+        21)
+End Function
+
+Function FromYubin()
+    FromYubin = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE yubin BETWEEN '" & Bag.Joken.YubinB & "' AND '" & Bag.Joken.YubinE & "' ORDER BY yubin")
+    If FromYubin <> "" Then Exit Function
+    
+    FromYubin = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE yubin BETWEEN '" & Bag.Joken.YubinB & "' AND '" & Bag.Joken.YubinE & "' ORDER BY yubin")
+End Function
+
+Function FromShi()
+    Dim Code
+    Code = GetShi()
+    FromShi = ListRecords(Bag.Connect, _
+        "SELECT yubin_misc & ' ' & ken_name & ' ' & shi_name & ' ※'  AS out" & _
+        "  FROM shi INNER JOIN ken ON shi.ken_code = ken.code" & _
+        " WHERE shi.code = " & Code & " AND yubin_misc IS NOT NULL")
+End Function
+
+Function FromCho()
+    Dim Code
+    Code = GetShi()
+    
+    FromCho = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE cho.code = " & Code & " AND cho_hira LIKE '" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
+    If FromCho <> "" Then Exit Function
+    
+    FromCho = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE cho.code = " & Code & " AND cho_name LIKE '" & Bag.Joken.Cho & "%' ORDER BY yubin")
+    If FromCho <> "" Then Exit Function
+    
+    FromCho = FromShi()
+End Function
+
+Function FromJigyo()
+    Dim Code
+    Code = GetShi()
+    
+    FromJigyo = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE cho.code = " & Code & " AND cho_hira LIKE '%" & ToOogaki(Bag.Joken.Cho) & "%' ORDER BY yubin")
+    If FromJigyo <> "" Then Exit Function
+    
+    FromJigyo = ListRecords(Bag.Connect, _
+        "SELECT yubin & ' ' & ken_name & ' ' & shi_name & ' ' & cho_name AS out" & _
+        "  FROM jigyo AS cho INNER JOIN (shi INNER JOIN ken ON shi.ken_code = ken.code) ON cho.code = shi.code" & _
+        " WHERE cho.code = " & Code & " AND cho_name LIKE '%" & Bag.Joken.Cho & "%' ORDER BY yubin")
+End Function
+
+Function GetShi()
+    Dim out, Ken
+    
+    Ken = GetKen()
+    out = GetId(Bag.Connect, "SELECT code FROM shi WHERE ken_code = " & Ken & " AND shi_name = '" & Bag.Joken.Shi & "'")
+    If out = 0 Then
+        out = GetId(Bag.Connect, "SELECT code FROM shi WHERE ken_code = " & Ken & " AND shi_hira = '" & ToOogaki(Bag.Joken.Shi) & "'")
+    End If
+    
+    GetShi = out
+End Function
+
+Function GetKen()
+    Dim out
+    
+    out = GetId(Bag.Connect, "SELECT code FROM ken WHERE ken_name = '" & Bag.Joken.Ken & "'")
+    If out = 0 Then
+        out = GetId(Bag.Connect, "SELECT code FROM ken WHERE ken_hira = '" & ToOogaki(Bag.Joken.Ken) & "'")
+    End If
+    
+    GetKen = out
+End Function
+
+'=== SQL functions end ===
+'=== utility functions begin ===
+
+Function ToOogaki(Text)
+    Dim x, out
+    
+    out = Text
+    For Each x In Array( _
+            Array("ぁ", "あ"), _
+            Array("ぃ", "い"), _
+            Array("ぅ", "う"), _
+            Array("ぇ", "え"), _
+            Array("ぉ", "お"), _
+            Array("っ", "つ"), _
+            Array("ゃ", "や"), _
+            Array("ゅ", "ゆ"), _
+            Array("ょ", "よ"), _
+            Array("ゎ", "わ") _
+        )
+        out = Replace(out, x(0), x(1))
+    Next
+    
+    ToOogaki = out
+End Function
+
+Function HasConsole()
+    HasConsole = (UCase(Left(Right(WScript.FullName,11),1)) = "C")
+End Function
+
+'=== utility functions end ===
+'=== classes begin ===
+' GlobalResources, SearchConditions
+
+Class GlobalResources
+    Public Title, KenKotei, ShiKotei
+    Public Joken, Connect
+    Public Shell
+    
+    Private Sub Class_Initialize
+        Set Shell = CreateObject("WScript.Shell")
+        Set Joken = New SearchConditions
+        
+        'KenKotei = Shell.Environment("USER")("KENKOTEI") ' this doesn't work
+        KenKotei = Shell.ExpandEnvironmentStrings("%KENKOTEI%")
+        If KenKotei = "%KENKOTEI%" Then KenKotei = ""
+        If KenKotei <> ""  Then ShiKotei = Shell.ExpandEnvironmentStrings("%SHIKOTEI%")
+        If ShiKotei = "%SHIKOTEI%" Then ShiKotei = ""
+        Title = KenKotei & ShiKotei & " ● 郵便番号検索 - yubin"
+        
+        Set Connect = CreateObject("ADODB.Connection")
+        Connect.Open GetConnectionString()
+    End Sub
+    
+    Private Sub Class_Terminate
+        Connect.Close
+        Set Connect = Nothing
+        Set Joken = Nothing
+        Set Shell = Nothing
+    End Sub
+    
+    Private Function GetMdbName()
+        GetMdbName = WScript.ScriptFullName & ".mdb"
+        'GetMdbName = "C:\tmp\yubin.vbs.mdb"
+    End Function
+
+    Private Function GetConnectionString()
+        GetConnectionString = _
+            "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+            GetMdbName & _
+            ";User ID=Admin;Password=;"
+    End Function
+End Class
+
+Class SearchConditions
+    Public Ken, Shi, Cho
+    Public Yubin, YubinB, YubinE
+    Public How
+    
+    Public Sub SetText(Text)
+        SetConditions Split(Replace(Text, "　", " "))
+    End Sub
+    
+    Public Sub SetArgs(Args)
+        SetConditions Args
+    End Sub
+    
+    Public Function Dump()
+        Dump = Join(Array(How, Yubin, YubinB, YubinE, Ken, Shi, Cho), vbCrLf)
+    End Function
+    
+    Private Sub SetConditions(p)
+        Dim x, i
+        Dim q(2)
+        
+        How = HowNA
+        
+        If Bag.KenKotei <> "" Then
+            q(0) = Bag.KenKotei
+            i = 1
+        End If
+        If Bag.ShiKotei <> "" Then
+            q(1) = Bag.ShiKotei
+            i = 2
+        End If
+        
+        For Each x In p
+            x = Trim(x)
+            If x <> "" Then
+                Select Case How
+                Case HowNA
+                    ' The First Item
+                    If Left(x, 1) = "＄" Or Left(x, 1) = "$" Then
+                        How = HowFromJigyo
+                    Else
+                        If IsNumeric(Left(x, 1)) Then
+                            How = HowFromYubin
+                            q(0) = ""
+                            ScoopNumber x, q(0)
+                        Else
+                            How = HowFromCho
+                            q(i) = x
+                            i = i + 1
+                        End If
+                    End If
+                Case HowFromYubin
+                    ' The 2nd and after
+                    ScoopNumber x, q(0)
+                Case Else
+                    ' The 2nd and after
+                    If i > 2 Then
+                        q(2) = q(2) & x
+                    Else
+                        q(i) = x
+                    End If
+                    i = i + 1
+                End Select
+            End If
+        Next
+        
+        If How = HowFromYubin Then
+            Yubin = Left(q(0), 7)
+            i = Len(Yubin)
+            If i = 7 Then
+                YubinB = Yubin
+                YubinE = Yubin
+            ElseIf i < 3 Then
+                ' avoid searching to many records
+                How = HowNA
+            Else
+                YubinB = Yubin & String(7 - i, "0")
+                YubinE = Yubin & String(7 - i, "9")
+            End If
+        Else
+            Ken = SafeString(q(0))
+            Shi = SafeString(q(1))
+            Cho = SafeString(q(2))
+        End If
+    End Sub
+    
+    Private Sub ScoopNumber(Text, out)
+        Dim i, x
+        
+        For i = 1 to Len(Text)
+            x = Mid(Text, i, 1)
+            If IsNumeric(x) Then out = out & CStr(CLng(x))
+        Next
+    End Sub
+    
+    Private Function SafeString(Text)
+        SafeString = Replace(Replace(Text, """", " "), "'", " ")
+    End Function
+End Class
+
+'=== classes end ===
+```
+
+### new\_yubin.vbs ###
+
+```
+' new_yubin
+' initialize mdb file from zip numbers csv.
+' csv url: http://www.post.japanpost.jp/zipcode/download.html
+' Copyright (C) 2011 Tomizono - kobobau.com
+' Fortitudinous, Free, Fair, http://cowares.nobody.jp
+
+Const adOpenForwardOnly = 0
+Const adLockOptimistic = 3
+Const TristateFalse = 0
+Const ForReading = 1
+Const CsvNA = 0
+Const CsvOogaki = 1
+Const CsvJigyo = 2
+Const ColumnsOogaki = 15
+Const ColumnsJigyo = 13
+
+On Error Resume Next
+Set Args = WScript.Arguments
+Set StdErr = New StringStream
+Main Args
+If Err.Number <> 0 Then WScript.Echo Err.Description
+If StdErr.Text <> "" Then WScript.Echo StdErr.Text
+WScript.Quit(Err.Number)
+
+Private Function GetMdbName()
+    GetMdbName = Replace(WScript.ScriptFullName, WScript.ScriptName, "yubin.vbs") & ".mdb"
+    'GetMdbName = "C:\tmp\yubin.vbs.mdb"
+End Function
+
+Private Function GetConnectionString()
+    GetConnectionString = _
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+        GetMdbName & _
+        ";User ID=Admin;Password=;"
+End Function
+
+Sub Main(Files)
+    Dim Con, File
+    
+    Set Con = CreateObject("ADODB.Connection")
+    Con.Open GetConnectionString()
+    
+    For Each File In Files
+        UpdateFromCsv Con, File
+    Next
+    
+    Con.Close
+    Set Con = Nothing
+End Sub
+
+Sub UpdateFromCsv(Con, FileName)
+    Select Case WhichCsv(FileName)
+    Case CsvOogaki
+        StdErr.Print "市町村郵便番号の更新: " & FileName
+        AppendCsvOogaki Con, FileName
+    Case CsvJigyo
+        StdErr.Print "大口事業所の更新: " & FileName
+        AppendCsvJigyo Con, FileName
+    Case Else
+        StdErr.Print "読めないデータ: " & FileName
+    End Select
+End Sub
+
+Sub AppendCsvJigyo(Con, FileName)
+    AppendZipCode Con, FileName, "zipcode_j", RegParseCsvJigyo, ColumnsJigyo
+    Con.Execute "make_jigyo"
+End Sub
+
+Sub AppendCsvOogaki(Con, FileName)
+    AppendZipCode Con, FileName, "zipcode_k", RegParseCsvOogaki, ColumnsOogaki
+    AppendKenShiCho Con
+End Sub
+
+Sub AppendKenShiCho(Con)
+    Con.Execute "make_ken"
+    Con.Execute "make_shi_yubin"
+    Con.Execute "update_shi_yubin"
+    Con.Execute "make_cho"
+End Sub
+
+Sub AppendZipCode(Con, FileName, TableName, R, ColumnsNumber)
+    Dim dbs, fs, ts, rRes, RawText, i
+    
+    Set dbs = CreateObject("ADODB.Recordset")
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    dbs.Open TableName, Con, adOpenForwardOnly, adLockOptimistic
+    Set ts = fs.OpenTextFile(FileName, ForReading, False, TristateFalse)
+    
+    Con.BeginTrans
+    Do Until ts.AtEndOfStream
+        RawText = ts.ReadLine
+        Set rRes = R.Execute(RawText)
+        If rRes.Count = 0 Then
+            StdErr.Print "Parse Error: " & RawText
+        Else
+            If rRes(0).SubMatches.Count <> ColumnsNumber Then
+                StdErr.Print "Parse Error: " & RawText
+            Else
+                dbs.AddNew
+                For i = 1 To ColumnsNumber
+                    dbs.Fields(i) = rRes(0).SubMatches(i - 1)
+                Next
+                dbs.Update
+            End If
+        End If
+    Loop
+    Con.CommitTrans
+    
+    ts.Close
+    dbs.Close
+    Set ts = Nothing
+    Set fs = Nothing
+    Set dbs = Nothing
+End Sub
+
+Private Function RegParseCsvOogaki()
+    Dim R, i
+    Const PNum = "([^,""]*)\s*"
+    Const PStr = """([^,""]*)\s*"""
+    Const PC = ","
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = PNum
+    For i = 1 To 8
+        R.Pattern = R.Pattern & PC & PStr
+    Next
+    For i = 1 To 6
+        R.Pattern = R.Pattern & PC & PNum
+    Next
+    
+    Set RegParseCsvOogaki = R
+End Function
+
+Private Function RegParseCsvJigyo()
+    Dim R, i
+    Const PNum = "([^,""]*)\s*"
+    Const PStr = """([^,""]*)\s*"""
+    Const PC = ","
+    
+    Set R = CreateObject("VBScript.RegExp")
+    R.Global = True
+    R.IgnoreCase = False
+    R.MultiLine = False
+    R.Pattern = PNum
+    For i = 1 To 9
+        R.Pattern = R.Pattern & PC & PStr
+    Next
+    For i = 1 To 3
+        R.Pattern = R.Pattern & PC & PNum
+    Next
+    
+    Set RegParseCsvJigyo = R
+End Function
+
+Function WhichCsv(FileName)
+    Dim out, fs, ts, rRes, RawText
+    
+    out = CsvNA
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    Set ts = fs.OpenTextFile(FileName, ForReading, False, TristateFalse)
+    
+    If Not ts.AtEndOfStream Then
+        RawText = ts.ReadLine
+        Set rRes = RegParseCsvOogaki.Execute(RawText)
+        If rRes.Count > 0 Then
+            out = CsvOogaki
+        Else
+            Set rRes = RegParseCsvJigyo.Execute(RawText)
+            If rRes.Count > 0 Then out = CsvJigyo
+        End If
+        Set rRes = Nothing
+    End If
+    
+    ts.Close
+    Set ts = Nothing
+    Set fs = Nothing
+    
+    WhichCsv = out
+End Function
+
+Class StringStream
+    Public Text
+    
+    Public Sub Print(Data)
+        Text = Text & Data & vbCrLf
+    End Sub
+End Class
+```
+
+### yubin\_kagawa.bat ###
+
+```
+SET KENKOTEI=香川県
+SET SHIKOTEI=高松市
+WScript yubin.vbs
+```
+
+### tables.txt ###
+
+```
+'table
+' name;cho
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;yubin
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;cho_name
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_hira
+' type;text
+' type-low;text
+' size;255
+
+'table-keys
+' name;code
+' column;code
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table-keys
+' name;yubin
+' column;yubin
+
+'table
+' name;jigyo
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;yubin
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;cho_name
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_hira
+' type;text
+' type-low;text
+' size;255
+
+'table-keys
+' name;code
+' column;code
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table-keys
+' name;yubin
+' column;yubin
+
+'table
+' name;ken
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;ken_name
+' type;text
+' type-low;text
+' size;8
+
+'table-columns
+' name;ken_hira
+' type;text
+' type-low;text
+' size;8
+
+'table-columns
+' name;records
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;ken_hira
+' unique;
+' column;ken_hira
+
+'table-keys
+' name;ken_name
+' unique;
+' column;ken_name
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;code
+
+'table
+' name;shi
+
+'table-columns
+' name;code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;shi_name
+' type;text
+' type-low;text
+' size;24
+
+'table-columns
+' name;shi_hira
+' type;text
+' type-low;text
+' size;48
+
+'table-columns
+' name;records
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;yubin_misc
+' type;text
+' type-low;text
+' size;7
+' allow-zero-length;
+
+'table-columns
+' name;ken_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;code
+
+'table-keys
+' name;shi_hira
+' column;shi_hira
+
+'table-keys
+' name;shi_name
+' column;shi_name
+
+'table
+' name;zipcode_j
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;dantai_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;jigyo_kana
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;jigyo
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;ken
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho
+' type;text
+' type-low;text
+' size;255
+' allow-zero-length;
+
+'table-columns
+' name;aza
+' type;text
+' type-low;text
+' size;255
+' allow-zero-length;
+
+'table-columns
+' name;yubin7
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;yubin5
+' type;text
+' type-low;text
+' size;5
+
+'table-columns
+' name;shiten
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shubetu
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;fukusu
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;shusei
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+'table
+' name;zipcode_k
+
+'table-columns
+' name;id
+' type;integer
+' type-low;long
+' size;4
+' auto-increment;
+
+'table-columns
+' name;dantai_code
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;yubin5
+' type;text
+' type-low;text
+' size;5
+
+'table-columns
+' name;yubin7
+' type;text
+' type-low;text
+' size;7
+
+'table-columns
+' name;ken_kana
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi_kana
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho_kana
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;ken
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;shi
+' type;text
+' type-low;text
+' size;50
+
+'table-columns
+' name;cho
+' type;text
+' type-low;text
+' size;255
+
+'table-columns
+' name;cho_2zip
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;koaza
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;chome
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;zip_2cho
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;koshin
+' type;integer
+' type-low;long
+' size;4
+
+'table-columns
+' name;riyu
+' type;integer
+' type-low;long
+' size;4
+
+'table-keys
+' name;PrimaryKey
+' primary;
+' unique;
+' column;id
+
+```
+
+### queries.txt ###
+
+```
+'query
+' name;delete_cho
+'{{{
+DELETE *
+FROM cho;
+'}}}
+
+'query
+' name;delete_jigyo
+'{{{
+DELETE *
+FROM jigyo;
+'}}}
+
+'query
+' name;delete_ken
+'{{{
+DELETE *
+FROM ken;
+'}}}
+
+'query
+' name;delete_shi
+'{{{
+DELETE *
+FROM shi;
+'}}}
+
+'query
+' name;delete_zipcode_j
+'{{{
+DELETE *
+FROM zipcode_j;
+'}}}
+
+'query
+' name;delete_zipcode_k
+'{{{
+DELETE *
+FROM zipcode_k;
+'}}}
+
+'query
+' name;ikani_kisaiga_nai
+'{{{
+SELECT [dantai_code] AS code, First([yubin7]) AS yubin
+FROM zipcode_k
+WHERE [cho]="以下に掲載がない場合"
+GROUP BY [dantai_code];
+'}}}
+
+'query
+' name;make_cho
+'{{{
+INSERT INTO cho ( yubin, code, cho_name, cho_hira )
+SELECT yubin7 AS yubin, dantai_code AS code, cho AS cho_name, StrConv(cho_kana,36) AS cho_hira
+FROM zipcode_k;
+'}}}
+
+'query
+' name;make_jigyo
+'{{{
+INSERT INTO jigyo ( yubin, code, cho_name, cho_hira )
+SELECT yubin7 AS yubin, dantai_code AS code, jigyo AS cho_name, StrConv(jigyo_kana,36) AS cho_hira
+FROM zipcode_j;
+'}}}
+
+'query
+' name;make_ken
+'{{{
+INSERT INTO ken ( code, ken_name, ken_hira, records )
+SELECT Int(dantai_code/1000) AS code, First(ken) AS ken_name, StrConv(First(ken_kana),36) AS ken_hira, Count(id) AS records
+FROM zipcode_k
+GROUP BY Int(dantai_code/1000);
+'}}}
+
+'query
+' name;make_shi
+'{{{
+SELECT [dantai_code] AS code, First([shi]) AS shi_name, StrConv(First([shi_kana]),36) AS shi_hira, Count([id]) AS records
+FROM zipcode_k
+GROUP BY [dantai_code];
+'}}}
+
+'query
+' name;make_shi_yubin
+'{{{
+INSERT INTO shi ( code, shi_name, shi_hira, records, yubin_misc, ken_code )
+SELECT A.code, A.shi_name, A.shi_hira, A.records, B.yubin AS yubin_misc, Int(A.code/1000) AS ken_code
+FROM make_shi AS A LEFT JOIN ikani_kisaiga_nai AS B ON A.code=B.code;
+'}}}
+
+'query
+' name;update_shi_yubin
+'{{{
+UPDATE shi AS A INNER JOIN zipcode_k AS B ON A.code=B.dantai_code SET A.yubin_misc = B.yubin7
+WHERE A.yubin_misc Is Null AND A.records=1;
+'}}}
+
+```
+
+### urls.txt ###
+
+```
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/ken_all.zip    ken_all.zip
+http://www.post.japanpost.jp/zipcode/dl/jigyosyo/zip/jigyosyo.zip jigyosyo.zip
+```
+
+### urls\_ken.txt ###
+
+```
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/01hokkai.zip 01hokkai.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/02aomori.zip 02aomori.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/03iwate.zip  03iwate.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/04miyagi.zip 04miyagi.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/05akita.zip  05akita.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/06yamaga.zip 06yamaga.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/07fukush.zip 07fukush.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/08ibarak.zip 08ibarak.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/09tochig.zip 09tochig.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/10gumma.zip  10gumma.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/11saitam.zip 11saitam.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/12chiba.zip  12chiba.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/13tokyo.zip  13tokyo.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/14kanaga.zip 14kanaga.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/15niigat.zip 15niigat.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/16toyama.zip 16toyama.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/17ishika.zip 17ishika.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/18fukui.zip  18fukui.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/19yamana.zip 19yamana.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/20nagano.zip 20nagano.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/21gifu.zip   21gifu.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/22shizuo.zip 22shizuo.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/23aichi.zip  23aichi.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/24mie.zip    24mie.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/25shiga.zip  25shiga.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/26kyouto.zip 26kyouto.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/27osaka.zip  27osaka.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/28hyogo.zip  28hyogo.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/29nara.zip   29nara.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/30wakaya.zip 30wakaya.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/31tottor.zip 31tottor.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/32shiman.zip 32shiman.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/33okayam.zip 33okayam.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/34hirosh.zip 34hirosh.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/35yamagu.zip 35yamagu.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/36tokush.zip 36tokush.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/37kagawa.zip 37kagawa.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/38ehime.zip  38ehime.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/39kochi.zip  39kochi.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/40fukuok.zip 40fukuok.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/41saga.zip   41saga.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/42nagasa.zip 42nagasa.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/43kumamo.zip 43kumamo.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/44oita.zip   44oita.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/45miyaza.zip 45miyaza.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/46kagosh.zip 46kagosh.zip
+http://www.post.japanpost.jp/zipcode/dl/oogaki/zip/47okinaw.zip 47okinaw.zip
+```

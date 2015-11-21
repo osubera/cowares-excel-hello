@@ -1,0 +1,188 @@
+# Introduction #
+
+  * bad vba: Empty betrays
+
+## 概要 ##
+  * 失敗マクロ: VBAの Empty には気をつけろ
+
+# Details #
+
+  * Empty is for an undefined value of Variant type variable.
+  * can be shown excactly by `IsEmpty` function.
+  * but the compare operation `equal` tells a lie.
+  * comparing with the former value is used to know the exact change on Long sequence.
+  * same approach on a Variant sequence contains Empty will fail, because continuous 0 and Empty are regarded as same.
+  * Empty = 0 is True on VBA.
+  * a user function is required to know a exact distinguish.
+  * we also have to care Null.
+
+## 説明 ##
+  * Empty は Variant 型変数の初期値だ。
+  * `IsEmpty` 関数で識別できる。
+  * しかし、比較演算子による条件判定ではやっかいな動きをする。
+  * Long 数列のキー変化判定は、しばしば前値との比較で行われる。
+  * Empty を含む Variant 数列で、同様の処理を行えば、 0 と Empty が連続した場合に、キー変化と判定されない。
+  * Empty = 0 は、真とみなされるから。
+  * これを識別したいなら、厳密な比較判定を行う関数を作成する必要がある。
+  * また、 Null が混在した場合の比較演算子にも注意が必要だ。
+
+# Bad Code #
+
+```
+'ssf-begin
+';
+
+'module
+'   name;bad_empty
+'{{{
+Option Explicit
+
+Sub test_Empty()
+    Debug.Assert (Empty = Empty)
+    Debug.Assert (Empty = 0)
+    Debug.Assert (Empty = "")
+    Debug.Assert (Empty = vbNullString)
+    
+    Debug.Assert IsEmpty(Empty)
+    Debug.Assert Not IsEmpty(0)
+    Debug.Assert Not IsEmpty("")
+    Debug.Assert Not IsEmpty(vbNullString)
+End Sub
+
+Sub test_Null()
+    Debug.Print (Null = Empty)
+    Debug.Print (Null = 0)
+    Debug.Print (Null = "")
+    Debug.Print (Null = vbNullString)
+    Debug.Print (Null = Null)
+    ' above are all "Null", not True nor False
+    
+    Debug.Assert (2 = IIf(Null = Null, 1, 2))
+    Debug.Assert (2 = IIf(Null <> Null, 1, 2))
+    
+    Debug.Assert Not IsEmpty(Null)
+    Debug.Assert IsNull(Null)
+    Debug.Assert Not IsNull(Empty)
+    Debug.Assert Not IsNull(0)
+    Debug.Assert Not IsNull("")
+    Debug.Assert Not IsNull(vbNullString)
+End Sub
+
+Sub test_vbNullString()
+    Debug.Assert (vbNullString = Empty)
+    Debug.Assert Not (vbNullString = CVar(0))   ' explicit cast required
+    Debug.Assert (vbNullString = "")
+    Debug.Assert (vbNullString = vbNullString)
+End Sub
+
+Sub test_vbNullString_more()
+    On Error Resume Next
+    Debug.Print (vbNullString = 0)
+    Debug.Print Err.Number, Err.Description ' 13 type unmatched
+End Sub
+
+Sub test_TypeName()
+    Debug.Assert TypeName(Empty) = "Empty"
+    Debug.Assert TypeName(0) = "Integer"
+    Debug.Assert TypeName("") = "String"
+    Debug.Assert TypeName(vbNullString) = "String"
+    Debug.Assert TypeName(Null) = "Null"
+End Sub
+
+Sub test_ExactEqual()
+    Debug.Assert ExactEqual(Empty, Empty)
+    Debug.Assert Not ExactEqual(Empty, 0)
+    Debug.Assert Not ExactEqual(Empty, "")
+    Debug.Assert Not ExactEqual(Empty, vbNullString)
+    
+    Debug.Assert ExactEqual(Null, Null)
+    Debug.Assert Not ExactEqual(Null, Empty)
+    Debug.Assert Not ExactEqual(Null, 0)
+    Debug.Assert Not ExactEqual(Null, "")
+    Debug.Assert Not ExactEqual(Null, vbNullString)
+    
+    Debug.Assert ExactEqual(0, 0)
+    Debug.Assert Not ExactEqual(0, 1)
+    Debug.Assert Not ExactEqual("1", 1)
+    Debug.Assert ExactEqual("", "")
+    Debug.Assert ExactEqual("", vbNullString)
+    Debug.Assert ExactEqual(vbNullString, vbNullString)
+    Debug.Assert Not ExactEqual(vbNullString, 0)
+    
+End Sub
+
+Function ExactEqual(x As Variant, y As Variant) As Boolean
+    Dim Equal As Boolean
+    
+    ' handle Null
+    If IsNull(x) <> IsNull(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsNull(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' handle Empty
+    If IsEmpty(x) <> IsEmpty(y) Then
+        Equal = False
+        GoTo DONE
+    ElseIf IsEmpty(x) Then
+        Equal = True
+        GoTo DONE
+    End If
+    
+    ' no more nulls nor empties
+    Equal = (x = y)
+    
+DONE:
+    ExactEqual = Equal
+End Function
+
+Sub test_TooStrictEqual()
+    Debug.Assert TooStrictEqual(Empty, Empty)
+    Debug.Assert Not TooStrictEqual(Empty, 0)
+    Debug.Assert Not TooStrictEqual(Empty, "")
+    Debug.Assert Not TooStrictEqual(Empty, vbNullString)
+    
+    Debug.Assert TooStrictEqual(Null, Null)
+    Debug.Assert Not TooStrictEqual(Null, Empty)
+    Debug.Assert Not TooStrictEqual(Null, 0)
+    Debug.Assert Not TooStrictEqual(Null, "")
+    Debug.Assert Not TooStrictEqual(Null, vbNullString)
+    
+    Debug.Assert TooStrictEqual(0, 0)
+    Debug.Assert Not TooStrictEqual(0, 1)
+    Debug.Assert Not TooStrictEqual("1", 1)
+    Debug.Assert TooStrictEqual("", "")
+    Debug.Assert TooStrictEqual("", vbNullString)
+    Debug.Assert TooStrictEqual(vbNullString, vbNullString)
+    Debug.Assert Not TooStrictEqual(vbNullString, 0)
+    
+    ' followings are too much
+    Debug.Assert Not TooStrictEqual(CInt(1), CLng(1))
+    Debug.Assert Not TooStrictEqual(CDbl(1), CSng(1))
+    
+End Sub
+
+Function TooStrictEqual(x As Variant, y As Variant) As Boolean
+    ' using VarType is too strict to use
+    Dim Equal As Boolean
+    
+    If VarType(x) <> VarType(y) Then
+        Equal = False
+    ElseIf IsNull(x) Then
+        Equal = True
+    Else
+        Equal = (x = y)
+    End If
+    
+    TooStrictEqual = Equal
+End Function
+
+'}}}
+
+'ssf-end
+
+
+```

@@ -1,0 +1,237 @@
+# Introduction #
+
+  * bad vba: when the Charset of ADODB.Stream should be set
+
+## 概要 ##
+  * 失敗マクロ: ADODB.Stream の Charset を設定するタイミングに気をつけろ
+
+# Details #
+
+  * `ADODB.Stream` is an essential object for windows i18n scripting.
+  * reading a utf-8 file by `LoadFromFile` method causes a serious issue, if you choose badly the point of setting the `Charset` property.
+  * do not set it `utf-8` after `LoadFromFile`.
+  * this is because the `LoadFromFile` seems to care the unicode BOM and adjust the byte position of the stream.
+  * at the worst case, we lost 4 bytes text from the Stream without any notifications.
+  * choose wisely, and everything goes good.
+
+## 説明 ##
+  * `ADODB.Stream` は、ウィンドウズで国際化(i18n)、つまり日本語を扱うスクリプトを書くときに欠かせない。
+  * utf-8 ファイルを `LoadFromFile` メソッドで読んだとき、 `Charset` プロパティを書き換えるタイミングを間違えると、ひどい事になる。
+  * `LoadFromFile` を実行した後は、これに `utf-8` を設定してはいけない。
+  * `LoadFromFile` はユニコードBOMを扱って、ストリームのバイト位置調整をするようなので、この制限がある。
+  * 最悪のケースではストリームの途中で、４バイトの文字がいつの間にか消えていた。
+  * 賢い選択をすれば、何も問題は起きない。
+
+# Bad Code #
+
+```
+'module
+'   name;Module1
+'{{{
+Option Explicit
+
+' expect 2 text files contain exactly same 26 alphabet characters
+Const WithBom = "C:\tmp\bom.txt"        ' 29 bytes
+Const WithoutBom = "C:\tmp\nobom.txt"   ' 26 bytes
+
+Const adReadAll = -1    ' (&HFFFFFFFF)
+Const adReadLine = -2   ' (&HFFFFFFFE)
+
+Function Utf8BOM(ByVal Index As Long) As Byte
+    Select Case Index
+    Case 0
+        Utf8BOM = &HEF
+    Case 1
+        Utf8BOM = &HBB
+    Case 2
+        Utf8BOM = &HBF
+    End Select
+End Function
+
+Function UnicodeBOM() As String
+    UnicodeBOM = ChrW(&HFEFF)
+End Function
+
+Sub test_reading_good()
+    Dim Text As String
+    Dim File As Variant
+    Dim ts As ADODB.Stream
+    
+    For Each File In Array(WithBom, WithoutBom)
+        Set ts = New ADODB.Stream
+        
+        With ts
+            .Open
+            .Type = adTypeText
+            .Charset = "utf-8"
+            .LoadFromFile File
+            Text = .ReadText(adReadAll)
+            .Close
+        End With
+        
+        Debug.Assert Len(Text) = 26
+        Debug.Assert Text = "abcdefghijklmnopqrstuvwxyz"
+        
+        Set ts = Nothing
+    Next
+End Sub
+
+Sub test_reading_bad()
+    Dim i As Long
+    Dim Text As String
+    Dim File As Variant
+    Dim ts As ADODB.Stream
+    
+    On Error Resume Next
+    
+    For Each File In Array(WithBom, WithoutBom)
+        Set ts = New ADODB.Stream
+        
+        With ts
+            .Open
+            .Type = adTypeText
+            .LoadFromFile File
+            .Charset = "utf-8"
+            Text = .ReadText(adReadAll)
+            .Close
+        End With
+        
+        If Err.Number = 0 Then
+            Debug.Print File, Len(Text)
+            Text = Replace(Text, "abcdefghijklmnopqrstuvwxyz", "")
+            For i = 1 To Len(Text)
+                Debug.Print Hex(AscW(Mid(Text, i, 1)))
+            Next
+        Else
+            Debug.Print File, Err.Number, Err.Description
+        End If
+        
+        Set ts = Nothing
+    Next
+End Sub
+
+Sub test_reading_good_buffered()
+    Dim i As Long
+    Dim Text As String
+    Dim File As Variant
+    Dim ts As ADODB.Stream
+    
+    For Each File In Array(WithBom, WithoutBom)
+        Set ts = New ADODB.Stream
+        
+        Debug.Print File
+        With ts
+            .Open
+            .Type = adTypeText
+            .Charset = "utf-8"
+            .LoadFromFile File
+            For i = 1 To 3
+                Text = .ReadText(4)
+                Debug.Print Len(Text), Text
+            Next
+            .Close
+        End With
+        
+        Set ts = Nothing
+    Next
+End Sub
+
+Sub test_reading_bad_buffered()
+    Dim i As Long
+    Dim Text As String
+    Dim File As Variant
+    Dim ts As ADODB.Stream
+    
+    On Error Resume Next
+    
+    For Each File In Array(WithBom, WithoutBom)
+        Set ts = New ADODB.Stream
+        
+        Debug.Print File
+        With ts
+            .Open
+            .Type = adTypeText
+            .LoadFromFile File
+            .Charset = "utf-8"
+            For i = 1 To 3
+                Text = .ReadText(4)
+                If Err.Number = 0 Then
+                    Debug.Print Len(Text), Text
+                Else
+                    Debug.Print Err.Number, Err.Description
+                End If
+            Next
+            .Close
+        End With
+        
+        Set ts = Nothing
+    Next
+End Sub
+
+'}}}
+
+```
+
+### Result ###
+
+```
+Windows 2000 + ADO 2.5
+
+C:\tmp\bom.txt               28 
+20
+FEFF
+C:\tmp\nobom.txt             27 
+20
+
+C:\tmp\bom.txt
+ 4            abcd
+ 4            efgh
+ 4            ijkl
+C:\tmp\nobom.txt
+ 4            abcd
+ 4            efgh
+ 4            ijkl
+
+C:\tmp\bom.txt
+ 4             ?ab
+ 4            bcde
+ 4            fghi
+C:\tmp\nobom.txt
+ 4             abc
+ 4            cdef
+ 4            ghij
+
+```
+
+  * in the last case, we have a character duplicated in the text stream.
+    * 最後の例では、テキスト中の１文字が重複して読み出されている。
+
+```
+Windows Vista + ADO 2.5 or later
+
+C:\tmp\bom.txt               29 
+FFFD
+FFFD
+FEFF
+C:\tmp\nobom.txt             5            プロシージャの呼び出し、または引数が不正です。
+C:\tmp\bom.txt
+ 4            abcd
+ 4            efgh
+ 4            ijkl
+C:\tmp\nobom.txt
+ 4            abcd
+ 4            efgh
+ 4            ijkl
+C:\tmp\bom.txt
+ 4            ???a
+ 4            fghi
+ 4            jklm
+C:\tmp\nobom.txt
+ 4            ??ab
+ 4            ghij
+ 4            klmn
+
+```
+
+  * in the last case, we lost 4 characters from the text stream.
+    * 最後の例では、テキスト中の４文字が失われた。

@@ -1,0 +1,342 @@
+
+
+# Introduction #
+
+  1. a primitive tool to convert an Excel Book into an SSF text
+
+## 概要 ##
+  1. エクセルブックを SSF テキストに変換する、原始的なツール
+
+# Details #
+
+  * this wirter is designed for users unfamiliar to the SSF world.
+> > We publish tools in a format of SSF, so they are completely opened.
+> > But what happens to a newbies?
+> > He needs tools though he has no SSF tools yet.
+> > This is it.
+> > We offer him this tool.
+> > It was written to make the first step easy.
+> > It's simple and does only a few things.
+> > This is because its design is to maximize a quick start.
+> > However you can feel many advantages to use an SSF through this simple tool.
+  * this writer works in a single VBA module.
+  * [ssf\_reader\_primitive](ssf_reader_primitive.md) is also available as a simple reader.
+
+## 説明 ##
+  * このSSF書き出し装置は、 SSF の世界に馴れていない初心者向けに設計した。
+> > このプロジェクトでは、各種ツールを SSF 形式で配布している。それだから完全にオープンソースだ。
+> > しかし、新入りはどうするんだ？
+> > ツールが欲しくても、 SSF ツールすら持っていない。
+> > そこでこいつの出番だ。
+> > このツールが役に立つ。
+> > こいつは初めの第一歩が簡単に進めるように作ったものだ。
+> > 単純で、ほんのちょっとのことしかできない。
+> > 初動を最優先するように設計したのだ。
+> > そうとはいえ、この単純なツールを使ってみれば、 SSF を使うことの便利さを大いに感じることだろう。
+  * このツールは、たった一つの VBA モジュールで動いている。
+  * 対応する読み込み装置として [ssf\_reader\_primitive](ssf_reader_primitive.md) がある。
+
+# Limitations #
+
+  1. this tool cannot do full SSF format.
+  1. uses the following ssf keys only.
+> > workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
+  1. uses the following names only.
+> > name, address
+
+## 制約 ##
+  1. このツールは SSF 書式の全機能が使えるわけではない。
+  1. 次の ssf キーしか使わない。
+> > workbook, worksheet, cells-formula, cells-numberformat, cells-name, code, module, class, require
+  1. 次の名前しか使わない。
+> > name, address
+
+# Downloads #
+
+  * [downloads](http://code.google.com/p/cowares-excel-hello/downloads/list?can=2&q=ssf+writer)
+
+# How to use #
+
+  1. add a vba module into your excel book.
+  1. paste the below Code on the module.
+  1. add references for
+    * Microsoft Scripting Runtime
+    * Microsoft Visual Basic for Applications Extensibility 5.3
+  1. change the filename at the topmost of the module code.
+    * GetFileName = "C:\tmp\ssf.txt"
+    * the output file name is fixed above, never asked, so you may want to change that name as you wish.
+  1. open a target excel book and activate.
+  1. run the macro, "Writer" on the target book.
+  1. a text file will be written.
+  1. [Trust access to the VBA project object model](vba#how_to_allow_access_to_a_Visual_Basic_project.md) is required.
+
+## 使い方 ##
+  1. エクセルブックにVBAのモジュールを挿入する。
+  1. そのモジュールに、下記の Code を貼り付ける。
+  1. 次の参照設定を追加する。
+    * Microsoft Scripting Runtime
+    * Microsoft Visual Basic for Applications Extensibility 5.3
+  1. モジュールコードの先頭近くにあるファイル名を変更する。
+    * GetFileName = "C:￥tmp￥ssf.txt"
+    * 出力するファイルは上のものに固定されていて、実行中に変更できない。ここを使いやすいように変えておけばよい。
+  1. 変換対象のエクセルブックを開いて前面にしておく。
+  1. 貼り付けたマクロ "Writer" を実行する。
+  1. テキストファイルが保存される。
+  1. [VBA プロジェクト オブジェクト モデルへのアクセスを信頼する](vba#Visual_Basic_%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%82%92%E4%BF%A1%E9%A0%BC%E3%81%95%E3%81%9B.md) が必要。
+
+# Code #
+
+```
+'workbook
+'  name;ssf_writer_primitive.xls
+
+'require
+'  ;{420B2830-E718-11CF-893D-00A0C9054228} 1 0 Microsoft Scripting Runtime
+'  ;{0002E157-0000-0000-C000-000000000046} 5 3 Microsoft Visual Basic for Applications Extensibility 5.3
+
+'worksheet
+'  name;Sheet1
+
+
+'module
+'  name;SsfWriterPrimitive
+'{{{
+Option Explicit
+
+Function GetFileName() As String
+    GetFileName = "C:\tmp\ssf.txt"
+End Function
+
+Sub Writer()
+    Dim fs As Scripting.FileSystemObject
+    Dim Stream As Scripting.TextStream
+    Set fs = New Scripting.FileSystemObject
+    Set Stream = fs.OpenTextFile(GetFileName, ForWriting, True, TristateFalse)
+    
+    WriteTo Stream
+    
+    Stream.Close
+    Set Stream = Nothing
+    Set fs = Nothing
+End Sub
+
+Function WriteTo(Stream As Scripting.TextStream) As String
+    Stream.Write DumpWorkbook(ActiveWorkbook)
+End Function
+
+Function DumpWorkbook(Book As Workbook) As String
+    Dim Result As String
+    
+    Result = "'workbook" & vbCrLf
+    Result = Result & "'  name;" & Book.Name
+    ' avoid to print the default codename
+    If "ThisWorkbook" <> Book.CodeName Then
+        Result = Result & "/" & Book.CodeName
+    End If
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of workbook block
+    Result = Result & DumpProjectRequires(Book)
+    Result = Result & DumpWorksheets(Book)
+    Result = Result & DumpCellsName(Book)
+    ' put this at the last: http://code.google.com/p/cowares-excel-hello/wiki/hello_thisworkbook#Case_2
+    Result = Result & DumpVbaCodes(Book)
+    
+    DumpWorkbook = Result
+End Function
+
+Function DumpWorksheets(Book As Workbook) As String
+    Dim Result As String
+    Dim Ws As Worksheet
+    
+    Result = ""
+    For Each Ws In Book.Worksheets
+        Result = Result & DumpWorksheet(Ws)
+    Next
+    
+    DumpWorksheets = Result
+End Function
+
+Function DumpWorksheet(Ws As Worksheet) As String
+    Dim Result As String
+    
+    Result = "'worksheet" & vbCrLf
+    Result = Result & "'  name;" & Ws.Name
+    ' avoid to print the default codename
+    If Ws.Name <> Ws.CodeName Then
+        Result = Result & "/" & Ws.CodeName
+    End If
+    Result = Result & vbCrLf    ' end of name line
+    Result = Result & vbCrLf    ' end of worksheet block
+    
+    ' go into cells when this sheet is not protected and has cell values
+    If Not Ws.ProtectContents Then
+        If (TypeName(Ws.UsedRange.Value) <> "Empty") Then
+            Result = Result & DumpCellsFormula(Ws.UsedRange) & DumpCellsNumberFormat(Ws.UsedRange)
+        End If
+    End If
+    
+    DumpWorksheet = Result
+End Function
+
+Function DumpCellsName(Book As Workbook) As String
+    Dim Result As String
+    Dim CellNames As Names
+    Dim CellName As Name
+    
+    DumpCellsName = ""
+    Set CellNames = Book.Names
+    If CellNames.Count = 0 Then Exit Function
+    
+    ' simple list, 2 lines for a single (address, name) pair
+    Result = "'cells-name" & vbCrLf
+    For Each CellName In CellNames
+        Result = Result & "'  ;" & CellName.RefersToR1C1 & vbCrLf
+        Result = Result & "'  ;" & CellName.Name & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsName = Result
+End Function
+
+Function DumpCellsFormula(Ra As Range) As String
+    Dim Result As String
+    Dim Ce As Range
+    
+    Result = "'cells-formula" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.FormulaR1C1 & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsFormula = Result
+End Function
+
+Function DumpCellsNumberFormat(Ra As Range) As String
+    ' this doesn't print any formats out of the UsedRange given
+    Dim Result As String
+    Dim Ce As Range
+    Dim AllFormats As Variant
+    
+    DumpCellsNumberFormat = ""
+    AllFormats = Ra.NumberFormat
+    ' we get a format string when all ranges are filled by a same format, otherwise get a Null
+    If Not IsNull(AllFormats) Then
+        ' avoid this block when everything is "General"
+        If AllFormats = "General" Then Exit Function
+    End If
+    
+    Result = "'cells-numberformat" & vbCrLf
+    Result = Result & "'  address;" & Ra.Address(False, False, xlA1, False) & vbCrLf
+    ' simple list, each cell in each line
+    For Each Ce In Ra
+        Result = Result & "'         ;" & Ce.NumberFormat & vbCrLf
+    Next
+    Result = Result & vbCrLf
+    
+    DumpCellsNumberFormat = Result
+End Function
+
+Function DumpProjectRequires(Book As Workbook) As String
+    Dim Result As String
+    Dim Project As VBProject
+    Dim NumberOfReferences As Long
+    Dim i As Long
+    
+    DumpProjectRequires = ""
+    Set Project = Book.VBProject
+    NumberOfReferences = Project.References.Count
+    If NumberOfReferences = 0 Then Exit Function
+    ' it doesn't work, because we have at least 4 references.
+    
+    Result = "'require" & vbCrLf
+    For i = 1 To NumberOfReferences
+        ' avoid to print 4 standard references
+        ' VBA (builtin), Excel (builtin), stdole and Office
+        If Not Project.References(i).BuiltIn Then
+            If LCase(Project.References(i).Name) <> "stdole" _
+                    And LCase(Project.References(i).Name) <> "office" Then
+                ' machine needs Guid, Major and Minor.  human needs Description
+                Result = Result & "'  ;" & Project.References(i).GUID & " "
+                Result = Result & Project.References(i).Major & " "
+                Result = Result & Project.References(i).Minor & " "
+                Result = Result & Project.References(i).Description & vbCrLf
+            End If
+        End If
+    Next
+    
+    Result = Result & vbCrLf
+    
+    DumpProjectRequires = Result
+End Function
+
+Function DumpVbaCodes(Book As Workbook) As String
+    Dim Result As String
+    Dim Module As VBComponent
+    Dim BookModule As VBComponent
+    
+    Result = ""
+    ' let ThisWorkbook go to the last
+    For Each Module In Book.VBProject.VBComponents
+        If Module.Name = "ThisWorkbook" Then
+            Set BookModule = Module
+        Else
+            Result = Result & DumpVbaCodeModule(Module.CodeModule)
+        End If
+    Next
+    If Not BookModule Is Nothing Then
+        Result = Result & DumpVbaCodeModule(BookModule.CodeModule)
+    End If
+    
+    DumpVbaCodes = Result
+End Function
+
+Function DumpVbaCodeModule(TheCode As CodeModule) As String
+    Dim Result As String
+    Dim ModuleType As String
+    Dim NumberOfLines As Long
+    Dim Source As String
+    
+    Result = ""
+    Select Case TheCode.Parent.Type
+    Case vbext_ct_StdModule
+        ModuleType = "module"   ' Module
+    Case vbext_ct_ClassModule
+        ModuleType = "class"    ' Class
+    Case vbext_ct_MSForm
+        ModuleType = "form"     ' not for Excel 2000
+    Case vbext_ct_ActiveXDesigner
+        ModuleType = "activex"
+    Case vbext_ct_Document
+        ModuleType = "code"     ' Excel Objects
+    Case Else
+        ModuleType = "unknown-type-" & TheCode.Parent.Type
+    End Select
+    NumberOfLines = TheCode.CountOfLines
+    If NumberOfLines > TheCode.CountOfDeclarationLines Then
+        ' avoid to print a blank code, that contains "Option Explicit" only
+        Result = Result & "'" & ModuleType & vbCrLf
+        Result = Result & "'  name;" & TheCode.Parent.Name & vbCrLf
+        Result = Result & "'{{{" & vbCrLf
+        
+        Source = TheCode.Lines(1, NumberOfLines)
+        ' need at least one linefeed on the end
+        If Right(Source, 2) <> vbCrLf Then
+            Source = Source & vbCrLf
+        End If
+        ' must disable escaping signs in the source itself
+        Source = Replace(Source, vbCrLf & "'{{{" & vbCrLf, vbCrLf & "'#{{{" & vbCrLf)
+        Source = Replace(Source, vbCrLf & "'}}}" & vbCrLf, vbCrLf & "'#}}}" & vbCrLf)
+        
+        Result = Result & Source
+        Result = Result & "'}}}" & vbCrLf
+    End If
+    Result = Result & vbCrLf
+    
+    DumpVbaCodeModule = Result
+End Function
+'}}}
+
+```
+
