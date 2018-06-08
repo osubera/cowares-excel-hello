@@ -3,31 +3,24 @@
 \alias{boxplotdbl}
 \docType{package}
 \title{
-Double Box Plot
+\packageTitle{boxplotdbl}
 }
 \description{
-Correlation chart of two set (x and y) of data. 
-Extend the box plot chart for two-axes to show the
-correlation of independent two set of observations
-with common factor.  Quartiles and outliers are 
-calculated by standard boxplot function. 
+\packageDescription{boxplotdbl}
 }
 \details{
-\tabular{ll}{
-Package: \tab boxplotdbl\cr
-Type: \tab Package\cr
-Version: \tab 1.2.2\cr
-Date: \tab 2013-11-24\cr
-License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
-}
+
+The DESCRIPTION file:
+\packageDESCRIPTION{boxplotdbl}
+\packageIndices{boxplotdbl}
 This package contains boxplotdou function. 
 It is used for 2 sets data, to visualize the correlation 
 of x and y axis.  
 }
 \author{
-Shinichiro Tomizono
+\packageAuthor{boxplotdbl}
 
-Maintainer: Shinichiro Tomizono <cowares@gmail.com>
+Maintainer: \packageMaintainer{boxplotdbl}
 }
 \references{
 Double Box Plot: \url{http://tomizonor.wordpress.com/2013/03/15/double-box-plot/}\cr

@@ -3,20 +3,16 @@
 \alias{elliplot}
 \docType{package}
 \title{
-Ellipse Summary Plot of Quantiles
+\packageTitle{elliplot}
 }
 \description{
-Correlation chart of two set (x and y) of data. 
-Using Quantiles.  Visualize the effect of factor. 
+\packageDescription{elliplot}
 }
 \details{
-\tabular{ll}{
-Package: \tab elliplot\cr
-Type: \tab Package\cr
-Version: \tab 1.0.0\cr
-Date: \tab 2013-09-15\cr
-License: \tab MIT | \href{http://paidforeveryone.wordpress.com}{paid4e}: Copyright (c) 2013, Shinichiro Tomizono\cr
-}
+
+The DESCRIPTION file:
+\packageDESCRIPTION{elliplot}
+\packageIndices{elliplot}
 This package contains quantile functions and ellipse 
 plot functions.  These functions are to calculate 
 quantile summaries and visualize them with ellipses.  
@@ -26,9 +22,9 @@ When used for 2 sets data, it visualize the correlation
 of x and y axis.  
 }
 \author{
-Shinichiro Tomizono
+\packageAuthor{elliplot}
 
-Maintainer: Shinichiro Tomizono <cowares@gmail.com>
+Maintainer: \packageMaintainer{elliplot}
 }
 \references{
 Quantiles: \url{http://tomizonor.wordpress.com/2013/04/28/quantiles-octiles/}\cr
